@@ -78,7 +78,7 @@ async def coordinator_node(task=None, **kwargs):
     agent = strands_utils.get_agent(
         agent_name="coordinator",
         system_prompts=apply_prompt_template(prompt_name="coordinator", prompt_context={}), # apply_prompt_template(prompt_name="task_agent", prompt_context={"TEST": "sdsd"})
-        model_id=os.getenv("COODINATOR_MODEL_ID", os.getenv("DEFAULT_MODEL_ID")),
+        model_id=os.getenv("COORDINATOR_MODEL_ID", os.getenv("DEFAULT_MODEL_ID")),
         enable_reasoning=False,
         prompt_cache_info=(False, None), #(False, None), (True, "default")
         tool_cache=False,

@@ -1,0 +1,46 @@
+[
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "prod"
+  },
+  {
+    "ParameterKey": "ProjectName",
+    "ParameterValue": "deep-insight"
+  },
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "vpc-0be869fcda8ead4b3"
+  },
+  {
+    "ParameterKey": "PrivateSubnet1Id",
+    "ParameterValue": "subnet-018b0810d92f3fcdc"
+  },
+  {
+    "ParameterKey": "PrivateSubnet2Id",
+    "ParameterValue": "subnet-0e2f3fa18969bf917"
+  },
+  {
+    "ParameterKey": "FargateSecurityGroupId",
+    "ParameterValue": "sg-0853a2a61c62e135b"
+  },
+  {
+    "ParameterKey": "TaskExecutionRoleArn",
+    "ParameterValue": "arn:aws:iam::738490718699:role/deep-insight-task-execution-role-prod"
+  },
+  {
+    "ParameterKey": "TaskRoleArn",
+    "ParameterValue": "arn:aws:iam::738490718699:role/deep-insight-task-role-prod"
+  },
+  {
+    "ParameterKey": "DockerImageUri",
+    "ParameterValue": "738490718699.dkr.ecr.us-east-1.amazonaws.com/deep-insight-fargate-runtime-prod:latest"
+  },
+  {
+    "ParameterKey": "TaskCpu",
+    "ParameterValue": "2048"
+  },
+  {
+    "ParameterKey": "TaskMemory",
+    "ParameterValue": "4096"
+  }
+]

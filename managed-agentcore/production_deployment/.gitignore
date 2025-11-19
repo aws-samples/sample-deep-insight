@@ -1,0 +1,88 @@
+# Environment files
+.env
+*.env.local
+deployment.env
+
+# CloudFormation temporary files (with Account ID)
+cloudformation/parameters/.*.json
+cloudformation/parameters/*-temp.json
+
+# Allow prod params template (no sensitive data, uses ACCOUNT_ID placeholder)
+!cloudformation/parameters/phase1-prod-params.json
+
+# AWS credentials
+.aws/
+credentials
+config
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+temp/
+tmp/
+artifacts/
+
+# Runtime outputs
+agentcore-runtime/
+.bedrock_agentcore/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Test files
+.pytest_cache/
+.coverage
+htmlcov/

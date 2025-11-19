@@ -50,7 +50,7 @@ class ColoredStreamingCallback(StreamingStdOutCallbackHandler):
         print(f"{self.color_code}{token}{self.reset_code}", end="", flush=True)
 
 # Wrap agent with StreamableAgent for queue-based streaming (Agent as a tool 사용할 경우, tool response 또한 스트리밍 하기 위해서)
-# Graph를 사용한다면 에이전트 마다 StreamableAgent를 감싸면 안된다. 그래프는 그래프 완성 후 StreamableGprah로 래핑함. 
+# Graph를 사용한다면 에이전트 마다 StreamableAgent를 감싸면 안된다. 그래프는 그래프 완성 후 StreamableGprah로 래핑함.
 class StreamableAgent:
     """Agent wrapper that adds streaming capability with event queue pattern."""
 
@@ -197,7 +197,7 @@ class strands_utils():
             # If caching is disabled, pass the string as-is
             logger.info(f"{Colors.GREEN}{agent_name.upper()} - Prompt Cache Disabled{Colors.END}")
             system_prompt_with_cache = system_prompts
-        
+
         if tool_cache: logger.info(f"{Colors.GREEN}{agent_name.upper()} - Tool Cache Enabled{Colors.END}")
         else: logger.info(f"{Colors.GREEN}{agent_name.upper()} - Tool Cache Disabled{Colors.END}")
 
@@ -496,6 +496,10 @@ class strands_utils():
 
         return output  
 
+    #########################
+    ## modification STRART ##
+    #########################
+
     @staticmethod
     def process_event_for_display(event):
         """Process events for colored terminal output"""
@@ -520,14 +524,14 @@ class strands_utils():
                 print(f"\n[TOOL RESULT - {tool_name}]", flush=True)
 
                 # Parse output based on function name
-                if tool_name == "python_repl_tool" and len(output.split("||")) == 3:
+                if tool_name in ["python_repl_tool", "fargate_python_tool"] and len(output.split("||")) == 3:
                     status, code, stdout = output.split("||")
                     callback_tool.on_llm_new_token(f"Status: {status}\n")
 
                     if code: callback_tool.on_llm_new_token(f"Code:\n```python\n{code}\n```\n")
                     if stdout and stdout != 'None': callback_tool.on_llm_new_token(f"Output:\n{stdout}\n")
 
-                elif tool_name == "bash_tool" and len(output.split("||")) == 2:
+                elif tool_name in ["bash_tool", "fargate_bash_tool"] and len(output.split("||")) == 2:
                     cmd, stdout = output.split("||")
                     if cmd: callback_tool.on_llm_new_token(f"CMD:\n```bash\n{cmd}\n```\n")
                     if stdout and stdout != 'None': callback_tool.on_llm_new_token(f"Output:\n{stdout}\n")
@@ -536,7 +540,7 @@ class strands_utils():
                     # file_read 결과는 보통 길어서 앞부분만 표시
                     truncated_output = output[:500] + "..." if len(output) > 500 else output
                     callback_tool.on_llm_new_token(f"File content preview:\n{truncated_output}\n")
-                
+
                 elif tool_name == "rag_tool":
                     callback_tool.on_llm_new_token(f"rag response:\n{output}\n")
 
