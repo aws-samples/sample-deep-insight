@@ -20,7 +20,7 @@ There are many ways you can contribute to Deep Insight:
 1. Fork the repository
 2. Clone your fork:
    ```bash
-   git clone https://github.com/your-username/sample-deep-insight.git
+   git clone https://github.com/aws-samples/sample-deep-insight.git
    cd sample-deep-insight/self-hosted
    ```
 3. Set up your development environment:
@@ -40,7 +40,7 @@ There are many ways you can contribute to Deep Insight:
 1. Fork the repository
 2. Clone your fork:
    ```bash
-   git clone https://github.com/your-username/sample-deep-insight.git
+   git clone https://github.com/aws-samples/sample-deep-insight.git
    cd sample-deep-insight/managed-agentcore
    ```
 3. Follow the deployment guide in `managed-agentcore/README.md`

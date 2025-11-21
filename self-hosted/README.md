@@ -42,8 +42,8 @@ Transform weeks of manual reporting work into minutes using hierarchical multi-a
 
 ```bash
 # 1. Clone and setup environment
-git clone https://github.com/aws-samples/aws-ai-ml-workshop-kr.git
-cd aws-ai-ml-workshop-kr/genai/aws-gen-ai-kr/20_applications/08_bedrock_manus/use_cases/06_insight_extractor_strands_sdk_workshop_phase_1
+git clone https://github.com/aws-samples/sample-deep-insight.git
+cd sample-deep-insight/self-hosted
 cd setup/ && ./create-uv-env.sh deep-insight 3.12 && cd ..
 
 # 2. Configure AWS credentials
@@ -184,10 +184,11 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ```bash
 # Fork the repository on GitHub, then clone your fork
-git clone https://github.com/YOUR_USERNAME/aws-ai-ml-workshop-kr.git
-cd aws-ai-ml-workshop-kr/genai/aws-gen-ai-kr/20_applications/08_bedrock_manus/use_cases/06_insight_extractor_strands_sdk_workshop_phase_1
+git clone https://github.com/aws-samples/sample-deep-insight.git
+cd sample-deep-insight/self-hosted
 
 # Follow installation steps above to set up your environment
+cd setup/ && ./create-uv-env.sh deep-insight 3.12 && cd ..
 
 # Create feature branch
 git checkout -b feature/your-feature-name

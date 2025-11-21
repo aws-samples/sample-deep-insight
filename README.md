@@ -50,6 +50,7 @@ Transform weeks of manual reporting work into minutes using hierarchical multi-a
 - **🎨 Full Customization & Control** - Modify agents, prompts, and workflows with complete code access in your AWS VPC
 - **🔒 Enterprise-Grade Security** - Single-tenant VPC deployment with complete data isolation
 - **🤖 Advanced Multi-Agent Architecture** - Hierarchical workflow with Coordinator, Planner, Supervisor, and specialized tool agents
+- **🧠 Flexible Model Selection** - Choose different Claude models for each agent (Sonnet 4, Haiku 4, etc.) via simple .env configuration
 - **📊 Transparency & Verifiability** - Reports with calculation methods, sources, and reasoning processes
 - **🚀 Beyond Reporting** - Extend to any agent use case: shopping, support, log analysis, and more
 
@@ -84,15 +85,15 @@ Deep Insight offers two deployment models designed for different operational nee
 | **Setup Time** | ~10 minutes | ~65-105 minutes (one-time) |
 | **Development Iteration** | Instant (no rebuild) | Requires Docker rebuild |
 | **Operational Overhead** | Medium (manual scaling) | Low (auto-scaling) |
-| **Networking** | Local or VPC (internet access) | 100% Private VPC (VPC Endpoints only) |
+| **Networking** | Local or VPC | 100% Private VPC (VPC Endpoints only) |
 | **Best For** | Development, rapid iteration | Production ops, enterprise scale |
 
 ### Deployment Paths
 
-**Self-Hosted**: [`./self-hosted/`](./self-hosted/) - Complete code access in your VPC
+**Self-Hosted**: [`./self-hosted/`](./self-hosted/) - Run locally or in your VPC with complete code access
 - 📖 Read: [Self-Hosted README](./self-hosted/README.md)
 
-**Managed AgentCore**: [`./managed-agentcore/`](./managed-agentcore/) - AWS-managed infrastructure
+**Managed AgentCore**: [`./managed-agentcore/`](./managed-agentcore/) - AWS-managed infrastructure in private VPC
 - 📖 Read: [Managed AgentCore README](./managed-agentcore/README.md)
 
 ---
@@ -119,7 +120,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ```bash
 # Fork the repository on GitHub, then clone your fork
-git clone https://github.com/YOUR_USERNAME/sample-deep-insight.git
+git clone https://github.com/aws-samples/sample-deep-insight.git
 cd sample-deep-insight
 
 # Choose your deployment option and follow the README
