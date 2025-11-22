@@ -653,6 +653,9 @@ Resources:
         - !Ref PrivateSubnet2
       SecurityGroups:
         - !Ref ALBSecurityGroup
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value: '150'  # Increased from default 60s to 150s
       Tags:
         - Key: Name
           Value: !Sub '${ProjectName}-alb-${Environment}'

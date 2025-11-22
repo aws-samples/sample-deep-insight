@@ -276,9 +276,14 @@ if os.path.exists('./artifacts/citations.json'):
                 citations_data[calc_id] = citation_id
 
 def format_with_citation(value, calc_id):
-    """Format number with citation marker if available"""
+    """Format value with citation marker if available. Handles both numeric and string values."""
     citation_ref = citations_data.get(calc_id, '')
-    return f"{{value:,}}{{citation_ref}}" if citation_ref else f"{{value:,}}"
+    # Format with comma only for numeric types
+    if isinstance(value, (int, float)):
+        formatted = f"{{value:,.0f}}" if isinstance(value, float) and value == int(value) else f"{{value:,}}"
+    else:
+        formatted = str(value)
+    return f"{{formatted}}{{citation_ref}}" if citation_ref else formatted
 
 # === STEP 2 EXECUTION ===
 doc = load_or_create_docx()

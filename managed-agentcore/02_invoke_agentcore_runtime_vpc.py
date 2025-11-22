@@ -119,9 +119,12 @@ if not AGENT_ARN:
     print(f"{YELLOW}⚠️  Run create_agentcore_runtime_vpc.py first{NC}")
     sys.exit(1)
 
-# User prompt with priority: CLI args > env var > default
-#DEFAULT_PROMPT = "데이터 디렉토리의 모든 CSV 파일을 분석하고 총 매출액을 계산해줘. PDF 보고서는 만들지 마."
-DEFAULT_PROMPT = "데이터 디렉토리의 모든 CSV 파일을 분석하고 총 매출액을 계산해줘, 아주 자세히 분석해줘." 
+# simple version for debugging
+#DEFAULT_PROMPT = "데이터 디렉토리의 모든 CSV 파일을 분석하고 총 매출액을 계산해줘. 보고서는 만들지 마."
+# simple version - bill expectation :$2.137 
+# DEFAULT_PROMPT = "데이터 디렉토리의 모든 CSV 파일을 분석하고,이 Moon Market 데이터의 핵심 지표를 요약해줘" # Simple Version
+# complex version
+DEFAULT_PROMPT = "데이터 디렉토리의 모든 CSV 파일을 분석하고 이 Moon Market 데이터에서 비즈니스 성장 기회를 발굴해줘: 숨겨진 고객 패턴과 세그먼트를 발견하고, 수익 최적화 방안을 제시하며, 마케팅과 운영 효율성을 높일 수 있는 개선점을 찾고, 다음 달 매출을 크게 늘릴 수 있는 실행 가능한 전략 3가지를 우선순위와 기대 효과를 포함해서 제안해줘." 
 #DEFAULT_PROMPT = "데이터 디렉토리의 모든 CSV 파일을 분석하고 총 매출액을 계산해줘, 카테고리별 매출 비중도 함께 보여줘. 결과물을 docx로 만들어줘" 
 PROMPT = args.user_query or os.getenv("USER_QUERY", DEFAULT_PROMPT)
 
@@ -203,7 +206,7 @@ def main():
 
     try:
         payload = build_payload()
-        print(f"📦 Payload: {json.dumps(payload, indent=2)}\n")
+        print(f"📦 Payload: {json.dumps(payload, indent=2, ensure_ascii=False)}\n")
 
         boto3_response = agentcore_client.invoke_agent_runtime(
             agentRuntimeArn=AGENT_ARN,

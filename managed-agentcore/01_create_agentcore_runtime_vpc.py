@@ -41,7 +41,7 @@ Important Notes:
     - Observability automatically enabled (CloudWatch Logs)
 
 Execution Order:
-    create_agentcore_runtime_vpc.py → invoke_agentcore_runtime_vpc.py (testing)
+    01_create_agentcore_runtime_vpc.py → 02_invoke_agentcore_runtime_vpc.py (testing)
 """
 
 import os
@@ -576,7 +576,7 @@ def print_completion_summary(runtime_info, agent_name, config):
     print()
 
     print(f"{BLUE}Next Steps:{NC}")
-    print(f"  1. Test Runtime: python3 invoke_agentcore_runtime_vpc.py")
+    print(f"  1. Test Runtime: python3 02_invoke_agentcore_runtime_vpc.py")
     print(f"  2. Check CloudWatch Logs:")
     print(f"     - Verify 'Coordinator started' message")
     print(f"     - Ensure no 'FileNotFoundError: coordinator.md'")

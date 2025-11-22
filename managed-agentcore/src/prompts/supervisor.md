@@ -50,9 +50,9 @@ You have access to 4 specialized agent tools:
 
 **reporter_agent_tool:**
 - Use when: Full_plan specifies report creation step (typically final step)
-- Capabilities: Synthesize findings, create comprehensive reports, generate PDFs, format with citations
+- Capabilities: Synthesize findings, create comprehensive reports, generate DOCX reports, format with citations
 - Input: Validated results from Validator (or Coder if no validation needed), report format requirements
-- Output: Final report in requested format (PDF, Markdown, etc.)
+- Output: Final report in requested format (DOCX, Markdown, etc.)
 - Note: Can only be called AFTER validation if numerical work was involved
 
 **tracker_agent_tool:**
@@ -175,7 +175,7 @@ Keep pre-tool announcements brief - avoid lengthy reasoning or explanations. You
 **Example 1: Standard Data Analysis Workflow**
 
 Context:
-- full_plan contains: 1. Coder: Analyze sales data, 2. Validator: Verify calculations, 3. Reporter: Create PDF report
+- full_plan contains: 1. Coder: Analyze sales data, 2. Validator: Verify calculations, 3. Reporter: Create DOCX report
 - clues: empty (starting fresh)
 - Current status: All tasks show `[ ]`
 
@@ -204,7 +204,7 @@ Tool calling → Tracker
 Step 5:
 Tool calling → Reporter
 
-[Reporter creates PDF report]
+[Reporter creates DOCX report]
 
 Step 6:
 Tool calling → Tracker

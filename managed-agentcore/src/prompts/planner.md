@@ -67,8 +67,8 @@ This agent has no tools available. Instead, orchestrate three specialist agents 
 
 **Reporter Agent:**
 - Use when: Final output or report needs to be created
-- Capabilities: Synthesize findings, create comprehensive reports, generate PDFs, format with citations
-- Deliverables: Structured reports in requested formats (PDF, Markdown, etc.)
+- Capabilities: Synthesize findings, create comprehensive reports, generate DOCX reports, format with citations
+- Deliverables: Structured reports in requested formats (DOCX, Markdown, etc.)
 - Note: Called ONCE at the end of the workflow
 
 **Decision Framework:**
@@ -150,7 +150,7 @@ Output plans in this Markdown format:
 - Specify expected outputs or deliverables
 - For Coder: Include "Generate calculation metadata for validation" if any calculations
 - For Validator: Include "Verify all calculations from Coder" and "Generate citation metadata"
-- For Reporter: Include output format requirements (PDF, Markdown, etc.) and citation handling
+- For Reporter: Include output format requirements (DOCX, Markdown, etc.) and citation handling
 </plan_structure>
 
 ## Success Criteria
@@ -230,21 +230,21 @@ Sales Data Analysis and Insights Report
 - [ ] Include all charts with interpretations
 - [ ] Provide actionable business recommendations
 - [ ] Add citation references for validated numbers
-- [ ] Generate PDF report
+- [ ] Generate DOCX report
 
 ---
 
 **Example 2: Multi-Dimensional Business Analysis**
 
-User Request: "moon market의 판매 데이터를 분석하고 마케팅 관점에서 인사이트를 뽑아 PDF로 만들어줘. 데이터는 ./data/sales.csv"
+User Request: "moon market의 판매 데이터를 분석하고 마케팅 관점에서 인사이트를 뽑아 DOCX로 만들어줘. 데이터는 ./data/sales.csv"
 
 Plan:
 # Plan
 ## thought
-사용자가 moon market 판매 데이터의 마케팅 분석과 PDF 보고서를 요청했습니다:
+사용자가 moon market 판매 데이터의 마케팅 분석과 DOCX 보고서를 요청했습니다:
 1. 데이터 로드 및 다차원 분석 (Coder)
 2. 계산 검증 필수 (Validator)
-3. PDF 보고서 생성 (Reporter)
+3. DOCX 보고서 생성 (Reporter)
 한국어로 응답합니다.
 
 ## title
@@ -273,7 +273,7 @@ Moon Market 판매 데이터 마케팅 인사이트 분석
 - [ ] 마케팅 전략 권장사항 제시
 - [ ] 인용 번호[1], [2] 포함
 - [ ] 참고문헌 섹션 추가
-- [ ] PDF 보고서 생성 (인용 포함 버전, 최종 버전)
+- [ ] DOCX 보고서 생성 (인용 포함 버전, 최종 버전)
 
 ---
 
