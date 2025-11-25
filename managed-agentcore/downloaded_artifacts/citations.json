@@ -1,0 +1,348 @@
+{
+  "metadata": {
+    "generated_at": "2025-11-24 01:21:14",
+    "total_calculations": 26,
+    "cited_calculations": 20,
+    "validation_status": "completed",
+    "verified_count": 5,
+    "needs_review_count": 15
+  },
+  "citations": [
+    {
+      "citation_id": "[1]",
+      "calculation_id": "calc_001",
+      "value": 157685452.0,
+      "description": "총 매출액",
+      "formula": "SUM(금액)",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "verified",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "high"
+    },
+    {
+      "citation_id": "[2]",
+      "calculation_id": "calc_002",
+      "value": 2726.0,
+      "description": "총 거래 건수",
+      "formula": "COUNT(*)",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "*"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "verified",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "high"
+    },
+    {
+      "citation_id": "[3]",
+      "calculation_id": "calc_003",
+      "value": 57844.99339691856,
+      "description": "평균 거래 금액",
+      "formula": "AVG(금액)",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "verified",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "high"
+    },
+    {
+      "citation_id": "[4]",
+      "calculation_id": "calc_cat_01",
+      "value": 33816811.0,
+      "description": "과일 카테고리 매출",
+      "formula": "SUM(금액 WHERE 카테고리='과일')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "카테고리"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "needs_review",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "high"
+    },
+    {
+      "citation_id": "[5]",
+      "calculation_id": "calc_cat_02",
+      "value": 33022145.0,
+      "description": "수산물 카테고리 매출",
+      "formula": "SUM(금액 WHERE 카테고리='수산물')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "카테고리"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "needs_review",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "high"
+    },
+    {
+      "citation_id": "[6]",
+      "calculation_id": "calc_cat_03",
+      "value": 31702911.0,
+      "description": "채소 카테고리 매출",
+      "formula": "SUM(금액 WHERE 카테고리='채소')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "카테고리"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "needs_review",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "high"
+    },
+    {
+      "citation_id": "[7]",
+      "calculation_id": "calc_cat_04",
+      "value": 29773681.0,
+      "description": "유제품 카테고리 매출",
+      "formula": "SUM(금액 WHERE 카테고리='유제품')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "카테고리"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "needs_review",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "high"
+    },
+    {
+      "citation_id": "[8]",
+      "calculation_id": "calc_cat_05",
+      "value": 29369904.0,
+      "description": "육류 카테고리 매출",
+      "formula": "SUM(금액 WHERE 카테고리='육류')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "카테고리"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "needs_review",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "high"
+    },
+    {
+      "citation_id": "[9]",
+      "calculation_id": "calc_301",
+      "value": -1.3875003944637572,
+      "description": "평균 월별 성장률",
+      "formula": "AVG((월매출[i] - 월매출[i-1]) / 월매출[i-1] * 100)",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "needs_review",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "high"
+    },
+    {
+      "citation_id": "[10]",
+      "calculation_id": "calc_101",
+      "value": 20.227554663698463,
+      "description": "상위 5개 제품 매출 집중도",
+      "formula": "SUM(상위5개제품매출) / 총매출 * 100",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "제품명"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "needs_review",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "high"
+    },
+    {
+      "citation_id": "[11]",
+      "calculation_id": "calc_102",
+      "value": 38.9587810548306,
+      "description": "상위 10개 제품 매출 집중도",
+      "formula": "SUM(상위10개제품매출) / 총매출 * 100",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "제품명"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "needs_review",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "high"
+    },
+    {
+      "citation_id": "[12]",
+      "calculation_id": "calc_201",
+      "value": 43.06071431370854,
+      "description": "고가 제품 매출 비중",
+      "formula": "SUM(금액 WHERE 단가 >= 15000) / 총매출 * 100",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "단가"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "needs_review",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "high"
+    },
+    {
+      "citation_id": "[13]",
+      "calculation_id": "calc_202",
+      "value": 53.68737313826516,
+      "description": "고가 거래 매출 기여도",
+      "formula": "SUM(금액 WHERE 금액 >= Q3) / 총매출 * 100",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "needs_review",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "high"
+    },
+    {
+      "citation_id": "[14]",
+      "calculation_id": "calc_303",
+      "value": 24186521.84919905,
+      "description": "7월 예상 매출 (선형 추세)",
+      "formula": "6월매출 * (1 + 최근3개월평균성장률)",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "verified",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "high"
+    },
+    {
+      "citation_id": "[15]",
+      "calculation_id": "strat_001",
+      "value": 2320975.6,
+      "description": "전략1: 가격 최적화 잠재 수익",
+      "formula": "저가제품매출 * 0.05",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "단가"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "verified",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "high"
+    },
+    {
+      "citation_id": "[16]",
+      "calculation_id": "calc_month_01",
+      "value": 27467811.0,
+      "description": "2023-01 월 매출",
+      "formula": "SUM(금액 WHERE 년월='2023-01')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "needs_review",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "medium"
+    },
+    {
+      "citation_id": "[17]",
+      "calculation_id": "calc_month_02",
+      "value": 23673855.0,
+      "description": "2023-02 월 매출",
+      "formula": "SUM(금액 WHERE 년월='2023-02')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "needs_review",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "medium"
+    },
+    {
+      "citation_id": "[18]",
+      "calculation_id": "calc_month_03",
+      "value": 27169004.0,
+      "description": "2023-03 월 매출",
+      "formula": "SUM(금액 WHERE 년월='2023-03')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "needs_review",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "medium"
+    },
+    {
+      "citation_id": "[19]",
+      "calculation_id": "calc_month_04",
+      "value": 26687501.0,
+      "description": "2023-04 월 매출",
+      "formula": "SUM(금액 WHERE 년월='2023-04')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "needs_review",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "medium"
+    },
+    {
+      "citation_id": "[20]",
+      "calculation_id": "calc_month_05",
+      "value": 27737723.0,
+      "description": "2023-05 월 매출",
+      "formula": "SUM(금액 WHERE 년월='2023-05')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "source_rows": "all rows",
+      "verification_status": "needs_review",
+      "verification_notes": "",
+      "timestamp": "2025-11-24 01:17:48",
+      "importance": "medium"
+    }
+  ]
+}

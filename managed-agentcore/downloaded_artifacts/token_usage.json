@@ -1,0 +1,63 @@
+{
+  "session_id": "2025-11-24-01-09-59-65f95f38",
+  "request_id": "65f95f38-678e-48dd-a6d6-d142184f57f4",
+  "timestamp": "2025-11-24 01:28:44",
+  "summary": {
+    "total_tokens": 1448807,
+    "total_input_tokens": 735701,
+    "total_output_tokens": 87984,
+    "cache_read_input_tokens": 563596,
+    "cache_write_input_tokens": 61526
+  },
+  "by_agent": {
+    "coordinator": {
+      "input": 1286,
+      "output": 126,
+      "cache_read": 0,
+      "cache_write": 0,
+      "model_id": "global.anthropic.claude-haiku-4-5-20251001-v1:0"
+    },
+    "planner": {
+      "input": 3636,
+      "output": 2207,
+      "cache_read": 0,
+      "cache_write": 0,
+      "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
+    },
+    "coder-custom-interpreter": {
+      "input": 426846,
+      "output": 39568,
+      "cache_read": 275080,
+      "cache_write": 13754,
+      "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
+    },
+    "tracker": {
+      "input": 23798,
+      "output": 4816,
+      "cache_read": 0,
+      "cache_write": 0,
+      "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
+    },
+    "validator": {
+      "input": 3613,
+      "output": 3674,
+      "cache_read": 11429,
+      "cache_write": 11429,
+      "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
+    },
+    "reporter": {
+      "input": 218337,
+      "output": 27713,
+      "cache_read": 250935,
+      "cache_write": 16729,
+      "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
+    },
+    "supervisor": {
+      "input": 58185,
+      "output": 9880,
+      "cache_read": 26152,
+      "cache_write": 19614,
+      "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
+    }
+  }
+}

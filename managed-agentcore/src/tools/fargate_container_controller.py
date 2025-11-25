@@ -115,7 +115,7 @@ class SessionBasedFargateManager:
     TASK_IP_WAIT_TIMEOUT = 60          # Timeout for waiting for task IP address (seconds)
     TASK_IP_POLL_INTERVAL = 3          # Polling interval for task IP check (seconds)
     HEALTH_CHECK_TIMEOUT = 5           # Timeout for container health check (seconds)
-    CODE_EXECUTION_TIMEOUT = 180       # Timeout for code execution (seconds)
+    CODE_EXECUTION_TIMEOUT = 600       # Timeout for code execution (seconds) - Increased for long-running tasks like DOCX generation
     SESSION_COMPLETE_TIMEOUT = 10      # Timeout for session completion signal (seconds)
     STATUS_CHECK_TIMEOUT = 5           # Timeout for session status check (seconds)
     S3_UPLOAD_WAIT = 15                # Wait time for S3 upload completion (seconds)

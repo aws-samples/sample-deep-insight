@@ -212,14 +212,14 @@ AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID
 # ============================================================
 # Bedrock Model Configuration
 # ============================================================
-DEFAULT_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
-COORDINATOR_MODEL_ID=global.anthropic.claude-haiku-4-5-20251001-v1:0
-PLANNER_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
-SUPERVISOR_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
-CODER_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
-VALIDATOR_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
-REPORTER_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
-TRACKER_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
+DEFAULT_MODEL_ID=global.anthropic.claude-sonnet-4-20250514-v1:0
+COORDINATOR_MODEL_ID=global.anthropic.claude-sonnet-4-20250514-v1:0
+PLANNER_MODEL_ID=global.anthropic.claude-sonnet-4-20250514-v1:0
+SUPERVISOR_MODEL_ID=global.anthropic.claude-sonnet-4-20250514-v1:0
+CODER_MODEL_ID=global.anthropic.claude-sonnet-4-20250514-v1:0
+VALIDATOR_MODEL_ID=global.anthropic.claude-sonnet-4-20250514-v1:0
+REPORTER_MODEL_ID=global.anthropic.claude-sonnet-4-20250514-v1:0
+TRACKER_MODEL_ID=global.anthropic.claude-sonnet-4-20250514-v1:0
 
 # ============================================================
 # Phase 1: Infrastructure Outputs

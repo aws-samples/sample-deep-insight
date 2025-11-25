@@ -448,7 +448,7 @@ class strands_utils():
                         return {
                             **base_event,
                             "type": "agent_tool_stream",
-                            "event_type": "tool_result", 
+                            "event_type": "tool_result",
                             "tool_name": tool_name,
                             "tool_id": tool_id,
                             "output": output

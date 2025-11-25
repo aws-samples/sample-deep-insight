@@ -1,0 +1,93 @@
+============================================================
+Token Usage Summary
+============================================================
+
+Session ID: 2025-11-24-01-09-59-65f95f38
+Request ID: 65f95f38-678e-48dd-a6d6-d142184f57f4
+Timestamp: 2025-11-24 01:28:44
+
+------------------------------------------------------------
+Overall Statistics
+------------------------------------------------------------
+
+Total Tokens: 1,448,807
+Model(s) Used: global.anthropic.claude-haiku-4-5-20251001-v1:0, global.anthropic.claude-sonnet-4-5-20250929-v1:0
+  - Regular Input:     735,701 (100% cost)
+  - Cache Read:        563,596 (10% cost - 90% discount)
+  - Cache Write:        61,526 (125% cost - 25% extra)
+  - Output:             87,984
+
+------------------------------------------------------------
+Model Usage Summary (for cost calculation)
+------------------------------------------------------------
+
+  [global.anthropic.claude-haiku-4-5-20251001-v1:0]
+    Total: 1,412
+    - Regular Input:       1,286 (100% cost)
+    - Cache Read:              0 (10% cost - 90% discount)
+    - Cache Write:             0 (125% cost - 25% extra)
+    - Output:                126
+    Used by: coordinator
+
+  [global.anthropic.claude-sonnet-4-5-20250929-v1:0]
+    Total: 1,447,395
+    - Regular Input:     734,415 (100% cost)
+    - Cache Read:        563,596 (10% cost - 90% discount)
+    - Cache Write:        61,526 (125% cost - 25% extra)
+    - Output:             87,858
+    Used by: planner, coder-custom-interpreter, tracker, validator, reporter, supervisor
+
+------------------------------------------------------------
+Token Usage by Agent
+------------------------------------------------------------
+
+[coder-custom-interpreter] Total: 755,248
+  Model: global.anthropic.claude-sonnet-4-5-20250929-v1:0
+  - Regular Input:     426,846 (100% cost)
+  - Cache Read:        275,080 (10% cost - 90% discount)
+  - Cache Write:        13,754 (125% cost - 25% extra)
+  - Output:             39,568
+
+[coordinator] Total: 1,412
+  Model: global.anthropic.claude-haiku-4-5-20251001-v1:0
+  - Regular Input:       1,286 (100% cost)
+  - Cache Read:              0 (10% cost - 90% discount)
+  - Cache Write:             0 (125% cost - 25% extra)
+  - Output:                126
+
+[planner] Total: 5,843
+  Model: global.anthropic.claude-sonnet-4-5-20250929-v1:0
+  - Regular Input:       3,636 (100% cost)
+  - Cache Read:              0 (10% cost - 90% discount)
+  - Cache Write:             0 (125% cost - 25% extra)
+  - Output:              2,207
+
+[reporter] Total: 513,714
+  Model: global.anthropic.claude-sonnet-4-5-20250929-v1:0
+  - Regular Input:     218,337 (100% cost)
+  - Cache Read:        250,935 (10% cost - 90% discount)
+  - Cache Write:        16,729 (125% cost - 25% extra)
+  - Output:             27,713
+
+[supervisor] Total: 113,831
+  Model: global.anthropic.claude-sonnet-4-5-20250929-v1:0
+  - Regular Input:      58,185 (100% cost)
+  - Cache Read:         26,152 (10% cost - 90% discount)
+  - Cache Write:        19,614 (125% cost - 25% extra)
+  - Output:              9,880
+
+[tracker] Total: 28,614
+  Model: global.anthropic.claude-sonnet-4-5-20250929-v1:0
+  - Regular Input:      23,798 (100% cost)
+  - Cache Read:              0 (10% cost - 90% discount)
+  - Cache Write:             0 (125% cost - 25% extra)
+  - Output:              4,816
+
+[validator] Total: 30,145
+  Model: global.anthropic.claude-sonnet-4-5-20250929-v1:0
+  - Regular Input:       3,613 (100% cost)
+  - Cache Read:         11,429 (10% cost - 90% discount)
+  - Cache Write:        11,429 (125% cost - 25% extra)
+  - Output:              3,674
+
+============================================================

@@ -1,0 +1,370 @@
+{
+  "calculations": [
+    {
+      "id": "calc_001",
+      "value": 157685452.0,
+      "description": "총 매출액",
+      "formula": "SUM(금액)",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "전체 기간 총 매출"
+    },
+    {
+      "id": "calc_002",
+      "value": 2726.0,
+      "description": "총 거래 건수",
+      "formula": "COUNT(*)",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "*"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "전체 거래 수"
+    },
+    {
+      "id": "calc_003",
+      "value": 57844.99339691856,
+      "description": "평균 거래 금액",
+      "formula": "AVG(금액)",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "거래당 평균 매출"
+    },
+    {
+      "id": "calc_cat_01",
+      "value": 33816811.0,
+      "description": "과일 카테고리 매출",
+      "formula": "SUM(금액 WHERE 카테고리='과일')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "카테고리"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "전체 매출의 21.4%"
+    },
+    {
+      "id": "calc_cat_02",
+      "value": 33022145.0,
+      "description": "수산물 카테고리 매출",
+      "formula": "SUM(금액 WHERE 카테고리='수산물')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "카테고리"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "전체 매출의 20.9%"
+    },
+    {
+      "id": "calc_cat_03",
+      "value": 31702911.0,
+      "description": "채소 카테고리 매출",
+      "formula": "SUM(금액 WHERE 카테고리='채소')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "카테고리"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "전체 매출의 20.1%"
+    },
+    {
+      "id": "calc_cat_04",
+      "value": 29773681.0,
+      "description": "유제품 카테고리 매출",
+      "formula": "SUM(금액 WHERE 카테고리='유제품')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "카테고리"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "전체 매출의 18.9%"
+    },
+    {
+      "id": "calc_cat_05",
+      "value": 29369904.0,
+      "description": "육류 카테고리 매출",
+      "formula": "SUM(금액 WHERE 카테고리='육류')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "카테고리"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "전체 매출의 18.6%"
+    },
+    {
+      "id": "calc_month_01",
+      "value": 27467811.0,
+      "description": "2023-01 월 매출",
+      "formula": "SUM(금액 WHERE 년월='2023-01')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "importance": "medium",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "2023-01 월간 총 매출"
+    },
+    {
+      "id": "calc_month_02",
+      "value": 23673855.0,
+      "description": "2023-02 월 매출",
+      "formula": "SUM(금액 WHERE 년월='2023-02')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "importance": "medium",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "2023-02 월간 총 매출"
+    },
+    {
+      "id": "calc_month_03",
+      "value": 27169004.0,
+      "description": "2023-03 월 매출",
+      "formula": "SUM(금액 WHERE 년월='2023-03')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "importance": "medium",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "2023-03 월간 총 매출"
+    },
+    {
+      "id": "calc_month_04",
+      "value": 26687501.0,
+      "description": "2023-04 월 매출",
+      "formula": "SUM(금액 WHERE 년월='2023-04')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "importance": "medium",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "2023-04 월간 총 매출"
+    },
+    {
+      "id": "calc_month_05",
+      "value": 27737723.0,
+      "description": "2023-05 월 매출",
+      "formula": "SUM(금액 WHERE 년월='2023-05')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "importance": "medium",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "2023-05 월간 총 매출"
+    },
+    {
+      "id": "calc_month_06",
+      "value": 24949558.0,
+      "description": "2023-06 월 매출",
+      "formula": "SUM(금액 WHERE 년월='2023-06')",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "importance": "medium",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "2023-06 월간 총 매출"
+    },
+    {
+      "id": "calc_301",
+      "value": -1.3875003944637572,
+      "description": "평균 월별 성장률",
+      "formula": "AVG((월매출[i] - 월매출[i-1]) / 월매출[i-1] * 100)",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "6개월 평균 성장률: -1.39%"
+    },
+    {
+      "id": "calc_302",
+      "value": 15.018569373159421,
+      "description": "요일별 매출 변동성",
+      "formula": "(MAX(요일매출) - MIN(요일매출)) / AVG(요일매출) * 100",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "importance": "medium",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "요일별 편차 15.0%"
+    },
+    {
+      "id": "calc_101",
+      "value": 20.227554663698463,
+      "description": "상위 5개 제품 매출 집중도",
+      "formula": "SUM(상위5개제품매출) / 총매출 * 100",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "제품명"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "상위 5개 제품이 20.2% 차지"
+    },
+    {
+      "id": "calc_102",
+      "value": 38.9587810548306,
+      "description": "상위 10개 제품 매출 집중도",
+      "formula": "SUM(상위10개제품매출) / 총매출 * 100",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "제품명"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "상위 10개 제품이 39.0% 차지"
+    },
+    {
+      "id": "calc_201",
+      "value": 43.06071431370854,
+      "description": "고가 제품 매출 비중",
+      "formula": "SUM(금액 WHERE 단가 >= 15000) / 총매출 * 100",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "단가"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "고가 제품이 43.1% 차지"
+    },
+    {
+      "id": "calc_202",
+      "value": 53.68737313826516,
+      "description": "고가 거래 매출 기여도",
+      "formula": "SUM(금액 WHERE 금액 >= Q3) / 총매출 * 100",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "상위 25% 거래가 53.7% 차지"
+    },
+    {
+      "id": "calc_303",
+      "value": 24186521.84919905,
+      "description": "7월 예상 매출 (선형 추세)",
+      "formula": "6월매출 * (1 + 최근3개월평균성장률)",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "예측: 24,186,522원"
+    },
+    {
+      "id": "calc_304",
+      "value": 27.264800027940094,
+      "description": "일별 매출 변동계수",
+      "formula": "(STDEV(일별매출) / AVG(일별매출)) * 100",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "importance": "medium",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "변동계수 27.3%"
+    },
+    {
+      "id": "strat_001",
+      "value": 2320975.6,
+      "description": "전략1: 가격 최적화 잠재 수익",
+      "formula": "저가제품매출 * 0.05",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "단가"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "저가 제품 5% 가격 인상 시 월 2,320,976원 추가"
+    },
+    {
+      "id": "strat_002",
+      "value": 1486527.1428571418,
+      "description": "전략2: 금요일 매출 개선 잠재력",
+      "formula": "(평균요일매출 - 금요일매출) * 26주 / 6개월",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액",
+        "날짜"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "금요일 평균화 시 월 1,486,527원 추가"
+    },
+    {
+      "id": "strat_003",
+      "value": 2365281.78,
+      "description": "전략3: 번들 상품 잠재 수익",
+      "formula": "거래건수 * 0.10 * 평균거래금액 * 0.15",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "10% 고객 번들 구매 시 월 2,365,282원 추가"
+    },
+    {
+      "id": "strat_total",
+      "value": 6172784.522857142,
+      "description": "전체 전략 통합 효과",
+      "formula": "전략1 + 전략2 + 전략3",
+      "source_file": "./data/Dat-fresh-food-claude.csv",
+      "source_columns": [
+        "금액"
+      ],
+      "importance": "high",
+      "timestamp": "2025-11-24 01:17:48",
+      "verification_notes": "3가지 전략 통합 시 월 6,172,785원 (+23.5%)"
+    }
+  ],
+  "summary": {
+    "total_calculations": 26,
+    "high_importance": 18,
+    "medium_importance": 8,
+    "data_source": "./data/Dat-fresh-food-claude.csv",
+    "analysis_period": "2023-01-01 to 2023-06-29",
+    "generated_at": "2025-11-24 01:17:48"
+  }
+}
