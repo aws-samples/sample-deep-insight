@@ -1,9 +1,5 @@
 <div align="center">
-  <div>
-    <img src="./self-hosted/assets/deepinsight_logo.png" alt="Deep Insight" width="110px" height="210px">
-  </div>
-
-  <h1 style="margin-top: 10px;">Deep Insight</h1>
+  <h1>Deep Insight</h1>
 
   <h2>Production-ready multi-agent framework for building scalable data analysis workflows without infrastructure headaches</h2>
 
