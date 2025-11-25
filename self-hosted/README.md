@@ -15,7 +15,6 @@
 
   <p>
     <a href="#why-deep-insight">Why Deep Insight?</a>
-    ◆ <a href="#deployment-options">Deployment Options</a>
     ◆ <a href="#quick-start">Quick Start</a>
     ◆ <a href="#demo">Demo</a>
     ◆ <a href="#architecture">Architecture</a>
@@ -24,24 +23,23 @@
 
 ## *Latest News* 🔥
 
-- **[2025/11]** Released Managed AgentCore deployment with 100% private VPC networking and auto-scaling
 - **[2025/10]** Released [Deep Insight Workshop](https://catalog.us-east-1.prod.workshops.aws/workshops/ee17ba6e-edc4-4921-aaf6-ca472841c49b/ko-KR) (Korean)
 - **[2025/10]** Added support for Claude Sonnet 4.5 with extended thinking and enhanced reasoning capabilities
 - **[2025/09]** Released Deep Insight framework built on Strands SDK and Amazon Bedrock with hierarchical multi-agent architecture
 
 ## Are You Facing These Challenges?
 
-### 에이전트 설계, 어디서부터 시작해야 할지 고민이신가요?
+### 에이전트 설계, 어디서부터 시작해야 할지 고민이신가요? (Struggling with Agent Architecture?)
 
 Deep Insight provides a **proven hierarchical architecture** with Coordinator, Planner, Supervisor, and specialized tool agents. Start with a working production-grade system and customize from there—no need to design from scratch.
 
-### 프로덕션급 성능의 에이전트, 어떻게 만들어야 할지 막막하신가요?
+### 프로덕션급 성능의 에이전트, 어떻게 만들어야 할지 막막하신가요? (Need Production-Grade Performance?)
 
 Get **production-grade multi-agent workflows** out of the box with prompt caching, streaming responses, token tracking, and battle-tested performance patterns. Deploy with confidence using architecture validated in real-world scenarios.
 
-### 복잡한 인프라 설정 때문에 에이전트 운영이 부담되시나요?
+### 민감한 데이터를 안전하게 처리하고 싶으신가요? (Concerned About Data Security?)
 
-Choose **Managed AgentCore** for AWS-managed infrastructure with auto-scaling Fargate containers, 100% private VPC networking, and zero operational overhead. Focus on your use case, not infrastructure management.
+Deploy Deep Insight in **your own AWS VPC** for complete data isolation and control. All data processing happens within your secure VPC environment, with Amazon Bedrock API calls staying in AWS infrastructure—never exposed to the public internet.
 
 ## Why Deep Insight?
 
@@ -54,47 +52,19 @@ Transform weeks of manual reporting work into minutes using hierarchical multi-a
 - **📊 Transparency & Verifiability** - Reports with calculation methods, sources, and reasoning processes
 - **🚀 Beyond Reporting** - Extend to any agent use case: shopping, support, log analysis, and more
 
-## Deployment Options: Choose Your Path
+## Quick Start
 
-Deep Insight offers two deployment models designed for different operational needs:
+Deep Insight provides a self-hosted deployment that you can run locally or in your AWS VPC with complete code access and customization.
 
-### Decision Guide
+### Self-Hosted Deployment
 
-> **Both options support full agent customization** (code, prompts, workflows). The key difference is **infrastructure management**.
+Run agents locally or in your VPC with full control over:
+- ✅ Complete code access to agents, prompts, and workflows
+- ✅ Rapid iteration during development (no rebuild required)
+- ✅ Flexible infrastructure management
+- ✅ Simple setup in ~10 minutes
 
-**Choose Self-Hosted if you**:
-- ✅ Prefer managing your own infrastructure and development environment
-- ✅ Want to run agents locally or in existing VPC infrastructure
-- ✅ Need rapid iteration during development (no Docker rebuild required)
-- ✅ Have simpler networking requirements (standard VPC setup)
-- ✅ Prefer lightweight deployment without containerization
-
-**Choose Managed AgentCore if you**:
-- ✅ Want AWS to handle infrastructure operations (ECS, Fargate, ALB, VPC Endpoints)
-- ✅ Need production-grade auto-scaling and high availability out of the box
-- ✅ Prefer 100% private VPC networking with zero internet exposure
-- ✅ Want enterprise observability (OpenTelemetry, per-invocation log streams)
-- ✅ Have limited DevOps resources or prefer serverless architecture
-
-### Comparison Table
-
-| Feature | Self-Hosted | Managed AgentCore |
-|---------|-------------|-------------------|
-| **Agent Customization** | ✅ Full code access | ✅ Full code access |
-| **Infrastructure Management** | Self-managed (local/VPC) | AWS-managed (Amazon Bedrock AgentCore) |
-| **Setup Time** | ~10 minutes | ~65-105 minutes (one-time) |
-| **Development Iteration** | Instant (no rebuild) | Requires Docker rebuild |
-| **Operational Overhead** | Medium (manual scaling) | Low (auto-scaling) |
-| **Networking** | Local or VPC | 100% Private VPC (VPC Endpoints only) |
-| **Best For** | Development, rapid iteration | Production ops, enterprise scale |
-
-### Deployment Paths
-
-**Self-Hosted**: [`./self-hosted/`](./self-hosted/) - Run locally or in your VPC with complete code access
-- 📖 Read: [Self-Hosted README](./self-hosted/README.md)
-
-**Managed AgentCore**: [`./managed-agentcore/`](./managed-agentcore/) - AWS-managed infrastructure in private VPC
-- 📖 Read: [Managed AgentCore README](./managed-agentcore/README.md)
+**Get Started**: Follow the instructions below to set up your environment
 
 ---
 
@@ -123,9 +93,8 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 git clone https://github.com/aws-samples/sample-deep-insight.git
 cd sample-deep-insight
 
-# Choose your deployment option and follow the README
-# Self-Hosted: cd self-hosted && follow self-hosted/README.md
-# Managed AgentCore: cd managed-agentcore && follow managed-agentcore/README.md
+# Follow the self-hosted setup instructions
+cd self-hosted
 
 # Create feature branch
 git checkout -b feature/your-feature-name
