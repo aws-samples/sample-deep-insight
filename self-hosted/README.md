@@ -1,11 +1,11 @@
 <div align="center">
   <div>
-    <img src="./assets/deepinsight_logo.png" alt="Deep Insight" width="110px" height="210px">
+    <img src="./self-hosted/assets/deepinsight_logo.png" alt="Deep Insight" width="110px" height="210px">
   </div>
 
   <h1 style="margin-top: 10px;">Deep Insight</h1>
 
-  <h2>A model-driven approach to building customizable reporting agents with Amazon Bedrock</h2>
+  <h2>Production-ready multi-agent framework for building scalable data analysis workflows without infrastructure headaches</h2>
 
   <div align="center">
     <a href="https://github.com/aws-samples/aws-ai-ml-workshop-kr/graphs/commit-activity"><img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/aws-samples/aws-ai-ml-workshop-kr"/></a>
@@ -15,18 +15,33 @@
 
   <p>
     <a href="#why-deep-insight">Why Deep Insight?</a>
+    ◆ <a href="#deployment-options">Deployment Options</a>
     ◆ <a href="#quick-start">Quick Start</a>
     ◆ <a href="#demo">Demo</a>
-    ◆ <a href="#installation">Installation</a>
     ◆ <a href="#architecture">Architecture</a>
   </p>
 </div>
 
 ## *Latest News* 🔥
 
+- **[2025/11]** Released Managed AgentCore deployment with 100% private VPC networking and auto-scaling
 - **[2025/10]** Released [Deep Insight Workshop](https://catalog.us-east-1.prod.workshops.aws/workshops/ee17ba6e-edc4-4921-aaf6-ca472841c49b/ko-KR) (Korean)
-- **[2025/10]** Added support for Claude Sonnet 4.5 with enhanced reasoning capabilities
+- **[2025/10]** Added support for Claude Sonnet 4.5 with extended thinking and enhanced reasoning capabilities
 - **[2025/09]** Released Deep Insight framework built on Strands SDK and Amazon Bedrock with hierarchical multi-agent architecture
+
+## Are You Facing These Challenges?
+
+### 에이전트 설계, 어디서부터 시작해야 할지 고민이신가요?
+
+Deep Insight provides a **proven hierarchical architecture** with Coordinator, Planner, Supervisor, and specialized tool agents. Start with a working production-grade system and customize from there—no need to design from scratch.
+
+### 프로덕션급 성능의 에이전트, 어떻게 만들어야 할지 막막하신가요?
+
+Get **production-grade multi-agent workflows** out of the box with prompt caching, streaming responses, token tracking, and battle-tested performance patterns. Deploy with confidence using architecture validated in real-world scenarios.
+
+### 복잡한 인프라 설정 때문에 에이전트 운영이 부담되시나요?
+
+Choose **Managed AgentCore** for AWS-managed infrastructure with auto-scaling Fargate containers, 100% private VPC networking, and zero operational overhead. Focus on your use case, not infrastructure management.
 
 ## Why Deep Insight?
 
@@ -35,28 +50,53 @@ Transform weeks of manual reporting work into minutes using hierarchical multi-a
 - **🎨 Full Customization & Control** - Modify agents, prompts, and workflows with complete code access in your AWS VPC
 - **🔒 Enterprise-Grade Security** - Single-tenant VPC deployment with complete data isolation
 - **🤖 Advanced Multi-Agent Architecture** - Hierarchical workflow with Coordinator, Planner, Supervisor, and specialized tool agents
+- **🧠 Flexible Model Selection** - Choose different Claude models for each agent (Sonnet 4, Haiku 4, etc.) via simple .env configuration
 - **📊 Transparency & Verifiability** - Reports with calculation methods, sources, and reasoning processes
 - **🚀 Beyond Reporting** - Extend to any agent use case: shopping, support, log analysis, and more
 
-## Quick Start
+## Deployment Options: Choose Your Path
 
-```bash
-# 1. Clone and setup environment
-git clone https://github.com/aws-samples/sample-deep-insight.git
-cd sample-deep-insight/self-hosted
-cd setup/ && ./create-uv-env.sh deep-insight 3.12 && cd ..
+Deep Insight offers two deployment models designed for different operational needs:
 
-# 2. Configure AWS credentials
-aws configure
-# Enter your AWS Access Key ID, Secret Access Key, and set region to us-west-2
+### Decision Guide
 
-# 3. Run your analysis
-uv run python main.py --user_query "Create a sales performance report for Moon Market. Analyze from sales and marketing perspectives, generate charts and extract insights, then create a docx file. The analysis target is the ./data/Dat-fresh-food-claude.csv file."
-```
+> **Both options support full agent customization** (code, prompts, workflows). The key difference is **infrastructure management**.
 
-> **Prerequisites**: Python 3.12+, AWS credentials with Bedrock access (tested in us-west-2 region)
->
-> **Need more options?** See [Installation](#installation) section below for detailed setup instructions and alternative configuration methods.
+**Choose Self-Hosted if you**:
+- ✅ Prefer managing your own infrastructure and development environment
+- ✅ Want to run agents locally or in existing VPC infrastructure
+- ✅ Need rapid iteration during development (no Docker rebuild required)
+- ✅ Have simpler networking requirements (standard VPC setup)
+- ✅ Prefer lightweight deployment without containerization
+
+**Choose Managed AgentCore if you**:
+- ✅ Want AWS to handle infrastructure operations (ECS, Fargate, ALB, VPC Endpoints)
+- ✅ Need production-grade auto-scaling and high availability out of the box
+- ✅ Prefer 100% private VPC networking with zero internet exposure
+- ✅ Want enterprise observability (OpenTelemetry, per-invocation log streams)
+- ✅ Have limited DevOps resources or prefer serverless architecture
+
+### Comparison Table
+
+| Feature | Self-Hosted | Managed AgentCore |
+|---------|-------------|-------------------|
+| **Agent Customization** | ✅ Full code access | ✅ Full code access |
+| **Infrastructure Management** | Self-managed (local/VPC) | AWS-managed (Amazon Bedrock AgentCore) |
+| **Setup Time** | ~10 minutes | ~65-105 minutes (one-time) |
+| **Development Iteration** | Instant (no rebuild) | Requires Docker rebuild |
+| **Operational Overhead** | Medium (manual scaling) | Low (auto-scaling) |
+| **Networking** | Local or VPC | 100% Private VPC (VPC Endpoints only) |
+| **Best For** | Development, rapid iteration | Production ops, enterprise scale |
+
+### Deployment Paths
+
+**Self-Hosted**: [`./self-hosted/`](./self-hosted/) - Run locally or in your VPC with complete code access
+- 📖 Read: [Self-Hosted README](./self-hosted/README.md)
+
+**Managed AgentCore**: [`./managed-agentcore/`](./managed-agentcore/) - AWS-managed infrastructure in private VPC
+- 📖 Read: [Managed AgentCore README](./managed-agentcore/README.md)
+
+---
 
 ## Demo
 
@@ -70,111 +110,7 @@ uv run python main.py --user_query "Create a sales performance report for Moon M
 
 ### Sample Outputs
 
-📄 [English Report](./assets/report_en.docx) | 📄 [Korean Report](./assets/report.docx)
-
-## Installation
-
-This section provides detailed installation instructions and alternative configuration options. For a quick 3-step setup, see [Quick Start](#quick-start) above.
-
-### Environment Setup
-
-```bash
-# Navigate to setup directory
-cd setup/
-
-# Create UV environment with Python 3.12
-./create-uv-env.sh deep-insight 3.12
-
-# Return to project root
-cd ..
-```
-
-The setup script automatically:
-- Creates a UV virtual environment with Python 3.12
-- Installs all required dependencies from `setup/pyproject.toml`
-- Creates symbolic links (`.venv`, `pyproject.toml`, `uv.lock`) in the project root
-
-### Configure AWS Credentials
-
-**Option 1: AWS CLI (Recommended for Quick Start)**
-
-```bash
-aws configure
-# Enter your credentials and set region to us-west-2
-```
-
-**Option 2: Environment Variables**
-
-```bash
-# Direct export (session-based)
-export AWS_REGION=us-west-2
-export AWS_ACCESS_KEY_ID=your_access_key
-export AWS_SECRET_ACCESS_KEY=your_secret_key
-```
-
-**Option 3: .env File (Persistent)**
-
-```bash
-# Copy example file and edit
-cp .env.example .env
-# Edit .env with your AWS credentials
-```
-
-> **Security Note**: Never commit `.env` files with real credentials to version control. The `.env` file is already in `.gitignore`.
-
-## Architecture
-
-### System Overview
-
-<div align="center">
-  <img src="./assets/architecture.png" alt="Deep Insight Architecture" width="750">
-</div>
-
-### Three-Tier Agent Hierarchy
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                     User Input                          │
-│              (Natural Language Query)                   │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────┐
-│  COORDINATOR (Entry Point)                              │
-│  • Handles initial user requests                        │
-│  • Routes simple queries directly                       │
-│  • Hands off complex tasks to Planner                   │
-│  Model: Claude Sonnet 4 (no reasoning)                  │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────┐
-│  PLANNER (Strategic Thinking)                           │
-│  • Analyzes task complexity                             │
-│  • Creates detailed execution plan                      │
-│  • Uses reasoning for step-by-step strategy             │
-│  Model: Claude Sonnet 4 (reasoning enabled)             │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────┐
-│  SUPERVISOR (Task Orchestrator)                         │
-│  • Delegates tasks to specialized agents                │
-│  • Monitors progress and coordinates workflow           │
-│  • Aggregates results from tool agents                  │
-│  Model: Claude Sonnet 4 (prompt caching enabled)        │
-└──────────┬──────────┬──────────┬────────────────────────┘
-           │          │          │          │
-     ┌─────┘    ┌─────┘    ┌─────┘    ┌─────┘
-     ▼          ▼          ▼          ▼
-┌─────────┐ ┌─────────┐ ┌─────────┐ ┌──────────┐
-│  CODER  │ │REPORTER │ │TRACKER  │ │VALIDATOR │
-│         │ │         │ │         │ │          │
-│ Python  │ │ Report  │ │Progress │ │ Quality  │
-│ Bash    │ │ Format  │ │Monitor  │ │ Validate │
-│ Analysis│ │ Generate│ │ State   │ │ Verify   │
-└─────────┘ └─────────┘ └─────────┘ └──────────┘
-```
+📄 [English Report](./self-hosted/assets/report_en.docx) | 📄 [Korean Report](./self-hosted/assets/report.docx)
 
 ## Contributing
 
@@ -185,10 +121,11 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 ```bash
 # Fork the repository on GitHub, then clone your fork
 git clone https://github.com/aws-samples/sample-deep-insight.git
-cd sample-deep-insight/self-hosted
+cd sample-deep-insight
 
-# Follow installation steps above to set up your environment
-cd setup/ && ./create-uv-env.sh deep-insight 3.12 && cd ..
+# Choose your deployment option and follow the README
+# Self-Hosted: cd self-hosted && follow self-hosted/README.md
+# Managed AgentCore: cd managed-agentcore && follow managed-agentcore/README.md
 
 # Create feature branch
 git checkout -b feature/your-feature-name

@@ -1,10 +1,10 @@
-# Contributing to LangManus
+# Contributing to Deep Insight
 
-Thank you for your interest in contributing to LangManus! We welcome contributions of all kinds from the community.
+Thank you for your interest in contributing to Deep Insight! We welcome contributions of all kinds from the community.
 
 ## Ways to Contribute
 
-There are many ways you can contribute to LangManus:
+There are many ways you can contribute to Deep Insight:
 
 - **Code Contributions**: Add new features, fix bugs, or improve performance
 - **Documentation**: Improve README, add code comments, or create examples
@@ -15,23 +15,35 @@ There are many ways you can contribute to LangManus:
 
 ## Development Setup
 
+### Self-Hosted Development
+
 1. Fork the repository
 2. Clone your fork:
    ```bash
-   git clone https://github.com/your-username/langmanus.git
-   cd langmanus
+   git clone https://github.com/aws-samples/sample-deep-insight.git
+   cd sample-deep-insight/self-hosted
    ```
 3. Set up your development environment:
    ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   uv sync
+   cd setup
+   ./create-uv-env.sh deep-insight 3.12
+   cd ..
    ```
-4. Configure pre-commit hooks:
+4. Configure AWS credentials:
    ```bash
-   chmod +x pre-commit
-   ln -s ../../pre-commit .git/hooks/pre-commit
+   aws configure
+   # Set region to us-west-2
    ```
+
+### Managed AgentCore Development
+
+1. Fork the repository
+2. Clone your fork:
+   ```bash
+   git clone https://github.com/aws-samples/sample-deep-insight.git
+   cd sample-deep-insight/managed-agentcore
+   ```
+3. Follow the deployment guide in `managed-agentcore/README.md`
 
 ## Development Process
 
@@ -46,17 +58,13 @@ There are many ways you can contribute to LangManus:
    - Add tests for new features
    - Update documentation as needed
 
-3. Run tests and checks:
-   ```bash
-   make test      # Run tests
-   make lint      # Run linting
-   make format    # Format code
-   make coverage  # Check test coverage
-   ```
+3. Test your changes:
+   - **Self-Hosted**: Run `uv run python main.py` with test queries
+   - **Managed AgentCore**: Test with `uv run 02_invoke_agentcore_runtime_vpc.py`
 
 4. Commit your changes:
    ```bash
-   git commit -m 'Add some amazing feature'
+   git commit -m "Add some amazing feature"
    ```
 
 5. Push to your fork:
@@ -71,7 +79,7 @@ There are many ways you can contribute to LangManus:
 - Fill in the pull request template completely
 - Include tests for new features
 - Update documentation as needed
-- Ensure all tests pass and there are no linting errors
+- Ensure all tests pass
 - Keep pull requests focused on a single feature or fix
 - Reference any related issues
 
@@ -82,6 +90,18 @@ There are many ways you can contribute to LangManus:
 - Write descriptive docstrings
 - Keep functions and methods focused and single-purpose
 - Comment complex logic
+
+## Contribution Areas
+
+We especially welcome contributions in these areas:
+
+- **New Agent Types**: Add specialized agents for specific domains
+- **Tool Integration**: Create new tools for agent capabilities
+- **Model Support**: Add support for additional LLM providers
+- **Documentation**: Improve guides, examples, and tutorials
+- **Bug Fixes**: Fix issues and improve stability
+- **Performance**: Optimize streaming, caching, and execution
+- **Multi-Region Support**: Test and improve deployment in different AWS regions
 
 ## Community Guidelines
 
@@ -95,7 +115,7 @@ There are many ways you can contribute to LangManus:
 
 If you need help with anything:
 - Check existing issues and discussions
-- Join our community channels
+- Review the README files in each deployment directory
 - Ask questions in discussions
 
-We appreciate your contributions to making LangManus better!
+We appreciate your contributions to making Deep Insight better!
