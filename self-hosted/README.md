@@ -13,6 +13,7 @@
     <a href="#why-deep-insight">Why Deep Insight?</a>
     ◆ <a href="#quick-start">Quick Start</a>
     ◆ <a href="#demo">Demo</a>
+    ◆ <a href="#installation">Installation</a>
     ◆ <a href="#architecture">Architecture</a>
   </p>
 </div>
@@ -52,17 +53,75 @@ Transform weeks of manual reporting work into minutes using hierarchical multi-a
 
 ## Quick Start
 
-Deep Insight provides a self-hosted deployment that you can run locally or in your AWS VPC with complete code access and customization.
+```bash
+# 1. Clone and setup environment
+git clone https://github.com/aws-samples/sample-deep-insight.git
+cd sample-deep-insight/self-hosted
+cd setup/ && ./create-uv-env.sh deep-insight 3.12 && cd ..
 
-### Self-Hosted Deployment
+# 2. Configure AWS credentials
+aws configure
+# Enter your AWS Access Key ID, Secret Access Key, and set region to us-west-2
 
-Run agents locally or in your VPC with full control over:
-- ✅ Complete code access to agents, prompts, and workflows
-- ✅ Rapid iteration during development (no rebuild required)
-- ✅ Flexible infrastructure management
-- ✅ Simple setup in ~10 minutes
+# 3. Run your analysis
+uv run python main.py --user_query "Create a sales performance report for Moon Market. Analyze from sales and marketing perspectives, generate charts and extract insights, then create a docx file. The analysis target is the ./data/Dat-fresh-food-claude.csv file."
+```
 
-**Get Started**: Follow the instructions below to set up your environment
+> **Prerequisites**: Python 3.12+, AWS credentials with Bedrock access (tested in us-west-2 region)
+>
+> **Need more options?** See [Installation](#installation) section below for detailed setup instructions and alternative configuration methods.
+
+---
+
+## Installation
+
+This section provides detailed installation instructions and alternative configuration options. For a quick 3-step setup, see [Quick Start](#quick-start) above.
+
+### Environment Setup
+
+```bash
+# Navigate to setup directory
+cd setup/
+
+# Create UV environment with Python 3.12
+./create-uv-env.sh deep-insight 3.12
+
+# Return to project root
+cd ..
+```
+
+The setup script automatically:
+- Creates a UV virtual environment with Python 3.12
+- Installs all required dependencies from `setup/pyproject.toml`
+- Creates symbolic links (`.venv`, `pyproject.toml`, `uv.lock`) in the project root
+
+### Configure AWS Credentials
+
+**Option 1: AWS CLI (Recommended for Quick Start)**
+
+```bash
+aws configure
+# Enter your credentials and set region to us-west-2
+```
+
+**Option 2: Environment Variables**
+
+```bash
+# Direct export (session-based)
+export AWS_REGION=us-west-2
+export AWS_ACCESS_KEY_ID=your_access_key
+export AWS_SECRET_ACCESS_KEY=your_secret_key
+```
+
+**Option 3: .env File (Persistent)**
+
+```bash
+# Copy example file and edit
+cp .env.example .env
+# Edit .env with your AWS credentials
+```
+
+> **Security Note**: Never commit `.env` files with real credentials to version control. The `.env` file is already in `.gitignore`.
 
 ---
 
