@@ -11,7 +11,7 @@ from src.utils.common_utils import get_message_from_string
 import pandas as pd
 from src.utils.strands_sdk_utils import TokenTracker
 
-from src.tools import python_repl_tool, bash_tool
+from src.tools import bash_tool, write_and_execute_tool
 from strands_tools import file_read
 
 load_dotenv()
@@ -152,7 +152,7 @@ def handle_validator_agent_tool(_task: Annotated[str, "The validation task or in
         enable_reasoning=False,
         prompt_cache_info=(False, None), # reasoning agent uses prompt caching
         tool_cache=False,
-        tools=[python_repl_tool, bash_tool, file_read],
+        tools=[write_and_execute_tool, bash_tool, file_read],
         streaming=True  # Enable streaming for consistency
     )
 

@@ -1,5 +1,5 @@
 import time
-import json
+import pickle
 import base64
 import random
 import logging
@@ -40,39 +40,21 @@ def retry(total_try_cnt=5, sleep_in_sec=5, retryable_exceptions=(ClientError,)):
         return wrapper
     return decorator
 
-def to_json(obj, path):
-    """Save object to JSON file.
+def to_pickle(obj, path):
 
-    Security: Replaced pickle with JSON to avoid deserialization vulnerabilities.
-    JSON is safe for serialization and works for most common data types.
-    """
-    with open(file=path, mode="w", encoding="utf-8") as f:
-        json.dump(obj, f, indent=2, ensure_ascii=False)
+    with open(file=path, mode="wb") as f:
+        pickle.dump(obj, f)
 
-    print (f'To_JSON: {path}')
-
-def load_json(path):
-    """Load object from JSON file.
-
-    Security: Replaced pickle with JSON to avoid code execution vulnerabilities
-    during deserialization.
-    """
-    with open(file=path, mode="r", encoding="utf-8") as f:
-        obj = json.load(f)
+    print (f'To_PICKLE: {path}')
+    
+def load_pickle(path):
+    
+    with open(file=path, mode="rb") as f:
+        obj=pickle.load(f)
 
     print (f'Load from {path}')
 
     return obj
-
-# Legacy function names for backward compatibility
-# These now use JSON instead of pickle for security
-def to_pickle(obj, path):
-    """DEPRECATED: Use to_json() instead. This now saves as JSON for security."""
-    return to_json(obj, path)
-
-def load_pickle(path):
-    """DEPRECATED: Use load_json() instead. This now loads JSON for security."""
-    return load_json(path)
 
 def to_markdown(obj, path):
 

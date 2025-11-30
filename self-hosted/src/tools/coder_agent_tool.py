@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 from src.utils.strands_sdk_utils import strands_utils
 from src.prompts.template import apply_prompt_template
 from src.utils.common_utils import get_message_from_string
-from src.tools import python_repl_tool, bash_tool
+from src.tools import bash_tool, write_and_execute_tool
+from strands_tools import file_read
 from src.utils.strands_sdk_utils import TokenTracker
 
 load_dotenv()
@@ -85,7 +86,7 @@ def handle_coder_agent_tool(task: Annotated[str, "The coding task or question th
         enable_reasoning=False,
         prompt_cache_info=(True, "default"),  # reasoning agent uses prompt caching
         tool_cache=True,
-        tools=[python_repl_tool, bash_tool],
+        tools=[write_and_execute_tool, bash_tool, file_read],
         streaming=True  # Enable streaming for consistency
     )
 

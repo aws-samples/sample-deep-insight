@@ -20,6 +20,8 @@
 
 ## *Latest News* 🔥
 
+- **[2025/12]** File-based code execution - significantly reduces NameError/ImportError rates compared to REPL-based approaches
+- **[2025/12]** Output token optimization with shared utils scripts - repeatedly used functions are generated once and imported, reducing redundant code generation
 - **[2025/11]** Added per-agent token tracking with detailed metrics - monitor input/output tokens and cache reads/writes for complete cost visibility and optimization
 - **[2025/11]** Added editable DOCX report generation - all analysis results are exportable to fully editable Word documents for easy customization and sharing
 - **[2025/10]** Released Deep Insight Workshop ([Korean](https://catalog.us-east-1.prod.workshops.aws/workshops/ee17ba6e-edc4-4921-aaf6-ca472841c49b/ko-KR) | [English](https://catalog.us-east-1.prod.workshops.aws/workshops/ee17ba6e-edc4-4921-aaf6-ca472841c49b/en-US))
@@ -137,7 +139,7 @@ cp .env.example .env
 
 ### Sample Outputs
 
-📄 [English Report](./self-hosted/assets/report_en.docx) | 📄 [Korean Report](./self-hosted/assets/report.docx)
+📄 [English Report](./assets/report_en.docx) | 📄 [Korean Report](./assets/report.docx)
 
 ## Contributing
 

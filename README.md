@@ -13,12 +13,14 @@
     <a href="#why-deep-insight">Why Deep Insight?</a>
     ◆ <a href="#quick-start">Quick Start</a>
     ◆ <a href="#demo">Demo</a>
-    ◆ <a href="#architecture">Architecture</a>
+    ◆ <a href="#deployment-options">Deployment Options</a>
   </p>
 </div>
 
 ## *Latest News* 🔥
 
+- **[2025/12]** File-based code execution - significantly reduces NameError/ImportError rates compared to REPL-based approaches
+- **[2025/12]** Output token optimization with shared utils scripts - repeatedly used functions are generated once and imported, reducing redundant code generation
 - **[2025/11]** Added per-agent token tracking with detailed metrics - monitor input/output tokens and cache reads/writes for complete cost visibility and optimization
 - **[2025/11]** Added editable DOCX report generation - all analysis results are exportable to fully editable Word documents for easy customization and sharing
 - **[2025/10]** Released Deep Insight Workshop ([Korean](https://catalog.us-east-1.prod.workshops.aws/workshops/ee17ba6e-edc4-4921-aaf6-ca472841c49b/ko-KR) | [English](https://catalog.us-east-1.prod.workshops.aws/workshops/ee17ba6e-edc4-4921-aaf6-ca472841c49b/en-US))
@@ -52,18 +54,34 @@ Transform weeks of manual reporting work into minutes using hierarchical multi-a
 
 ## Quick Start
 
-Deep Insight provides a self-hosted deployment that you can run locally or in your AWS VPC with complete code access and customization.
+Deep Insight provides two deployment options to match your needs.
 
 ### Self-Hosted Deployment
 
-Run agents locally or in your VPC with full control over:
+Run agents locally or in your VPC with full control:
 - ✅ Complete code access to agents, prompts, and workflows
 - ✅ Rapid iteration during development (no rebuild required)
-- ✅ Flexible infrastructure management
 - ✅ Simple setup in ~10 minutes
 
-**Get Started**: [`./self-hosted/`](./self-hosted/)
-- 📖 Read: [Self-Hosted README](./self-hosted/README.md)
+**Get Started**: [`./self-hosted/`](./self-hosted/) | 📖 [Self-Hosted README](./self-hosted/README.md)
+
+### Managed AgentCore Deployment
+
+Production deployment using AWS Bedrock AgentCore Runtime with VPC Private Mode:
+- ✅ AWS-managed infrastructure with CloudFormation
+- ✅ 100% private network (VPC endpoints, no public internet)
+- ✅ Dynamic Fargate containers for code execution
+
+**Get Started**: [`./managed-agentcore/`](./managed-agentcore/) | 📖 [Managed AgentCore README](./managed-agentcore/README.md)
+
+## Deployment Options
+
+| Feature | Self-Hosted | Managed AgentCore |
+|---------|-------------|-------------------|
+| Setup Time | ~10 minutes | ~45 minutes |
+| Infrastructure | Local/EC2 | AWS Fargate + VPC |
+| Network | Your choice | 100% Private VPC |
+| Best For | Development, Testing | Production, Enterprise |
 
 ---
 
@@ -93,7 +111,8 @@ git clone https://github.com/aws-samples/sample-deep-insight.git
 cd sample-deep-insight
 
 # Follow the self-hosted setup instructions
-cd self-hosted && follow the README.md
+cd self-hosted
+cd setup/ && ./create-uv-env.sh deep-insight 3.12 && cd ..
 
 # Create feature branch
 git checkout -b feature/your-feature-name

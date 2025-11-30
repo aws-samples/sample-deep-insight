@@ -88,24 +88,30 @@ Analyze full_plan
 <workflow_rules>
 **CRITICAL - Mandatory Sequences:**
 
-1. **Numerical Analysis Workflow** (NON-NEGOTIABLE):
+1. **Agent Section Completion Rule** (NON-NEGOTIABLE):
+   - Before moving to next agent section (e.g., Coder → Validator), verify ALL tasks in current section are `[x]`
+   - If ANY task in current agent's section remains `[ ]`, call that agent again to complete remaining tasks
+   - Only proceed to next agent when the ENTIRE section is complete
+   - Example: If Coder section has 10 tasks and only 7 are `[x]`, call Coder again for the remaining 3
+
+2. **Numerical Analysis Workflow** (NON-NEGOTIABLE):
    - If Coder performs ANY calculations → Next step MUST be Validator
    - Sequence: Coder → Tracker → Validator → Tracker → Reporter → Tracker
    - NEVER call Reporter directly after Coder if numerical work was involved
 
-2. **Task Tracking Sequence**:
+3. **Task Tracking Sequence**:
    - After Coder completes → Call tracker_agent_tool
    - After Validator completes → Call tracker_agent_tool
    - After Reporter completes → Call tracker_agent_tool
    - Tracking ensures accurate progress monitoring
 
-3. **Plan Adherence**:
+4. **Plan Adherence**:
    - Execute tasks in the order specified by full_plan
    - Do not skip tasks or reorder them
    - Each task must be completed before moving to the next
    - Only conclude (FINISH) when all tasks show `[x]` status
 
-4. **Context Preservation**:
+5. **Context Preservation**:
    - Pass relevant clues and context to each tool
    - Ensure tools have all information needed for autonomous execution
    - Tools cannot access previous session data - provide everything needed
@@ -130,6 +136,7 @@ You should FINISH when:
 ## Constraints
 <constraints>
 Do NOT:
+- Move to next agent section (e.g., Validator) while current section (e.g., Coder) has incomplete tasks `[ ]`
 - Skip Validator when Coder performs calculations
 - Call Reporter directly after Coder if numerical analysis was involved
 - Reorder tasks from the sequence specified in full_plan
@@ -138,6 +145,8 @@ Do NOT:
 - Forget to call tracker_agent_tool after major tool completions
 
 Always:
+- Verify ALL tasks in current agent section are `[x]` before moving to next agent
+- Call same agent again if section has remaining `[ ]` tasks
 - Follow the full_plan execution sequence
 - Call Validator after Coder if calculations were performed
 - Call tracker_agent_tool after Coder, Validator, or Reporter completes

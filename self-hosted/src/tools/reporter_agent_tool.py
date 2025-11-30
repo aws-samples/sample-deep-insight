@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from src.utils.strands_sdk_utils import strands_utils
 from src.prompts.template import apply_prompt_template
 from src.utils.common_utils import get_message_from_string
-from src.tools import python_repl_tool, bash_tool
+from src.tools import bash_tool, write_and_execute_tool
 from strands_tools import file_read
 from src.utils.strands_sdk_utils import TokenTracker
 
@@ -87,7 +87,7 @@ def handle_reporter_agent_tool(_task: Annotated[str, "The reporting task or inst
         enable_reasoning=False,
         prompt_cache_info=(True, "default"), # reasoning agent uses prompt caching
         tool_cache=True,
-        tools=[python_repl_tool, bash_tool, file_read],
+        tools=[write_and_execute_tool, bash_tool, file_read],
         streaming=True  # Enable streaming for consistency
     )
 
@@ -139,7 +139,7 @@ def reporter_agent_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
     result = handle_reporter_agent_tool(task)
     
     # Check if execution was successful based on the result string
-    if "Error in reporter agent tool" in result:
+    if "Error in reporter agent tool" in result or "Error: " in result:
         return {
             "toolUseId": tool_use_id,
             "status": "error",

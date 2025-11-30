@@ -532,6 +532,10 @@ class strands_utils():
                     if cmd: callback_tool.on_llm_new_token(f"CMD:\n```bash\n{cmd}\n```\n")
                     if stdout and stdout != 'None': callback_tool.on_llm_new_token(f"Output:\n{stdout}\n")
 
+                elif tool_name == "write_and_execute_tool":
+                    # write_and_execute_tool: 작성 결과 + 실행 결과 (전체 출력)
+                    callback_tool.on_llm_new_token(f"{output}\n")
+
                 elif tool_name == "file_read":
                     # file_read 결과는 보통 길어서 앞부분만 표시
                     truncated_output = output[:500] + "..." if len(output) > 500 else output
@@ -541,8 +545,8 @@ class strands_utils():
                     callback_tool.on_llm_new_token(f"rag response:\n{output}\n")
 
                 else: # 기타 모든 툴 결과 표시, 코더 툴, 리포터 툴 결과도 다 출력 (for debug)
-                    callback_tool.on_llm_new_token(f"Output: pass - you can see that in debug mode\n")
-                    #callback_default.on_llm_new_token(f"Output: {output}\n")
+                    #callback_tool.on_llm_new_token(f"Output: pass - you can see that in debug mode\n")
+                    callback_default.on_llm_new_token(f"Output: {output}\n")
                     #pass
 
 class FunctionNode(MultiAgentBase):
