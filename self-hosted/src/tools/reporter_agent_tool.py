@@ -4,11 +4,13 @@ import asyncio
 from typing import Any, Annotated
 from strands.types.tools import ToolResult, ToolUse
 from strands.types.content import ContentBlock
+from strands.tools.tools import PythonAgentTool
 from dotenv import load_dotenv
 from src.utils.strands_sdk_utils import strands_utils
 from src.prompts.template import apply_prompt_template
 from src.utils.common_utils import get_message_from_string
-from src.tools import bash_tool, write_and_execute_tool
+from src.tools.bash_tool import bash_tool
+from src.tools.write_and_execute_tool import write_and_execute_tool
 from strands_tools import file_read
 from src.utils.strands_sdk_utils import TokenTracker
 
@@ -48,7 +50,7 @@ class Colors:
     GREEN = '\033[92m'
     END = '\033[0m'
 
-def handle_reporter_agent_tool(_task: Annotated[str, "The reporting task or instruction for generating the report."]):
+def _handle_reporter_agent_tool(_task: Annotated[str, "The reporting task or instruction for generating the report."]):
     """
     Generate comprehensive reports based on analysis results using a specialized reporter agent.
 
@@ -131,13 +133,13 @@ def handle_reporter_agent_tool(_task: Annotated[str, "The reporting task or inst
     return result_text
 
 # Function name must match tool name
-def reporter_agent_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
+def _reporter_agent_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
     tool_use_id = tool["toolUseId"]
     task = tool["input"]["task"]
-    
+
     # Use the existing handle_reporter_agent_tool function
-    result = handle_reporter_agent_tool(task)
-    
+    result = _handle_reporter_agent_tool(task)
+
     # Check if execution was successful based on the result string
     if "Error in reporter agent tool" in result or "Error: " in result:
         return {
@@ -151,3 +153,6 @@ def reporter_agent_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
             "status": "success",
             "content": [{"text": result}]
         }
+
+# Wrap with PythonAgentTool for proper Strands SDK registration
+reporter_agent_tool = PythonAgentTool("reporter_agent_tool", TOOL_SPEC, _reporter_agent_tool)

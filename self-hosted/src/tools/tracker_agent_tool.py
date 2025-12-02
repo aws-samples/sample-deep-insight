@@ -3,6 +3,7 @@ import os
 import asyncio
 from typing import Any, Annotated
 from strands.types.tools import ToolResult, ToolUse
+from strands.tools.tools import PythonAgentTool
 from dotenv import load_dotenv
 from src.utils.strands_sdk_utils import strands_utils
 from src.prompts.template import apply_prompt_template
@@ -49,8 +50,8 @@ class Colors:
     BLUE = '\033[94m'
     END = '\033[0m'
 
-def handle_tracker_agent_tool(completed_agent: Annotated[str, "The name of the agent that just completed its task"], 
-                             completion_summary: Annotated[str, "Summary of what was completed by the agent"]):
+def _handle_tracker_agent_tool(completed_agent: Annotated[str, "The name of the agent that just completed its task"],
+                              completion_summary: Annotated[str, "Summary of what was completed by the agent"]):
     """
     Track and update task completion status based on agent results.
     
@@ -146,14 +147,14 @@ def handle_tracker_agent_tool(completed_agent: Annotated[str, "The name of the a
     return result_text
 
 # Function name must match tool name
-def tracker_agent_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
+def _tracker_agent_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
     tool_use_id = tool["toolUseId"]
     completed_agent = tool["input"]["completed_agent"]
     completion_summary = tool["input"]["completion_summary"]
-    
+
     # Use the existing handle_tracker_agent_tool function
-    result = handle_tracker_agent_tool(completed_agent, completion_summary)
-    
+    result = _handle_tracker_agent_tool(completed_agent, completion_summary)
+
     # Check if execution was successful based on the result string
     if "Error" in result:
         return {
@@ -167,3 +168,6 @@ def tracker_agent_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
             "status": "success",
             "content": [{"text": result}]
         }
+
+# Wrap with PythonAgentTool for proper Strands SDK registration
+tracker_agent_tool = PythonAgentTool("tracker_agent_tool", TOOL_SPEC, _tracker_agent_tool)

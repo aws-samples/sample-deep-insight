@@ -2,6 +2,7 @@ import logging
 import subprocess
 from typing import Any, Annotated
 from strands.types.tools import ToolResult, ToolUse
+from strands.tools.tools import PythonAgentTool
 from src.tools.decorators import log_io
 
 
@@ -32,7 +33,7 @@ class Colors:
     END = '\033[0m'
 
 @log_io
-def handle_bash_tool(cmd: Annotated[str, "The bash command to be executed."]):
+def _handle_bash_tool(cmd: Annotated[str, "The bash command to be executed."]):
     """Use this to execute bash command and do necessary operations."""
 
     print()  # Add newline before log
@@ -59,13 +60,13 @@ def handle_bash_tool(cmd: Annotated[str, "The bash command to be executed."]):
         return error_message
 
 # Function name must match tool name
-def bash_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
+def _bash_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
     tool_use_id = tool["toolUseId"]
     cmd = tool["input"]["cmd"]
-    
+
     # Use the existing handle_bash_tool function
-    result = handle_bash_tool(cmd)
-    
+    result = _handle_bash_tool(cmd)
+
     # Check if execution was successful based on the result string
     if "Command failed" in result or "Error executing command" in result:
         return {
@@ -80,6 +81,9 @@ def bash_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
             "content": [{"text": result}]
         }
 
+# Wrap with PythonAgentTool for proper Strands SDK registration
+bash_tool = PythonAgentTool("bash_tool", TOOL_SPEC, _bash_tool)
+
 if __name__ == "__main__":
     # Test example using the handle_bash_tool function directly
-    print(handle_bash_tool("ls -all"))
+    print(_handle_bash_tool("ls -all"))

@@ -4,11 +4,13 @@ import asyncio
 from typing import Any, Annotated
 from strands.types.tools import ToolResult, ToolUse
 from strands.types.content import ContentBlock
+from strands.tools.tools import PythonAgentTool
 from dotenv import load_dotenv
 from src.utils.strands_sdk_utils import strands_utils
 from src.prompts.template import apply_prompt_template
 from src.utils.common_utils import get_message_from_string
-from src.tools import bash_tool, write_and_execute_tool
+from src.tools.bash_tool import bash_tool
+from src.tools.write_and_execute_tool import write_and_execute_tool
 from strands_tools import file_read
 from src.utils.strands_sdk_utils import TokenTracker
 
@@ -49,7 +51,7 @@ class Colors:
     YELLOW = '\033[93m'
     END = '\033[0m'
 
-def handle_coder_agent_tool(task: Annotated[str, "The coding task or question that needs to be executed by the coder agent."]):
+def _handle_coder_agent_tool(task: Annotated[str, "The coding task or question that needs to be executed by the coder agent."]):
     """
     Execute Python code and bash commands using a specialized coder agent.
 
@@ -130,12 +132,12 @@ def handle_coder_agent_tool(task: Annotated[str, "The coding task or question th
     return result_text
 
 # Function name must match tool name
-def coder_agent_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
+def _coder_agent_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
     tool_use_id = tool["toolUseId"]
     task = tool["input"]["task"]
 
     # Use the existing handle_coder_agent_tool function
-    result = handle_coder_agent_tool(task)
+    result = _handle_coder_agent_tool(task)
 
     # Check if execution was successful based on the result string
     if "Error in coder agent tool" in result:
@@ -150,3 +152,6 @@ def coder_agent_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
             "status": "success",
             "content": [{"text": result}]
         }
+
+# Wrap with PythonAgentTool for proper Strands SDK registration
+coder_agent_tool = PythonAgentTool("coder_agent_tool", TOOL_SPEC, _coder_agent_tool)

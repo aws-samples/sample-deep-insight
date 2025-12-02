@@ -10,7 +10,10 @@ from src.utils.common_utils import get_message_from_string
 load_dotenv()
 
 # Tools
-from src.tools import coder_agent_tool, reporter_agent_tool, tracker_agent_tool, validator_agent_tool
+from src.tools.coder_agent_tool import coder_agent_tool
+from src.tools.reporter_agent_tool import reporter_agent_tool
+from src.tools.tracker_agent_tool import tracker_agent_tool
+from src.tools.validator_agent_tool import validator_agent_tool
 
 # Simple logger setup
 logger = logging.getLogger(__name__)

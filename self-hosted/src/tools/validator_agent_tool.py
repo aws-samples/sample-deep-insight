@@ -4,6 +4,7 @@ import asyncio
 from typing import Any, Annotated, Dict, List
 from strands.types.tools import ToolResult, ToolUse
 from strands.types.content import ContentBlock
+from strands.tools.tools import PythonAgentTool
 from dotenv import load_dotenv
 from src.utils.strands_sdk_utils import strands_utils
 from src.prompts.template import apply_prompt_template
@@ -11,7 +12,8 @@ from src.utils.common_utils import get_message_from_string
 import pandas as pd
 from src.utils.strands_sdk_utils import TokenTracker
 
-from src.tools import bash_tool, write_and_execute_tool
+from src.tools.bash_tool import bash_tool
+from src.tools.write_and_execute_tool import write_and_execute_tool
 from strands_tools import file_read
 
 load_dotenv()
@@ -113,7 +115,7 @@ class OptimizedValidator:
         
         return priority_calcs, stats
 
-def handle_validator_agent_tool(_task: Annotated[str, "The validation task or instruction for validating calculations and generating citations."]):
+def _handle_validator_agent_tool(_task: Annotated[str, "The validation task or instruction for validating calculations and generating citations."]):
     """
     Validate numerical calculations and generate citation metadata for reports.
 
@@ -197,13 +199,13 @@ def handle_validator_agent_tool(_task: Annotated[str, "The validation task or in
     return result_text
 
 # Function name must match tool name
-def validator_agent_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
+def _validator_agent_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
     tool_use_id = tool["toolUseId"]
     task = tool["input"]["task"]
-    
+
     # Use the existing handle_validator_agent_tool function
-    result = handle_validator_agent_tool(task)
-    
+    result = _handle_validator_agent_tool(task)
+
     # Check if execution was successful based on the result string
     if "Error" in result:
         return {
@@ -217,3 +219,6 @@ def validator_agent_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
             "status": "success",
             "content": [{"text": result}]
         }
+
+# Wrap with PythonAgentTool for proper Strands SDK registration
+validator_agent_tool = PythonAgentTool("validator_agent_tool", TOOL_SPEC, _validator_agent_tool)

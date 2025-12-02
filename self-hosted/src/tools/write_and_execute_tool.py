@@ -3,6 +3,7 @@ import logging
 import subprocess
 from typing import Any, Annotated
 from strands.types.tools import ToolResult, ToolUse
+from strands.tools.tools import PythonAgentTool
 from src.tools.decorators import log_io
 
 logger = logging.getLogger(__name__)
@@ -44,7 +45,7 @@ class Colors:
 
 
 @log_io
-def handle_write_and_execute_tool(
+def _handle_write_and_execute_tool(
     file_path: Annotated[str, "The path where the Python script should be written"],
     content: Annotated[str, "The Python code content to write to the file"],
     timeout: Annotated[int, "Timeout in seconds for script execution"] = 300
@@ -131,13 +132,13 @@ def handle_write_and_execute_tool(
     return "\n".join(results)
 
 
-def write_and_execute_tool(tool: ToolUse, **kwargs: Any) -> ToolResult:
+def _write_and_execute_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
     tool_use_id = tool["toolUseId"]
     file_path = tool["input"]["file_path"]
     content = tool["input"]["content"]
     timeout = tool["input"].get("timeout", 300)
 
-    result = handle_write_and_execute_tool(file_path, content, timeout)
+    result = _handle_write_and_execute_tool(file_path, content, timeout)
 
     # Check if execution had errors
     if "✗ Error" in result or "✗ Execution failed" in result or "✗ Execution timed out" in result:
@@ -152,3 +153,6 @@ def write_and_execute_tool(tool: ToolUse, **kwargs: Any) -> ToolResult:
             "status": "success",
             "content": [{"text": result}]
         }
+
+# Wrap with PythonAgentTool for proper Strands SDK registration
+write_and_execute_tool = PythonAgentTool("write_and_execute_tool", TOOL_SPEC, _write_and_execute_tool)

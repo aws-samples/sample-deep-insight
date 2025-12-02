@@ -3,6 +3,7 @@ import logging
 import subprocess
 from typing import Any, Annotated
 from strands.types.tools import ToolResult, ToolUse
+from strands.tools.tools import PythonAgentTool
 from src.tools.decorators import log_io
 
 
@@ -60,7 +61,7 @@ class PythonREPL:
 repl = PythonREPL()
 
 @log_io
-def handle_python_repl_tool(code: Annotated[str, "The python code to execute to do further analysis or calculation."]):
+def _handle_python_repl_tool(code: Annotated[str, "The python code to execute to do further analysis or calculation."]):
     """
     Use this to execute python code and do data analysis or calculation. If you want to see the output of a value,
     you should print it out with `print(...)`. This is visible to the user.
@@ -87,12 +88,12 @@ def handle_python_repl_tool(code: Annotated[str, "The python code to execute to 
     return result_str
 
 # Function name must match tool name
-def python_repl_tool(tool: ToolUse, **kwargs: Any) -> ToolResult:
+def _python_repl_tool(tool: ToolUse, **_kwargs: Any) -> ToolResult:
     tool_use_id = tool["toolUseId"]
     code = tool["input"]["code"]
 
     # Use the existing handle_python_repl_tool function
-    result = handle_python_repl_tool(code)
+    result = _handle_python_repl_tool(code)
 
     # Check if execution was successful based on the result string
     if "Failed to execute" in result:
@@ -107,3 +108,6 @@ def python_repl_tool(tool: ToolUse, **kwargs: Any) -> ToolResult:
             "status": "success",
             "content": [{"text": result}]
         }
+
+# Wrap with PythonAgentTool for proper Strands SDK registration
+python_repl_tool = PythonAgentTool("python_repl_tool", TOOL_SPEC, _python_repl_tool)
