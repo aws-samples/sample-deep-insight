@@ -13,7 +13,7 @@ dependencies = [
     "boto3==1.42.0",
     "strands-agents==1.18.0",
     "strands-agents-tools==0.2.16",
-    "mcp==1.21.0",
+    "mcp==1.23.0",
     "streamlit==1.51.0",
     "requests-toolbelt==1.0.0",
     "sagemaker==2.254.1",
