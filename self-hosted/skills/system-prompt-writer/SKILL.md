@@ -477,6 +477,41 @@ May ask clarifying questions if the user's request is ambiguous.
 Should acknowledge when sufficient information is unavailable.
 ```
 
+### 7. Provide Motivation Context
+
+**Anthropic's Claude 4 Guidance:**
+> "Provide the motivation behind any instruction to help Claude infer how to behave in edge cases."
+
+Instructions work better when accompanied by the **why** behind them. This helps the agent handle edge cases not explicitly covered.
+
+**Without Motivation (Less Effective):**
+```
+NEVER use ellipses in your responses.
+```
+
+**With Motivation (More Effective):**
+```
+Your response will be read aloud by a text-to-speech engine, so never use ellipses since the TTS engine will not know how to pronounce them.
+```
+
+**Why This Works:**
+- Agent understands the underlying constraint (TTS compatibility)
+- Can apply the principle to similar situations (avoid other TTS-unfriendly characters)
+- Makes better decisions in edge cases not explicitly covered
+
+**Example Patterns:**
+
+| Without Motivation | With Motivation |
+|-------------------|-----------------|
+| "Keep responses under 100 words" | "Keep responses under 100 words because they'll be displayed on mobile screens with limited space" |
+| "Always ask for confirmation" | "Always ask for confirmation before destructive operations because users may not realize the action is irreversible" |
+| "Use formal language" | "Use formal language because this agent serves enterprise legal teams who expect professional communication" |
+
+**When to Provide Motivation:**
+- Instructions that might seem arbitrary
+- Constraints that affect edge case behavior
+- Rules where understanding "why" helps with generalization
+
 ## Context Management Strategies
 
 ### Strategy 1: Just-in-Time Loading
@@ -554,6 +589,20 @@ When conversation history exceeds 50 messages:
 4. Continue with compacted context
 ```
 
+**For Multi-Context Window Workflows:**
+
+If your agent handles **complex tasks spanning multiple sessions** or context windows (e.g., large refactoring projects, multi-day analysis), see the specialized guide:
+
+→ **`references/long-horizon-tasks-guide.md`**
+
+This guide covers:
+- First context window setup (tests.json, init.sh patterns)
+- State management across sessions
+- Context persistence prompts
+- Multi-session agent templates
+
+**Note:** Most agents don't need these patterns. Only use when tasks genuinely span multiple context windows.
+
 ## Anti-Patterns to Avoid
 
 ❌ **Over-specification:** Avoid writing step-by-step algorithms - let the LLM reason
@@ -595,6 +644,102 @@ for item in {{1, 2, 3}}:
 ```
 
 **Impact:** This is a CRITICAL error that prevents the prompt from loading. Always use double braces in code samples.
+
+## Recommended Prompt Patterns
+
+These patterns from Anthropic's Claude 4 guidance can be embedded in system prompts to improve agent behavior.
+
+### Pattern 1: Default to Action
+
+Use when you want the agent to implement changes rather than just suggest them.
+
+```xml
+<default_to_action>
+By default, implement changes rather than only suggesting them.
+If the user's intent is unclear, infer the most useful likely action and proceed.
+</default_to_action>
+```
+
+**When to use:**
+- Coding assistants that should write code, not just explain
+- Automation agents that should execute tasks
+- Agents where users expect direct action
+
+**When NOT to use:**
+- High-stakes decisions requiring user confirmation
+- Destructive operations
+- Situations where wrong actions are costly
+
+### Pattern 2: Investigate Before Answering
+
+Use to prevent hallucination and ensure grounded responses.
+
+```xml
+<investigate_before_answering>
+Never speculate about code you have not opened.
+Always read relevant files before answering.
+</investigate_before_answering>
+```
+
+**When to use:**
+- Code analysis agents
+- Research agents working with documents
+- Any agent where accuracy is critical
+
+**Variations:**
+```xml
+<verify_before_claiming>
+Before making claims about data, always query the source.
+Do not assume values or states - verify them first.
+</verify_before_claiming>
+```
+
+### Pattern 3: Incremental Progress (for complex tasks)
+
+Use when agents handle multi-step or long-running tasks.
+
+```xml
+<incremental_progress>
+Break complex tasks into smaller steps.
+Complete and verify each step before proceeding.
+Track progress explicitly and save state when appropriate.
+</incremental_progress>
+```
+
+**When to use:**
+- Multi-step workflow agents
+- Agents handling complex analysis
+- Long-running task executors
+
+### Combining Patterns
+
+Patterns can be combined based on agent needs:
+
+```markdown
+## Behavior
+<behavior>
+<default_to_action>
+Implement changes directly rather than suggesting them.
+</default_to_action>
+
+<investigate_before_answering>
+Always read files before making claims about their contents.
+</investigate_before_answering>
+
+<incremental_progress>
+For complex tasks, break into steps and verify each before proceeding.
+</incremental_progress>
+</behavior>
+```
+
+**Note:** Only include patterns relevant to your agent's use case. Don't add patterns "just in case."
+
+**When to use additional patterns** → See `references/claude4-prompt-patterns.md`
+- Agent should **suggest instead of implement** → `<do_not_act_before_instructions>`
+- Need **parallel tool execution** optimization → `<use_parallel_tool_calls>`
+- Want **prose output** instead of bullet points → `<avoid_excessive_markdown>`
+- Prevent **over-engineering** in code agents → `<avoid_over_engineering>`
+- Building **frontend/web UI** with distinctive design → `<frontend_aesthetics>`
 
 ## Domain-Specific System Prompt Patterns
 
