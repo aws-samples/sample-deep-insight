@@ -3,8 +3,8 @@ import os
 import asyncio
 from typing import Any, Annotated
 from strands.types.tools import ToolResult, ToolUse
-from strands.types.content import ContentBlock
 from strands.tools.tools import PythonAgentTool
+from strands.types.content import ContentBlock
 from dotenv import load_dotenv
 from src.utils.strands_sdk_utils import strands_utils
 from src.prompts.template import apply_prompt_template

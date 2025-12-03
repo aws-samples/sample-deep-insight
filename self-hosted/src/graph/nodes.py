@@ -9,7 +9,7 @@ from src.utils.common_utils import get_message_from_string
 # Load environment variables
 load_dotenv()
 
-# Tools
+# Tools - import PythonAgentTool instances directly
 from src.tools.coder_agent_tool import coder_agent_tool
 from src.tools.reporter_agent_tool import reporter_agent_tool
 from src.tools.tracker_agent_tool import tracker_agent_tool
