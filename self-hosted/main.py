@@ -6,6 +6,7 @@ import os
 import shutil
 import asyncio
 import argparse
+import textwrap
 from dotenv import load_dotenv
 from src.utils.strands_sdk_utils import strands_utils
 from src.graph.builder import build_graph
@@ -18,7 +19,7 @@ from src.utils.event_queue import clear_queue
 
 def remove_artifact_folder(folder_path="./artifacts/"):
     """
-    ./artifact/ 폴더가 존재하면 삭제하는 함수
+    ./artifhowact/ 폴더가 존재하면 삭제하는 함수
 
     Args:
         folder_path (str): 삭제할 폴더 경로
@@ -107,11 +108,15 @@ if __name__ == "__main__":
         payload = {
             "user_query": args.user_query,
         }
-    else:
+    else: #             "user_query": "너가 작성할 것은 moon market 의 판매 현황 보고서야. 세일즈 및 마케팅 관점으로 분석을 해주고, 차트 생성 및 인사이트도 뽑아서 docx 파일로 만들어줘. 분석대상은 './data/moon-market-fresh-food-sales.csv' 파일 입니다."
         # Full comprehensive analysis query (main version):
+        user_query =textwrap.dedent("""
+                너가 작성할 것은 moon market 의 판매 현황 보고서야. 
+                세일즈 및 마케팅 관점으로 분석을 해주고, 차트 생성 및 인사이트도 뽑아서 docx 파일로 만들어줘. 
+                분석대상은 './data/moon_market/kr/' 파일 입니다.
+            """).strip()
         payload = {
-            "user_query": "너가 작성할 것은 moon market 의 판매 현황 보고서야. 세일즈 및 마케팅 관점으로 분석을 해주고, 차트 생성 및 인사이트도 뽑아서 docx 파일로 만들어줘. 분석대상은 './data/moon-market-fresh-food-sales.csv' 파일 입니다."
-            #"user_query": "너가 작성할 것은 moon market 의 판매 현황 보고서야. 세일즈 및 마케팅 관점으로 분석을 해주고, 차트 생성 및 인사이트도 뽑아서 docx 파일로 만들어줘. 분석대상은 './data/Dat-fresh-food-claude.csv' 파일 입니다. planning 할때 coder 분석항목은 1-2개로 최대한 간단하게 하고 Validator는 제외해줘. 왜냐하면 리포터 에이전트 테스트 중이거든. Validator가 있으면 시간을 많이 먹어 "
+            "user_query": user_query
         }
 
     #########################

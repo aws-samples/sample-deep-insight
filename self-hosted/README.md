@@ -65,7 +65,10 @@ cd setup/ && ./create-uv-env.sh deep-insight 3.12 && cd ..
 aws configure
 # Enter your AWS Access Key ID, Secret Access Key, and set region to us-west-2
 
-# 3. Run your analysis
+# 3. Copy example file to .env
+cp .env.example .env
+
+# 4. Run your analysis
 uv run python main.py --user_query "Create a sales performance report for Moon Market. Analyze from sales and marketing perspectives, generate charts and extract insights, then create a docx file. The analysis target is the ./data/Dat-fresh-food-claude.csv file."
 ```
 
