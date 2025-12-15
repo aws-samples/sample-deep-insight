@@ -20,7 +20,6 @@
 ## *Latest News* 🔥
 
 - **[2025/12]** Human in the Loop (HITL) - review and steer the analysis plan before execution, giving users control over the analysis direction
-- **[2025/12]** Managed AgentCore deployment - production-ready with Bedrock AgentCore Runtime, Custom Code Interpreter (Fargate), and 100% private VPC
 - **[2025/12]** File-based code execution - significantly reduces NameError/ImportError rates compared to REPL-based approaches
 - **[2025/12]** Output token optimization with shared utils scripts - repeatedly used functions are generated once and imported, reducing redundant code generation
 - **[2025/11]** Added per-agent token tracking with detailed metrics - monitor input/output tokens and cache reads/writes for complete cost visibility and optimization
