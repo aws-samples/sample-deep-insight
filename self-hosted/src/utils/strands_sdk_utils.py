@@ -145,11 +145,13 @@ class strands_utils():
         tool_cache = kwargs["tool_cache"]
 
         ## BedrockModel params: https://strandsagents.com/latest/api-reference/models/?h=bedrockmodel#strands.models.bedrock.BedrockModel
+        # max_tokens: Claude 3.5/4 models support up to 8192 output tokens by default, extended to 64K for Sonnet
+        # Increased from 8192*5 (40,960) to 8192*8 (65,536) to prevent MaxTokensReachedException
         llm = BedrockModel(
             model_id=model_id,
             streaming=True,
             cache_tools="default" if tool_cache else None,
-            max_tokens=8192*5,
+            max_tokens=64000,
             stop_sequences=["\n\nHuman"],
             temperature=1 if enable_reasoning else 0.01,
             additional_request_fields={

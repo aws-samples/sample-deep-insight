@@ -1,210 +1,250 @@
-<div align="center">
-  <h1>Deep Insight</h1>
+# Deep Insight: Self-Hosted Version
 
-  <h2>Production-ready multi-agent framework for building scalable data analysis workflows without infrastructure headaches</h2>
+> Full control deployment with complete code access - run locally or in your own infrastructure
 
-  <div align="center">
-    <a href="https://github.com/aws-samples/aws-ai-ml-workshop-kr/graphs/commit-activity"><img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/aws-samples/aws-ai-ml-workshop-kr"/></a>
-    <a href="https://github.com/aws-samples/aws-ai-ml-workshop-kr/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/badge/LICENSE-MIT-green"/></a>
-    <a href="https://www.python.org/downloads/"><img alt="Python" src="https://img.shields.io/badge/python-3.12+-blue.svg"/></a>
-  </div>
+**Last Updated**: 2025-12-10
 
-  <p>
-    <a href="#why-deep-insight">Why Deep Insight?</a>
-    ◆ <a href="#quick-start">Quick Start</a>
-    ◆ <a href="#demo">Demo</a>
-    ◆ <a href="#installation">Installation</a>
-    ◆ <a href="#architecture">Architecture</a>
-  </p>
-</div>
+---
 
-## *Latest News* 🔥
+## 🎯 Overview
 
-- **[2025/12]** File-based code execution - significantly reduces NameError/ImportError rates compared to REPL-based approaches
-- **[2025/12]** Output token optimization with shared utils scripts - repeatedly used functions are generated once and imported, reducing redundant code generation
-- **[2025/11]** Added per-agent token tracking with detailed metrics - monitor input/output tokens and cache reads/writes for complete cost visibility and optimization
-- **[2025/11]** Added editable DOCX report generation - all analysis results are exportable to fully editable Word documents for easy customization and sharing
-- **[2025/10]** Released Deep Insight Workshop ([Korean](https://catalog.us-east-1.prod.workshops.aws/workshops/ee17ba6e-edc4-4921-aaf6-ca472841c49b/ko-KR) | [English](https://catalog.us-east-1.prod.workshops.aws/workshops/ee17ba6e-edc4-4921-aaf6-ca472841c49b/en-US))
-- **[2025/10]** Added support for Claude Sonnet 4.5 with extended thinking and enhanced reasoning capabilities
-- **[2025/09]** Released Deep Insight framework built on Strands SDK and Amazon Bedrock with hierarchical multi-agent architecture
+Self-hosted deployment option for Deep Insight - run agents locally or on your own infrastructure with full customization control. For the complete project overview, deployment comparison, and contribution guidelines, see the [root README](../README.md).
 
-## Are You Facing These Challenges?
+- **Full Control**: Complete code access to agents, prompts, and workflows
+- **Rapid Iteration**: No rebuild required during development
+- **Simple Setup**: Get started in ~10 minutes
 
-### 에이전트 설계, 어디서부터 시작해야 할지 고민이신가요? (Struggling with Agent Architecture?)
+---
 
-Deep Insight provides a **proven hierarchical architecture** with Coordinator, Planner, Supervisor, and specialized tool agents. Start with a working production-grade system and customize from there—no need to design from scratch.
+## 🚀 Quick Start
 
-### 프로덕션급 성능의 에이전트, 어떻게 만들어야 할지 막막하신가요? (Need Production-Grade Performance?)
+### Tested Environments
 
-Get **production-grade multi-agent workflows** out of the box with prompt caching, streaming responses, token tracking, and battle-tested performance patterns. Deploy with confidence using architecture validated in real-world scenarios.
+macOS, Ubuntu, Amazon Linux
 
-### 민감한 데이터를 안전하게 처리하고 싶으신가요? (Concerned About Data Security?)
+### Prerequisites
 
-Deploy Deep Insight in **your own AWS VPC** for complete data isolation and control. All data processing happens within your secure VPC environment, with Amazon Bedrock API calls staying in AWS infrastructure—never exposed to the public internet.
+| Tool | Version | Check Command |
+|------|---------|---------------|
+| Python | 3.12+ | `python3 --version` |
+| AWS CLI | v2.x | `aws --version` |
 
-## Why Deep Insight?
-
-Transform weeks of manual reporting work into minutes using hierarchical multi-agent systems built on Strands SDK and Amazon Bedrock.
-
-- **🎨 Full Customization & Control** - Modify agents, prompts, and workflows with complete code access in your AWS VPC
-- **🔒 Enterprise-Grade Security** - Single-tenant VPC deployment with complete data isolation
-- **🤖 Advanced Multi-Agent Architecture** - Hierarchical workflow with Coordinator, Planner, Supervisor, and specialized tool agents
-- **🧠 Flexible Model Selection** - Choose different Claude models for each agent (Sonnet 4, Haiku 4, etc.) via simple .env configuration
-- **📊 Transparency & Verifiability** - Reports with calculation methods, sources, and reasoning processes
-- **🚀 Beyond Reporting** - Extend to any agent use case: shopping, support, log analysis, and more
-
-## Quick Start
+### Setup & Run
 
 ```bash
-# 1. Clone and setup environment
+# 1. Clone repository
 git clone https://github.com/aws-samples/sample-deep-insight.git
 cd sample-deep-insight/self-hosted
+
+# 2. Create environment
 cd setup/ && ./create-uv-env.sh deep-insight 3.12 && cd ..
 
-# 2. Configure AWS credentials
+# 3. Configure AWS credentials (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html)
 aws configure
-# Enter your AWS Access Key ID, Secret Access Key, and set region to us-west-2
 
-# 3. Copy example file to .env
+# 4. Copy environment file
 cp .env.example .env
 
-# 4. Run your analysis
-uv run python main.py --user_query "Create a sales performance report for Moon Market. Analyze from sales and marketing perspectives, generate charts and extract insights, then create a docx file. The analysis target is the ./data/Dat-fresh-food-claude.csv file."
+# 5. Run analysis
+uv run python main.py --user_query "Analyze from sales and marketing perspectives, generate charts and extract insights. The analysis target is the './data/moon_market/kr/' directory. moon-market-fresh-food-sales.csv is the data file, and column_definitions.json contains column descriptions."
 ```
-
-> **Prerequisites**: Python 3.12+, AWS credentials with Bedrock access (tested in us-west-2 region)
->
-> **Need more options?** See [Installation](#installation) section below for detailed setup instructions and alternative configuration methods.
 
 ---
 
-## Installation
+## 📊 Architecture
 
-This section provides detailed installation instructions and alternative configuration options. For a quick 3-step setup, see [Quick Start](#quick-start) above.
+### Three-Tier Agent Hierarchy
 
-### Environment Setup
-
-```bash
-# Navigate to setup directory
-cd setup/
-
-# Create UV environment with Python 3.12
-./create-uv-env.sh deep-insight 3.12
-
-# Return to project root
-cd ..
 ```
-
-The setup script automatically:
-- Creates a UV virtual environment with Python 3.12
-- Installs all required dependencies from `setup/pyproject.toml`
-- Creates symbolic links (`.venv`, `pyproject.toml`, `uv.lock`) in the project root
-
-### Configure AWS Credentials
-
-**Option 1: AWS CLI (Recommended for Quick Start)**
-
-```bash
-aws configure
-# Enter your credentials and set region to us-west-2
+User Query + Data Files (CSV, JSON)
+    ↓
+┌─────────────────────────────────────────────────────────┐
+│  COORDINATOR (Entry Point)                              │
+│  - Handles initial requests                             │
+│  - Routes simple queries directly                       │
+│  - Hands off complex tasks to Planner                   │
+│  - Model: Claude Sonnet 4 (no reasoning)                │
+└────────────────┬────────────────────────────────────────┘
+                 ↓ (if complex)
+┌─────────────────────────────────────────────────────────┐
+│  PLANNER (Strategic Thinking)                           │
+│  - Analyzes task complexity                             │
+│  - Creates detailed execution plan                      │
+│  - Model: Claude Sonnet 4 (reasoning enabled)           │
+└────────────────┬────────────────────────────────────────┘
+                 ↓
+┌─────────────────────────────────────────────────────────┐
+│  SUPERVISOR (Task Orchestrator)                         │
+│  - Delegates to specialized tool agents                 │
+│  - Monitors progress and coordinates workflow           │
+│  - Aggregates results                                   │
+│  - Model: Claude Sonnet 4 (prompt caching)              │
+└────────────────┬────────────────────────────────────────┘
+                 ↓
+┌─────────────────────────────────────────────────────────┐
+│  TOOL AGENTS                                            │
+│  - Coder: Python/Bash execution for data analysis       │
+│  - Reporter: Report formatting and DOCX generation      │
+│  - Validator: Quality validation and verification       │
+│  - Tracker: Progress monitoring                         │
+└─────────────────────────────────────────────────────────┘
 ```
-
-**Option 2: Environment Variables**
-
-```bash
-# Direct export (session-based)
-export AWS_REGION=us-west-2
-export AWS_ACCESS_KEY_ID=your_access_key
-export AWS_SECRET_ACCESS_KEY=your_secret_key
-```
-
-**Option 3: .env File (Persistent)**
-
-```bash
-# Copy example file and edit
-cp .env.example .env
-# Edit .env with your AWS credentials
-```
-
-> **Security Note**: Never commit `.env` files with real credentials to version control. The `.env` file is already in `.gitignore`.
 
 ---
 
-## Demo
+## ✨ Key Features
 
-### Fresh Food Sales Data Analysis
+### Full Customization
+- 🎨 **Complete Code Access** - Modify agents, prompts, and workflows directly
+- 🧠 **Flexible Model Selection** - Choose different Claude models for each agent via `.env` configuration
+- 🛠️ **Extensible Agents** - Add new agents or modify existing ones to fit your requirements
 
-> **Task**: "Create a sales performance report for Moon Market. Analyze from sales and marketing perspectives, generate charts and extract insights, then create a docx file. The analysis target is the `./data/Dat-fresh-food-claude.csv` file."
->
-> **Workflow**: Input (CSV data file: `Dat-fresh-food-claude.csv`) → Process (Natural language prompt: "Analyze sales performance, generate charts, extract insights") → Output (DOCX report with analysis, visualizations, and marketing insights)
+### Development Experience
+- ⚡ **Rapid Iteration** - No rebuild required, changes take effect immediately
+- 🔧 **Local Execution** - Run and debug agents on your local machine
+- 📝 **Prompt Engineering** - System prompts stored as markdown files in `src/prompts/`
 
-[▶️ Watch Full Demo on YouTube](https://www.youtube.com/watch?v=pn5aPfYSnp0)
+### Production Ready
+- 📊 **Token Tracking** - Monitor input/output tokens and cache reads/writes per agent
+- 🔄 **Streaming Responses** - Real-time event streaming for responsive UX
+- 📄 **DOCX Reports** - Automatic editable Word document generation
 
-### Sample Outputs
+### Multi-Agent Workflow
+- 🤖 **Hierarchical Orchestration** - Coordinator → Planner → Supervisor architecture handles complex tasks automatically
+- 🔀 **Smart Routing** - Simple queries handled directly, complex tasks delegated to specialized agents
+- 📈 **Parallel Execution** - Tool agents work concurrently for faster results
+- 🔍 **Built-in Validation** - Automatic result verification and citation generation
 
-📄 [English Report](./assets/report_en.docx) | 📄 [Korean Report](./assets/report.docx)
-
-## Contributing
-
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-### Quick Start for Contributors
-
-```bash
-# Fork the repository on GitHub, then clone your fork
-git clone https://github.com/aws-samples/sample-deep-insight.git
-cd sample-deep-insight
-
-# Follow the self-hosted setup instructions
-cd self-hosted
-
-# Create feature branch
-git checkout -b feature/your-feature-name
-
-# Make changes, test, then commit and push
-git add .
-git commit -m "Add feature: description"
-git push origin feature/your-feature-name
-
-# Open a Pull Request on GitHub
-```
-
-### Contribution Areas
-
-- **New Agent Types**: Add specialized agents for specific domains
-- **Tool Integration**: Create new tools for agent capabilities
-- **Model Support**: Add support for additional LLM providers
-- **Documentation**: Improve guides, examples, and tutorials
-- **Bug Fixes**: Fix issues and improve stability
-- **Performance**: Optimize streaming, caching, and execution
-
-## License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-### Philosophy
-
-> **"Come From Open Source, Back to Open Source"**
-
-We believe in the power of open collaboration. Deep Insight takes the excellent work of the LangManus community and extends it with AWS-native capabilities, then contributes those enhancements back to the community.
-
-## Contributors
-
-| Name | Role | Contact |
-|------|------|---------|
-| **Dongjin Jang, Ph.D.** | AWS Sr. AI/ML Specialist SA | [Email](mailto:dongjinj@amazon.com) · [LinkedIn](https://www.linkedin.com/in/dongjin-jang-kr/) · [GitHub](https://github.com/dongjin-ml) · [Hugging Face](https://huggingface.co/Dongjin-kr) |
-| **Gonsoo Moon** | AWS Sr. AI/ML Specialist SA | [Email](mailto:moongons@amazon.com) · [LinkedIn](https://www.linkedin.com/in/gonsoomoon) · [GitHub](https://github.com/gonsoomoon-ml) · [Hugging Face](https://huggingface.co/Gonsoo) |
-| **Chloe(Younghwa) Kwak** | AWS Sr. Solutions Architect | [Email](mailto:younghwa@amazon.com) · [LinkedIn](https://www.linkedin.com/in/younghwakwak) · [GitHub](https://github.com/chloe-kwak) · [Hugging Face](https://huggingface.co/Chloe-yh) |
-| **Yoonseo Kim** | AWS Solutions Architect | [Email](mailto:ottlseo@amazon.com) · [LinkedIn](https://www.linkedin.com/in/ottlseo/) · [GitHub](https://github.com/ottlseo) |
-| **Jiyun Park** | AWS Solutions Architect | [Email](mailto:jiyunp@amazon.com) · [LinkedIn](https://www.linkedin.com/in/jiyunpark1128/) · [GitHub](https://github.com/glossyyoon) |
+> 📖 **[Compare with Managed AgentCore →](../managed-agentcore/production_deployment/docs/DEPLOYMENT_COMPARISON.md)** When to choose each option
 
 ---
 
-<div align="center">
-  <p>
-    <strong>Built with ❤️ by AWS KOREA SA Team</strong><br>
-    <sub>Empowering enterprises to build customizable agentic AI systems</sub>
-  </p>
-</div>
+## 📁 Project Structure
+
+```
+.
+├── main.py                  # Entry point for agent execution
+├── src/
+│   ├── graph/               # Multi-agent workflow definitions
+│   │   ├── builder.py       # Graph construction with Strands SDK
+│   │   └── nodes.py         # Agent node implementations
+│   ├── tools/               # Tool agent implementations
+│   │   ├── coder_agent_tool.py
+│   │   ├── reporter_agent_tool.py
+│   │   ├── validator_agent_tool.py
+│   │   └── tracker_agent_tool.py
+│   ├── prompts/             # System prompts (*.md files)
+│   └── utils/               # Utilities (event queue, strands utils)
+├── app/                     # Streamlit web interface
+│   └── app.py
+├── setup/                   # Environment setup
+│   ├── create-uv-env.sh
+│   └── pyproject.toml
+├── data/                    # Sample CSV data files
+└── gepa-optimizer/          # Prompt optimization toolkit
+```
+
+---
+
+## 🔧 Use Your Own Data
+
+### Directory Structure
+
+Add your data files under the `data/` directory:
+
+```
+data/
+└── your_project/
+    ├── your_data.csv              # Your data file
+    └── column_definitions.json    # Column descriptions (optional)
+```
+
+### Column Definitions (Optional)
+
+Create `column_definitions.json` to help the agent understand your data:
+
+```json
+{
+  "columns": {
+    "date": "Transaction date in YYYY-MM-DD format",
+    "product_name": "Name of the product sold",
+    "quantity": "Number of units sold",
+    "revenue": "Total revenue in USD"
+  }
+}
+```
+
+### Run Analysis
+
+Your prompt should include:
+1. **Analysis perspective**: What angle to analyze (e.g., sales, marketing, operations)
+2. **Data path**: Full path to your CSV and JSON files
+
+```bash
+uv run python main.py --user_query "Analyze from sales and marketing perspectives, generate charts and extract insights. The analysis target is './data/your_project/' directory. your_data.csv is the data file, and column_definitions.json contains column descriptions."
+```
+
+> 📖 **[Prompt writing guide (Korean) →](https://www.linkedin.com/pulse/%EB%8D%B0%EC%9D%B4%ED%84%B0-%EB%B6%84%EC%84%9D-%EB%A6%AC%ED%8F%AC%ED%8A%B8-2-3%EC%9D%BC%EC%97%90%EC%84%9C-15%EB%B6%84%EC%9C%BC%EB%A1%9C-agentic-ai-%EC%8B%A4%EC%A0%84-%EC%9C%A0%EC%8A%A4%EC%BC%80%EC%9D%B4%EC%8A%A4-gonsoo-moon-nhlac/)** How to write effective analysis prompts
+
+---
+
+## 🔧 Change Agent Model IDs
+
+Each agent can use a different Bedrock model. Configure model IDs in `.env`:
+
+```bash
+# Default model for all agents
+DEFAULT_MODEL_ID=global.anthropic.claude-sonnet-4-20250514-v1:0
+
+# Use faster model for simple routing tasks
+COORDINATOR_MODEL_ID=global.anthropic.claude-haiku-4-5-20251001-v1:0
+
+# Use most capable model for complex planning
+PLANNER_MODEL_ID=global.anthropic.claude-opus-4-5-20251101-v1:0
+
+# Other agents
+CODER_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
+VALIDATOR_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
+REPORTER_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
+```
+
+### Available Models
+
+| Model | Model ID | Use Case |
+|-------|----------|----------|
+| Claude Opus 4.5 | `global.anthropic.claude-opus-4-5-20251101-v1:0` | Highest capability |
+| Claude Sonnet 4.5 | `global.anthropic.claude-sonnet-4-5-20250929-v1:0` | Higher capability |
+| Claude Sonnet 4 | `global.anthropic.claude-sonnet-4-20250514-v1:0` | Balanced |
+| Claude Haiku 4.5 | `global.anthropic.claude-haiku-4-5-20251001-v1:0` | Fast, lower cost |
+
+> **Finding other models**: Use `aws bedrock list-foundation-models --query "modelSummaries[?providerName=='Anthropic'].[modelId,modelName]" --output table` or see [Amazon Bedrock Model IDs](https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html)
+
+Changes take effect immediately (no rebuild required).
+
+---
+
+## 🛠️ Modify Agent Prompts
+
+System prompts are stored as markdown files in `src/prompts/`:
+
+```
+src/prompts/
+├── coordinator.md    # Entry point agent
+├── planner.md        # Planning agent
+├── supervisor.md     # Task orchestration
+├── coder.md          # Code execution
+├── reporter.md       # Report generation
+└── validator.md      # Result validation
+```
+
+Edit these files to customize agent behavior. Changes take effect immediately (no rebuild required).
+
+---
+
+## 📝 License
+
+MIT License - see the [LICENSE](../LICENSE) file for details.
+
+---
+
+> 📖 For contributing guidelines, acknowledgments, and full project documentation, see the [root README](../README.md).

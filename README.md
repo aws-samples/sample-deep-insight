@@ -19,13 +19,21 @@
 
 ## *Latest News* 🔥
 
+- **[2025/12]** Human in the Loop (HITL) - review and steer the analysis plan before execution, giving users control over the analysis direction
+- **[2025/12]** Managed AgentCore deployment - production-ready with Bedrock AgentCore Runtime, Custom Code Interpreter (Fargate), and 100% private VPC
 - **[2025/12]** File-based code execution - significantly reduces NameError/ImportError rates compared to REPL-based approaches
 - **[2025/12]** Output token optimization with shared utils scripts - repeatedly used functions are generated once and imported, reducing redundant code generation
 - **[2025/11]** Added per-agent token tracking with detailed metrics - monitor input/output tokens and cache reads/writes for complete cost visibility and optimization
+
+<details>
+<summary>Show older updates</summary>
+
 - **[2025/11]** Added editable DOCX report generation - all analysis results are exportable to fully editable Word documents for easy customization and sharing
 - **[2025/10]** Released Deep Insight Workshop ([Korean](https://catalog.us-east-1.prod.workshops.aws/workshops/ee17ba6e-edc4-4921-aaf6-ca472841c49b/ko-KR) | [English](https://catalog.us-east-1.prod.workshops.aws/workshops/ee17ba6e-edc4-4921-aaf6-ca472841c49b/en-US))
 - **[2025/10]** Added support for Claude Sonnet 4.5 with extended thinking and enhanced reasoning capabilities
 - **[2025/09]** Released Deep Insight framework built on Strands SDK and Amazon Bedrock with hierarchical multi-agent architecture
+
+</details>
 
 ## Are You Facing These Challenges?
 
@@ -43,13 +51,15 @@ Deploy Deep Insight in **your own AWS VPC** for complete data isolation and cont
 
 ## Why Deep Insight?
 
-Transform weeks of manual reporting work into minutes using hierarchical multi-agent systems built on Strands SDK and Amazon Bedrock.
+Transform complex data analysis into automated insights using hierarchical multi-agent systems built on Strands SDK and Amazon Bedrock.
 
-- **🎨 Full Customization & Control** - Modify agents, prompts, and workflows with complete code access in your AWS VPC
-- **🔒 Enterprise-Grade Security** - Single-tenant VPC deployment with complete data isolation
 - **🤖 Advanced Multi-Agent Architecture** - Hierarchical workflow with Coordinator, Planner, Supervisor, and specialized tool agents
+- **🎨 Full Customization & Control** - Modify agents, prompts, and workflows with complete code access
 - **🧠 Flexible Model Selection** - Choose different Claude models for each agent (Sonnet 4, Haiku 4, etc.) via simple .env configuration
+- **💻 Custom Code Interpreter** - Flexible code execution from local Python to Fargate-based containers with your own Docker image
 - **📊 Transparency & Verifiability** - Reports with calculation methods, sources, and reasoning processes
+- **🔒 Enterprise-Grade Security** - From local development to 100% private VPC with Bedrock AgentCore Runtime
+- **⚡ Production Scalability** - Concurrent processing with AgentCore MicroVM and auto-scaling Fargate containers
 - **🚀 Beyond Reporting** - Extend to any agent use case: shopping, support, log analysis, and more
 
 ## Quick Start
@@ -68,20 +78,23 @@ Run agents locally or in your VPC with full control:
 ### Managed AgentCore Deployment
 
 Production deployment using AWS Bedrock AgentCore Runtime with VPC Private Mode:
-- ✅ AWS-managed infrastructure with CloudFormation
+- ✅ Bedrock AgentCore Runtime hosting Strands Agent
+- ✅ Custom Code Interpreter (ECR + ALB + Fargate)
 - ✅ 100% private network (VPC endpoints, no public internet)
-- ✅ Dynamic Fargate containers for code execution
 
 **Get Started**: [`./managed-agentcore/`](./managed-agentcore/) | 📖 [Managed AgentCore README](./managed-agentcore/README.md)
 
 ## Deployment Options
 
-| Feature | Self-Hosted | Managed AgentCore |
-|---------|-------------|-------------------|
+| | Self-Hosted | Managed AgentCore |
+|---|-------------|-------------------|
 | Setup Time | ~10 minutes | ~45 minutes |
-| Infrastructure | Local/EC2 | AWS Fargate + VPC |
+| Agent Hosting | Local/EC2 | Bedrock AgentCore Runtime |
+| Code Execution | Local Python | Custom Code Interpreter (Fargate) |
 | Network | Your choice | 100% Private VPC |
 | Best For | Development, Testing | Production, Enterprise |
+
+> 📖 **[Detailed comparison →](./managed-agentcore/production_deployment/docs/DEPLOYMENT_COMPARISON.md)** Security, cost, features, and when to choose each option
 
 ---
 

@@ -63,6 +63,37 @@ def should_handoff_to_planner(_):
 
     return False
 
+
+def _check_plan_revision_state():
+    """Helper to get plan revision state from global storage."""
+    global _global_node_states
+    shared_state = _global_node_states.get('shared', {})
+    return shared_state.get('plan_revision_requested', False)
+
+
+def should_revise_plan(_):
+    """Check if user requested plan revision in plan_reviewer.
+
+    Note: Strands SDK requires explicit conditions on both outgoing edges from a node
+    to ensure only one destination becomes "ready". This is why we have two opposite
+    condition functions (should_revise_plan and should_proceed_to_supervisor).
+    """
+    result = _check_plan_revision_state()
+    logger.info(f"should_revise_plan: {result}")
+    return result
+
+
+def should_proceed_to_supervisor(_):
+    """Check if plan was approved and should proceed to supervisor.
+
+    Note: This is the logical negation of should_revise_plan. Both conditions are needed
+    because Strands SDK evaluates all edges and marks destination nodes as "ready"
+    if their incoming edge conditions are satisfied.
+    """
+    result = not _check_plan_revision_state()
+    logger.info(f"should_proceed_to_supervisor: {result}")
+    return result
+
 async def coordinator_node(task=None, **kwargs):
     
     """Coordinator node that communicate with customers."""
@@ -133,9 +164,31 @@ async def planner_node(task=None, **kwargs):
         logger.warning("No shared state found in global storage")
         return None, {"text": "No shared state available"}
 
+    # Check if this is a revision request
+    is_revision = shared_state.get('plan_revision_requested', False)
+    plan_feedback = shared_state.get('plan_feedback', '')
+    previous_plan = shared_state.get('full_plan', '')
+    revision_count = shared_state.get('plan_revision_count', 0)
+
+    # Select appropriate prompt based on whether this is initial planning or revision
+    if is_revision and plan_feedback:
+        # Use revision prompt with feedback context
+        prompt_context = {
+            "USER_REQUEST": request,
+            "PREVIOUS_PLAN": previous_plan,
+            "USER_FEEDBACK": plan_feedback,
+            "REVISION_COUNT": revision_count,
+            "MAX_REVISIONS": MAX_PLAN_REVISIONS
+        }
+        prompt_name = "planner_revise"
+        logger.info(f"{Colors.YELLOW}Revising plan based on user feedback (revision {revision_count}){Colors.END}")
+    else:
+        prompt_context = {"USER_REQUEST": request}
+        prompt_name = "planner"
+
     agent = strands_utils.get_agent(
         agent_name="planner",
-        system_prompts=apply_prompt_template(prompt_name="planner", prompt_context={"USER_REQUEST": request}),
+        system_prompts=apply_prompt_template(prompt_name=prompt_name, prompt_context=prompt_context),
         model_id=os.getenv("PLANNER_MODEL_ID", os.getenv("DEFAULT_MODEL_ID")),
         enable_reasoning=True,
         prompt_cache_info=(False, None),  # enable prompt caching for reasoning agent, (False, None), (True, "default")
@@ -145,6 +198,12 @@ async def planner_node(task=None, **kwargs):
 
     messages = shared_state["messages"]
     message = messages[-1]["content"][-1]["text"]
+
+    # If revision, append feedback to the message
+    if is_revision and plan_feedback:
+        message = f"{message}\n\n<user_feedback>\nUser requested the following changes to the plan:\n{plan_feedback}\n</user_feedback>"
+        # Reset the revision flag after using it
+        shared_state['plan_revision_requested'] = False
 
     # Process streaming response and collect text in one pass
     full_text = ""
@@ -165,6 +224,91 @@ async def planner_node(task=None, **kwargs):
     log_node_complete("Planner")
     # Return response only
     return response
+
+
+# Plan feedback configuration
+MAX_PLAN_REVISIONS = int(os.getenv("MAX_PLAN_REVISIONS", "10"))
+
+async def plan_reviewer_node(task=None, **kwargs):
+    """
+    Plan reviewer node that allows user to review and provide feedback on the generated plan.
+
+    This node:
+    1. Displays the generated plan to the user
+    2. Asks for approval or feedback
+    3. If feedback provided and revisions remaining, triggers re-planning
+    4. If approved or max revisions reached, proceeds to supervisor
+    """
+    log_node_start("PlanReviewer")
+    global _global_node_states
+
+    shared_state = _global_node_states.get('shared', {})
+
+    if not shared_state:
+        logger.warning("No shared state found in global storage")
+        return {"text": "No shared state available"}
+
+    # Get current plan and revision count
+    full_plan = shared_state.get('full_plan', '')
+    revision_count = shared_state.get('plan_revision_count', 0)
+
+    # Reset revision flag at start
+    shared_state['plan_revision_requested'] = False
+
+    # Check if we've exceeded max revisions - auto-approve
+    if revision_count >= MAX_PLAN_REVISIONS:
+        logger.info(f"{Colors.YELLOW}Max revisions ({MAX_PLAN_REVISIONS}) reached. Auto-approving plan.{Colors.END}")
+        shared_state['history'].append({
+            "agent": "plan_reviewer",
+            "message": f"Plan auto-approved (max {MAX_PLAN_REVISIONS} revisions reached)"
+        })
+        log_node_complete("PlanReviewer")
+        return {"text": "Plan auto-approved after max revisions", "approved": True}
+
+    # Display plan and ask for user input
+    print(f"\n{Colors.CYAN}{'='*60}{Colors.END}")
+    print(f"{Colors.CYAN}📋 PLAN REVIEW (Revision {revision_count}/{MAX_PLAN_REVISIONS}){Colors.END}")
+    print(f"{Colors.CYAN}{'='*60}{Colors.END}")
+    print(f"\n{full_plan}\n")
+    print(f"{Colors.CYAN}{'='*60}{Colors.END}")
+
+    # Get user input
+    print(f"\n{Colors.YELLOW}Please review the plan above.{Colors.END}")
+    print(f"  - Press {Colors.GREEN}Enter{Colors.END} or type '{Colors.GREEN}yes{Colors.END}' to approve and proceed")
+    print(f"  - Type your {Colors.YELLOW}feedback{Colors.END} to request revisions ({MAX_PLAN_REVISIONS - revision_count} revision(s) remaining)")
+    print()
+
+    try:
+        # Import readline for proper terminal input handling (backspace, delete, arrow keys)
+        import readline  # noqa: F401
+        user_input = input("Your response: ").strip()
+    except EOFError:
+        # Non-interactive mode - auto-approve
+        user_input = "yes"
+
+    # Process user response
+    if user_input.lower() in ['', 'yes', 'y', 'approve', 'ok', 'proceed']:
+        # User approved the plan - plan_revision_requested stays False (set above)
+        shared_state['history'].append({
+            "agent": "plan_reviewer",
+            "message": "Plan approved by user"
+        })
+        logger.info(f"{Colors.GREEN}Plan approved by user{Colors.END}")
+        log_node_complete("PlanReviewer")
+        return {"text": "Plan approved", "approved": True}
+    else:
+        # User provided feedback - request revision
+        shared_state['plan_revision_requested'] = True
+        shared_state['plan_feedback'] = user_input
+        shared_state['plan_revision_count'] = revision_count + 1
+        shared_state['history'].append({
+            "agent": "plan_reviewer",
+            "message": f"User feedback: {user_input}"
+        })
+        logger.info(f"{Colors.YELLOW}Plan revision requested. Feedback: {user_input}{Colors.END}")
+        log_node_complete("PlanReviewer")
+        return {"text": f"Revision requested: {user_input}", "approved": False, "feedback": user_input}
+
 
 async def supervisor_node(task=None, **kwargs):
     """Supervisor node that decides which agent should act next."""
@@ -195,7 +339,7 @@ async def supervisor_node(task=None, **kwargs):
 
     # Create message with cache point for messages caching
     # This caches the large context (full_plan, clues) for cost savings
-    message = [ContentBlock(text=message_text), ContentBlock(cachePoint={"type": "default"})]  # Cache point for messages caching
+    message = [ContentBlock(text=message_text)]  # No cache point - system prompt cache only
 
     # Process streaming response and collect text in one pass
     full_text = ""

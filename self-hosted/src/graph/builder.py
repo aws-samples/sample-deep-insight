@@ -7,7 +7,10 @@ from .nodes import (
     supervisor_node,
     coordinator_node,
     planner_node,
+    plan_reviewer_node,
     should_handoff_to_planner,
+    should_revise_plan,
+    should_proceed_to_supervisor,
 )
 
 class StreamableGraph:
@@ -66,22 +69,39 @@ class StreamableGraph:
         yield {"type": "workflow_complete", "message": "All events processed through global queue"}
 
 def build_graph():
-    """Build and return the agent workflow graph with streaming capability."""
+    """Build and return the agent workflow graph with streaming capability.
+
+    Workflow:
+        Coordinator → Planner → PlanReviewer → Supervisor
+                         ↑          │
+                         └──────────┘ (feedback loop if user requests revision)
+    """
     builder = GraphBuilder()
 
     # Add nodes
     coordinator = FunctionNode(func=coordinator_node, name="coordinator")
     planner = FunctionNode(func=planner_node, name="planner")
+    plan_reviewer = FunctionNode(func=plan_reviewer_node, name="plan_reviewer")
     supervisor = FunctionNode(func=supervisor_node, name="supervisor")
 
     builder.add_node(coordinator, "coordinator")
     builder.add_node(planner, "planner")
+    builder.add_node(plan_reviewer, "plan_reviewer")
     builder.add_node(supervisor, "supervisor")
 
     # Set entry point and edges
     builder.set_entry_point("coordinator")
     builder.add_edge("coordinator", "planner", condition=should_handoff_to_planner)
-    builder.add_edge("planner", "supervisor")
+    builder.add_edge("planner", "plan_reviewer")
+    # Conditional edges from plan_reviewer:
+    # - If user requests revision → go back to planner
+    # - If user approves plan → proceed to supervisor
+    builder.add_edge("plan_reviewer", "planner", condition=should_revise_plan)
+    builder.add_edge("plan_reviewer", "supervisor", condition=should_proceed_to_supervisor)
+
+    # Set execution limits to prevent infinite loops (max 10 plan revisions + normal flow)
+    # Max node executions: planner can run up to 11 times (initial + 10 revisions)
+    builder.set_max_node_executions(25)
 
     # Return graph with streaming capability
     return StreamableGraph(builder.build())
