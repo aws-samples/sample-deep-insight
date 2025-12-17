@@ -1,0 +1,325 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Deep Insight Infrastructure - Phase 1 Main Stack (Nested)'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: prod
+    Description: Environment name (dev, staging, prod)
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+
+  ProjectName:
+    Type: String
+    Default: deep-insight
+    Description: Project name for resource naming
+
+  AvailabilityZone1:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Description: |
+      First Availability Zone - MUST map to a supported AgentCore VPC AZ ID.
+
+      IMPORTANT: AZ names (e.g., us-east-1a) are ACCOUNT-SPECIFIC and map to different
+      physical datacenters in different AWS accounts. You MUST verify which AZ names
+      in YOUR account map to supported AZ IDs.
+
+      Supported AZ IDs by region:
+        us-east-1: use1-az1, use1-az2, use1-az4
+        us-east-2: use2-az1, use2-az2, use2-az3
+        us-west-2: usw2-az1, usw2-az2, usw2-az3
+        ap-south-1: aps1-az1, aps1-az2, aps1-az3
+        ap-southeast-1: apse1-az1, apse1-az2, apse1-az3
+        ap-southeast-2: apse2-az1, apse2-az2, apse2-az3
+        ap-northeast-1: apne1-az1, apne1-az2, apne1-az4
+        eu-west-1: euw1-az1, euw1-az2, euw1-az3
+        eu-central-1: euc1-az1, euc1-az2, euc1-az3
+
+      To verify YOUR account's supported AZ names:
+        cd production_deployment/scripts
+        ./verify_agentcore_azs.sh <region>
+
+      For detailed documentation:
+        See production_deployment/docs/bedrock_agentcore_vpc_regions.md
+
+  AvailabilityZone2:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Description: |
+      Second Availability Zone - MUST be different from AvailabilityZone1 and map
+      to a supported AgentCore VPC AZ ID.
+
+      IMPORTANT: Run the verification script to identify supported AZ names in YOUR account.
+
+      To verify:
+        cd production_deployment/scripts
+        ./verify_agentcore_azs.sh <region>
+
+      The script will provide the exact AZ names to use for your deployment.
+
+  VpcCidr:
+    Type: String
+    Default: 10.0.0.0/16
+    Description: CIDR block for VPC
+
+  PrivateSubnet1Cidr:
+    Type: String
+    Default: 10.0.1.0/24
+    Description: CIDR block for Private Subnet 1
+
+  PrivateSubnet2Cidr:
+    Type: String
+    Default: 10.0.2.0/24
+    Description: CIDR block for Private Subnet 2
+
+  PublicSubnet1Cidr:
+    Type: String
+    Default: 10.0.11.0/24
+    Description: CIDR block for Public Subnet 1
+
+  PublicSubnet2Cidr:
+    Type: String
+    Default: 10.0.12.0/24
+    Description: CIDR block for Public Subnet 2
+
+  NestedTemplatesBucketName:
+    Type: String
+    Description: S3 bucket name where nested templates are stored
+
+Resources:
+  # ============================================
+  # Network Stack
+  # ============================================
+  NetworkStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${NestedTemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/nested/network.yaml'
+      Parameters:
+        Environment: !Ref Environment
+        ProjectName: !Ref ProjectName
+        AvailabilityZone1: !Ref AvailabilityZone1
+        AvailabilityZone2: !Ref AvailabilityZone2
+        VpcCidr: !Ref VpcCidr
+        PrivateSubnet1Cidr: !Ref PrivateSubnet1Cidr
+        PrivateSubnet2Cidr: !Ref PrivateSubnet2Cidr
+        PublicSubnet1Cidr: !Ref PublicSubnet1Cidr
+        PublicSubnet2Cidr: !Ref PublicSubnet2Cidr
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-network-stack-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+  # ============================================
+  # Security Groups Stack
+  # ============================================
+  SecurityGroupsStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: NetworkStack
+    Properties:
+      TemplateURL: !Sub 'https://${NestedTemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/nested/security-groups.yaml'
+      Parameters:
+        Environment: !Ref Environment
+        ProjectName: !Ref ProjectName
+        VpcId: !GetAtt NetworkStack.Outputs.VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-sg-stack-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+  # ============================================
+  # VPC Endpoints Stack
+  # ============================================
+  VPCEndpointsStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: SecurityGroupsStack
+    Properties:
+      TemplateURL: !Sub 'https://${NestedTemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/nested/vpc-endpoints.yaml'
+      Parameters:
+        Environment: !Ref Environment
+        ProjectName: !Ref ProjectName
+        VpcId: !GetAtt NetworkStack.Outputs.VpcId
+        PrivateSubnet1Id: !GetAtt NetworkStack.Outputs.PrivateSubnet1Id
+        PrivateSubnet2Id: !GetAtt NetworkStack.Outputs.PrivateSubnet2Id
+        PrivateRouteTableId: !GetAtt NetworkStack.Outputs.PrivateRouteTableId
+        VPCEndpointSecurityGroupId: !GetAtt SecurityGroupsStack.Outputs.VPCEndpointSecurityGroupId
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-vpce-stack-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+  # ============================================
+  # ALB Stack
+  # ============================================
+  ALBStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: SecurityGroupsStack
+    Properties:
+      TemplateURL: !Sub 'https://${NestedTemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/nested/alb.yaml'
+      Parameters:
+        Environment: !Ref Environment
+        ProjectName: !Ref ProjectName
+        VpcId: !GetAtt NetworkStack.Outputs.VpcId
+        PrivateSubnet1Id: !GetAtt NetworkStack.Outputs.PrivateSubnet1Id
+        PrivateSubnet2Id: !GetAtt NetworkStack.Outputs.PrivateSubnet2Id
+        ALBSecurityGroupId: !GetAtt SecurityGroupsStack.Outputs.ALBSecurityGroupId
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-alb-stack-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+  # ============================================
+  # IAM Stack
+  # ============================================
+  IAMStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${NestedTemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/nested/iam.yaml'
+      Parameters:
+        Environment: !Ref Environment
+        ProjectName: !Ref ProjectName
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-iam-stack-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+# ============================================
+# Outputs
+# ============================================
+Outputs:
+  # Network Outputs
+  VpcId:
+    Description: VPC ID
+    Value: !GetAtt NetworkStack.Outputs.VpcId
+    Export:
+      Name: !Sub '${ProjectName}-vpc-id-${Environment}'
+
+  PrivateSubnet1Id:
+    Description: Private Subnet 1 ID
+    Value: !GetAtt NetworkStack.Outputs.PrivateSubnet1Id
+    Export:
+      Name: !Sub '${ProjectName}-private-subnet-1-id-${Environment}'
+
+  PrivateSubnet2Id:
+    Description: Private Subnet 2 ID
+    Value: !GetAtt NetworkStack.Outputs.PrivateSubnet2Id
+    Export:
+      Name: !Sub '${ProjectName}-private-subnet-2-id-${Environment}'
+
+  PublicSubnet1Id:
+    Description: Public Subnet 1 ID
+    Value: !GetAtt NetworkStack.Outputs.PublicSubnet1Id
+    Export:
+      Name: !Sub '${ProjectName}-public-subnet-1-id-${Environment}'
+
+  PublicSubnet2Id:
+    Description: Public Subnet 2 ID
+    Value: !GetAtt NetworkStack.Outputs.PublicSubnet2Id
+    Export:
+      Name: !Sub '${ProjectName}-public-subnet-2-id-${Environment}'
+
+  # Security Groups Outputs
+  AgentCoreSecurityGroupId:
+    Description: AgentCore Security Group ID
+    Value: !GetAtt SecurityGroupsStack.Outputs.AgentCoreSecurityGroupId
+    Export:
+      Name: !Sub '${ProjectName}-agentcore-sg-id-${Environment}'
+
+  ALBSecurityGroupId:
+    Description: ALB Security Group ID
+    Value: !GetAtt SecurityGroupsStack.Outputs.ALBSecurityGroupId
+    Export:
+      Name: !Sub '${ProjectName}-alb-sg-id-${Environment}'
+
+  FargateSecurityGroupId:
+    Description: Fargate Security Group ID
+    Value: !GetAtt SecurityGroupsStack.Outputs.FargateSecurityGroupId
+    Export:
+      Name: !Sub '${ProjectName}-fargate-sg-id-${Environment}'
+
+  VPCEndpointSecurityGroupId:
+    Description: VPC Endpoint Security Group ID
+    Value: !GetAtt SecurityGroupsStack.Outputs.VPCEndpointSecurityGroupId
+    Export:
+      Name: !Sub '${ProjectName}-vpce-sg-id-${Environment}'
+
+  # ALB Outputs
+  ApplicationLoadBalancerArn:
+    Description: ALB ARN
+    Value: !GetAtt ALBStack.Outputs.ApplicationLoadBalancerArn
+    Export:
+      Name: !Sub '${ProjectName}-alb-arn-${Environment}'
+
+  ApplicationLoadBalancerDNS:
+    Description: ALB DNS Name
+    Value: !GetAtt ALBStack.Outputs.ApplicationLoadBalancerDNS
+    Export:
+      Name: !Sub '${ProjectName}-alb-dns-${Environment}'
+
+  TargetGroupArn:
+    Description: Target Group ARN
+    Value: !GetAtt ALBStack.Outputs.TargetGroupArn
+    Export:
+      Name: !Sub '${ProjectName}-tg-arn-${Environment}'
+
+  # IAM Outputs
+  TaskExecutionRoleArn:
+    Description: Task Execution Role ARN
+    Value: !GetAtt IAMStack.Outputs.TaskExecutionRoleArn
+    Export:
+      Name: !Sub '${ProjectName}-task-execution-role-arn-${Environment}'
+
+  TaskRoleArn:
+    Description: Task Role ARN
+    Value: !GetAtt IAMStack.Outputs.TaskRoleArn
+    Export:
+      Name: !Sub '${ProjectName}-task-role-arn-${Environment}'
+
+  SessionDataBucketName:
+    Description: S3 Bucket for Fargate Session Data and Artifacts
+    Value: !GetAtt IAMStack.Outputs.SessionDataBucketName
+    Export:
+      Name: !Sub '${ProjectName}-session-bucket-name-${Environment}'
+
+  # VPC Endpoints Outputs
+  BedrockAgentCoreDataPlaneEndpointId:
+    Description: Bedrock AgentCore Data Plane VPC Endpoint ID
+    Value: !GetAtt VPCEndpointsStack.Outputs.BedrockAgentCoreDataPlaneEndpointId
+
+  BedrockAgentCoreGatewayEndpointId:
+    Description: Bedrock AgentCore Gateway VPC Endpoint ID
+    Value: !GetAtt VPCEndpointsStack.Outputs.BedrockAgentCoreGatewayEndpointId
+
+  ECRAPIEndpointId:
+    Description: ECR API VPC Endpoint ID
+    Value: !GetAtt VPCEndpointsStack.Outputs.ECRAPIEndpointId
+
+  ECRDockerEndpointId:
+    Description: ECR Docker VPC Endpoint ID
+    Value: !GetAtt VPCEndpointsStack.Outputs.ECRDockerEndpointId
+
+  CloudWatchLogsEndpointId:
+    Description: CloudWatch Logs VPC Endpoint ID
+    Value: !GetAtt VPCEndpointsStack.Outputs.CloudWatchLogsEndpointId
+
+  S3GatewayEndpointId:
+    Description: S3 Gateway VPC Endpoint ID
+    Value: !GetAtt VPCEndpointsStack.Outputs.S3GatewayEndpointId
+
+  StackName:
+    Description: CloudFormation Stack Name
+    Value: !Ref AWS::StackName

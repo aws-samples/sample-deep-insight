@@ -19,14 +19,16 @@
 
 ## *Latest News* 🔥
 
+- **[2025/12]** Claude Code-style Skill System - dynamically discover and load specialized skills (PDF, DOCX, XLSX processing, etc.) in Strands Agents with lazy loading for optimal performance ([details](./docs/features/skill-system.md))
 - **[2025/12]** Human in the Loop (HITL) - review and steer the analysis plan before execution, giving users control over the analysis direction ([details](./docs/features/hitl-workflow.md))
+- **[2025/12]** Managed AgentCore deployment - production-ready with Bedrock AgentCore Runtime, Custom Code Interpreter (Fargate), and 100% private VPC
 - **[2025/12]** File-based code execution - significantly reduces NameError/ImportError rates compared to REPL-based approaches
 - **[2025/12]** Output token optimization with shared utils scripts - repeatedly used functions are generated once and imported, reducing redundant code generation
-- **[2025/11]** Added per-agent token tracking with detailed metrics - monitor input/output tokens and cache reads/writes for complete cost visibility and optimization
 
 <details>
 <summary>Show older updates</summary>
 
+- **[2025/11]** Added per-agent token tracking with detailed metrics - monitor input/output tokens and cache reads/writes for complete cost visibility and optimization
 - **[2025/11]** Added editable DOCX report generation - all analysis results are exportable to fully editable Word documents for easy customization and sharing
 - **[2025/10]** Released Deep Insight Workshop ([Korean](https://catalog.us-east-1.prod.workshops.aws/workshops/ee17ba6e-edc4-4921-aaf6-ca472841c49b/ko-KR) | [English](https://catalog.us-east-1.prod.workshops.aws/workshops/ee17ba6e-edc4-4921-aaf6-ca472841c49b/en-US))
 - **[2025/10]** Added support for Claude Sonnet 4.5 with extended thinking and enhanced reasoning capabilities

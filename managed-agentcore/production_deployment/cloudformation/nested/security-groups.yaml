@@ -1,0 +1,242 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Security Groups Stack - All Security Groups and Rules'
+
+Parameters:
+  Environment:
+    Type: String
+    Description: Environment name
+
+  ProjectName:
+    Type: String
+    Description: Project name for resource naming
+
+  VpcId:
+    Type: String
+    Description: VPC ID from Network Stack
+
+Resources:
+  # ============================================
+  # Security Groups (without rules to avoid circular dependencies)
+  # ============================================
+
+  # 1. AgentCore Security Group
+  AgentCoreSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub '${ProjectName}-agentcore-sg-${Environment}'
+      GroupDescription: Security group for Bedrock AgentCore Runtime
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-agentcore-sg-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+  # 2. ALB Security Group
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub '${ProjectName}-alb-sg-${Environment}'
+      GroupDescription: Security group for Internal Application Load Balancer
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-alb-sg-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+  # 3. Fargate Security Group
+  FargateSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub '${ProjectName}-fargate-sg-${Environment}'
+      GroupDescription: Security group for Fargate containers
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-fargate-sg-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+  # 4. VPC Endpoint Security Group
+  VPCEndpointSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub '${ProjectName}-vpce-sg-${Environment}'
+      GroupDescription: Security group for VPC Endpoints
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-vpce-sg-${Environment}'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+  # ============================================
+  # AgentCore Security Group Rules
+  # ============================================
+  AgentCoreSGIngressSelf:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref AgentCoreSecurityGroup
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref AgentCoreSecurityGroup
+      Description: Allow all traffic from same security group
+
+  AgentCoreSGIngressVPCE:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref AgentCoreSecurityGroup
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      SourceSecurityGroupId: !Ref VPCEndpointSecurityGroup
+      Description: Allow HTTPS from VPC Endpoints
+
+  AgentCoreSGEgressALB:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref AgentCoreSecurityGroup
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      DestinationSecurityGroupId: !Ref ALBSecurityGroup
+      Description: Allow outbound to ALB
+
+  AgentCoreSGEgressVPCE:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref AgentCoreSecurityGroup
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      DestinationSecurityGroupId: !Ref VPCEndpointSecurityGroup
+      Description: Allow outbound to VPC Endpoints
+
+  AgentCoreSGEgressAll:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref AgentCoreSecurityGroup
+      IpProtocol: -1
+      CidrIp: 0.0.0.0/0
+      Description: Allow all outbound
+
+  # ============================================
+  # ALB Security Group Rules
+  # ============================================
+  ALBSGIngressAgentCore:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref ALBSecurityGroup
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      SourceSecurityGroupId: !Ref AgentCoreSecurityGroup
+      Description: Allow HTTP from AgentCore
+
+  ALBSGEgressFargate:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref ALBSecurityGroup
+      IpProtocol: tcp
+      FromPort: 8080
+      ToPort: 8080
+      DestinationSecurityGroupId: !Ref FargateSecurityGroup
+      Description: Allow outbound to Fargate
+
+  # ============================================
+  # Fargate Security Group Rules
+  # ============================================
+  FargateSGIngressALB:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref FargateSecurityGroup
+      IpProtocol: tcp
+      FromPort: 8080
+      ToPort: 8080
+      SourceSecurityGroupId: !Ref ALBSecurityGroup
+      Description: Allow traffic from ALB
+
+  FargateSGEgressVPCE:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref FargateSecurityGroup
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      DestinationSecurityGroupId: !Ref VPCEndpointSecurityGroup
+      Description: Allow HTTPS to VPC Endpoints
+
+  FargateSGEgressAll:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref FargateSecurityGroup
+      IpProtocol: -1
+      CidrIp: 0.0.0.0/0
+      Description: Allow all outbound
+
+  # ============================================
+  # VPC Endpoint Security Group Rules
+  # ============================================
+  VPCESGIngressAgentCore:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref VPCEndpointSecurityGroup
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      SourceSecurityGroupId: !Ref AgentCoreSecurityGroup
+      Description: Allow HTTPS from AgentCore
+
+  VPCESGIngressFargate:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref VPCEndpointSecurityGroup
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      SourceSecurityGroupId: !Ref FargateSecurityGroup
+      Description: Allow HTTPS from Fargate
+
+  VPCESGEgressAll:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref VPCEndpointSecurityGroup
+      IpProtocol: -1
+      CidrIp: 0.0.0.0/0
+      Description: Allow all outbound
+
+# ============================================
+# Outputs
+# ============================================
+Outputs:
+  AgentCoreSecurityGroupId:
+    Description: AgentCore Security Group ID
+    Value: !Ref AgentCoreSecurityGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-AgentCoreSecurityGroupId'
+
+  ALBSecurityGroupId:
+    Description: ALB Security Group ID
+    Value: !Ref ALBSecurityGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-ALBSecurityGroupId'
+
+  FargateSecurityGroupId:
+    Description: Fargate Security Group ID
+    Value: !Ref FargateSecurityGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-FargateSecurityGroupId'
+
+  VPCEndpointSecurityGroupId:
+    Description: VPC Endpoint Security Group ID
+    Value: !Ref VPCEndpointSecurityGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-VPCEndpointSecurityGroupId'

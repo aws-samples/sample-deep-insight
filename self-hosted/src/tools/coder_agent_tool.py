@@ -9,10 +9,12 @@ from dotenv import load_dotenv
 from src.utils.strands_sdk_utils import strands_utils
 from src.prompts.template import apply_prompt_template
 from src.utils.common_utils import get_message_from_string
+from src.tools import skill_tool
 from src.tools.bash_tool import bash_tool
 from src.tools.write_and_execute_tool import write_and_execute_tool
 from strands_tools import file_read
 from src.utils.strands_sdk_utils import TokenTracker
+from src.utils.skills.skill_utils import initialize_skills
 
 load_dotenv()
 
@@ -80,15 +82,22 @@ def _handle_coder_agent_tool(task: Annotated[str, "The coding task or question t
     request_prompt, full_plan = shared_state.get("request_prompt", ""), shared_state.get("full_plan", "")
     clues, messages = shared_state.get("clues", ""), shared_state.get("messages", [])
 
+
+    # 스킬 시스템 초기화 (디스커버리 + 로더 + 툴 설정)
+    _, skill_prompt = initialize_skills(
+        skill_dirs=["./skills"],
+        verbose=True # If True, You can see tha available skills
+    )
+    
     # Create coder agent with specialized tools using consistent pattern
     coder_agent = strands_utils.get_agent(
         agent_name="coder",
-        system_prompts=apply_prompt_template(prompt_name="coder", prompt_context={"USER_REQUEST": request_prompt, "FULL_PLAN": full_plan}),
+        system_prompts=apply_prompt_template(prompt_name="coder", prompt_context={"USER_REQUEST": request_prompt, "FULL_PLAN": full_plan}) + skill_prompt,
         model_id=os.getenv("CODER_MODEL_ID", os.getenv("DEFAULT_MODEL_ID")),
         enable_reasoning=False,
         prompt_cache_info=(True, "default"),  # reasoning agent uses prompt caching
         tool_cache=True,
-        tools=[write_and_execute_tool, bash_tool, file_read],
+        tools=[skill_tool, write_and_execute_tool, bash_tool, file_read],
         streaming=True  # Enable streaming for consistency
     )
 
