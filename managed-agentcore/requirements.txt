@@ -13,7 +13,7 @@ bedrock-agentcore>=1.0.6
 bedrock-agentcore-starter-toolkit>=0.1.33
 
 # MCP and utilities
-mcp==1.21.0
+mcp==1.23.0
 streamlit==1.51.0
 requests-toolbelt==1.0.0
 sagemaker==2.254.1
