@@ -25,7 +25,7 @@ dependencies = [
     "seaborn==0.13.2",
     "python-dotenv==1.2.1",
     "langchain==1.1.0",
-    "weasyprint==66.0",
+    "weasyprint==68.0",
     "python-docx==1.2.0",
     "scikit-learn==1.7.2",
     "numpy>=1.26.4",
