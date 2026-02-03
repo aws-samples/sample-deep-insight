@@ -16,7 +16,7 @@ bedrock-agentcore-starter-toolkit>=0.1.33
 mcp==1.23.0
 streamlit==1.51.0
 requests-toolbelt==1.0.0
-sagemaker==2.254.1
+sagemaker==2.256.0
 awscli==1.42.75
 termcolor==3.2.0
 
