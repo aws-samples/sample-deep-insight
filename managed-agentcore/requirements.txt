@@ -4,7 +4,7 @@
 # Core packages
 ipykernel==7.1.0
 jupyter==1.1.1
-boto3==1.40.75
+boto3==1.42.7
 
 # Strands SDK and AgentCore
 strands-agents==1.17.0
@@ -17,7 +17,7 @@ mcp==1.23.0
 streamlit==1.51.0
 requests-toolbelt==1.0.0
 sagemaker==2.256.0
-awscli==1.42.75
+awscli>=1.44.0
 termcolor==3.2.0
 
 # Observability
