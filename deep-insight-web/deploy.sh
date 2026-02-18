@@ -194,7 +194,7 @@ else
         echo "Docker buildx installed: $(docker buildx version)"
     fi
     # Set up QEMU for cross-platform emulation (run amd64 binaries on arm64)
-    docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    docker run --privileged --rm tonistiigi/binfmt --install amd64
     docker buildx build --no-cache --platform linux/amd64 -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
 fi
 
