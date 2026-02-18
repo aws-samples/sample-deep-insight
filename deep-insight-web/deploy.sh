@@ -178,7 +178,9 @@ echo "ECR: ${ECR_URI}"
 # ---------- Step 2: Docker Build + Push ----------
 
 echo "=== Step 2: Docker Build + Push ==="
-DOCKER_BUILDKIT=1 docker build --platform linux/amd64 -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
+# On arm64 hosts (e.g., Mac M1/M2), install Docker buildx and use:
+#   docker buildx build --platform linux/amd64 -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
+docker build -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
 
 aws ecr get-login-password --region "$REGION" \
     | docker login --username AWS --password-stdin "${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com"
