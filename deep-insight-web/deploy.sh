@@ -27,7 +27,7 @@ set -e
 export AWS_PAGER=""
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ENV_FILE="$(cd "$SCRIPT_DIR/../../../managed-agentcore" && pwd)/.env"
+ENV_FILE="$(cd "$SCRIPT_DIR/../managed-agentcore" && pwd)/.env"
 
 if [ ! -f "$ENV_FILE" ]; then
     echo "ERROR: $ENV_FILE not found. Deploy managed-agentcore first."

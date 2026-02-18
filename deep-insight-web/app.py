@@ -25,7 +25,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 try:
-    _env_path = Path(__file__).resolve().parents[3] / "managed-agentcore" / ".env"
+    _env_path = Path(__file__).resolve().parents[1] / "managed-agentcore" / ".env"
     if _env_path.exists():
         load_dotenv(_env_path)
 except (IndexError, OSError):
