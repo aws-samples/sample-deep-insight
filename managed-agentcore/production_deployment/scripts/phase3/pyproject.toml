@@ -15,4 +15,7 @@ dependencies = [
     "ipykernel>=7.1.0",
     "jupyter>=1.1.1",
     "langchain-core>=0.3.0",
+    "fastapi>=0.129.0",
+    "uvicorn>=0.38.0",
+    "python-multipart>=0.0.20",
 ]

@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Insight</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0d0f13;
+            --bg-surface: #161921;
+            --bg-card: #1c2029;
+            --bg-elevated: #232833;
+            --border: #2a2f3a;
+            --border-hover: #3d445a;
+            --text-primary: #e8eaf0;
+            --text-secondary: #b0b8ce;
+            --text-muted: #7f88a0;
+            --accent: #4a7cff;
+            --accent-glow: rgba(74, 124, 255, 0.15);
+            --accent-hover: #6190ff;
+            --green: #34d399;
+            --green-bg: rgba(52, 211, 153, 0.1);
+            --green-border: rgba(52, 211, 153, 0.25);
+            --red: #f87171;
+            --amber: #fbbf24;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --radius-xs: 6px;
+            --font-display: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-display);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== Top Bar ===== */
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            padding: 1rem 2rem;
+        }
+        .lang-area { display: flex; align-items: center; gap: 0.5rem; }
+        .lang-label { color: var(--text-muted); font-size: 0.8rem; font-weight: 500; }
+        .lang-toggle {
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            padding: 0.35rem 0.9rem;
+            font-size: 0.8rem;
+            font-family: var(--font-display);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lang-toggle:hover { color: var(--text-primary); border-color: var(--border-hover); background: var(--bg-card); }
+
+        /* ===== Hero Section ===== */
+        .hero {
+            text-align: center;
+            padding: 3rem 1rem 2.5rem;
+            position: relative;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            height: 400px;
+            background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .hero-logo-wrap {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 0.8rem;
+        }
+        .hero-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 18px;
+            box-shadow: 0 6px 30px rgba(74, 124, 255, 0.4), 0 0 60px rgba(74, 124, 255, 0.15);
+        }
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #e8eaf0 30%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-tagline {
+            position: relative;
+            z-index: 1;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            line-height: 1.7;
+        }
+        .hero-tagline .highlight {
+            color: #c084fc;
+            font-weight: 600;
+        }
+        .hero-subtitle {
+            position: relative;
+            z-index: 1;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 400;
+            margin-top: 0.4rem;
+            letter-spacing: 0.01em;
+        }
+
+        /* ===== Main ===== */
+        main {
+            flex: 1;
+            max-width: 780px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 1rem 3rem;
+        }
+
+        /* ===== Card ===== */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.8rem;
+            margin-bottom: 1.2rem;
+            transition: border-color 0.2s;
+        }
+        .card:hover { border-color: var(--border-hover); }
+        .card h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 1rem;
+        }
+
+        /* ===== Guide ===== */
+        .guide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .guide-header h2 { margin-bottom: 0; }
+        .guide-arrow {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            transition: transform 0.25s;
+        }
+        .guide-arrow.collapsed { transform: rotate(-90deg); }
+        .guide-body { margin-top: 1.2rem; }
+        .guide-steps {
+            padding-left: 1.3rem;
+            line-height: 2;
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+        }
+        .guide-steps li { padding-left: 0.3rem; }
+        .guide-steps li::marker { color: var(--accent); font-weight: 600; }
+        .guide-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 1.2rem 0;
+        }
+
+        /* ===== Sample Data ===== */
+        .sample-data-section h3 {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .sample-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin: 0.2rem 0.4rem 0.2rem 0;
+            padding: 0.4rem 0.9rem;
+            background: var(--bg-elevated);
+            color: var(--accent);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .sample-link:hover {
+            background: var(--accent-glow);
+            border-color: var(--accent);
+        }
+        .sample-link::before {
+            content: '↓';
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+
+        /* ===== Upload ===== */
+        .field { margin-bottom: 1.2rem; }
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+            font-size: 0.92rem;
+            color: var(--text-primary);
+        }
+        label .req { color: var(--red); margin-left: 0.2rem; }
+        .field small { color: var(--text-muted); font-size: 0.8rem; }
+
+        /* Drag & drop zone */
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-sm);
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            background: var(--bg-surface);
+            position: relative;
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+        .drop-zone-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.5;
+        }
+        .drop-zone-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .drop-zone-text .browse {
+            color: var(--accent);
+            font-weight: 600;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .drop-zone-hint {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            margin-top: 0.4rem;
+        }
+        .drop-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .file-selected {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 0.6rem;
+            padding: 0.35rem 0.8rem;
+            background: var(--green-bg);
+            border: 1px solid var(--green-border);
+            border-radius: var(--radius-xs);
+            color: var(--green);
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+        .file-selected .remove-file {
+            cursor: pointer;
+            opacity: 0.6;
+            margin-left: 0.3rem;
+        }
+        .file-selected .remove-file:hover { opacity: 1; }
+
+        /* Column def file input */
+        .coldef-input {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .coldef-input input[type="file"] { color: var(--text-secondary); font-size: 0.85rem; }
+
+        /* ===== Buttons ===== */
+        .btn {
+            font-family: var(--font-display);
+            font-weight: 600;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.7rem 1.8rem;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 2px 12px rgba(74, 124, 255, 0.25);
+        }
+        .btn-primary:hover { background: var(--accent-hover); box-shadow: 0 4px 20px rgba(74, 124, 255, 0.35); }
+        .btn-primary:disabled { background: var(--bg-elevated); color: var(--text-muted); box-shadow: none; cursor: not-allowed; }
+        .btn-green { background: var(--green); color: #0d0f13; }
+        .btn-green:hover { background: #5ee3b4; }
+        .btn-red { background: var(--red); color: #fff; }
+        .btn-red:hover { background: #fca5a5; }
+
+        #status {
+            margin-top: 0.8rem;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        /* ===== Analyze Section (progressive disclosure) ===== */
+        .analyze-card {
+            border-color: var(--accent);
+            border-width: 1px;
+            animation: slideUp 0.4s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Prompt textarea */
+        textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            resize: vertical;
+            line-height: 1.6;
+            transition: border-color 0.2s;
+        }
+        textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        textarea::placeholder { color: var(--text-muted); }
+
+        /* ===== Prompt Examples (chips under textarea) ===== */
+        .prompt-examples-area {
+            margin-top: 0.8rem;
+        }
+        .prompt-examples-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .prompt-examples-label::before {
+            content: '💡';
+            font-size: 0.85rem;
+        }
+        .prompt-chip {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.6rem 0.9rem;
+            margin-bottom: 0.4rem;
+            color: var(--text-secondary);
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            line-height: 1.5;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .prompt-chip:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            color: var(--text-primary);
+        }
+        .prompt-tag {
+            display: inline-block;
+            font-size: 0.68rem;
+            padding: 0.12rem 0.45rem;
+            border-radius: 4px;
+            margin-right: 0.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            vertical-align: middle;
+        }
+        .tag-simple { background: rgba(52, 211, 153, 0.15); color: var(--green); border: 1px solid var(--green-border); }
+        .tag-detailed { background: rgba(74, 124, 255, 0.12); color: var(--accent); border: 1px solid rgba(74, 124, 255, 0.25); }
+
+        /* Analyze button row */
+        .analyze-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        /* ===== Output ===== */
+        #output {
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+        .event-reasoning { color: var(--text-muted); }
+        .event-text { color: var(--text-primary); }
+        .event-error { color: var(--red); }
+        .event-done { color: var(--green); font-weight: 600; }
+
+        .section-note {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+        .callout {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            padding: 0.7rem 1rem;
+            border-radius: var(--radius-xs);
+            font-size: 0.82rem;
+            line-height: 1.5;
+            margin-bottom: 0.8rem;
+        }
+        .callout-icon { flex-shrink: 0; font-size: 0.95rem; margin-top: 0.05rem; }
+        .callout-amber {
+            background: rgba(251, 191, 36, 0.08);
+            border-left: 3px solid var(--amber);
+            color: var(--text-secondary);
+        }
+        .callout-blue {
+            background: rgba(74, 124, 255, 0.08);
+            border-left: 3px solid var(--accent);
+            color: var(--text-secondary);
+        }
+
+        .output-info {
+            background: rgba(74, 124, 255, 0.08);
+            border: 1px solid rgba(74, 124, 255, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 0.7rem 1rem;
+            margin-bottom: 0.8rem;
+            color: var(--accent);
+            font-size: 0.85rem;
+            line-height: 1.5;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .output-info .elapsed-timer { color: var(--text-muted); }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .pulse-dot {
+            width: 8px; height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            flex-shrink: 0;
+            animation: pulse-dot 1.5s ease-in-out infinite;
+        }
+
+        /* ===== Modal ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 16px 60px rgba(0,0,0,0.5);
+        }
+        .modal-header {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 { font-size: 1.05rem; font-weight: 600; }
+        .modal-header .meta { color: var(--text-muted); font-size: 0.82rem; }
+        .modal-guide {
+            padding: 1rem 1.5rem 0.5rem;
+        }
+        .modal-guide-text {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+        .modal-guide-option {
+            font-size: 0.84rem;
+            line-height: 1.7;
+            padding-left: 0.2rem;
+        }
+        .modal-guide-option .opt-approve { color: var(--green); font-weight: 600; }
+        .modal-guide-option .opt-revise { color: var(--amber); font-weight: 600; }
+        .modal-guide-examples {
+            margin-top: 0.5rem;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .modal-body { padding: 1.2rem 1.5rem; overflow-y: auto; flex: 1; }
+        #plan-text {
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            white-space: pre-wrap;
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+        .modal-actions {
+            padding: 1.2rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        .action-zone {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.2rem;
+            transition: border-color 0.2s;
+        }
+        .action-zone-approve {
+            background: rgba(52, 211, 153, 0.04);
+            border-color: var(--green-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .action-zone-approve:hover { border-color: var(--green); }
+        .zone-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .zone-label .zone-icon { font-size: 1rem; }
+        .action-zone-revise {
+            background: rgba(251, 191, 36, 0.03);
+            border-color: rgba(251, 191, 36, 0.15);
+        }
+        .action-zone-revise:hover { border-color: var(--amber); }
+        .revise-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.7rem;
+        }
+        #feedback-input {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            font-family: var(--font-display);
+            font-size: 0.88rem;
+            transition: border-color 0.2s;
+        }
+        #feedback-input::placeholder { color: var(--text-muted); }
+        #feedback-input:focus { outline: none; border-color: var(--amber); box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1); }
+        .revise-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 0.6rem;
+        }
+        .btn-amber { background: var(--amber); color: #0d0f13; font-weight: 700; }
+        .btn-amber:hover { background: #fcd34d; }
+        .btn-amber:disabled { background: var(--bg-elevated); color: var(--text-muted); cursor: not-allowed; }
+
+        /* ===== Reports ===== */
+        .report-group { margin-bottom: 1rem; }
+        .report-group:last-child { margin-bottom: 0; }
+        .report-group-title { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+        .report-item {
+            display: flex;
+            align-items: center;
+            padding: 0.55rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .report-item:last-child { border-bottom: none; }
+        .ext-badge {
+            display: inline-block;
+            padding: 0.15rem 0.55rem;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-right: 0.7rem;
+            min-width: 3rem;
+            text-align: center;
+            letter-spacing: 0.03em;
+        }
+        .ext-docx { background: rgba(74, 124, 255, 0.15); color: var(--accent); }
+        .ext-pdf { background: rgba(248, 113, 113, 0.15); color: var(--red); }
+        .ext-txt { background: rgba(156, 163, 184, 0.15); color: var(--text-secondary); }
+        .ext-img { background: rgba(52, 211, 153, 0.15); color: var(--green); }
+        .report-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+        .report-link:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+        /* ===== Footer ===== */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 1.2rem 2rem;
+            text-align: center;
+        }
+        .footer-links { display: flex; justify-content: center; gap: 0.8rem; margin-bottom: 0.5rem; }
+        .footer-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--text-secondary);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            padding: 0.35rem 0.9rem;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .footer-link:hover { border-color: var(--accent); color: var(--accent); }
+        .footer-link svg { width: 14px; height: 14px; fill: currentColor; }
+        .footer-version { color: var(--text-muted); font-size: 0.75rem; }
+
+        /* ===== Utility ===== */
+        .hidden { display: none !important; }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 600px) {
+            .hero-title { font-size: 2rem; }
+            .hero-logo { width: 60px; height: 60px; }
+            .card { padding: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top bar (language only) -->
+    <div class="top-bar">
+        <div class="lang-area">
+            <span class="lang-label">Language</span>
+            <button class="lang-toggle" id="lang-toggle" onclick="toggleLanguage()">EN</button>
+        </div>
+    </div>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-logo-wrap">
+            <img src="/static/logo.png" alt="Logo" class="hero-logo">
+            <h1 class="hero-title">Deep Insight</h1>
+        </div>
+        <p class="hero-tagline"><span data-i18n="hero_tagline_prefix">리포팅 등의 다양한 에이전트 응용 개발 위한 </span><span class="highlight" data-i18n="hero_tagline_highlight">커스텀 에이전트 구축 플랫폼</span></p>
+        <p class="hero-subtitle" data-i18n="hero_subtitle">Built on Strands Agent &amp; Amazon Bedrock AgentCore</p>
+    </section>
+
+    <main>
+        <!-- Guide -->
+        <div class="card" id="guide-card">
+            <div class="guide-header" onclick="toggleGuide()">
+                <h2 data-i18n="guide_title">사용 가이드</h2>
+                <span class="guide-arrow" id="guide-arrow">▾</span>
+            </div>
+            <div class="guide-body" id="guide-body">
+                <ol class="guide-steps">
+                    <li data-i18n="guide_step1">데이터 파일(CSV, Excel 등)과 컬럼 정의 파일(선택)을 업로드합니다</li>
+                    <li data-i18n="guide_step2">분석 프롬프트를 입력합니다</li>
+                    <li data-i18n="guide_step3">분석 계획이 표시되면 승인하거나 수정을 요청합니다</li>
+                    <li data-i18n="guide_step4">에이전트가 분석을 완료할 때까지 기다립니다 (수 분 소요)</li>
+                    <li data-i18n="guide_step5">Reports 섹션에서 생성된 보고서를 다운로드합니다</li>
+                </ol>
+                <div class="callout callout-amber" style="margin-top:0.8rem">
+                    <span class="callout-icon">⏱</span>
+                    <span data-i18n="guide_time_note">보고서 생성은 15분 이상 소요될 수 있습니다. 샘플 데이터의 경우 약 15분 정도 걸립니다.</span>
+                </div>
+                <hr class="guide-divider">
+                <div class="sample-data-section">
+                    <h3 data-i18n="sample_title">샘플 데이터</h3>
+                    <div class="callout callout-blue">
+                        <span class="callout-icon">💡</span>
+                        <span data-i18n="sample_hint">데이터가 없거나 테스트 실행을 원하면 아래 샘플 CSV 파일과 컬럼 정의 JSON 파일을 다운로드한 후 업로드하세요</span>
+                    </div>
+                    <div id="sample-data-links"><span style="color:var(--text-muted)" data-i18n="sample_loading">로딩 중...</span></div>
+                </div>
+                <hr class="guide-divider">
+                <div class="sample-data-section">
+                    <h3 data-i18n="sample_reports_title">샘플 보고서</h3>
+                    <div class="callout callout-blue" style="margin-bottom:0.6rem">
+                        <span class="callout-icon">📄</span>
+                        <span data-i18n="sample_reports_hint">위 샘플 데이터로 생성된 보고서 예시입니다. 분석 결과물이 어떤 형태인지 미리 확인해보세요.</span>
+                    </div>
+                    <div id="sample-reports-links"><span style="color:var(--text-muted)" data-i18n="sample_loading">로딩 중...</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload -->
+        <div class="card" id="upload-card">
+            <h2 data-i18n="upload_title">데이터 업로드</h2>
+            <form id="upload-form">
+                <div class="field">
+                    <label for="data-file"><span data-i18n="upload_data_label">데이터 파일</span><span class="req">*</span></label>
+                    <div class="drop-zone" id="drop-zone">
+                        <input type="file" id="data-file" accept=".csv,.xlsx,.xls,.tsv,.txt,.json" required>
+                        <div class="drop-zone-icon">📂</div>
+                        <div class="drop-zone-text">
+                            <span data-i18n="drop_text">파일을 여기에 끌어다 놓거나 </span><span class="browse" data-i18n="drop_browse">클릭하여 선택</span>
+                        </div>
+                        <div class="drop-zone-hint" data-i18n="upload_data_hint">CSV, Excel, TSV, TXT, JSON</div>
+                    </div>
+                    <div id="selected-file" class="hidden"></div>
+                </div>
+                <div class="field">
+                    <label for="col-def" data-i18n="upload_coldef_label">컬럼 정의 (선택사항)</label>
+                    <div class="coldef-input">
+                        <input type="file" id="col-def" accept=".json">
+                        <small data-i18n="upload_coldef_hint">컬럼 타입과 의미를 설명하는 JSON 파일</small>
+                    </div>
+                </div>
+                <button type="submit" id="upload-btn" class="btn btn-primary" data-i18n="upload_btn">업로드</button>
+            </form>
+            <div id="status"></div>
+        </div>
+
+        <!-- Analyze (shown after upload) -->
+        <div id="analyze-section" class="card analyze-card hidden">
+            <h2 data-i18n="analyze_title">분석</h2>
+            <div class="field">
+                <label for="query" data-i18n="analyze_query_label">프롬프트</label>
+                <textarea id="query" rows="3" data-i18n-placeholder="analyze_placeholder"></textarea>
+            </div>
+            <!-- Prompt examples (repositioned here) -->
+            <div class="prompt-examples-area">
+                <div class="prompt-examples-label" data-i18n="prompt_examples_label">예시를 클릭하면 자동 입력됩니다</div>
+                <div id="prompt-examples"></div>
+            </div>
+            <div class="analyze-row">
+                <button id="analyze-btn" class="btn btn-primary" disabled data-i18n="analyze_btn">🔍 분석 시작</button>
+            </div>
+        </div>
+
+        <!-- Output -->
+        <div id="output-section" class="card hidden">
+            <h2 data-i18n="output_title">출력</h2>
+            <div class="callout callout-amber">
+                <span class="callout-icon">⏱</span>
+                <span data-i18n-html="output_note">스트리밍 출력은 5분 이상 소요될 수 있습니다. <strong>Tool calling → Coder</strong> 표시 후 다음 스트리밍까지 <strong>약 2분 이내</strong> 걸립니다.</span>
+            </div>
+            <div id="output-info" class="output-info">
+                <span class="pulse-dot"></span>
+                <span data-i18n="output_waiting">분석 중... 스트림이 연결되면 출력이 표시됩니다. 데이터 크기와 프롬프트에 따라 약 15분 정도 소요될 수 있습니다.</span>
+                <span class="elapsed-timer" id="elapsed-timer"></span>
+            </div>
+            <div id="output"></div>
+        </div>
+
+        <!-- Reports -->
+        <div id="download-section" class="card hidden">
+            <h2 data-i18n="reports_title">보고서</h2>
+            <p class="section-note" data-i18n="reports_note">브라우저 우측 상단에 보안되지 않은 다운로드 경고가 표시되면 허용 버튼을 클릭하세요 (HTTP 연결)</p>
+            <div id="download-list"></div>
+        </div>
+    </main>
+
+    <!-- Plan review modal -->
+    <div id="plan-modal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 data-i18n="modal_title">분석 계획 검토</h3>
+                <span class="meta">
+                    <span data-i18n="modal_revision">수정 횟수</span>: <span id="modal-revision">1</span>/<span id="modal-max">10</span>
+                    &mdash; <span data-i18n="modal_timeout">남은 시간</span>: <span id="modal-countdown">300</span>s
+                </span>
+            </div>
+            <div class="modal-guide">
+                <p class="modal-guide-text" data-i18n="modal_guide_desc">아래 분석 계획을 검토한 후 승인 또는 수정 요청을 선택하세요.</p>
+                <div class="modal-guide-option">
+                    <span class="opt-approve" data-i18n="modal_guide_approve">✓ 승인</span> — <span data-i18n="modal_guide_approve_desc">이 계획대로 분석을 시작합니다</span>
+                </div>
+                <div class="modal-guide-option">
+                    <span class="opt-revise" data-i18n="modal_guide_revise">✎ 수정 요청</span> — <span data-i18n="modal_guide_revise_desc">피드백을 입력하면 계획이 수정됩니다 (최대 10회)</span>
+                </div>
+                <div class="modal-guide-examples" data-i18n="modal_guide_examples">예: "주간 매출 추이를 추가해줘", "매출 건수 차트는 삭제해줘", "시계열 차트를 추가해줘"</div>
+            </div>
+            <div class="modal-body">
+                <div id="plan-text"></div>
+            </div>
+            <div class="modal-actions">
+                <div class="action-zone action-zone-approve">
+                    <span class="zone-label">
+                        <span class="zone-icon">✓</span>
+                        <span data-i18n="modal_zone_approve">이 계획대로 진행</span>
+                    </span>
+                    <button class="btn btn-green" id="approve-btn" data-i18n="modal_approve">승인</button>
+                </div>
+                <div class="action-zone action-zone-revise">
+                    <div class="revise-header">
+                        <span class="zone-label">
+                            <span class="zone-icon">✎</span>
+                            <span data-i18n="modal_zone_revise">수정 요청</span>
+                        </span>
+                    </div>
+                    <input type="text" id="feedback-input" data-i18n-placeholder="modal_feedback_placeholder">
+                    <div class="revise-footer">
+                        <button class="btn btn-amber" id="reject-btn" disabled data-i18n="modal_revise_btn">수정 요청</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <a class="footer-link" href="https://github.com/aws-samples/sample-deep-insight" target="_blank">
+                <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                GitHub
+            </a>
+        </div>
+        <div class="footer-version">Deep Insight v1.2.0</div>
+    </footer>
+
+    <script>
+        // ==================== i18n ====================
+        const translations = {
+            ko: {
+                hero_tagline_prefix: "리포팅 등의 다양한 에이전트 응용 개발 위한 ",
+                hero_tagline_highlight: "커스텀 에이전트 구축 플랫폼",
+                hero_subtitle: "Built on Strands Agent & Amazon Bedrock AgentCore",
+                guide_title: "사용 가이드",
+                guide_step1: "데이터 파일(CSV, Excel 등)과 컬럼 정의 파일(선택)을 업로드합니다",
+                guide_step2: "분석 프롬프트를 입력합니다",
+                guide_step3: "분석 계획이 표시되면 승인하거나 수정을 요청합니다",
+                guide_step4: "에이전트가 분석을 완료할 때까지 기다립니다 (수 분 소요)",
+                guide_step5: "Reports 섹션에서 생성된 보고서를 다운로드합니다",
+                guide_time_note: "보고서 생성은 15분 이상 소요될 수 있습니다. 샘플 데이터의 경우 약 15분 정도 걸립니다.",
+                prompt_examples_label: "예시를 클릭하면 자동 입력됩니다",
+                prompt_tag_simple: "간단",
+                prompt_tag_detailed: "상세",
+                prompt_simple_1: "데이터의 핵심 지표를 요약해줘",
+                prompt_simple_2: "총 매출액을 계산해줘. 결과를 DOCX로 저장해줘",
+                prompt_detailed_1: "데이터에서 비즈니스 성장 기회를 발굴해줘: 숨겨진 고객 패턴과 세그먼트를 발견하고, 수익 최적화 방안을 제시하며, 마케팅과 운영 효율성을 높일 수 있는 개선점을 찾고, 다음 달 매출을 크게 늘릴 수 있는 실행 가능한 전략 3가지를 우선순위와 기대 효과를 포함해서 제안해줘. 결과는 DOCX로 저장해줘",
+                sample_title: "샘플 데이터",
+                sample_hint: "데이터가 없거나 테스트 실행을 원하면 아래 샘플 CSV 파일과 컬럼 정의 JSON 파일을 다운로드한 후 업로드하세요",
+                sample_loading: "로딩 중...",
+                sample_none: "사용 가능한 샘플 데이터가 없습니다",
+                sample_reports_title: "샘플 보고서",
+                sample_reports_hint: "위 샘플 데이터로 생성된 보고서 예시입니다. 분석 결과물이 어떤 형태인지 미리 확인해보세요.",
+                sample_reports_none: "사용 가능한 샘플 보고서가 없습니다",
+                upload_title: "데이터 업로드",
+                upload_data_label: "데이터 파일",
+                upload_data_hint: "CSV, Excel, TSV, TXT, JSON",
+                upload_coldef_label: "컬럼 정의 (선택사항)",
+                upload_coldef_hint: "컬럼 타입과 의미를 설명하는 JSON 파일",
+                upload_btn: "업로드",
+                drop_text: "파일을 여기에 끌어다 놓거나 ",
+                drop_browse: "클릭하여 선택",
+                file_selected: "선택됨: ",
+                analyze_title: "분석",
+                analyze_query_label: "프롬프트",
+                analyze_placeholder: "예: 매출 트렌드를 분석하고 보고서를 만들어주세요",
+                analyze_btn: "🔍 분석 시작",
+                output_title: "출력",
+                output_note: "스트리밍 출력은 5분 이상 소요될 수 있습니다. <strong>Tool calling → Coder</strong> 표시 후 다음 스트리밍까지 <strong>약 2분 이내</strong> 걸립니다.",
+                output_waiting: "분석 중... 스트림이 연결되면 출력이 표시됩니다. 데이터 크기와 프롬프트에 따라 약 15분 정도 소요될 수 있습니다.",
+                reports_title: "보고서",
+                reports_note: "브라우저 우측 상단에 보안되지 않은 다운로드 경고가 표시되면 허용 버튼을 클릭하세요 (HTTP 연결)",
+                modal_title: "분석 계획 검토",
+                modal_guide_desc: "아래 분석 계획을 검토한 후 승인 또는 수정 요청을 선택하세요.",
+                modal_guide_approve: "✓ 승인",
+                modal_guide_approve_desc: "이 계획대로 분석을 시작합니다",
+                modal_guide_revise: "✎ 수정 요청",
+                modal_guide_revise_desc: "피드백을 입력하면 계획이 수정됩니다 (최대 10회)",
+                modal_guide_examples: "예: \"주간 매출 추이를 추가해줘\", \"매출 건수 차트는 삭제해줘\", \"시계열 차트를 추가해줘\"",
+                modal_revision: "수정 횟수",
+                modal_timeout: "남은 시간",
+                modal_zone_approve: "이 계획대로 진행",
+                modal_zone_revise: "수정 요청",
+                modal_feedback_placeholder: "수정할 내용을 입력하세요...",
+                modal_approve: "승인",
+                modal_revise_btn: "수정 요청",
+                report_group_documents: "문서",
+                report_group_text: "텍스트",
+                report_group_images: "이미지",
+                status_uploading: "업로드 중...",
+                status_upload_complete: "✓ 업로드 완료. Upload ID: ",
+                status_upload_failed: "업로드 실패: ",
+            },
+            en: {
+                hero_tagline_prefix: "A platform for building diverse agent applications including reporting — ",
+                hero_tagline_highlight: "Custom Agent Builder",
+                hero_subtitle: "Built on Strands Agent & Amazon Bedrock AgentCore",
+                guide_title: "QUICK START GUIDE",
+                guide_step1: "Upload your data file (CSV, Excel, etc.) and optional column definitions",
+                guide_step2: "Enter an analysis prompt describing what you want to analyze",
+                guide_step3: "Review the analysis plan when prompted and approve or request changes",
+                guide_step4: "Wait for the agents to complete the analysis (may take several minutes)",
+                guide_step5: "Download the generated reports from the Reports section",
+                guide_time_note: "Report generation may take more than 15 minutes. For the sample data, it takes approximately 15 minutes.",
+                prompt_examples_label: "Click an example to auto-fill",
+                prompt_tag_simple: "Simple",
+                prompt_tag_detailed: "Detailed",
+                prompt_simple_1: "Summarize key metrics from the data",
+                prompt_simple_2: "Calculate total sales. Save the result as DOCX",
+                prompt_detailed_1: "Discover business growth opportunities from the data: find hidden customer patterns and segments, suggest revenue optimization strategies, identify improvements for marketing and operational efficiency, and propose 3 actionable strategies to significantly increase next month's sales with priorities and expected impact. Save the result as DOCX",
+                sample_title: "SAMPLE DATA",
+                sample_hint: "If you don't have data prepared or want to try a test run, download the sample CSV and column definition JSON files below, then upload them",
+                sample_loading: "Loading...",
+                sample_none: "No sample data available",
+                sample_reports_title: "SAMPLE REPORTS",
+                sample_reports_hint: "Example reports generated from the sample data above. Preview what analysis results look like.",
+                sample_reports_none: "No sample reports available",
+                upload_title: "UPLOAD DATA",
+                upload_data_label: "Data file",
+                upload_data_hint: "CSV, Excel, TSV, TXT, or JSON",
+                upload_coldef_label: "Column definitions (optional)",
+                upload_coldef_hint: "JSON file describing column types and meanings",
+                upload_btn: "Upload",
+                drop_text: "Drag & drop your file here or ",
+                drop_browse: "click to browse",
+                file_selected: "Selected: ",
+                analyze_title: "ANALYZE",
+                analyze_query_label: "Prompt",
+                analyze_placeholder: "e.g. Analyze sales trends and generate a report",
+                analyze_btn: "🔍 Analyze",
+                output_title: "OUTPUT",
+                output_note: "Streaming output may take more than 5 minutes. After <strong>Tool calling → Coder</strong> appears, the next streaming output takes <strong>under 2 minutes</strong>.",
+                output_waiting: "Analyzing... Output will appear once the stream is available. This may take about 15 minutes depending on data size and prompt complexity.",
+                reports_title: "REPORTS",
+                reports_note: "If you see an insecure download warning in your browser, click Allow to proceed (HTTP connection)",
+                modal_title: "Plan Review",
+                modal_guide_desc: "Review the analysis plan below, then choose to approve or request revisions.",
+                modal_guide_approve: "✓ Approve",
+                modal_guide_approve_desc: "Start analysis with this plan",
+                modal_guide_revise: "✎ Request Revision",
+                modal_guide_revise_desc: "Enter feedback to revise the plan (up to 10 times)",
+                modal_guide_examples: "e.g. \"Add weekly sales trend\", \"Remove sales count chart\", \"Add time-series chart\"",
+                modal_revision: "Revisions",
+                modal_timeout: "Time left",
+                modal_zone_approve: "Proceed with this plan",
+                modal_zone_revise: "Request Revision",
+                modal_feedback_placeholder: "Enter what you'd like to change...",
+                modal_approve: "Approve",
+                modal_revise_btn: "Request Revision",
+                report_group_documents: "Documents",
+                report_group_text: "Text",
+                report_group_images: "Images",
+                status_uploading: "Uploading...",
+                status_upload_complete: "✓ Upload complete. Upload ID: ",
+                status_upload_failed: "Upload failed: ",
+            }
+        };
+
+        let currentLang = "ko";
+
+        function toggleLanguage() {
+            currentLang = currentLang === "ko" ? "en" : "ko";
+            applyLanguage();
+        }
+
+        function applyLanguage() {
+            const t = translations[currentLang];
+            document.getElementById("lang-toggle").textContent = currentLang === "ko" ? "EN" : "KR";
+            document.querySelectorAll("[data-i18n]").forEach(el => {
+                const key = el.getAttribute("data-i18n");
+                if (t[key] !== undefined) el.textContent = t[key];
+            });
+            document.querySelectorAll("[data-i18n-html]").forEach(el => {
+                const key = el.getAttribute("data-i18n-html");
+                if (t[key] !== undefined) el.innerHTML = t[key];
+            });
+            document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+                const key = el.getAttribute("data-i18n-placeholder");
+                if (t[key] !== undefined) el.placeholder = t[key];
+            });
+            renderPromptExamples();
+            renderSampleDataLinks();
+            renderSampleReportsLinks();
+        }
+
+        // ==================== Guide ====================
+        let guideExpanded = true;
+        function toggleGuide() {
+            guideExpanded = !guideExpanded;
+            document.getElementById("guide-body").classList.toggle("hidden", !guideExpanded);
+            document.getElementById("guide-arrow").classList.toggle("collapsed", !guideExpanded);
+        }
+
+        // ==================== Prompt Examples ====================
+        function renderPromptExamples() {
+            const container = document.getElementById("prompt-examples");
+            const t = translations[currentLang];
+            const examples = [
+                { tag: t.prompt_tag_simple, tagClass: "tag-simple", text: t.prompt_simple_1 },
+                { tag: t.prompt_tag_simple, tagClass: "tag-simple", text: t.prompt_simple_2 },
+                { tag: t.prompt_tag_detailed, tagClass: "tag-detailed", text: t.prompt_detailed_1 },
+            ];
+            container.innerHTML = "";
+            for (const ex of examples) {
+                const div = document.createElement("div");
+                div.className = "prompt-chip";
+                div.innerHTML = `<span class="prompt-tag ${ex.tagClass}">${ex.tag}</span>${ex.text}`;
+                div.addEventListener("click", () => {
+                    const q = document.getElementById("query");
+                    if (q) { q.value = ex.text; q.focus(); }
+                });
+                container.appendChild(div);
+            }
+        }
+
+        // ==================== Drag & Drop ====================
+        const dropZone = document.getElementById("drop-zone");
+        const dataFileInput = document.getElementById("data-file");
+        const selectedFileDiv = document.getElementById("selected-file");
+
+        dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("dragover"); });
+        dropZone.addEventListener("dragleave", () => { dropZone.classList.remove("dragover"); });
+        dropZone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropZone.classList.remove("dragover");
+            if (e.dataTransfer.files.length > 0) {
+                dataFileInput.files = e.dataTransfer.files;
+                showSelectedFile(e.dataTransfer.files[0].name);
+            }
+        });
+        dataFileInput.addEventListener("change", () => {
+            if (dataFileInput.files.length > 0) {
+                showSelectedFile(dataFileInput.files[0].name);
+            }
+        });
+
+        function showSelectedFile(name) {
+            const t = translations[currentLang];
+            selectedFileDiv.innerHTML = `<span class="file-selected">📄 ${t.file_selected || ""}${name} <span class="remove-file" onclick="clearFile()" title="Remove">✕</span></span>`;
+            selectedFileDiv.classList.remove("hidden");
+            dropZone.classList.add("hidden");
+        }
+
+        function clearFile() {
+            dataFileInput.value = "";
+            selectedFileDiv.innerHTML = "";
+            selectedFileDiv.classList.add("hidden");
+            dropZone.classList.remove("hidden");
+        }
+
+        // ==================== Sample Data ====================
+        let allSampleDatasets = [];
+
+        async function loadSampleData() {
+            try {
+                const res = await fetch("/sample-data");
+                const data = await res.json();
+                allSampleDatasets = data.datasets || [];
+            } catch (err) {
+                allSampleDatasets = [];
+            }
+            renderSampleDataLinks();
+        }
+
+        function renderSampleDataLinks() {
+            const container = document.getElementById("sample-data-links");
+            const t = translations[currentLang];
+            const suffix = currentLang === "ko" ? "-kr" : "-en";
+            const filtered = allSampleDatasets.filter(ds => ds.name.endsWith(suffix));
+            if (filtered.length === 0) {
+                container.innerHTML = `<span style="color:var(--text-muted)">${t.sample_none}</span>`;
+                return;
+            }
+            container.innerHTML = "";
+            for (const ds of filtered) {
+                for (const file of ds.files) {
+                    const a = document.createElement("a");
+                    a.className = "sample-link";
+                    a.href = `/sample-data/${encodeURIComponent(ds.name)}/${encodeURIComponent(file)}`;
+                    a.download = file;
+                    a.textContent = file;
+                    container.appendChild(a);
+                }
+            }
+        }
+
+        // ==================== Sample Reports ====================
+        let allSampleReports = [];
+
+        async function loadSampleReports() {
+            try {
+                const res = await fetch("/sample-reports");
+                const data = await res.json();
+                allSampleReports = data.reports || [];
+            } catch (err) {
+                allSampleReports = [];
+            }
+            renderSampleReportsLinks();
+        }
+
+        function renderSampleReportsLinks() {
+            const container = document.getElementById("sample-reports-links");
+            const t = translations[currentLang];
+            const langTag = currentLang === "ko" ? "_kr_" : "_en_";
+            const filtered = allSampleReports.filter(name => name.includes(langTag));
+            if (filtered.length === 0) {
+                container.innerHTML = `<span style="color:var(--text-muted)">${t.sample_reports_none}</span>`;
+                return;
+            }
+            container.innerHTML = "";
+            for (const file of filtered) {
+                const a = document.createElement("a");
+                a.className = "sample-link";
+                a.href = `/sample-reports/${encodeURIComponent(file)}`;
+                a.download = file;
+                a.textContent = file;
+                container.appendChild(a);
+            }
+        }
+
+        // ==================== State ====================
+        let currentUploadId = null;
+        let currentSessionId = null;
+        let currentRequestId = null;
+        let countdownTimer = null;
+        let analysisStartTime = null;
+        let elapsedTimer = null;
+        let firstOutputReceived = false;
+
+        const uploadForm = document.getElementById("upload-form");
+        const uploadBtn = document.getElementById("upload-btn");
+        const statusDiv = document.getElementById("status");
+        const analyzeSection = document.getElementById("analyze-section");
+        const analyzeBtn = document.getElementById("analyze-btn");
+        const queryInput = document.getElementById("query");
+        const outputSection = document.getElementById("output-section");
+        const outputDiv = document.getElementById("output");
+        const downloadSection = document.getElementById("download-section");
+        const downloadList = document.getElementById("download-list");
+        const planModal = document.getElementById("plan-modal");
+        const planText = document.getElementById("plan-text");
+        const modalRevision = document.getElementById("modal-revision");
+        const modalMax = document.getElementById("modal-max");
+        const modalCountdown = document.getElementById("modal-countdown");
+        const feedbackInput = document.getElementById("feedback-input");
+        const approveBtn = document.getElementById("approve-btn");
+        const rejectBtn = document.getElementById("reject-btn");
+
+        // ==================== Upload ====================
+        uploadForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const dataFile = document.getElementById("data-file").files[0];
+            if (!dataFile) return;
+
+            const formData = new FormData();
+            formData.append("data_file", dataFile);
+            const colDef = document.getElementById("col-def").files[0];
+            if (colDef) formData.append("column_definitions", colDef);
+
+            uploadBtn.disabled = true;
+            statusDiv.textContent = translations[currentLang].status_uploading;
+            statusDiv.style.color = "var(--text-muted)";
+
+            try {
+                const res = await fetch("/upload", { method: "POST", body: formData });
+                const data = await res.json();
+                if (data.success) {
+                    currentUploadId = data.upload_id;
+                    statusDiv.textContent = translations[currentLang].status_upload_complete + data.upload_id;
+                    statusDiv.style.color = "var(--green)";
+                    analyzeSection.classList.remove("hidden");
+                    analyzeBtn.disabled = false;
+                    // Scroll to analyze section
+                    analyzeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    statusDiv.textContent = translations[currentLang].status_upload_failed + (data.error || "Unknown error");
+                    statusDiv.style.color = "var(--red)";
+                }
+            } catch (err) {
+                statusDiv.textContent = translations[currentLang].status_upload_failed + err.message;
+                statusDiv.style.color = "var(--red)";
+            } finally {
+                uploadBtn.disabled = false;
+            }
+        });
+
+        // ==================== Analyze ====================
+        function appendOutput(text, className) {
+            if (!firstOutputReceived) {
+                firstOutputReceived = true;
+                document.getElementById("output-info").classList.add("hidden");
+            }
+            const span = document.createElement("span");
+            span.className = className || "";
+            span.textContent = text;
+            outputDiv.appendChild(span);
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+
+        function stopElapsedTimer() {
+            if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; }
+        }
+
+        analyzeBtn.addEventListener("click", async () => {
+            const query = queryInput.value.trim();
+            if (!query || !currentUploadId) return;
+
+            analyzeBtn.disabled = true;
+            outputSection.classList.remove("hidden");
+            outputDiv.textContent = "";
+            analysisStartTime = new Date();
+            firstOutputReceived = false;
+
+            const outputInfo = document.getElementById("output-info");
+            const elapsedEl = document.getElementById("elapsed-timer");
+            outputInfo.classList.remove("hidden");
+            if (elapsedTimer) clearInterval(elapsedTimer);
+            elapsedTimer = setInterval(() => {
+                const sec = Math.floor((new Date() - analysisStartTime) / 1000);
+                const m = Math.floor(sec / 60);
+                const s = sec % 60;
+                elapsedEl.textContent = ` (${m}:${s.toString().padStart(2, "0")})`;
+            }, 1000);
+
+            try {
+                const res = await fetch("/analyze", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ upload_id: currentUploadId, query }),
+                });
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = "";
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split("\n");
+                    buffer = lines.pop();
+                    for (const line of lines) {
+                        if (!line.startsWith("data: ")) continue;
+                        try { handleSSEEvent(JSON.parse(line.slice(6))); } catch (_) {}
+                    }
+                }
+            } catch (err) {
+                stopElapsedTimer();
+                appendOutput("\nError: " + err.message + "\n", "event-error");
+            } finally {
+                analyzeBtn.disabled = false;
+            }
+        });
+
+        function handleSSEEvent(event) {
+            switch (event.type) {
+                case "agent_text_stream":
+                    let text = event.text;
+                    // Add line breaks before "Tool calling" markers
+                    if (text.startsWith("Tool calling")) {
+                        text = "\n\n" + text + "\n";
+                    }
+                    // Add line breaks before markdown headers (##, ###)
+                    else if (/^#{1,4}\s/.test(text.trimStart())) {
+                        text = "\n\n" + text + "\n";
+                    }
+                    // Add newline after sentences for readability
+                    else if (/[!.:\n]$/.test(text.trimEnd())) {
+                        text = text + "\n";
+                    }
+                    appendOutput(text, "event-text");
+                    break;
+                case "agent_reasoning_stream": appendOutput(event.text, "event-reasoning"); break;
+                case "workflow_complete":
+                    currentSessionId = event.session_id || null;
+                    stopElapsedTimer();
+                    appendOutput("\n[Analysis complete]\n", "event-done");
+                    if (currentSessionId) fetchArtifactsWithRetry(currentSessionId);
+                    break;
+                case "error":
+                    stopElapsedTimer();
+                    appendOutput("\nError: " + event.text + "\n", "event-error");
+                    break;
+                case "done": break;
+                case "plan_review_request": showPlanModal(event); break;
+                case "plan_review_keepalive": updateCountdown(event.timeout_seconds - event.elapsed_seconds); break;
+                default: if (event.text) appendOutput(event.text, "event-text");
+            }
+        }
+
+        // ==================== Plan Modal ====================
+        function showPlanModal(event) {
+            currentRequestId = event.request_id;
+            planText.textContent = event.plan;
+            modalRevision.textContent = event.revision_count;
+            modalMax.textContent = event.max_revisions;
+            feedbackInput.value = "";
+            startCountdown(event.timeout_seconds);
+            planModal.classList.remove("hidden");
+            appendOutput("\n[Plan review requested — revision " + event.revision_count + "/" + event.max_revisions + "]\n", "event-text");
+        }
+
+        function hidePlanModal() {
+            planModal.classList.add("hidden");
+            if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+        }
+
+        function startCountdown(seconds) {
+            if (countdownTimer) clearInterval(countdownTimer);
+            let remaining = seconds;
+            modalCountdown.textContent = remaining;
+            countdownTimer = setInterval(() => {
+                remaining--;
+                modalCountdown.textContent = Math.max(remaining, 0);
+                if (remaining <= 0) { clearInterval(countdownTimer); countdownTimer = null; }
+            }, 1000);
+        }
+
+        function updateCountdown(remaining) {
+            modalCountdown.textContent = Math.max(Math.round(remaining), 0);
+        }
+
+        async function submitFeedback(approved) {
+            if (!currentRequestId) return;
+            const fb = feedbackInput.value.trim();
+            hidePlanModal();
+            appendOutput(approved ? "[Plan approved]\n" : "[Plan rejected: " + (fb || "no feedback") + "]\n", approved ? "event-done" : "event-error");
+            try {
+                await fetch("/feedback", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ request_id: currentRequestId, approved, feedback: fb }),
+                });
+            } catch (err) {
+                appendOutput("Feedback submit failed: " + err.message + "\n", "event-error");
+            }
+        }
+
+        approveBtn.addEventListener("click", () => submitFeedback(true));
+        rejectBtn.addEventListener("click", () => submitFeedback(false));
+
+        // Enable revise button only when feedback is entered
+        feedbackInput.addEventListener("input", () => {
+            rejectBtn.disabled = feedbackInput.value.trim().length === 0;
+        });
+
+        // Enter key submits revision
+        feedbackInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && feedbackInput.value.trim().length > 0) {
+                e.preventDefault();
+                submitFeedback(false);
+            }
+        });
+
+        // ==================== Reports ====================
+        const EXT_GROUPS = {
+            documents: { label_key: "report_group_documents", extensions: [".docx", ".pdf"] },
+            text:      { label_key: "report_group_text",      extensions: [".txt"] },
+            images:    { label_key: "report_group_images",     extensions: [".png", ".jpg", ".jpeg", ".gif", ".svg"] },
+        };
+        const EXT_BADGE_CLASS = {
+            ".docx": "ext-docx", ".pdf": "ext-pdf", ".txt": "ext-txt",
+            ".png": "ext-img", ".jpg": "ext-img", ".jpeg": "ext-img", ".gif": "ext-img", ".svg": "ext-img",
+        };
+
+        function getFileExtension(name) {
+            const dot = name.lastIndexOf(".");
+            return dot >= 0 ? name.slice(dot).toLowerCase() : "";
+        }
+
+        function renderReportList(filenames, sessionId) {
+            downloadList.innerHTML = "";
+            const t = translations[currentLang];
+            const grouped = {};
+            for (const gk of Object.keys(EXT_GROUPS)) grouped[gk] = [];
+            for (const name of filenames) {
+                const ext = getFileExtension(name);
+                for (const [gk, gd] of Object.entries(EXT_GROUPS)) {
+                    if (gd.extensions.includes(ext)) { grouped[gk].push(name); break; }
+                }
+            }
+            for (const [gk, gd] of Object.entries(EXT_GROUPS)) {
+                const files = grouped[gk];
+                if (files.length === 0) continue;
+                const groupDiv = document.createElement("div");
+                groupDiv.className = "report-group";
+                const title = document.createElement("div");
+                title.className = "report-group-title";
+                title.setAttribute("data-i18n", gd.label_key);
+                title.textContent = t[gd.label_key] || gk;
+                groupDiv.appendChild(title);
+                for (const name of files.sort()) {
+                    const ext = getFileExtension(name);
+                    const item = document.createElement("div");
+                    item.className = "report-item";
+                    const badge = document.createElement("span");
+                    badge.className = "ext-badge " + (EXT_BADGE_CLASS[ext] || "ext-txt");
+                    badge.textContent = ext.replace(".", "");
+                    item.appendChild(badge);
+                    const link = document.createElement("a");
+                    link.className = "report-link";
+                    link.href = "/download/" + encodeURIComponent(sessionId) + "/" + name.split("/").map(encodeURIComponent).join("/");
+                    link.textContent = name.split("/").pop();
+                    item.appendChild(link);
+                    groupDiv.appendChild(item);
+                }
+                downloadList.appendChild(groupDiv);
+            }
+        }
+
+        async function fetchArtifacts(sessionId) {
+            try {
+                const res = await fetch("/artifacts/" + encodeURIComponent(sessionId));
+                const data = await res.json();
+                if (data.success && data.filenames.length > 0) {
+                    renderReportList(data.filenames, sessionId);
+                    downloadSection.classList.remove("hidden");
+                    return true;
+                }
+            } catch (err) {
+                appendOutput("Failed to fetch artifacts: " + err.message + "\n", "event-error");
+            }
+            return false;
+        }
+
+        async function fetchArtifactsWithRetry(sessionId, retries = 10, delayMs = 15000) {
+            appendOutput("[Waiting for reports to upload...]\n", "event-text");
+            for (let i = 0; i < retries; i++) {
+                await new Promise(r => setTimeout(r, delayMs));
+                const found = await fetchArtifacts(sessionId);
+                if (found) {
+                    const endTime = new Date();
+                    const elapsed = ((endTime - analysisStartTime) / 1000).toFixed(1);
+                    const fmt = d => d.toLocaleTimeString();
+                    appendOutput("[Reports ready]\n", "event-done");
+                    appendOutput("Start: " + fmt(analysisStartTime) + "  End: " + fmt(endTime) + "  Elapsed: " + elapsed + "s (" + (elapsed / 60).toFixed(1) + "min)\n", "event-done");
+                    return;
+                }
+            }
+            appendOutput("[Reports not available yet. Try refreshing later.]\n", "event-error");
+        }
+
+        // ==================== Init ====================
+        document.addEventListener("DOMContentLoaded", () => {
+            applyLanguage();
+            loadSampleData();
+            loadSampleReports();
+        });
+    </script>
+</body>
+</html>

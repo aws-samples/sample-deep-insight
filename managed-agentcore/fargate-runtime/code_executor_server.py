@@ -481,8 +481,9 @@ def execute_code(code_string, execution_num):
                 }
 
                 # Execute code - Explicit exception handling to prevent container instability
+                # Note: exec() is intentional - this is a code execution service running in isolated Fargate containers
                 try:
-                    exec(code_string, exec_globals)
+                    exec(code_string, exec_globals)  # nosec B102 # noqa # codeql[py/code-injection] suppressed: intentional design
                     result["status"] = "completed"
                 except Exception as exec_error:
                     # Catch exec() errors immediately to prevent container crash

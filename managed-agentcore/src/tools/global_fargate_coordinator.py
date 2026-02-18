@@ -37,7 +37,8 @@ Key Features:
        - Per-request failure tracking with limits
 
     5. S3 Data Synchronization
-       - Directory upload with session ID prefixes
+       - Local directory upload with session ID prefixes (CLI flow)
+       - S3-to-S3 server-side copy for pre-uploaded data (web app flow)
        - Container file sync via HTTP API
        - Automatic cleanup on session completion
 
@@ -49,8 +50,11 @@ Usage Example:
     # Set request context (required)
     session_mgr.set_request_context("request-123")
 
-    # Create session with directory data
+    # Create session with local directory data (CLI flow)
     success = session_mgr.ensure_session_with_directory("./data")
+
+    # Or with S3 URL (web app flow)
+    success = session_mgr.ensure_session_with_directory("s3://bucket/uploads/uuid/")
 
     # Execute code in container
     result = session_mgr.execute_code("import pandas as pd\\ndf = pd.read_csv('data/file.csv')")
@@ -234,15 +238,24 @@ class GlobalFargateSessionManager:
 
     def ensure_session_with_directory(self, data_directory: str):
         """
-        Create session with directory data (recursive upload of all files)
+        Create session with directory data (recursive upload of all files).
+
+        Supports two input types:
+        - Local path (e.g., "./data"): Used by CLI invocation. Files are uploaded
+          from the runtime container's local filesystem to S3.
+        - S3 URL (e.g., "s3://bucket/uploads/uuid/"): Used by web app. Files are
+          copied directly within S3 (server-side copy, no download needed).
+
+        Both paths produce the same S3 prefix format, so the Fargate container
+        sync step (step 3) is identical regardless of input type.
 
         Workflow:
         1. Create Fargate session (generates session ID)
-        2. Upload entire directory to S3 (recursive, maintains structure)
-        3. Sync S3 directory to container (recursive)
+        2. Upload local directory to S3 OR copy S3 directory to session prefix
+        3. Sync S3 directory to Fargate container (recursive)
 
         Args:
-            data_directory: Path to local directory to upload (e.g., "./data")
+            data_directory: Local path (e.g., "./data") or S3 URL (e.g., "s3://bucket/prefix/")
 
         Returns:
             bool: True if successful, False otherwise
@@ -250,21 +263,29 @@ class GlobalFargateSessionManager:
         try:
             logger.info(f"🚀 Creating session with directory data: {data_directory}")
 
-            # Validate directory exists
-            if not os.path.exists(data_directory):
-                raise Exception(f"Directory not found: {data_directory}")
+            # Detect whether input is an S3 URL or a local filesystem path
+            is_s3_path = data_directory.startswith("s3://")
 
-            if not os.path.isdir(data_directory):
-                raise Exception(f"Path is not a directory: {data_directory}")
+            # Validate local path exists (S3 paths are validated during the copy step)
+            if not is_s3_path:
+                if not os.path.exists(data_directory):
+                    raise Exception(f"Directory not found: {data_directory}")
+                if not os.path.isdir(data_directory):
+                    raise Exception(f"Path is not a directory: {data_directory}")
 
             # 1. Create session first (generates session ID)
             if not self.ensure_session():
                 raise Exception("Failed to create Fargate session")
 
-            # 2. Upload entire directory to S3 (recursive)
+            # 2. Upload/copy data to session S3 prefix
+            #    - S3 path: S3-to-S3 server-side copy (web upload flow)
+            #    - Local path: local-to-S3 upload (CLI flow)
             session_id = self._sessions[self._current_request_id]['session_id']
-            s3_prefix = self._upload_directory_to_s3_with_session_id(data_directory, session_id)
-            logger.info(f"📤 Directory uploaded to S3: {s3_prefix}")
+            if is_s3_path:
+                s3_prefix = self._copy_s3_directory_to_session(data_directory, session_id)
+            else:
+                s3_prefix = self._upload_directory_to_s3_with_session_id(data_directory, session_id)
+            logger.info(f"📤 Directory ready in S3: {s3_prefix}")
 
             # 3. Sync S3 directory → container local storage (recursive)
             self._sync_directory_from_s3_to_container(s3_prefix)
@@ -805,6 +826,94 @@ class GlobalFargateSessionManager:
     # ========================================================================
     # 📤 DATA SYNC METHODS (S3 UPLOAD/DOWNLOAD)
     # ========================================================================
+
+    def _copy_s3_directory_to_session(self, s3_url: str, session_id: str) -> str:
+        """
+        Copy files from an S3 URL to the session's input prefix (S3-to-S3 copy).
+
+        This method handles the web upload flow where user data is already stored
+        in S3 (uploaded via the web app's /upload endpoint). Instead of downloading
+        to local disk and re-uploading, it performs a server-side S3 copy which is
+        faster and avoids unnecessary data transfer.
+
+        The destination prefix matches the format used by _upload_directory_to_s3_with_session_id(),
+        so the subsequent Fargate container sync step works identically.
+
+        Example:
+            Source: s3://deep-insight-logs-us-west-2-057716757052/uploads/abc-123/
+                ├── sales.csv
+                └── column_definitions.json
+
+            Destination: deep-insight/fargate_sessions/{session_id}/input/
+                ├── sales.csv
+                └── column_definitions.json
+
+        Args:
+            s3_url: Full S3 URL pointing to the uploaded data directory
+                    (e.g., "s3://bucket-name/uploads/uuid/")
+            session_id: Fargate session ID used to construct the destination prefix
+
+        Returns:
+            str: S3 prefix where files were copied
+                 (e.g., "deep-insight/fargate_sessions/{session_id}/input/")
+
+        Raises:
+            Exception: If no files are found at the source S3 path,
+                       or if S3 copy operations fail
+        """
+        try:
+            # Parse S3 URL into bucket name and key prefix
+            # Example: "s3://my-bucket/uploads/abc-123/"
+            #   -> source_bucket = "my-bucket"
+            #   -> source_prefix = "uploads/abc-123/"
+            url_body = s3_url[5:]  # Remove "s3://" scheme
+            parts = url_body.split("/", 1)
+            source_bucket = parts[0]
+            source_prefix = parts[1].rstrip("/") + "/" if len(parts) > 1 and parts[1] else ""
+
+            # Destination prefix: same format as _upload_directory_to_s3_with_session_id()
+            dest_prefix = f"deep-insight/fargate_sessions/{session_id}/input/"
+            s3_client = boto3.client('s3', region_name=self._get_aws_region())
+
+            logger.info(f"📤 Copying S3 directory to session...")
+            logger.info(f"   Source: s3://{source_bucket}/{source_prefix}")
+            logger.info(f"   Dest:   s3://{S3_BUCKET_NAME}/{dest_prefix}")
+
+            # List all objects under the source prefix and copy each to destination.
+            # Uses paginator to handle any number of files (>1000).
+            copied_count = 0
+            paginator = s3_client.get_paginator('list_objects_v2')
+            for page in paginator.paginate(Bucket=source_bucket, Prefix=source_prefix):
+                for obj in page.get('Contents', []):
+                    source_key = obj['Key']
+
+                    # Strip source prefix to get the relative file path
+                    # e.g., "uploads/abc-123/sales.csv" -> "sales.csv"
+                    relative_path = source_key[len(source_prefix):]
+                    if not relative_path:
+                        continue  # Skip the prefix itself (directory marker)
+
+                    dest_key = f"{dest_prefix}{relative_path}"
+
+                    # Server-side copy within the same AWS account (no data download)
+                    s3_client.copy_object(
+                        CopySource={'Bucket': source_bucket, 'Key': source_key},
+                        Bucket=S3_BUCKET_NAME,
+                        Key=dest_key,
+                    )
+                    copied_count += 1
+                    logger.info(f"   📤 {relative_path} → s3://{S3_BUCKET_NAME}/{dest_key}")
+
+            # Fail early if no files were found (likely wrong upload_id or empty upload)
+            if copied_count == 0:
+                raise Exception(f"No files found at source: s3://{source_bucket}/{source_prefix}")
+
+            logger.info(f"✅ Copied {copied_count} files within S3")
+            return dest_prefix
+
+        except Exception as e:
+            logger.error(f"❌ S3 directory copy failed: {e}")
+            raise
 
     def _upload_directory_to_s3_with_session_id(self, data_directory: str, session_id: str) -> str:
         """

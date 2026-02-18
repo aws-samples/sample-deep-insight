@@ -1,0 +1,50 @@
+[
+  {
+    "column_name": "Date",
+    "column_desc": "Date when the order was placed (format: M/D/YY)"
+  },
+  {
+    "column_name": "Product",
+    "column_desc": "Name of the ordered product (e.g., Seaweed Soup, Ginger Tea)"
+  },
+  {
+    "column_name": "Category",
+    "column_desc": "Product category (e.g., Soup/Side/Main, Coffee/Tea)"
+  },
+  {
+    "column_name": "Size",
+    "column_desc": "Product size or volume (e.g., 300g, 500ml, 1L)"
+  },
+  {
+    "column_name": "Qty",
+    "column_desc": "Quantity of items ordered"
+  },
+  {
+    "column_name": "Amount",
+    "column_desc": "Total order amount (unit: KRW)"
+  },
+  {
+    "column_name": "ship-city",
+    "column_desc": "District-level shipping address (e.g., Gangnam-gu, Jung-gu)"
+  },
+  {
+    "column_name": "ship-state",
+    "column_desc": "City/province-level shipping address (e.g., Seoul)"
+  },
+  {
+    "column_name": "ship-postal-code",
+    "column_desc": "Postal code of the shipping address"
+  },
+  {
+    "column_name": "promotion-ids",
+    "column_desc": "Promotion or coupon code applied to the order (e.g., FRUITPROMO5, WEEKEND20; may be empty)"
+  },
+  {
+    "column_name": "Gender",
+    "column_desc": "Customer gender (F: Female, M: Male)"
+  },
+  {
+    "column_name": "Age Group",
+    "column_desc": "Customer age group (e.g., 20s, 30s, 40s, 50s)"
+  }
+]

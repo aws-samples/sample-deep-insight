@@ -552,16 +552,20 @@ def _build_graph_input(user_query: str, payload: Dict[str, Any], request_id: str
 
     return graph_input
 
-def _enrich_event(event: Dict[str, Any], event_count: int) -> Dict[str, Any]:
+def _enrich_event(event: Dict[str, Any], event_count: int, request_id: str = None) -> Dict[str, Any]:
     """
     Add AgentCore runtime metadata to streaming event.
 
     Enriches each event with event ID, runtime source, and marks the final
-    event with total count and completion message.
+    event with total count and completion message. For workflow_complete events,
+    also adds the Fargate session_id so the web app can fetch generated artifacts
+    (DOCX reports, charts, etc.) via the /artifacts/{session_id} endpoint.
 
     Args:
         event (dict): Event dictionary from graph execution
         event_count (int): Sequential event number
+        request_id (str): Request identifier used to look up the Fargate session ID.
+                          Only needed for workflow_complete events.
 
     Returns:
         dict: Enriched event with added metadata
@@ -569,10 +573,20 @@ def _enrich_event(event: Dict[str, Any], event_count: int) -> Dict[str, Any]:
     event["event_id"] = event_count
     event["runtime_source"] = RUNTIME_SOURCE
 
-    # Mark final event
+    # Mark final event with session ID for artifact download
     if event.get("type") == "workflow_complete":
         event["total_events"] = event_count
         event["message"] = "All events processed through AgentCore Runtime"
+
+        # Look up Fargate session_id from the session manager.
+        # The web app needs this to call /artifacts/{session_id} for report downloads.
+        if request_id:
+            try:
+                fargate_manager = get_global_session()
+                session_info = fargate_manager._sessions.get(request_id, {})
+                event["session_id"] = session_info.get("session_id", "")
+            except Exception:
+                event["session_id"] = ""
 
     return event
 
@@ -658,7 +672,7 @@ async def agentcore_streaming_execution(
                 # Stream small/medium events as keepalives
                 if event.get("type") in STREAM_EVENT_TYPES:
                     streamed_count += 1
-                    yield _enrich_event(event, streamed_count)
+                    yield _enrich_event(event, streamed_count, request_id)
             print(f"📊 Total events: {event_count}, Streamed: {streamed_count}")
 
             # Step 6: Print conversation history and completion

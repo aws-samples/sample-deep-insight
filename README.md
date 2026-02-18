@@ -19,6 +19,7 @@
 
 ## *Latest News* 🔥
 
+- **[2026/02]** Web UI (v1.1.0) - browser-based interface for data upload, analysis, HITL plan review, and report download ([details](./docs/front-end/03-development-plan.md))
 - **[2025/12]** Claude Code-style Skill System - dynamically discover and load specialized skills (PDF, DOCX, XLSX processing, etc.) in Strands Agents with lazy loading for optimal performance ([details](./docs/features/skill-system.md))
 - **[2025/12]** Human in the Loop (HITL) - review and steer the analysis plan before execution, giving users control over the analysis direction ([details](./docs/features/hitl-workflow.md))
 - **[2025/12]** Managed AgentCore deployment - production-ready with Bedrock AgentCore Runtime, Custom Code Interpreter (Fargate), and 100% private VPC
@@ -65,7 +66,7 @@ Transform complex data analysis into automated insights using hierarchical multi
 
 ## Quick Start
 
-Deep Insight provides two deployment options to match your needs.
+Deep Insight provides three deployment options to match your needs.
 
 ### Self-Hosted Deployment
 
@@ -85,15 +86,26 @@ Production deployment using AWS Bedrock AgentCore Runtime with VPC Private Mode:
 
 **Get Started**: [`./managed-agentcore/`](./managed-agentcore/) | 📖 [Managed AgentCore README](./managed-agentcore/README.md)
 
+### Web UI Deployment
+
+Browser-based interface for non-technical users:
+- ✅ Upload data, review plans, download reports from the browser
+- ✅ Korean/English language support
+- ✅ Internet-facing ALB with VPN CIDR restriction
+
+<img src="./docs/front-end/images/web-ui.png" alt="Deep Insight Web UI" width="600"/>
+
+**Get Started**: [`./deep-insight-web/`](./deep-insight-web/) | 📖 [Development Plan](./docs/front-end/03-development-plan.md)
+
 ## Deployment Options
 
-| | Self-Hosted | Managed AgentCore |
-|---|-------------|-------------------|
-| Setup Time | ~10 minutes | ~45 minutes |
-| Agent Hosting | Local/EC2 | Bedrock AgentCore Runtime |
-| Code Execution | Local Python | Custom Code Interpreter (Fargate) |
-| Network | Your choice | 100% Private VPC |
-| Best For | Development, Testing | Production, Enterprise |
+| | Self-Hosted | Managed AgentCore | Web UI |
+|---|-------------|-------------------|--------|
+| Setup Time | ~10 minutes | ~45 minutes | ~15 minutes (after Managed) |
+| Agent Hosting | Local/EC2 | Bedrock AgentCore Runtime | Same as Managed |
+| Code Execution | Local Python | Custom Code Interpreter (Fargate) | Same as Managed |
+| Network | Your choice | 100% Private VPC | VPN-restricted ALB |
+| Best For | Development, Testing | Production, Enterprise | Non-technical Users |
 
 > 📖 **[Detailed comparison →](./managed-agentcore/production_deployment/docs/DEPLOYMENT_COMPARISON.md)** Security, cost, features, and when to choose each option
 

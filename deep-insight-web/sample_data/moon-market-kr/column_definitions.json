@@ -1,0 +1,50 @@
+[
+  {
+    "column_name": "Date",
+    "column_desc": "주문이 발생한 날짜 (형식: M/D/YY)"
+  },
+  {
+    "column_name": "Product",
+    "column_desc": "주문한 상품의 명칭 (예: 미역국, 생강차 등)"
+  },
+  {
+    "column_name": "Category",
+    "column_desc": "상품이 속한 카테고리 분류 (예: 국/반찬/메인요리, 커피/차 등)"
+  },
+  {
+    "column_name": "Size",
+    "column_desc": "상품의 용량 또는 크기 (예: 300g, 500ml, 1L 등)"
+  },
+  {
+    "column_name": "Qty",
+    "column_desc": "주문한 상품의 수량 (개수)"
+  },
+  {
+    "column_name": "Amount",
+    "column_desc": "주문의 총 금액 (단위: 원)"
+  },
+  {
+    "column_name": "ship-city",
+    "column_desc": "배송 주소의 시/구 단위 지역명 (예: 강서구, 중구 등)"
+  },
+  {
+    "column_name": "ship-state",
+    "column_desc": "배송 주소의 시/도 단위 광역 지역명 (예: 서울)"
+  },
+  {
+    "column_name": "ship-postal-code",
+    "column_desc": "배송 주소의 우편번호"
+  },
+  {
+    "column_name": "promotion-ids",
+    "column_desc": "주문에 적용된 프로모션 또는 쿠폰 코드 (예: FRUITPROMO5, WEEKEND20 등, 없을 수 있음)"
+  },
+  {
+    "column_name": "Gender",
+    "column_desc": "고객의 성별 (F: 여성, M: 남성)"
+  },
+  {
+    "column_name": "Age Group",
+    "column_desc": "고객의 연령대 그룹 (예: 20대, 30대, 40대, 50대 등)"
+  }
+]
