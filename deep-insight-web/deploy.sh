@@ -178,9 +178,20 @@ echo "ECR: ${ECR_URI}"
 # ---------- Step 2: Docker Build + Push ----------
 
 echo "=== Step 2: Docker Build + Push ==="
-# On arm64 hosts (e.g., Mac M1/M2), install Docker buildx and use:
-#   docker buildx build --platform linux/amd64 -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
-docker build -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
+# Fargate requires linux/amd64 images.
+# On arm64 hosts, cross-compile with docker buildx (requires buildx installed).
+HOST_ARCH=$(uname -m)
+if [ "$HOST_ARCH" = "x86_64" ]; then
+    docker build -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
+else
+    if ! docker buildx version &>/dev/null; then
+        echo "ERROR: arm64 host detected but Docker buildx is not installed."
+        echo "Fargate requires linux/amd64 images. Install buildx:"
+        echo "  https://docs.docker.com/go/buildx/"
+        exit 1
+    fi
+    docker buildx build --platform linux/amd64 -t "${ECR_REPO_NAME}:${IMAGE_TAG}" "$SCRIPT_DIR"
+fi
 
 aws ecr get-login-password --region "$REGION" \
     | docker login --username AWS --password-stdin "${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com"
