@@ -52,7 +52,17 @@ bash deploy.sh cleanup
 To add additional IP ranges to the ALB after deployment:
 
 ```bash
-bash add_alb_sg_rule.sh
+# Check your deployment region from managed-agentcore/.env
+grep AWS_REGION ../managed-agentcore/.env
+
+# Find your ALB Security Group ID
+aws ec2 describe-security-groups \
+  --filters "Name=group-name,Values=deep-insight-web-alb-sg" \
+  --query "SecurityGroups[0].GroupId" --output text --region us-west-2
+
+# Add your VPN's IP range so users on the VPN can reach the Web UI
+# Usage: bash add_alb_sg_rule.sh <ALB_SG_ID> <ALLOWED_CIDR> [REGION]
+bash add_alb_sg_rule.sh sg-0abc1234def56789 "10.0.0.0/8" us-west-2
 ```
 
 ---
