@@ -14,14 +14,13 @@ set -e
 #   - managed-agentcore/.env populated (from Phase 1+2 deployment)
 #
 # Usage:
-#   bash deploy.sh <VPN_CIDR>
+#   bash deploy.sh <VPN_CIDR>    # First deploy (creates ALB SG with VPN CIDR)
+#   bash deploy.sh               # Subsequent deploys (reuses existing ALB SG)
+#   bash deploy.sh cleanup       # Remove all resources
 #
 # Examples:
-#   bash deploy.sh "10.0.0.0/8"
-#   bash deploy.sh "54.239.0.0/16"
-#
-# To clean up all resources created by this script:
-#   bash deploy.sh cleanup
+#   bash deploy.sh "10.0.0.0/8"  # First deploy
+#   bash deploy.sh               # Redeploy (image + task def update only)
 # ============================================================
 
 export AWS_PAGER=""
@@ -56,15 +55,9 @@ EXECUTION_ROLE_ARN="${TASK_EXECUTION_ROLE_ARN}"
 S3_BUCKET="${S3_BUCKET_NAME}"
 RUNTIME_ARN_VALUE="${RUNTIME_ARN}"
 
-# VPN CIDR for ALB access restriction (required argument)
+# VPN CIDR for ALB access restriction (required on first deploy only)
 if [ "${1}" != "cleanup" ]; then
-    if [ -z "$1" ]; then
-        echo "ERROR: VPN CIDR is required."
-        echo "Usage: bash deploy.sh <VPN_CIDR>"
-        echo "Example: bash deploy.sh \"10.0.0.0/8\""
-        exit 1
-    fi
-    VPN_CIDR="$1"
+    VPN_CIDR="${1:-}"
 fi
 
 # New resources
@@ -90,7 +83,7 @@ echo "Cluster:     ${CLUSTER_NAME}"
 echo "VPC:         ${VPC_ID}"
 echo "S3 Bucket:   ${S3_BUCKET}"
 echo "Runtime ARN: ${RUNTIME_ARN_VALUE:0:60}..."
-echo "VPN CIDR:    ${VPN_CIDR}"
+echo "VPN CIDR:    ${VPN_CIDR:-"(reuse existing SG)"}"
 echo ""
 
 # ---------- Cleanup mode ----------
@@ -197,6 +190,13 @@ SG_ALB_WEB_ID=$(aws ec2 describe-security-groups \
     --region "$REGION" --query "SecurityGroups[0].GroupId" --output text 2>/dev/null || true)
 
 if [ -z "$SG_ALB_WEB_ID" ] || [ "$SG_ALB_WEB_ID" = "None" ]; then
+    if [ -z "$VPN_CIDR" ]; then
+        echo "ERROR: VPN CIDR is required on first deploy (ALB SG does not exist yet)."
+        echo "Usage: bash deploy.sh <VPN_CIDR>"
+        echo "Example: bash deploy.sh \"10.0.0.0/8\""
+        exit 1
+    fi
+
     SG_ALB_WEB_ID=$(aws ec2 create-security-group \
         --group-name "$SG_ALB_WEB_NAME" \
         --description "Allow HTTP from VPN to deep-insight-web ALB" \
@@ -215,8 +215,10 @@ if [ -z "$SG_ALB_WEB_ID" ] || [ "$SG_ALB_WEB_ID" = "None" ]; then
         --group-id "$SG_ALB_WEB_ID" \
         --protocol all --cidr 0.0.0.0/0 \
         --region "$REGION" > /dev/null
+    echo "ALB SG: ${SG_ALB_WEB_ID} (inbound: ${VPN_CIDR}:80)"
+else
+    echo "ALB SG: ${SG_ALB_WEB_ID} (already exists)"
 fi
-echo "ALB SG: ${SG_ALB_WEB_ID} (inbound: ${VPN_CIDR}:80)"
 
 # 3b: ECS Security Group (allow traffic from web ALB SG)
 SG_WEB_ID=$(aws ec2 describe-security-groups \
