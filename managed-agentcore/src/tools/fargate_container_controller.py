@@ -527,9 +527,10 @@ class SessionBasedFargateManager:
 
         try:
             # 🍪 Use http_session (includes Sticky Session cookie - per-request isolation)
+            # Include session_id so the container can reject misrouted requests
             response = self.http_session.post(
                 f"http://{self.alb_dns}/execute",
-                json={"code": code},
+                json={"code": code, "session_id": self.current_session['session_id']},
                 timeout=self.CODE_EXECUTION_TIMEOUT  # Increased for large PDF generation and complex data processing
             )
 
@@ -538,7 +539,12 @@ class SessionBasedFargateManager:
                 print(f"✅ Execution completed on fixed container: {result['execution_num']}/{result['total_executions']}", flush=True)
                 return result
             else:
-                self._raise_container_error("NOT RESPONDING", Exception(f"HTTP {response.status_code}"))
+                # Include the container's error message for better diagnostics
+                try:
+                    error_detail = response.json().get('error', response.text[:200])
+                except Exception:
+                    error_detail = response.text[:200]
+                self._raise_container_error("NOT RESPONDING", Exception(f"HTTP {response.status_code} - {error_detail}"))
 
         except requests.exceptions.RequestException as e:
             self._raise_container_error("CONNECTION", e)
@@ -572,7 +578,12 @@ class SessionBasedFargateManager:
                 return {"error": "No HTTP session"}
 
             # 1. Send session completion signal (🍪 use http_session - per-request isolation)
-            response = self.http_session.post(f"http://{self.alb_dns}/session/complete", timeout=self.SESSION_COMPLETE_TIMEOUT)
+            # Include session_id so the container can reject misrouted requests
+            response = self.http_session.post(
+                f"http://{self.alb_dns}/session/complete",
+                json={"session_id": session_id},
+                timeout=self.SESSION_COMPLETE_TIMEOUT
+            )
             result = response.json() if response.status_code == 200 else {}
 
             # 2. Wait for S3 upload

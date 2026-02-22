@@ -129,7 +129,7 @@ class SessionManager:
     def __init__(self):
         self.session_id = os.environ.get('SESSION_ID', str(uuid.uuid4())[:8])
         self.executions = []
-        self.max_executions = 300
+        self.max_executions = 500
         self.start_time = datetime.now()
         self.is_complete = False
         self.workspace = f"/tmp/session_{self.session_id}"
@@ -528,6 +528,17 @@ def execute_code(code_string, execution_num):
 @app.route('/health', methods=['GET'])
 def health():
     """Health check endpoint (for ALB Health Check)"""
+
+    # Return 503 after session completion so ALB stops routing traffic here.
+    # ALB Matcher is configured for HttpCode: 200, so 503 triggers unhealthy status
+    # after UnhealthyThresholdCount (3) consecutive failures.
+    if session_manager.is_complete:
+        return jsonify({
+            "status": "complete",
+            "session_id": session_manager.session_id,
+            "executions_completed": len(session_manager.executions),
+        }), 503
+
     return jsonify({
         "status": "healthy",
         "session_id": session_manager.session_id,
@@ -580,6 +591,13 @@ def execute():
     if not data or 'code' not in data:
         return jsonify({"error": "No code provided"}), 400
 
+    # Reject requests from misrouted runtimes (ALB sticky session failover protection)
+    request_session_id = data.get('session_id')
+    if request_session_id and request_session_id != session_manager.session_id:
+        return jsonify({
+            "error": "Session ID mismatch - request routed to wrong container"
+        }), 403
+
     code = data['code']
     execution_num = len(session_manager.executions) + 1
 
@@ -612,6 +630,17 @@ def execute():
 @app.route('/session/complete', methods=['POST'])
 def complete_session():
     """Force session completion (can terminate before 300 executions)"""
+
+    # Validate session ID to prevent cross-runtime contamination.
+    # When ALB sticky sessions fail over (original target unhealthy),
+    # a different runtime's cleanup request can be misrouted here.
+    data = request.get_json(silent=True) or {}
+    request_session_id = data.get('session_id')
+    if request_session_id and request_session_id != session_manager.session_id:
+        return jsonify({
+            "error": "Session ID mismatch - completion request routed to wrong container"
+        }), 403
+
     session_manager.complete_session()
     return jsonify({
         "message": "Session completed",
