@@ -175,6 +175,7 @@ write_and_execute_tool(
 - Results: ./artifacts/all_results.txt
 - Metadata: ./artifacts/calculation_metadata.json
 - Charts: ./artifacts/*.png
+- ⛔ NEVER create .docx or .pdf files (Reporter agent's responsibility)
 
 **Output Strategy:**
 - ✅ Print summary stats: `print(f"Top 3: {{sales.head(3).to_dict()}}")`
@@ -259,7 +260,7 @@ SUCCESS
 ## Constraints
 <constraints>
 Do NOT:
-- Create PDFs/reports (Reporter's job)
+- Create DOCX, PDF, or any report documents (Reporter's job — only Reporter creates .docx files)
 - Use python_repl_tool (doesn't exist)
 - Assume variables persist between scripts
 - Create charts without korean_font initialization
