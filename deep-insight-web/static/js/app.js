@@ -1,17 +1,19 @@
 // ==================== State ====================
-let currentUploadId = null;
-let currentSessionId = null;
-let currentRequestId = null;
-let countdownTimer = null;
-let analysisStartTime = null;
-let elapsedTimer = null;
-let firstOutputReceived = false;
+var currentUploadId = null;
+var currentSessionId = null;
+var currentRequestId = null;
+var countdownTimer = null;
+var analysisStartTime = null;
+var elapsedTimer = null;
+var firstOutputReceived = false;
+var sseCompleted = false;
+var analysisInProgress = false;  // For concurrent request prevention
 
 // ==================== DOM References ====================
-let uploadForm, uploadBtn, statusDiv, analyzeSection, analyzeBtn, queryInput;
-let outputSection, outputDiv, downloadSection, downloadList;
-let planModal, planText, modalRevision, modalMax, modalCountdown;
-let feedbackInput, approveBtn, rejectBtn;
+var uploadForm, uploadBtn, statusDiv, analyzeSection, analyzeBtn, queryInput;
+var outputSection, outputDiv, downloadSection, downloadList;
+var planModal, planText, modalRevision, modalMax, modalCountdown;
+var feedbackInput, approveBtn, rejectBtn;
 
 function initDOMRefs() {
     uploadForm = document.getElementById("upload-form");

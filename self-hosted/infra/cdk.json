@@ -1,0 +1,21 @@
+{
+  "app": "/Library/Frameworks/Python.framework/Versions/3.11/bin/python3 app.py",
+  "context": {
+    "region": "us-west-2",
+    "instance_type": "t3.xlarge",
+    "admin_email": "",
+    "origin_verify_secret": ""
+  },
+  "watch": {
+    "include": ["**"],
+    "exclude": [
+      "README.md",
+      "cdk*.json",
+      "requirements*.txt",
+      "**/__pycache__",
+      "**/*.pyc",
+      ".git",
+      "node_modules"
+    ]
+  }
+}

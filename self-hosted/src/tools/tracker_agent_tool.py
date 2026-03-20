@@ -132,7 +132,8 @@ def _handle_tracker_agent_tool(completed_agent: Annotated[str, "The name of the 
     
     # Update shared state with tracking results
     shared_state['messages'] = [get_message_from_string(role="user", string=RESPONSE_FORMAT.format("tracker", response["text"]), imgs=[])]
-    shared_state['clues'] = clues
+    from src.graph.nodes import _truncate_clues
+    shared_state['clues'] = _truncate_clues(clues)
     shared_state['history'] = history
     
     # Update the full_plan with the tracked version if the response contains an updated plan

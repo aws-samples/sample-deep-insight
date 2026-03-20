@@ -23,13 +23,27 @@ ENV/
 
 # OS
 .DS_Store
+._*
 Thumbs.db
+
+# Chloe (local notes)
+chloe/
 
 # Temporary files
 deep-insight-web/static/tmp/
 tmp/
 managed-agentcore/artifacts/
 under_development/
+
+# Self-hosted deployment artifacts
+self-hosted/data/uploads/
+self-hosted/infra/cdk.out/
+self-hosted/setup/install-tl-*/
+**/*.backup
+*.png
+!self-hosted/assets/*.png
+!deep-insight-web/static/logo.png
+.env.deploy
 
 # Logs
 *.log

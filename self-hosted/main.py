@@ -34,8 +34,14 @@ def remove_artifact_folder(folder_path="./artifacts/"):
         print(f"'{folder_path}' 폴더가 존재하지 않습니다.")
 
 def _setup_execution():
-    """Initialize execution environment"""
-    remove_artifact_folder()
+    """Initialize execution environment.
+
+    Note: In Web mode, we do NOT delete artifacts — the user may not have downloaded
+    previous reports yet. New analysis overwrites files with the same name.
+    In CLI mode, remove_artifact_folder() can be called separately if needed.
+    """
+    # remove_artifact_folder()  # Disabled for Web compatibility — files are overwritten, not deleted
+    os.makedirs("./artifacts/", exist_ok=True)
     clear_queue()
     print("\n=== Starting Queue-Only Event Stream ===")
 

@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -694,6 +694,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "awscli" },
     { name = "boto3" },
+    { name = "fastapi" },
     { name = "fpdf2" },
     { name = "ipykernel" },
     { name = "jupyter" },
@@ -710,6 +711,7 @@ dependencies = [
     { name = "plotly" },
     { name = "python-docx" },
     { name = "python-dotenv" },
+    { name = "python-multipart" },
     { name = "reportlab" },
     { name = "requests-toolbelt" },
     { name = "sagemaker" },
@@ -719,6 +721,7 @@ dependencies = [
     { name = "strands-agents-tools" },
     { name = "streamlit" },
     { name = "termcolor" },
+    { name = "uvicorn" },
     { name = "weasyprint" },
 ]
 
@@ -726,6 +729,7 @@ dependencies = [
 requires-dist = [
     { name = "awscli", specifier = "==1.43.6" },
     { name = "boto3", specifier = "==1.42.0" },
+    { name = "fastapi", specifier = ">=0.115.0" },
     { name = "fpdf2", specifier = "==2.8.5" },
     { name = "ipykernel", specifier = "==7.1.0" },
     { name = "jupyter", specifier = "==1.1.1" },
@@ -742,6 +746,7 @@ requires-dist = [
     { name = "plotly", specifier = "==6.4.0" },
     { name = "python-docx", specifier = "==1.2.0" },
     { name = "python-dotenv", specifier = "==1.2.1" },
+    { name = "python-multipart", specifier = ">=0.0.20" },
     { name = "reportlab", specifier = "==4.4.4" },
     { name = "requests-toolbelt", specifier = "==1.0.0" },
     { name = "sagemaker", specifier = "==2.254.1" },
@@ -751,6 +756,7 @@ requires-dist = [
     { name = "strands-agents-tools", specifier = "==0.2.17" },
     { name = "streamlit", specifier = "==1.51.0" },
     { name = "termcolor", specifier = "==3.2.0" },
+    { name = "uvicorn", specifier = ">=0.34.0" },
     { name = "weasyprint", specifier = "==66.0" },
 ]
 

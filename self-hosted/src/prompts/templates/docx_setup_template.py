@@ -91,18 +91,36 @@ def add_image_with_spacing(document, image_path, figure_num, caption_text):
 
     return figure_num + 1
 
+def get_korean_font_name():
+    """Auto-detect Korean font based on OS"""
+    import platform
+    system = platform.system()
+    if system == 'Darwin':
+        return 'Apple SD Gothic Neo'
+    elif system == 'Windows':
+        return 'Malgun Gothic'
+    else:
+        return 'Nanum Gothic'
+
 def create_document_with_korean_font():
     """Create new DOCX document with Korean font and tight spacing"""
     document = Document()
 
     # Set default Korean font and tight spacing
+    korean_font = get_korean_font_name()
     style = document.styles['Normal']
-    style.font.name = 'Malgun Gothic'
+    style.font.name = korean_font
     style.font.size = Pt(10.5)
     style.paragraph_format.line_spacing_rule = WD_LINE_SPACING.EXACTLY
     style.paragraph_format.line_spacing = Pt(14)
     style.paragraph_format.space_before = Pt(0)
     style.paragraph_format.space_after = Pt(0)
+
+    # Set Korean font on Heading styles (prevents theme fallback to missing fonts)
+    for style_name in ['Heading 1', 'Heading 2', 'Heading 3']:
+        h_style = document.styles[style_name]
+        h_style.font.name = korean_font
+        h_style.element.rPr.rFonts.set(qn("w:eastAsia"), korean_font)
 
     return document
 

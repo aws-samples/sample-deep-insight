@@ -123,7 +123,15 @@ User Query + Data Files (CSV, JSON)
 
 ```
 .
-├── main.py                  # Entry point for agent execution
+├── main.py                  # CLI entry point (local mode)
+├── web/                     # Web server (AWS deployment mode)
+│   ├── app.py               # FastAPI server with SSE streaming
+│   ├── event_adapter.py     # Engine event → SSE event adapter
+│   └── hitl.py              # Human-in-the-loop plan review
+├── infra/                   # AWS CDK infrastructure
+│   ├── app.py               # CDK app entry point
+│   ├── cdk.json             # CDK config (region, instance_type, etc.)
+│   └── stacks/              # CloudFront + ALB + EC2 + Cognito
 ├── src/
 │   ├── graph/               # Multi-agent workflow definitions
 │   │   ├── builder.py       # Graph construction with Strands SDK
@@ -135,13 +143,11 @@ User Query + Data Files (CSV, JSON)
 │   │   └── tracker_agent_tool.py
 │   ├── prompts/             # System prompts (*.md files)
 │   └── utils/               # Utilities (event queue, strands utils)
-├── app/                     # Streamlit web interface
-│   └── app.py
 ├── setup/                   # Environment setup
 │   ├── create-uv-env.sh
 │   └── pyproject.toml
 ├── data/                    # Sample CSV data files
-└── gepa-optimizer/          # Prompt optimization toolkit
+└── skills/                  # Skill templates
 ```
 
 ---
@@ -220,6 +226,111 @@ REPORTER_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
 > **Finding other models**: Use `aws bedrock list-foundation-models --query "modelSummaries[?providerName=='Anthropic'].[modelId,modelName]" --output table` or see [Amazon Bedrock Model IDs](https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html)
 
 Changes take effect immediately (no rebuild required).
+
+---
+
+## 🌐 Web Deployment (AWS)
+
+Deploy to AWS and access via browser. Architecture: `Browser → CloudFront → ALB → EC2 (FastAPI)`.
+
+### Prerequisites
+
+- AWS CDK CLI **2.1107.0+** (`npm install -g aws-cdk@latest`)
+- Python 3.12+, Node.js 18+, AWS CLI v2
+
+### Deploy
+
+```bash
+# 1. Configure — set your email, origin_verify_secret auto-generates on first deploy
+cd self-hosted/infra
+# Edit cdk.json: set "admin_email" to your email
+
+# 2. Infrastructure
+pip install -r requirements.txt
+cdk bootstrap aws://ACCOUNT_ID/REGION
+cdk deploy --all
+# → Note the outputs: CloudFrontURL, Ec2InstanceId, OriginVerifySecret, etc.
+
+# 3. App code → EC2
+cd ../..  # back to sample-deep-insight/
+COPYFILE_DISABLE=1 tar czf /tmp/deep-insight-deploy.tar.gz \
+  --exclude='__pycache__' --exclude='.venv' --exclude='*.pyc' \
+  --exclude='artifacts/*.png' --exclude='artifacts/*.docx' --exclude='artifacts/*.txt' \
+  --exclude='artifacts/*.json' --exclude='data/uploads/*' \
+  --exclude='infra/cdk.out' --exclude='setup/.venv' \
+  --exclude='setup/install-tl-*' --exclude='._*' \
+  --exclude='.git' --exclude='*.backup' \
+  self-hosted/ deep-insight-web/
+
+aws s3 cp /tmp/deep-insight-deploy.tar.gz \
+  s3://cdk-hnb659fds-assets-ACCOUNT_ID-REGION/deploy/deep-insight-deploy.tar.gz
+
+aws ssm send-command --instance-ids EC2_INSTANCE_ID \
+  --document-name AWS-RunShellScript \
+  --parameters '{"commands":[
+    "aws s3 cp s3://cdk-hnb659fds-assets-ACCOUNT_ID-REGION/deploy/deep-insight-deploy.tar.gz /tmp/deploy.tar.gz --region REGION",
+    "tar xzf /tmp/deploy.tar.gz -C /opt/deep-insight/",
+    "export PATH=/root/.local/bin:$PATH && cd /opt/deep-insight/self-hosted/setup && uv sync"
+  ]}' --region REGION
+
+# 4. .env.deploy — fill CDK output values, then start service
+#    (see .env.deploy template below)
+#    systemctl restart deep-insight
+
+# 5. Open CloudFrontURL in browser
+```
+
+### .env.deploy template
+
+Create on EC2 at `/opt/deep-insight/self-hosted/.env.deploy` with CDK output values:
+
+```
+ORIGIN_VERIFY_SECRET=<OriginVerifySecret output>
+COGNITO_DOMAIN=<CognitoDomainURL output>
+COGNITO_CLIENT_ID=<AppClientId output>
+COGNITO_REDIRECT_URI=<CloudFrontURL output>/auth/callback
+COGNITO_USER_POOL_ID=<UserPoolId output>
+WEB_PORT=8080
+AWS_REGION=<your region>
+AWS_DEFAULT_REGION=<your region>
+MAX_PLAN_REVISIONS=10
+DEFAULT_MODEL_ID=us.anthropic.claude-sonnet-4-6
+COORDINATOR_MODEL_ID=us.anthropic.claude-haiku-4-5-20251001-v1:0
+PLANNER_MODEL_ID=us.anthropic.claude-sonnet-4-6
+SUPERVISOR_MODEL_ID=us.anthropic.claude-sonnet-4-6
+CODER_MODEL_ID=us.anthropic.claude-sonnet-4-6
+VALIDATOR_MODEL_ID=us.anthropic.claude-sonnet-4-6
+REPORTER_MODEL_ID=us.anthropic.claude-sonnet-4-6
+TRACKER_MODEL_ID=us.anthropic.claude-sonnet-4-6
+```
+
+> Model ID prefix: `us.anthropic.*` for us-east-1/us-west-2, `global.anthropic.*` for cross-region. Check available IDs: `aws bedrock list-inference-profiles --region REGION`
+
+### Redeploy (code only)
+
+```bash
+# Package + upload (same as step 3), then:
+aws ssm send-command --instance-ids EC2_INSTANCE_ID \
+  --document-name AWS-RunShellScript \
+  --parameters '{"commands":[
+    "aws s3 cp s3://cdk-hnb659fds-assets-ACCOUNT_ID-REGION/deploy/deep-insight-deploy.tar.gz /tmp/deploy.tar.gz --region REGION",
+    "tar xzf /tmp/deploy.tar.gz -C /opt/deep-insight/",
+    "systemctl restart deep-insight"
+  ]}' --region REGION
+```
+
+### Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `schema version mismatch` | `npm install -g aws-cdk@latest` (need CDK CLI 2.1107.0+) |
+| `model identifier is invalid` | Check model ID with `aws bedrock list-inference-profiles` |
+| Logo missing | Ensure tar excludes `artifacts/*.png` not `*.png` |
+| `Reports not available yet` | Check EC2 logs: `journalctl -u deep-insight --since "10 min ago"` |
+
+### Cost (~$176/month)
+
+EC2 t3.xlarge ~$120 + NAT Gateway ~$35 + ALB ~$20 + CloudFront ~$1
 
 ---
 

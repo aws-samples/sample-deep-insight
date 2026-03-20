@@ -628,7 +628,7 @@ textarea::placeholder { color: var(--text-muted); }
     border-radius: var(--radius);
     width: 90%;
     max-width: 700px;
-    max-height: 85vh;
+    max-height: 92vh;
     display: flex;
     flex-direction: column;
     box-shadow: 0 16px 60px rgba(0,0,0,0.5);
@@ -673,7 +673,7 @@ textarea::placeholder { color: var(--text-muted); }
     font-family: var(--font-mono);
     font-size: 0.82rem;
     white-space: pre-wrap;
-    max-height: 40vh;
+    max-height: 65vh;
     overflow-y: auto;
 }
 .modal-actions {
@@ -781,6 +781,8 @@ footer {
     text-align: center;
 }
 .footer-version { color: var(--text-muted); font-size: 0.75rem; }
+.footer-logout { color: var(--text-muted); font-size: 0.75rem; margin-left: 1.5rem; text-decoration: none; }
+.footer-logout:hover { color: var(--text-primary); }
 
 /* ===== Utility ===== */
 .hidden { display: none !important; }

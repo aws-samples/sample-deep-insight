@@ -190,7 +190,8 @@ def _handle_validator_agent_tool(_task: Annotated[str, "The validation task or i
 
     # Update shared state
     shared_state['messages'] = [get_message_from_string(role="user", string=RESPONSE_FORMAT.format("validator", response["text"]), imgs=[])]
-    shared_state['clues'] = clues
+    from src.graph.nodes import _truncate_clues
+    shared_state['clues'] = _truncate_clues(clues)
     shared_state['history'] = history
 
     logger.info(f"\n{Colors.GREEN}Validator Agent Tool completed{Colors.END}")

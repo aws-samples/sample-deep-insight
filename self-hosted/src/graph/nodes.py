@@ -47,6 +47,40 @@ RESPONSE_FORMAT = "Response from {}:\n\n<response>\n{}\n</response>\n\n*Please e
 FULL_PLAN_FORMAT = "Here is full plan :\n\n<full_plan>\n{}\n</full_plan>\n\n*Please consider this to select the next step.*"
 CLUES_FORMAT = "Here is clues from {}:\n\n<clues>\n{}\n</clues>\n\n"
 
+# Maximum characters for clues passed to Supervisor.
+# Each agent appends its full response to clues, causing unbounded growth.
+# Truncating to the most recent entries prevents Bedrock token limit issues.
+MAX_CLUES_CHARS = int(os.getenv("MAX_CLUES_CHARS", "8000"))
+
+def _truncate_clues(clues: str) -> str:
+    """Keep only the most recent clues within MAX_CLUES_CHARS.
+
+    Preserves complete <clues>...</clues> blocks from the end.
+    This prevents Supervisor's context from growing unboundedly
+    while retaining the latest status from each agent.
+    """
+    if len(clues) <= MAX_CLUES_CHARS:
+        return clues
+
+    # Find clues blocks and keep the most recent ones that fit
+    import re
+    blocks = re.findall(r'Here is (?:clues from \w+|updated tracking status):\n\n<(?:clues|tracking_clues)>.*?</(?:clues|tracking_clues)>', clues, re.DOTALL)
+
+    if not blocks:
+        # No structured blocks found, just keep the tail
+        return "...(truncated)\n\n" + clues[-MAX_CLUES_CHARS:]
+
+    # Build from the most recent blocks
+    result_blocks = []
+    total_len = 0
+    for block in reversed(blocks):
+        if total_len + len(block) > MAX_CLUES_CHARS and result_blocks:
+            break
+        result_blocks.insert(0, block)
+        total_len += len(block)
+
+    return "...(earlier clues truncated)\n\n" + "\n\n".join(result_blocks)
+
 def should_handoff_to_planner(_):
     """Check if coordinator requested handoff to planner."""
 
@@ -229,6 +263,9 @@ async def planner_node(task=None, **kwargs):
 # Plan feedback configuration
 MAX_PLAN_REVISIONS = int(os.getenv("MAX_PLAN_REVISIONS", "10"))
 
+# Plugin callback for web mode — set by web/app.py, None in CLI mode
+_plan_review_callback = None
+
 async def plan_reviewer_node(task=None, **kwargs):
     """
     Plan reviewer node that allows user to review and provide feedback on the generated plan.
@@ -265,26 +302,33 @@ async def plan_reviewer_node(task=None, **kwargs):
         log_node_complete("PlanReviewer")
         return {"text": "Plan auto-approved after max revisions", "approved": True}
 
-    # Display plan and ask for user input
-    print(f"\n{Colors.CYAN}{'='*60}{Colors.END}")
-    print(f"{Colors.CYAN}📋 PLAN REVIEW (Revision {revision_count}/{MAX_PLAN_REVISIONS}){Colors.END}")
-    print(f"{Colors.CYAN}{'='*60}{Colors.END}")
-    print(f"\n{full_plan}\n")
-    print(f"{Colors.CYAN}{'='*60}{Colors.END}")
+    # Web mode: delegate to async callback if registered
+    if _plan_review_callback is not None:
+        approved, user_input = await _plan_review_callback(
+            full_plan=full_plan,
+            revision_count=revision_count,
+            max_revisions=MAX_PLAN_REVISIONS,
+        )
+        if approved:
+            user_input = "yes"
+    else:
+        # CLI mode: display plan and ask for user input
+        print(f"\n{Colors.CYAN}{'='*60}{Colors.END}")
+        print(f"{Colors.CYAN}📋 PLAN REVIEW (Revision {revision_count}/{MAX_PLAN_REVISIONS}){Colors.END}")
+        print(f"{Colors.CYAN}{'='*60}{Colors.END}")
+        print(f"\n{full_plan}\n")
+        print(f"{Colors.CYAN}{'='*60}{Colors.END}")
 
-    # Get user input
-    print(f"\n{Colors.YELLOW}Please review the plan above.{Colors.END}")
-    print(f"  - Press {Colors.GREEN}Enter{Colors.END} or type '{Colors.GREEN}yes{Colors.END}' to approve and proceed")
-    print(f"  - Type your {Colors.YELLOW}feedback{Colors.END} to request revisions ({MAX_PLAN_REVISIONS - revision_count} revision(s) remaining)")
-    print()
+        print(f"\n{Colors.YELLOW}Please review the plan above.{Colors.END}")
+        print(f"  - Press {Colors.GREEN}Enter{Colors.END} or type '{Colors.GREEN}yes{Colors.END}' to approve and proceed")
+        print(f"  - Type your {Colors.YELLOW}feedback{Colors.END} to request revisions ({MAX_PLAN_REVISIONS - revision_count} revision(s) remaining)")
+        print()
 
-    try:
-        # Import readline for proper terminal input handling (backspace, delete, arrow keys)
-        import readline  # noqa: F401
-        user_input = input("Your response: ").strip()
-    except EOFError:
-        # Non-interactive mode - auto-approve
-        user_input = "yes"
+        try:
+            import readline  # noqa: F401
+            user_input = input("Your response: ").strip()
+        except EOFError:
+            user_input = "yes"
 
     # Process user response
     if user_input.lower() in ['', 'yes', 'y', 'approve', 'ok', 'proceed']:
@@ -335,7 +379,10 @@ async def supervisor_node(task=None, **kwargs):
     )
 
     clues, full_plan, messages = shared_state.get("clues", ""), shared_state.get("full_plan", ""), shared_state["messages"]
-    message_text = '\n\n'.join([messages[-1]["content"][-1]["text"], FULL_PLAN_FORMAT.format(full_plan), clues])
+    truncated_clues = _truncate_clues(clues)
+    if len(clues) != len(truncated_clues):
+        logger.info(f"Clues truncated: {len(clues)} -> {len(truncated_clues)} chars")
+    message_text = '\n\n'.join([messages[-1]["content"][-1]["text"], FULL_PLAN_FORMAT.format(full_plan), truncated_clues])
 
     # Create message with cache point for messages caching
     # This caches the large context (full_plan, clues) for cost savings

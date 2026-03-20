@@ -70,18 +70,45 @@ function removeStreamingIndicator() {
 }
 
 // ==================== Output ====================
+var MAX_OUTPUT_NODES = 500;  // Keep only last N nodes to prevent DOM bloat
+var pendingOutput = [];
+var flushScheduled = false;
+
+function _flushOutput() {
+    flushScheduled = false;
+    if (pendingOutput.length === 0) return;
+
+    removeStreamingIndicator();
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < pendingOutput.length; i++) {
+        var item = pendingOutput[i];
+        var span = document.createElement("span");
+        span.className = item.cls || "";
+        span.textContent = item.text;
+        frag.appendChild(span);
+    }
+    pendingOutput = [];
+    outputDiv.appendChild(frag);
+
+    // Trim old nodes to prevent browser freeze
+    while (outputDiv.childNodes.length > MAX_OUTPUT_NODES) {
+        outputDiv.removeChild(outputDiv.firstChild);
+    }
+
+    showStreamingIndicator();
+    outputDiv.scrollTop = outputDiv.scrollHeight;
+}
+
 function appendOutput(text, className) {
     if (!firstOutputReceived) {
         firstOutputReceived = true;
         document.getElementById("output-info").classList.add("hidden");
     }
-    removeStreamingIndicator();
-    const span = document.createElement("span");
-    span.className = className || "";
-    span.textContent = text;
-    outputDiv.appendChild(span);
-    showStreamingIndicator();
-    outputDiv.scrollTop = outputDiv.scrollHeight;
+    pendingOutput.push({ text: text, cls: className });
+    if (!flushScheduled) {
+        flushScheduled = true;
+        requestAnimationFrame(_flushOutput);
+    }
 }
 
 function stopElapsedTimer() {
@@ -93,7 +120,12 @@ function initAnalyze() {
     analyzeBtn.addEventListener("click", async () => {
         const query = queryInput.value.trim();
         if (!query || !currentUploadId) return;
+        if (analysisInProgress) {
+            alert(currentLang === "ko" ? "분석이 이미 진행 중입니다." : "Analysis is already in progress.");
+            return;
+        }
 
+        analysisInProgress = true;
         analyzeBtn.disabled = true;
         outputSection.classList.remove("hidden");
         outputDiv.textContent = "";
@@ -111,18 +143,51 @@ function initAnalyze() {
             elapsedEl.textContent = ` (${m}:${s.toString().padStart(2, "0")})`;
         }, 1000);
 
+        // Track last event time for stale connection detection
+        var lastEventTime = Date.now();
+        var sseDisconnectTime = null;
+        sseCompleted = false;
+        var stallCheckTimer = null;
+
+        // Polling fallback: if no SSE event for 60s, check if reports are ready
+        stallCheckTimer = setInterval(async function () {
+            if (sseCompleted) { clearInterval(stallCheckTimer); return; }
+            if (Date.now() - lastEventTime > 60000) {
+                if (!sseDisconnectTime) {
+                    sseDisconnectTime = new Date(lastEventTime);
+                    stopElapsedTimer();
+                }
+                appendOutput(currentLang === "ko" ? "\n[리포트 확인 중...]\n" : "\n[Checking for reports...]\n", "event-text");
+                var found = await fetchArtifacts(currentUploadId);
+                if (found) {
+                    sseCompleted = true;
+                    clearInterval(stallCheckTimer);
+                    removeStreamingIndicator();
+                    appendOutput(currentLang === "ko" ? "\n[분석 완료 — 리포트가 준비되었습니다]\n" : "\n[Analysis complete — reports ready]\n", "event-done");
+                    var elapsed = ((sseDisconnectTime - analysisStartTime) / 1000).toFixed(1);
+                    appendOutput("Elapsed: " + elapsed + "s (" + (elapsed / 60).toFixed(1) + "min)\n", "event-done");
+                    removeStreamingIndicator();
+                }
+            }
+        }, 30000);
+
         try {
             const res = await fetch("/analyze", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ upload_id: currentUploadId, query }),
             });
+            if (res.status === 429) {
+                appendOutput(currentLang === "ko" ? "\n[다른 분석이 진행 중입니다. 완료 후 다시 시도해주세요]\n" : "\n[Another analysis is in progress. Please try again later]\n", "event-error");
+                return;
+            }
             const reader = res.body.getReader();
             const decoder = new TextDecoder();
             let buffer = "";
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
+                lastEventTime = Date.now();
                 buffer += decoder.decode(value, { stream: true });
                 const lines = buffer.split("\n");
                 buffer = lines.pop();
@@ -132,12 +197,26 @@ function initAnalyze() {
                 }
             }
         } catch (err) {
-            stopElapsedTimer();
-            removeStreamingIndicator();
-            appendOutput("\nError: " + err.message + "\n", "event-error");
+            // SSE connection lost — record disconnect time and check for reports
+            if (!sseCompleted) {
+                if (!sseDisconnectTime) sseDisconnectTime = new Date(lastEventTime);
+                stopElapsedTimer();
+                appendOutput(currentLang === "ko" ? "\n[연결이 끊어졌습니다. 리포트 확인 중...]\n" : "\n[Connection lost. Checking for reports...]\n", "event-error");
+                var found = await fetchArtifacts(currentUploadId);
+                if (found) {
+                    sseCompleted = true;
+                    appendOutput(currentLang === "ko" ? "[리포트가 준비되었습니다]\n" : "[Reports ready]\n", "event-done");
+                    var elapsed = ((sseDisconnectTime - analysisStartTime) / 1000).toFixed(1);
+                    appendOutput("Elapsed: " + elapsed + "s (" + (elapsed / 60).toFixed(1) + "min)\n", "event-done");
+                } else {
+                    appendOutput(currentLang === "ko" ? "[아직 처리 중입니다. 잠시 후 새로고침 해주세요]\n" : "[Still processing. Please refresh later]\n", "event-error");
+                }
+            }
             removeStreamingIndicator();
         } finally {
+            if (stallCheckTimer) clearInterval(stallCheckTimer);
             removeStreamingIndicator();
+            analysisInProgress = false;
             analyzeBtn.disabled = false;
         }
     });
@@ -161,11 +240,21 @@ function handleSSEEvent(event) {
         case "agent_reasoning_stream": appendOutput(event.text, "event-reasoning"); break;
         case "workflow_complete":
             currentSessionId = event.session_id || null;
+            sseCompleted = true;
             stopElapsedTimer();
             removeStreamingIndicator();
             appendOutput("\n[Analysis complete]\n", "event-done");
             removeStreamingIndicator();
-            if (currentSessionId) fetchArtifactsWithRetry(currentSessionId);
+            var endTime = new Date();
+            var elapsed = ((endTime - analysisStartTime) / 1000).toFixed(1);
+            appendOutput("Start: " + analysisStartTime.toLocaleTimeString() + "  End: " + endTime.toLocaleTimeString() + "  Elapsed: " + elapsed + "s (" + (elapsed / 60).toFixed(1) + "min)\n", "event-done");
+            // Use filenames from event directly if available (no 15s delay)
+            if (event.filenames && event.filenames.length > 0 && currentSessionId) {
+                renderReportList(event.filenames, currentSessionId);
+                downloadSection.classList.remove("hidden");
+            } else if (currentSessionId) {
+                fetchArtifactsWithRetry(currentSessionId);
+            }
             break;
         case "error":
             stopElapsedTimer();
@@ -298,6 +387,41 @@ function renderReportList(filenames, sessionId) {
         }
         downloadList.appendChild(groupDiv);
     }
+
+    // Add "Delete All Data" button
+    const deleteDiv = document.createElement("div");
+    deleteDiv.style.cssText = "margin-top: 16px; padding-top: 12px; border-top: 1px solid #e5e7eb;";
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "btn-cleanup";
+    deleteBtn.textContent = currentLang === "ko" ? "분석 데이터 전체 삭제" : "Delete All Analysis Data";
+    deleteBtn.style.cssText = "background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px;";
+    deleteBtn.addEventListener("click", async function () {
+        var msg = currentLang === "ko"
+            ? "업로드한 파일과 분석 결과가 모두 삭제됩니다. 계속하시겠습니까?"
+            : "All uploaded files and analysis results will be deleted. Continue?";
+        if (!confirm(msg)) return;
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = currentLang === "ko" ? "삭제 중..." : "Deleting...";
+        try {
+            var res = await fetch("/cleanup/" + encodeURIComponent(sessionId), { method: "DELETE" });
+            var data = await res.json();
+            if (data.success) {
+                downloadList.innerHTML = "";
+                deleteDiv.remove();
+                appendOutput(currentLang === "ko" ? "\n[데이터가 삭제되었습니다]\n" : "\n[Data deleted successfully]\n", "event-done");
+            } else {
+                alert(data.error || "Delete failed");
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = currentLang === "ko" ? "분석 데이터 전체 삭제" : "Delete All Analysis Data";
+            }
+        } catch (err) {
+            alert("Delete failed: " + err.message);
+            deleteBtn.disabled = false;
+            deleteBtn.textContent = currentLang === "ko" ? "분석 데이터 전체 삭제" : "Delete All Analysis Data";
+        }
+    });
+    deleteDiv.appendChild(deleteBtn);
+    downloadList.appendChild(deleteDiv);
 }
 
 async function fetchArtifacts(sessionId) {
