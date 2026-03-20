@@ -9,7 +9,7 @@ from strands.tools.tools import PythonAgentTool
 from strands.types.content import ContentBlock
 from dotenv import load_dotenv
 from src.utils.strands_sdk_utils import strands_utils
-from src.prompts.template import apply_prompt_template
+from src.prompts.template import apply_prompt_template, filter_plan_for_agent
 from src.utils.common_utils import get_message_from_string
 from src.tools.custom_interpreter_write_and_execute_tool import custom_interpreter_write_and_execute_tool
 from src.tools.custom_interpreter_bash_tool import custom_interpreter_bash_tool
@@ -110,6 +110,9 @@ def _handle_reporter_agent_custom_interpreter_tool(task: Annotated[str, "The rep
                 return "Error: Failed to create custom interpreter session"
 
         # Create reporter agent with custom interpreter tools using consistent pattern
+        # Filter plan to only show Reporter tasks
+        reporter_plan = filter_plan_for_agent(full_plan, "reporter")
+
         logger.info(f"{Colors.BLUE}📦 Creating reporter agent with custom interpreter tools{Colors.END}")
         reporter_agent = strands_utils.get_agent(
             agent_name="reporter",  # 기존 이름 유지
@@ -117,7 +120,7 @@ def _handle_reporter_agent_custom_interpreter_tool(task: Annotated[str, "The rep
                 prompt_name="reporter",
                 prompt_context={
                     "USER_REQUEST": request_prompt,
-                    "FULL_PLAN": full_plan,
+                    "FULL_PLAN": reporter_plan,
                     "EXECUTION_ENVIRONMENT": "Custom code interpreter (isolated containers with automatic S3 upload for PDFs and charts)"
                 }
             ),

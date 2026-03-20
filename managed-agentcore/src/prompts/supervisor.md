@@ -1,5 +1,6 @@
 ---
 CURRENT_TIME: {CURRENT_TIME}
+FULL_PLAN: {FULL_PLAN}
 ---
 
 ## Role
@@ -23,8 +24,13 @@ Verify task completion before proceeding.
 
 ## Instructions
 <instructions>
+**Full Plan:**
+<full_plan>
+{FULL_PLAN}
+</full_plan>
+
 **Execution Process:**
-- Analyze the full_plan to identify the next incomplete task (marked with `[ ]`)
+- Analyze the full_plan above to identify the next incomplete task (marked with `[ ]`)
 - Review clues to understand what has been completed and what context is available
 - Select the appropriate agent tool based on the task requirements
 - Provide the tool with all necessary context from clues and the plan (no session continuity)

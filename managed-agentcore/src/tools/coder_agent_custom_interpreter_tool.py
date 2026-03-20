@@ -9,7 +9,7 @@ from strands.tools.tools import PythonAgentTool
 from strands.types.content import ContentBlock
 from dotenv import load_dotenv
 from src.utils.strands_sdk_utils import strands_utils
-from src.prompts.template import apply_prompt_template
+from src.prompts.template import apply_prompt_template, filter_plan_for_agent
 from src.utils.common_utils import get_message_from_string
 from src.tools.custom_interpreter_write_and_execute_tool import custom_interpreter_write_and_execute_tool
 from src.tools.custom_interpreter_bash_tool import custom_interpreter_bash_tool
@@ -104,10 +104,13 @@ def _handle_coder_agent_custom_interpreter_tool(task: Annotated[str, "The coding
             if not fargate_manager.ensure_session():
                 return "Error: Failed to create custom interpreter session"
 
+        # Filter plan to only show Coder tasks (prevents Coder from seeing Reporter's "create DOCX" task)
+        coder_plan = filter_plan_for_agent(full_plan, "coder")
+
         # Create coder agent with custom interpreter tools using consistent pattern
         coder_agent = strands_utils.get_agent(
             agent_name="coder",
-            system_prompts=apply_prompt_template(prompt_name="coder", prompt_context={"USER_REQUEST": request_prompt, "FULL_PLAN": full_plan}),
+            system_prompts=apply_prompt_template(prompt_name="coder", prompt_context={"USER_REQUEST": request_prompt, "FULL_PLAN": coder_plan}),
             model_id=os.getenv("CODER_MODEL_ID", os.getenv("DEFAULT_MODEL_ID")),
             enable_reasoning=False,
             prompt_cache_info=(True, "default"),  # reasoning agent uses prompt caching

@@ -290,7 +290,9 @@ async def planner_node(task=None, **kwargs):
         response = {"text": full_text}
 
         # Update shared global state
-        shared_state['messages'] = [get_message_from_string(role="user", string=response["text"], imgs=[])]
+        # Store user's original request as message (not the plan) — prevents plan from leaking
+        # to downstream agents via shared_state["messages"]. Plan lives in shared_state["full_plan"] only.
+        shared_state['messages'] = [get_message_from_string(role="user", string=shared_state.get("request_prompt", ""), imgs=[])]
         shared_state['full_plan'] = response["text"]
         shared_state['history'].append({"agent":"planner", "message": response["text"]})
 
@@ -459,9 +461,12 @@ async def supervisor_node(task=None, **kwargs):
             logger.warning("No shared state found in global storage")
             return None, {"text": "No shared state available"}
 
+        clues, full_plan = shared_state.get("clues", ""), shared_state.get("full_plan", "")
+        request_prompt = shared_state.get("request_prompt", "")
+
         agent = strands_utils.get_agent(
             agent_name="supervisor",
-            system_prompts=apply_prompt_template(prompt_name="supervisor", prompt_context={}),
+            system_prompts=apply_prompt_template(prompt_name="supervisor", prompt_context={"FULL_PLAN": full_plan}),
             model_id=os.getenv("SUPERVISOR_MODEL_ID", os.getenv("DEFAULT_MODEL_ID")),
             enable_reasoning=False,
             prompt_cache_info=(True, "default"),  # enable prompt caching for reasoning agent
@@ -470,8 +475,9 @@ async def supervisor_node(task=None, **kwargs):
             streaming=True,
         )
 
-        clues, full_plan, messages = shared_state.get("clues", ""), shared_state.get("full_plan", ""), shared_state["messages"]
-        message_text = '\n\n'.join([messages[-1]["content"][-1]["text"], FULL_PLAN_FORMAT.format(full_plan), clues])
+        # User message carries only the user request + clues (no plan).
+        # Plan is in the system prompt only — prevents leaking to downstream agents via shared_state["messages"].
+        message_text = '\n\n'.join([request_prompt, clues])
 
         # Create message with cache point for messages caching
         # This caches the large context (full_plan, clues) for cost savings

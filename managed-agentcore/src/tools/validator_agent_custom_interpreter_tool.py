@@ -9,7 +9,7 @@ from strands.tools.tools import PythonAgentTool
 from strands.types.content import ContentBlock
 from dotenv import load_dotenv
 from src.utils.strands_sdk_utils import strands_utils
-from src.prompts.template import apply_prompt_template
+from src.prompts.template import apply_prompt_template, filter_plan_for_agent
 from src.utils.common_utils import get_message_from_string
 from src.tools.custom_interpreter_write_and_execute_tool import custom_interpreter_write_and_execute_tool
 from src.tools.custom_interpreter_bash_tool import custom_interpreter_bash_tool
@@ -152,6 +152,9 @@ def _handle_validator_agent_custom_interpreter_tool(task: Annotated[str, "The va
                 return "Error: Failed to create custom interpreter session"
 
         # Create validator agent with custom interpreter tools using consistent pattern
+        # Filter plan to only show Validator tasks
+        validator_plan = filter_plan_for_agent(full_plan, "validator")
+
         logger.info(f"{Colors.BLUE}📦 Creating validator agent with custom interpreter tools{Colors.END}")
         validator_agent = strands_utils.get_agent(
             agent_name="validator",
@@ -159,7 +162,7 @@ def _handle_validator_agent_custom_interpreter_tool(task: Annotated[str, "The va
                 prompt_name="validator",
                 prompt_context={
                     "USER_REQUEST": request_prompt,
-                    "FULL_PLAN": full_plan,
+                    "FULL_PLAN": validator_plan,
                     "EXECUTION_ENVIRONMENT": "AWS Fargate (isolated containers with automatic lifecycle management)"
                 }
             ),

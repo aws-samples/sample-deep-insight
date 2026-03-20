@@ -18,4 +18,5 @@ dependencies = [
     "fastapi>=0.129.0",
     "uvicorn>=0.38.0",
     "python-multipart>=0.0.20",
+    "fastmcp>=2.10.0",
 ]
