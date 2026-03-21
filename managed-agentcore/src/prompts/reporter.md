@@ -63,17 +63,35 @@ def load_or_create_docx(path='./artifacts/report_draft.docx'):
     for s in doc.sections:
         s.top_margin = s.bottom_margin = Cm(2.54)
         s.left_margin = s.right_margin = Cm(3.17)
+    # Set default font for Normal and Heading styles (cross-platform Korean support)
+    font_name = get_korean_font_name()
+    for style_name in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3']:
+        style = doc.styles[style_name]
+        style.font.name = font_name
+        style.element.rPr.rFonts.set(qn("w:eastAsia"), font_name)
     return doc
 
 def save_docx(doc, path='./artifacts/report_draft.docx'):
     doc.save(path)
     print(f"💾 Saved: {{path}}")
 
+def get_korean_font_name():
+    import platform
+    system = platform.system()
+    if system == 'Darwin':
+        return 'Apple SD Gothic Neo'
+    elif system == 'Windows':
+        return 'Malgun Gothic'
+    else:
+        return 'Nanum Gothic'
+
+KOREAN_FONT = get_korean_font_name()
+
 def apply_korean_font(run, font_size=None, bold=False, italic=False, color=None):
     if font_size: run.font.size = Pt(font_size)
     run.font.bold, run.font.italic = bold, italic
-    run.font.name = "Malgun Gothic"
-    run._element.rPr.rFonts.set(qn("w:eastAsia"), "Malgun Gothic")
+    run.font.name = KOREAN_FONT
+    run._element.rPr.rFonts.set(qn("w:eastAsia"), KOREAN_FONT)
     if color: run.font.color.rgb = color
 
 def section_exists(doc, heading_text):
@@ -208,7 +226,7 @@ print("✅ Final: final_report.docx")
 5. Conclusions (H2) - Bulleted recommendations
 6. References (H2) - Only in "with citations" version
 
-**Typography:** H1: 24pt Bold Blue | H2: 18pt Bold | Body: 10.5pt | Caption: 9pt Italic Gray | Font: Malgun Gothic
+**Typography:** H1: 24pt Bold Blue | H2: 18pt Bold | Body: 10.5pt | Caption: 9pt Italic Gray | Font: Auto-detected (macOS: Apple SD Gothic Neo, Windows: Malgun Gothic, Linux: Nanum Gothic)
 
 </instructions>
 
@@ -295,7 +313,7 @@ write_and_execute_tool(
 - Report covers all analysis from all_results.txt
 - All charts integrated with analysis text (Image → Analysis pattern)
 - Two DOCX versions created (with/without citations)
-- Korean font (Malgun Gothic) applied properly
+- Korean font applied properly (auto-detected per OS)
 - Both files saved to ./artifacts/
 </success_criteria>
 
@@ -307,6 +325,9 @@ Do NOT:
 - Fabricate data not in all_results.txt
 - Include references section in "without citations" version
 - Assume variables persist between scripts
+- Hardcode font names like 'NanumGothic' — ALWAYS use `get_korean_font_name()` from reporter_report_utils
+- Set fonts directly with `run.font.name = 'NanumGothic'` — ALWAYS use `apply_korean_font()` helper
+- Define inline font detection functions — the shared utility already handles this
 
 **Common Errors to Avoid:**
 ```python
@@ -325,6 +346,8 @@ Always:
 - Check section_exists() before adding content
 - Load document at script start
 - Save document at script end
+- Use `apply_korean_font()` for ALL text runs (headings, body, tables, captions)
+- Use `load_or_create_docx()` which auto-sets Korean fonts on Normal + Heading styles
 </constraints>
 
 ## Examples

@@ -112,6 +112,26 @@ def save_calculation_metadata(path="./artifacts/calculation_metadata.json"):
     with open(path, "w", encoding="utf-8") as f:
         json.dump({{"generated_at": datetime.now().isoformat(), "calculations": _calculations}}, f, indent=2, ensure_ascii=False)
     print(f"📊 Saved: {{path}} ({{len(_calculations)}} calculations)")
+
+def setup_korean_font():
+    """Setup matplotlib Korean font (cross-platform). Call ONCE before any chart creation.
+    Returns FontProperties for use in title/label/text fontproperties= argument."""
+    import matplotlib.pyplot as plt
+    import matplotlib.font_manager as fm
+    import platform
+    system = platform.system()
+    if system == "Darwin":
+        candidates = ["Apple SD Gothic Neo", "AppleGothic"]
+    elif system == "Windows":
+        candidates = ["Malgun Gothic", "Nanum Gothic"]
+    else:
+        candidates = ["Nanum Gothic", "Noto Sans CJK KR", "NanumBarunGothic"]
+    available = {{f.name for f in fm.fontManager.ttflist}}
+    font_name = next((c for c in candidates if c in available), candidates[0])
+    plt.rcParams["font.family"] = [font_name]
+    plt.rcParams["axes.unicode_minus"] = False
+    print(f"🔤 Korean font: {{font_name}}")
+    return fm.FontProperties(family=font_name)
 '''
 )
 ```
@@ -120,22 +140,20 @@ def save_calculation_metadata(path="./artifacts/calculation_metadata.json"):
 ```python
 import sys
 sys.path.insert(0, './artifacts/code')
-from coder_analysis_utils import track_calculation, save_calculation_metadata
+from coder_analysis_utils import track_calculation, save_calculation_metadata, setup_korean_font
 
 track_calculation("calc_001", total, "Total sales", "SUM(Amount)",
                  source_file="./data/sales.csv", importance="high")
 save_calculation_metadata()
 ```
 
-**Chart Template (Korean Font):**
+**Chart Template (Korean Font - MUST use setup_korean_font from utils):**
 ```python
 import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
 import lovelyplots
 
-plt.rcParams['font.family'] = ['NanumGothic']
-plt.rcParams['axes.unicode_minus'] = False
-korean_font = fm.FontProperties(family='NanumGothic')
+# IMPORTANT: Always import setup_korean_font from shared utils. NEVER hardcode font names.
+korean_font = setup_korean_font()
 
 fig, ax = plt.subplots(figsize=(9.6, 6), dpi=200)
 ax.bar(x, y)
@@ -266,6 +284,8 @@ Do NOT:
 - Use python_repl_tool (doesn't exist)
 - Assume variables persist between scripts
 - Create charts without korean_font initialization
+- Hardcode font names like 'NanumGothic' — ALWAYS use `setup_korean_font()` from coder_analysis_utils
+- Define inline `_get_korean_font()` functions — the shared utility already handles this
 
 **Common Errors to Avoid:**
 ```python
@@ -301,11 +321,10 @@ write_and_execute_tool(
     content="""
 import sys
 sys.path.insert(0, './artifacts/code')
-from coder_analysis_utils import track_calculation, save_calculation_metadata
+from coder_analysis_utils import track_calculation, save_calculation_metadata, setup_korean_font
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
 import lovelyplots
 import os
 from datetime import datetime
@@ -325,9 +344,8 @@ track_calculation("calc_001", category_sales.sum(), "Total sales", "SUM(Amount)"
 print(f"Top 3: {{category_sales.head(3).to_dict()}}")
 print(f"Total: {{category_sales.sum():,.0f}}")
 
-# Visualization
-plt.rcParams['font.family'] = ['NanumGothic']
-korean_font = fm.FontProperties(family='NanumGothic')
+# Visualization - Korean font from shared utils (NEVER hardcode font names)
+korean_font = setup_korean_font()
 
 fig, ax = plt.subplots(figsize=(9.6, 6), dpi=200)
 bars = ax.bar(category_sales.index, category_sales.values, color='#ff9999')

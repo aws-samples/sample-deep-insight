@@ -154,7 +154,7 @@ const translations = {
     }
 };
 
-let currentLang = "ko";
+var currentLang = "ko";
 
 function toggleLanguage() {
     currentLang = currentLang === "ko" ? "en" : "ko";
