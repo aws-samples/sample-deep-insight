@@ -8,6 +8,8 @@ handling HITL plan review, and downloading generated reports.
 import json
 import logging
 import os
+import queue
+import threading
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -229,8 +231,36 @@ async def upload(
 # ---------- Feature 4: Analysis + SSE streaming ----------
 
 
+# SSE keepalive interval in seconds. Must be shorter than CloudFront's default
+# Origin Read Timeout (60s) to prevent proxy idle disconnections.
+SSE_KEEPALIVE_INTERVAL = 30
+
+
+def _read_agentcore_events(response, event_queue):
+    """Read AgentCore SSE stream in a background thread and enqueue parsed events.
+
+    iter_lines() is a blocking call, so it must run in a separate thread
+    to allow the main generator to yield keepalive comments.
+    """
+    try:
+        for event_bytes in response["response"].iter_lines(chunk_size=1):
+            event_data = parse_sse_data(event_bytes)
+            if event_data is not None:
+                event_queue.put(event_data)
+    except Exception as e:
+        event_queue.put({"type": "error", "text": str(e)})
+    finally:
+        event_queue.put(None)  # End-of-stream sentinel
+
+
 def agentcore_sse_generator(query: str, data_directory: str, upload_id: str = ""):
-    """Call AgentCore Runtime and yield SSE events for the browser."""
+    """Call AgentCore Runtime and yield SSE events for the browser.
+
+    To prevent proxy idle timeout disconnections (e.g., CloudFront Origin Read
+    Timeout of 60s), this generator sends an SSE comment (": keepalive") every
+    SSE_KEEPALIVE_INTERVAL seconds when no real events are available.
+    Browsers ignore SSE comments per the W3C spec, so this has no side effects.
+    """
     if not RUNTIME_ARN:
         yield format_sse({"type": "error", "text": "RUNTIME_ARN not configured"})
         return
@@ -252,12 +282,32 @@ def agentcore_sse_generator(query: str, data_directory: str, upload_id: str = ""
             yield format_sse({"type": "error", "text": f"Unexpected content type: {content_type}"})
             return
 
-        for event_bytes in response["response"].iter_lines(chunk_size=1):
-            event_data = parse_sse_data(event_bytes)
-            if event_data is None:
+        # Read events in a background thread so the main generator can
+        # yield keepalive comments during long idle periods.
+        event_queue = queue.Queue()
+        reader_thread = threading.Thread(
+            target=_read_agentcore_events, args=(response, event_queue), daemon=True
+        )
+        reader_thread.start()
+
+        while True:
+            try:
+                event_data = event_queue.get(timeout=SSE_KEEPALIVE_INTERVAL)
+            except queue.Empty:
+                # No event within the interval — send SSE comment to keep
+                # the connection alive through proxies.
+                yield ": keepalive\n\n"
                 continue
 
+            if event_data is None:
+                break  # End-of-stream sentinel from reader thread
+
             event_type = event_data.get("type") or event_data.get("event_type") or "unknown"
+
+            # Track failures from the reader thread so the ops dashboard
+            # (DynamoDB job tracking) records them correctly.
+            if event_type == "error":
+                track_job_failure(upload_id, event_data.get("text", "unknown error"))
 
             if event_type == "plan_review_request":
                 yield format_sse({

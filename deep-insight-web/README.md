@@ -12,7 +12,7 @@ Web UI for Deep Insight — a FastAPI server that connects to the Managed AgentC
 
 - **Browser-Based**: Upload data, review plans, download reports — no CLI needed
 - **Bilingual**: Korean / English language support
-- **Secure**: Internet-facing ALB restricted to VPN CIDR
+- **Secure**: Two deployment options — VPN CIDR or CloudFront + Cognito auth
 
 <img src="../docs/front-end/images/web-ui.png" alt="Deep Insight Web UI" width="600"/>
 
@@ -29,15 +29,25 @@ Web UI for Deep Insight — a FastAPI server that connects to the Managed AgentC
 
 > **Important**: The Web UI requires a running Managed AgentCore deployment. The `managed-agentcore/.env` file must exist with `RUNTIME_ARN`, `AWS_REGION`, and `S3_BUCKET_NAME` configured.
 
-### Production Deployment
+### Deployment Options
+
+Two deployment methods are available:
+
+| | Option A: VPN CIDR | Option B: CloudFront + Cognito |
+|---|---------------------|-------------------------------|
+| **Script** | `deploy.sh` | `deploy-cloudfront.sh` |
+| **Access** | VPN users only | Anyone with Cognito credentials |
+| **ALB SG** | VPN CIDR inbound | CloudFront managed prefix list |
+| **Auth** | Network-level (VPN) | Cognito User Pool (Lambda@Edge) |
+| **HTTPS** | No (HTTP via VPN) | Yes (CloudFront terminates TLS) |
+| **Best for** | Internal teams on VPN | External demos, customer PoCs |
+
+### Option A: VPN CIDR (direct ALB)
 
 ```bash
 cd deep-insight-web
 
-# Deploy (ECR, Docker build/push, ALB, ECS)
-# VPN_CIDR restricts ALB access to your VPN's IP range (only users on the VPN can reach the Web UI)
-# Usage: bash deploy.sh <VPN_CIDR>
-# Example: bash deploy.sh "10.0.0.0/8"
+# Deploy with VPN CIDR restriction
 bash deploy.sh "<YOUR_VPN_CIDR>"
 
 # Wait for service to stabilize
@@ -46,24 +56,48 @@ aws ecs wait services-stable \
   --services deep-insight-web-service \
   --region us-west-2
 
-# Clean up all resources
+# Clean up
 bash deploy.sh cleanup
 ```
 
+### Option B: CloudFront + Cognito (recommended)
+
+```bash
+cd deep-insight-web
+
+# Deploy with CloudFront (ALB restricted to CloudFront prefix list only)
+bash deploy-cloudfront.sh
+
+# Wait for service to stabilize
+aws ecs wait services-stable \
+  --cluster deep-insight-cluster-prod \
+  --services deep-insight-web-service \
+  --region us-west-2
+
+# (Optional) Add Cognito authentication
+bash add-cognito-auth.sh <CLOUDFRONT_DISTRIBUTION_ID>
+
+# Clean up (removes CloudFront, ALB, ECS, and all resources)
+bash deploy-cloudfront.sh cleanup
+```
+
+> **Security**: `deploy-cloudfront.sh` uses the CloudFront managed prefix list (`pl-82a045eb`) instead of `0.0.0.0/0` for the ALB security group. This prevents DyePack/Epoxy auto-mitigation incidents.
+
 > **Note**: Do NOT test during rolling deployment — the old ECS task gets killed mid-stream.
 
-### What `deploy.sh` Does
+### What the deploy scripts do
 
-The script handles all infrastructure in a single run:
+Both scripts handle all infrastructure in a single run:
 
 1. **ECR Repository** — Creates container registry
-2. **Docker Build + Push** — Builds image natively (arm64 on Graviton, x86 on Intel) and pushes to ECR
-3. **Security Groups** — ALB SG (VPN CIDR inbound on port 80), ECS SG, VPC endpoint rules
+2. **Docker Build + Push** — Auto-detects platform (arm64/x86) and pushes to ECR
+3. **Security Groups** — ALB SG (VPN CIDR *or* CloudFront prefix list), ECS SG, VPC endpoint rules
 4. **ALB + Target Group + Listener** — Internet-facing ALB with 3600s idle timeout for long analysis sessions
 5. **IAM Task Role** — Least-privilege permissions (S3 upload/feedback/artifacts, AgentCore invoke)
 6. **CloudWatch Log Group** — Container logging
-7. **ECS Task Definition** — Fargate ARM64 (Graviton2), 256 CPU / 512 MB
+7. **ECS Task Definition** — Fargate (auto-detects ARM64 or X86_64), 256 CPU / 512 MB
 8. **ECS Service** — Creates or updates with rolling deployment
+9. **CloudFront** — *(Option B only)* Creates distribution with ALB origin
 
 ---
 
@@ -87,17 +121,30 @@ The script handles all infrastructure in a single run:
 
 ## Architecture
 
+**Option A: VPN CIDR**
+
 ```
-Browser ←─ SSE ──→ FastAPI (deep-insight-web)
-                        │
-                        ├── boto3.invoke_agent_runtime() ──→ AgentCore Runtime
-                        │        (SSE streaming, 3600s timeout)
-                        │
-                        └── S3 ──→ File upload / HITL feedback / Report download
+Browser --> ALB (VPN CIDR SG) --> ECS Fargate (FastAPI)
+                                      |
+                                      +-- AgentCore Runtime (SSE streaming)
+                                      +-- S3 (upload / feedback / artifacts)
+```
+
+**Option B: CloudFront + Cognito**
+
+```
+Browser --> CloudFront (HTTPS) --> Lambda@Edge (Cognito auth)
+                                       |
+                                       v (authenticated)
+                                  ALB (CF prefix list SG) --> ECS Fargate (FastAPI)
+                                                                  |
+                                                                  +-- AgentCore Runtime
+                                                                  +-- S3
 ```
 
 - **AgentCore Native Protocol**: `boto3.invoke_agent_runtime()` with SSE streaming
-- **HITL flow**: `plan_review_request` SSE event → browser modal → `POST /feedback` → S3 → AgentCore polls
+- **SSE keepalive**: Sends `: keepalive` comments every 30s to prevent proxy idle timeout
+- **HITL flow**: `plan_review_request` SSE event -> browser modal -> `POST /feedback` -> S3 -> AgentCore polls
 - **Env vars**: Reuses `managed-agentcore/.env` (no separate `.env.example`)
 
 ---
