@@ -14,7 +14,7 @@ dependencies = [
     "strands-agents==1.19.0",
     "strands-agents-tools==0.2.17",
     "mcp==1.23.0",
-    "streamlit==1.51.0",
+    "streamlit==1.54.0",
     "requests-toolbelt==1.0.0",
     "sagemaker==2.254.1",
     "awscli==1.43.6",
