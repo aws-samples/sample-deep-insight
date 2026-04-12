@@ -130,7 +130,17 @@
                 </div>
                 <div class="field">
                     <label for="col-def"><span data-i18n="upload_coldef_label">컬럼 정의</span> <span class="tag-recommended" data-i18n="upload_coldef_tag">권장</span></label>
-                    <div class="drop-zone drop-zone-sm" id="drop-zone-coldef">
+                    <div id="selected-coldef" class="hidden"></div>
+                    <!-- Auto-generate (Primary) — shown when data file selected, no coldef -->
+                    <div id="coldef-autogen-area" class="hidden">
+                        <button type="button" id="coldef-autogen-btn" class="btn btn-autogen-primary" data-i18n="coldef_autogen_btn">🤖 컬럼 정의 자동 생성</button>
+                        <div class="coldef-autogen-desc" data-i18n="coldef_autogen_desc">업로드한 데이터 파일을 기반으로 AI가 컬럼 정의를 자동 생성합니다</div>
+                        <div id="coldef-autogen-status" class="hidden"></div>
+                    </div>
+                    <!-- "or" divider — shown when autogen area is visible -->
+                    <div id="coldef-manual-divider" class="autogen-divider hidden"><span data-i18n="coldef_or">또는</span></div>
+                    <!-- Manual upload (Secondary) -->
+                    <div class="drop-zone drop-zone-sm drop-zone-secondary" id="drop-zone-coldef">
                         <input type="file" id="col-def" accept=".json">
                         <div class="drop-zone-icon">📄</div>
                         <div class="drop-zone-text">
@@ -138,7 +148,24 @@
                         </div>
                         <div class="drop-zone-hint" data-i18n="upload_coldef_hint">컬럼의 도메인 고유 의미와 수식을 정의하는 JSON 파일</div>
                     </div>
-                    <div id="selected-coldef" class="hidden"></div>
+                    <!-- Review panel for generated column definitions -->
+                    <div id="coldef-review-panel" class="hidden coldef-review-panel">
+                        <div class="coldef-review-header">
+                            <span class="coldef-review-title" data-i18n="coldef_review_title">생성된 컬럼 정의</span>
+                            <div class="coldef-review-actions-top">
+                                <button type="button" id="coldef-view-toggle-btn" class="btn btn-sm btn-outline btn-view-active" data-i18n="coldef_view_table">📊 테이블</button>
+                                <button type="button" id="coldef-regen-btn" class="btn btn-sm btn-outline" data-i18n="coldef_regen_btn">🔄 재생성</button>
+                                <button type="button" id="coldef-edit-toggle-btn" class="btn btn-sm btn-outline" data-i18n="coldef_edit_btn">✏️ 직접 수정</button>
+                            </div>
+                        </div>
+                        <div id="coldef-review-table" class="coldef-review-table"></div>
+                        <textarea id="coldef-review-editor" class="coldef-review-editor hidden" rows="12"></textarea>
+                        <pre id="coldef-review-preview" class="coldef-review-preview hidden"></pre>
+                        <div class="coldef-review-actions">
+                            <button type="button" id="coldef-confirm-btn" class="btn btn-green" data-i18n="coldef_confirm_btn">✓ 이 정의 사용</button>
+                            <button type="button" id="coldef-cancel-btn" class="btn btn-sm btn-outline" data-i18n="coldef_cancel_btn">취소</button>
+                        </div>
+                    </div>
                 </div>
                 <button type="submit" id="upload-btn" class="btn btn-primary" data-i18n="upload_btn">업로드</button>
             </form>

@@ -75,6 +75,23 @@ const translations = {
         status_uploading: "업로드 중...",
         status_upload_complete: "✓ 업로드 완료. Upload ID: ",
         status_upload_failed: "업로드 실패: ",
+        coldef_or: "또는",
+        coldef_autogen_btn: "🤖 컬럼 정의 자동 생성",
+        coldef_autogen_desc: "업로드한 데이터 파일을 기반으로 AI가 컬럼 정의를 자동 생성합니다",
+        coldef_generating: "⏳ 생성 중...",
+        coldef_generating_hint: "AI가 컬럼 정의를 분석하고 있습니다...",
+        coldef_gen_failed: "생성 실패: ",
+        coldef_review_title: "생성된 컬럼 정의",
+        coldef_regen_btn: "🔄 재생성",
+        coldef_edit_btn: "✏️ 직접 수정",
+        coldef_preview_btn: "👁 미리보기",
+        coldef_confirm_btn: "✓ 이 정의 사용",
+        coldef_cancel_btn: "취소",
+        coldef_auto_generated: "자동 생성됨: column_definitions.json",
+        coldef_view_table: "📊 테이블",
+        coldef_view_json: "{ } JSON",
+        coldef_table_col_name: "컬럼명",
+        coldef_table_col_desc: "설명",
     },
     en: {
         hero_tagline_prefix: "A platform for building diverse agent applications including reporting — ",
@@ -151,6 +168,23 @@ const translations = {
         status_uploading: "Uploading...",
         status_upload_complete: "✓ Upload complete. Upload ID: ",
         status_upload_failed: "Upload failed: ",
+        coldef_or: "or",
+        coldef_autogen_btn: "🤖 Auto-generate Column Definitions",
+        coldef_autogen_desc: "AI generates column definitions based on your uploaded data file",
+        coldef_generating: "⏳ Generating...",
+        coldef_generating_hint: "AI is analyzing your columns...",
+        coldef_gen_failed: "Generation failed: ",
+        coldef_review_title: "Generated Column Definitions",
+        coldef_regen_btn: "🔄 Regenerate",
+        coldef_edit_btn: "✏️ Edit",
+        coldef_preview_btn: "👁 Preview",
+        coldef_confirm_btn: "✓ Use These Definitions",
+        coldef_cancel_btn: "Cancel",
+        coldef_auto_generated: "Auto-generated: column_definitions.json",
+        coldef_view_table: "📊 Table",
+        coldef_view_json: "{ } JSON",
+        coldef_table_col_name: "Column",
+        coldef_table_col_desc: "Description",
     }
 };
 
@@ -186,6 +220,9 @@ function applyLanguage() {
     renderPromptExamples();
     renderSampleDataLinks();
     renderSampleReportsLinks();
+    if (typeof refreshSelectedFileDisplays === "function") {
+        refreshSelectedFileDisplays();
+    }
 }
 
 // ==================== Guide ====================

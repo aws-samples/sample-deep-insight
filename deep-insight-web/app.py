@@ -24,8 +24,8 @@ from urllib.parse import quote
 from ops.job_tracker import track_job_start, track_job_link, track_job_failure
 from ops.admin_router import admin_router
 
-from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import FileResponse, HTMLResponse, Response, StreamingResponse
+from fastapi import FastAPI, File, Form, UploadFile
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -132,6 +132,107 @@ def get_sample_report(filename: str):
         return {"success": False, "error": "Invalid path"}
 
     return FileResponse(file_path, filename=filename)
+
+
+# ---------- Feature 1.5: Auto-generate column definitions ----------
+
+
+def _parse_csv_preview(raw_bytes: bytes, max_rows: int = 5) -> tuple[list[str], list[list[str]]]:
+    """Read CSV header and up to max_rows sample rows from raw bytes."""
+    import csv
+    import io
+
+    text = raw_bytes.decode("utf-8-sig", errors="replace")
+    reader = csv.reader(io.StringIO(text))
+    headers = next(reader, [])
+    rows = []
+    for row in reader:
+        rows.append(row)
+        if len(rows) >= max_rows:
+            break
+    return headers, rows
+
+
+@app.post("/generate-column-definitions")
+async def generate_column_definitions(
+    data_file: UploadFile = File(...),
+    lang: str = Form("ko"),
+):
+    """Read CSV header + sample rows and call Bedrock Claude to generate column_definitions.json."""
+    try:
+        raw = await data_file.read()
+        headers, sample_rows = _parse_csv_preview(raw)
+
+        if not headers:
+            return JSONResponse(
+                status_code=400,
+                content={"success": False, "error": "Could not parse CSV headers"},
+            )
+
+        # Build a preview table for the LLM
+        preview_lines = [",".join(headers)]
+        for row in sample_rows:
+            preview_lines.append(",".join(row))
+        preview_text = "\n".join(preview_lines)
+
+        lang_instruction = (
+            "Write column_desc in Korean." if lang == "ko"
+            else "Write column_desc in English."
+        )
+
+        prompt = f"""Analyze the following CSV data (header + sample rows) and generate a column_definitions JSON array.
+
+For each column, produce an object with:
+- "column_name": the exact column header from the CSV
+- "column_desc": a clear, concise description of what the column represents, including data type, unit, or format if apparent from the sample data.
+
+{lang_instruction}
+
+Return ONLY a valid JSON array, no markdown fences, no explanation.
+
+CSV data:
+{preview_text}"""
+
+        bedrock = boto3.client("bedrock-runtime", region_name=AWS_REGION)
+        body = json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 2048,
+            "messages": [{"role": "user", "content": prompt}],
+        })
+
+        response = bedrock.invoke_model(
+            modelId="us.anthropic.claude-haiku-4-5-20251001-v1:0",
+            contentType="application/json",
+            accept="application/json",
+            body=body,
+        )
+
+        result = json.loads(response["body"].read())
+        text_content = result["content"][0]["text"].strip()
+
+        # Strip markdown code fences if present (```json ... ```)
+        if text_content.startswith("```"):
+            lines = text_content.split("\n")
+            # Remove first line (```json) and last line (```)
+            lines = [l for l in lines if not l.strip().startswith("```")]
+            text_content = "\n".join(lines).strip()
+
+        # Parse the JSON to validate it
+        column_definitions = json.loads(text_content)
+
+        return {"success": True, "column_definitions": column_definitions}
+
+    except json.JSONDecodeError:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": "LLM returned invalid JSON. Please try again."},
+        )
+    except Exception as e:
+        logger.error(f"Column definition generation failed: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)},
+        )
 
 
 # ---------- Feature 2: Static page serving ----------

@@ -181,6 +181,7 @@ We believe in the power of open collaboration. Deep Insight takes the excellent 
 | **Chloe(Younghwa) Kwak** | AWS Sr. Solutions Architect | [Email](mailto:younghwa@amazon.com) · [LinkedIn](https://www.linkedin.com/in/younghwakwak) · [GitHub](https://github.com/chloe-kwak) · [Hugging Face](https://huggingface.co/Chloe-yh) |
 | **Yoonseo Kim** | AWS Solutions Architect | [Email](mailto:ottlseo@amazon.com) · [LinkedIn](https://www.linkedin.com/in/ottlseo/) · [GitHub](https://github.com/ottlseo) |
 | **Jiyun Park** | AWS Solutions Architect | [Email](mailto:jiyunp@amazon.com) · [LinkedIn](https://www.linkedin.com/in/jiyunpark1128/) · [GitHub](https://github.com/glossyyoon) |
+| **Kyutae Park, Ph.D.** | AWS AI/ML Specialist SA | [Email](mailto:kyutae@amazon.com) · [LinkedIn](https://www.linkedin.com/in/ren-ai-ssance/) · [GitHub](https://github.com/ren-ai-ssance)
 | **Dongjin Jang, Ph.D.** | Previous AWS Sr. AI/ML Specialist SA | [Email](mailto:dongjinj@amazon.com) · [LinkedIn](https://www.linkedin.com/in/dongjin-jang-kr/) · [GitHub](https://github.com/dongjin-ml) · [Hugging Face](https://huggingface.co/Dongjin-kr) 
 
 ---
