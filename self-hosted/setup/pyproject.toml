@@ -23,7 +23,7 @@ dependencies = [
     "matplotlib-inline==0.2.1",
     "lovelyplots>=1.0.2",
     "seaborn==0.13.2",
-    "python-dotenv==1.2.1",
+    "python-dotenv==1.2.2",
     "langchain==1.1.0",
     "weasyprint==66.0",
     "python-docx==1.2.0",
