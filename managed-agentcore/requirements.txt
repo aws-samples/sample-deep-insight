@@ -45,6 +45,6 @@ markdown==3.10
 fpdf2==2.8.5
 
 # Other utilities
-python-dotenv==1.2.1
+python-dotenv==1.2.2
 pillow>=11.2.1
 langchain==1.0.7
