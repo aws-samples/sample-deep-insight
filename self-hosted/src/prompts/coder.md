@@ -271,6 +271,16 @@ Time series:
 Part-whole composition:
 - 2-5 parts: pie OR single stacked bar.
 - 6+ parts: horizontal bar (sorted by value). PIE FORBIDDEN with 6+ slices.
+- Pie chart with any wedge ≤3%: inline labels overlap with neighbors —
+  matplotlib has NO built-in overlap resolution for pie. Two safe patterns:
+    (a) Group small wedges into a single 'Other' wedge (label as
+        'Other (N items, P%)') BEFORE plotting — preferred when ≥3
+        wedges fall below threshold.
+    (b) Move labels outside via `pctdistance=1.15, labeldistance=1.25`
+        with connector lines — required when small wedges must remain
+        visible as separate categories.
+  Default inline labels stack silently when adjacent wedges are <3%.
+  Verify slice sizes BEFORE plotting and apply (a) or (b) explicitly.
 
 Multivariate (3+ numeric variables):
 - 3 vars: bubble (x, y, size) - cap labels at top 8 (see Annotation rules for collision handling).

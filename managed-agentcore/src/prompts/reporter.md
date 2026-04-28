@@ -382,7 +382,7 @@ def audit_body_citations(doc):
                     cited_values.append(float(c.get("value", 0)))
                 except (TypeError, ValueError):
                     pass
-    num_re = re.compile(r'(?<![\\w.])(\\d{{1,3}}(?:[,]\\d{{3}})+|\\d{{3,}})(?:\\.\\d+)?')
+    num_re = re.compile(r'(?<![\w.])(\d{{1,3}}(?:[,]\d{{3}})+|\d{{3,}})(?:\.\d+)?')
     uncited = []
     for para in doc.paragraphs:
         txt = para.text
@@ -395,7 +395,7 @@ def audit_body_citations(doc):
             except ValueError:
                 continue
             tail = txt[m.end():m.end()+8]
-            if re.match(r'\\s*\\[\\d+\\]', tail):
+            if re.match(r'\s*\[\d+\]', tail):
                 continue
             tol = max(abs(val) * 0.005, 0.5)
             if any(abs(val - cv) <= tol for cv in cited_values):
