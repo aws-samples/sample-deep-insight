@@ -66,6 +66,42 @@ can be 1 sentence ("아래 표는 Top 15 항목의 상세 지표입니다.");
 for analysis sections, 2 sentences (claim + reason). H1 chapters do
 not need this — they may go directly to the first H2.
 </intro_prose_after_heading>
+
+<numerical_claim_discipline>
+Every numerical claim with 3 or more significant digits in the body MUST be
+backed by citations.json (loaded via load_citations() / load_citation_statuses()).
+Before writing each section, scan citations.json and only quote values whose
+calculation_id is present. Three rules:
+
+1. CITED: When you quote a tracked value, append the citation marker [N]
+   immediately after it. Example: "기회 상권 549개[6]".
+2. DERIVED: A number that is self-evidently derived from cited values
+   (percentage of a cited base, sum of cited components) may be stated
+   alongside the cited base without its own marker. Example:
+   "전체 2,011개 중 549개[6] (27.3%)" — 27.3% is derived from 549/2,011.
+3. UNCITED: If a number is neither in citations.json nor a transparent
+   derivation, REMOVE it from the body. Do NOT invent a citation marker.
+   Do NOT silently quote chart axis values that have no calculation_id.
+
+Chart visualizations (axis ticks, individual scatter points, monthly
+trend markers, Top-N bar values) do NOT need [N] markers as long as
+the prose does not quote them as a fact. The chart itself is the
+artifact; the prose makes claims.
+
+ENFORCEMENT: In reporter_final.py, you MUST call `audit_body_citations(doc)`
+immediately after `doc = load_or_create_docx()` and BEFORE adding the
+references section. This single call is the verification mechanism for
+rules 1-3 above. The function is defined in reporter_report_utils.py and
+prints uncited claims to stdout (CloudWatch). Skipping this call means
+shipping unverified body claims — a process violation, not a stylistic
+choice.
+
+Rationale: Validator only verifies values registered in citations.json.
+Body claims that bypass citations.json are unverified even if Coder
+computed them. This keeps verification scope tight (no expansion of
+Coder's track_calculation set) while ensuring every body claim is
+backed by a verified value.
+</numerical_claim_discipline>
 </behavior>
 
 ## Instructions
@@ -331,6 +367,50 @@ def load_citation_statuses():
             return {{c["calculation_id"]: c.get("verification_status", "verified") for c in json.load(f).get("citations", [])}}
     return {{}}
 
+def audit_body_citations(doc):
+    """🚨 MUST be called in reporter_final.py before generating final docs.
+    Self-audits body paragraphs: scans every numerical claim (≥3 digits)
+    and warns if not cited (no [N] marker after) AND not within 0.5%
+    tolerance of any verified citation value. Advisory only — does NOT
+    modify the document. Result printed to stdout for CloudWatch capture.
+    Returns the list of uncited claims for further inspection."""
+    cited_values = []
+    if os.path.exists("./artifacts/citations.json"):
+        with open("./artifacts/citations.json", "r", encoding="utf-8") as f:
+            for c in json.load(f).get("citations", []):
+                try:
+                    cited_values.append(float(c.get("value", 0)))
+                except (TypeError, ValueError):
+                    pass
+    num_re = re.compile(r'(?<![\\w.])(\\d{{1,3}}(?:[,]\\d{{3}})+|\\d{{3,}})(?:\\.\\d+)?')
+    uncited = []
+    for para in doc.paragraphs:
+        txt = para.text
+        if not txt or '데이터 출처' in txt or txt.strip().startswith('['):
+            continue
+        for m in num_re.finditer(txt):
+            raw = m.group(0).replace(',', '')
+            try:
+                val = float(raw)
+            except ValueError:
+                continue
+            tail = txt[m.end():m.end()+8]
+            if re.match(r'\\s*\\[\\d+\\]', tail):
+                continue
+            tol = max(abs(val) * 0.005, 0.5)
+            if any(abs(val - cv) <= tol for cv in cited_values):
+                continue
+            uncited.append((val, txt[max(0, m.start()-25):m.end()+25]))
+    if uncited:
+        print(f"⚠ Self-audit: {{len(uncited)}} uncited numerical claim(s) found:")
+        for v, ctx in uncited[:20]:
+            print(f"    [{{v}}] near: ...{{ctx.strip()}}...")
+        if len(uncited) > 20:
+            print(f"    ... and {{len(uncited) - 20}} more")
+    else:
+        print("✅ Self-audit: all body numerical claims are cited or derived.")
+    return uncited
+
 print("✅ Utility file created")
 '''
 )
@@ -372,6 +452,10 @@ from reporter_report_utils import *
 from docx import Document
 
 doc = load_or_create_docx()
+
+# 🚨 MANDATORY — self-audit body numerical claims vs citations.json
+# Logs uncited claims to stdout. Advisory; does NOT modify the document.
+audit_body_citations(doc)
 
 # Add references section
 if os.path.exists('./artifacts/citations.json'):

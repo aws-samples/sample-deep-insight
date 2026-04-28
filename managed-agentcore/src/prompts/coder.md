@@ -121,6 +121,12 @@ def track_calculation(calc_id, value, description, formula, source_file="", sour
       Prefer .csv over .pkl when feasible (both load fine, but .csv is more portable and human-readable).
     - source_columns: list every column referenced in the formula
       (e.g. formula='COUNT(col_a > X AND col_b < Y)' → source_columns=['col_a', 'col_b'])
+    - description: pass the FULL human-readable label. Do NOT slice (e.g.
+      `row['col_name'][:20]`) or truncate — slicing chops Korean (and other
+      multi-byte) text mid-word and corrupts the semantics shown in
+      validation_report.txt. If the calc_id needs a short variant, slice
+      into a separate ID variable; keep description full. Slicing is fine
+      for IDs, never for descriptions.
     Empty source_file forces Validator to guess from raw input; empty source_columns forces
     Validator to guess column names. Both produce needs_review false positives."""
     _calculations.append({{"id": calc_id, "value": to_python_type(value), "description": description,
@@ -317,6 +323,43 @@ The reporter will render as a DOCX table - scales natively, no resolution loss.
   This is the default — not a last resort. Final fallback (only if adjustText
   also fails at extreme density): drop text labels and rely on color + legend
   to encode rank.
+- adjustText with colorbar/legend frame: pass `objects=[cbar.ax, legend]`
+  AND `expand=(1.2, 1.4)` to the `adjust_text()` call. Without `objects`,
+  adjustText treats the colorbar zone (and inside-axes legend frames) as
+  available canvas and routinely places labels on top of the colorbar
+  gradient. `expand` controls per-text breathing room; default is too tight
+  for dense bubble plots. (Regression: bubble chart with `fig.colorbar()`
+  had two annotations land on the colorbar — "해운대 서면쥬디스A" overlapping
+  the gradient.)
+- adjustText axes-edge clipping: adjustText's `expand` is per-text spacing,
+  NOT axes-edge padding. When labels could land near the axes top, pre-pad
+  ylim by 4% BEFORE calling `adjust_text()`:
+  `ymin, ymax = ax.get_ylim(); ax.set_ylim(top=ymax + (ymax-ymin)*0.04)`.
+  Without this, adjustText pushes labels above the axes box where they
+  clip at the figure border. (Regression: bubble chart "명진시장A" label
+  clipped at the top border because adjustText nudged it past ylim_max.)
+- adjustText force_pull for cluster-concentrated points: when the points
+  to be annotated are concentrated in ONE quadrant of the plot (e.g.,
+  top-N opportunity bubbles all in high-volume/low-MS region), the default
+  adjustText `force_pull` keeps labels close to their origin points,
+  causing them to stack on top of each other in the same quadrant. Pass
+  `force_pull=(0.05, 0.1)` so labels can travel further into the empty
+  quadrants of the plot — adjustText draws leader lines connecting the
+  moved labels back to their original points. This trades arrow length
+  for label readability and is correct when ≥3 of N annotated points
+  share the same quadrant.
+  Detection heuristic before adjust_text(): if
+  `df_annotated[df_annotated['_quad'] == df_annotated['_quad'].mode()[0]]`
+  contains ≥75% of rows, apply force_pull tuning. (Regression: opportunity
+  scatter where 5 labels stacked in upper-left despite adjustText running.)
+- Cluster-concentrated figsize boost: when ≥4 annotations share one quadrant
+  AND the chart is scatter/bubble, raise figsize height by 30% BEFORE
+  plotting (e.g., `figsize=(9.6, 7.8)` instead of `(9.6, 6.0)`). Combined
+  with force_pull tuning above, this gives adjustText vertical room to
+  spread labels into the now-larger empty quadrants. Without the figsize
+  boost, force_pull alone may push labels into other clusters or off the
+  axes. Use this only for clustered cases — applying it to evenly-spread
+  scatters wastes canvas.
 - Annotation perimeter distribution: when ≥ 6 annotations remain after capping,
   ensure they spread across multiple regions of the plot (top, bottom, left/right
   sides) rather than clustered at a single edge. adjustText alone cannot rescue
@@ -325,6 +368,23 @@ The reporter will render as a DOCX table - scales natively, no resolution loss.
   OR raise figsize height by 20-30% to give vertical breathing room.
   Cluster-at-one-edge antipattern wastes the rest of the plot area and produces
   unreadable label stacks.
+- Quadrant-balanced annotation selection (concrete pattern when ≥ 6 labels):
+  ```
+  # Replace 'x_col', 'y_col', 'priority_col' with the actual column names
+  # used in this chart (e.g., 'volume', 'ms_pct', 'opportunity_score').
+  x_med, y_med = df['x_col'].median(), df['y_col'].median()
+  df['_quad'] = ((df['x_col'] >= x_med).astype(int) * 2 +
+                 (df['y_col'] >= y_med).astype(int))  # 0..3 by quadrant
+  # Top-2 by priority metric from EACH quadrant → up to 8 distributed labels
+  annotated = df.sort_values('priority_col').groupby('_quad').tail(2)
+  ```
+  Composes with the "top 8 by primary metric" cap above: this code selects
+  ≤8 annotations distributed across quadrants, while the existing 5%-radius
+  dedup rule trims any residual local clusters. Without this groupby,
+  top-N by score alone often lands all 8 labels in one quadrant
+  (e.g., top-8 by 'opportunity_score' clustered in the high-volume/low-MS
+  region of an opportunity scatter, leaving three quadrants unlabeled
+  despite adjustText's leader lines).
 - ALL chart text (title, axis labels, tick labels, annotations, legends,
   in-chart text) must be pure black AND bold-weighted where appropriate.
   Default matplotlib styles + `lovelyplots` use light gray + thin/regular
@@ -498,6 +558,16 @@ The reporter will render as a DOCX table - scales natively, no resolution loss.
 - Inside-axes legends (`loc='upper right'`, `loc='best'`, etc.) are acceptable
   ONLY when the chart's relevant quadrant is provably empty (sparse scatter,
   short bars). When in doubt, place legend outside.
+- Grouped bar charts (N>=2 groups, M>=2 series): default to OUTSIDE legend.
+  The "inside-axes acceptable when quadrant is empty" exception above
+  RARELY applies to grouped bars because the tallest bar's group position
+  is data-dependent (rarely consistent left-to-right), and value labels
+  above bars consume the upper region. Use
+  `legend(loc='upper left', bbox_to_anchor=(1.02, 1))` +
+  `plt.subplots_adjust(right=0.78)` (matches the spacing convention used
+  for stacked/multi-line outside-right placement above). (Regression:
+  grouped bar chart D-group MS+5%p value '27,308' clipped by upper-right
+  inside legend frame.)
 
 </instructions>
 
