@@ -267,6 +267,20 @@ Time series:
   Overlay is acceptable ONLY when series stratify monotonically into clear
   non-crossing bands.
 - > 15 series: heatmap (rows=series, cols=time, cmap='RdYlGn').
+- Heatmap NaN/missing data: when input matrix contains NaN or missing values,
+  matplotlib's default rendering leaves cells WHITE — visually identical to
+  the colormap's "low value" end and indistinguishable from zero. Readers
+  conflate "no data" with "zero sales". Three safe patterns:
+    (a) Distinct color via colormap.set_bad():
+        `cmap = plt.cm.RdYlGn.copy(); cmap.set_bad('lightgray')`
+        + use `np.ma.masked_invalid(matrix)` or `pd.DataFrame.isna()` mask.
+    (b) Explicit text annotation in missing cells:
+        `if np.isnan(val): ax.text(j, i, '—', ha='center', va='center', color='#666')`
+    (c) Filter out rows with >30% missing BEFORE plotting; document the
+        filter in the chart caption.
+  Add a legend/note describing the missing-data treatment ("회색: 데이터 없음"
+  or "—: 미관측"). Default white fill is FORBIDDEN — it silently corrupts
+  the reader's interpretation of low-value cells.
 
 Part-whole composition:
 - 2-5 parts: pie OR single stacked bar.
@@ -342,12 +356,19 @@ The reporter will render as a DOCX table - scales natively, no resolution loss.
   had two annotations land on the colorbar — "해운대 서면쥬디스A" overlapping
   the gradient.)
 - adjustText axes-edge clipping: adjustText's `expand` is per-text spacing,
-  NOT axes-edge padding. When labels could land near the axes top, pre-pad
-  ylim by 4% BEFORE calling `adjust_text()`:
-  `ymin, ymax = ax.get_ylim(); ax.set_ylim(top=ymax + (ymax-ymin)*0.04)`.
-  Without this, adjustText pushes labels above the axes box where they
-  clip at the figure border. (Regression: bubble chart "명진시장A" label
-  clipped at the top border because adjustText nudged it past ylim_max.)
+  NOT axes-edge padding. adjustText can push labels in ANY of 4 directions
+  (top/bottom/left/right) past the axes box where they clip at the figure
+  border. Pre-pad ALL four sides by 4% BEFORE calling `adjust_text()`:
+  ```
+  ymin, ymax = ax.get_ylim()
+  xmin, xmax = ax.get_xlim()
+  ymargin = (ymax - ymin) * 0.04
+  xmargin = (xmax - xmin) * 0.04
+  ax.set_ylim(ymin - ymargin, ymax + ymargin)
+  ax.set_xlim(xmin - xmargin, xmax + xmargin)
+  ```
+  Padding only ylim (or only one side) leaves labels vulnerable to clipping
+  in the unpadded direction.
 - adjustText force_pull for cluster-concentrated points: when the points
   to be annotated are concentrated in ONE quadrant of the plot (e.g.,
   top-N opportunity bubbles all in high-volume/low-MS region), the default

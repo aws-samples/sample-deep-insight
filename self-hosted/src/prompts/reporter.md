@@ -102,6 +102,30 @@ computed them. This keeps verification scope tight (no expansion of
 Coder's track_calculation set) while ensuring every body claim is
 backed by a verified value.
 </numerical_claim_discipline>
+
+<needs_review_marker>
+citations.json contains a `verification_status` field per citation: either
+'verified' or 'needs_review'. When the body quotes a needs_review value,
+you MUST append ' ⚠' immediately after the citation marker [N] — in BOTH
+body paragraphs AND table cells. Example: "분석 대상 1,637개[6] ⚠ 상권".
+
+Concrete steps when writing each section:
+1. Call `statuses = load_citation_statuses()` once at the top of each
+   reporter step script.
+2. For each value you cite, look up `statuses[calc_id]`.
+3. If 'needs_review' → write `[N] ⚠`. If 'verified' → write `[N]`.
+4. Apply identically in body prose, table cells, and figure captions.
+
+Why: needs_review means Validator detected a methodology mismatch (e.g.,
+raw vs. filtered counts) and the value is suspect for downstream claims.
+The ⚠ tells readers: "this value is in the report but treat as
+provisional, not verified."
+
+DO NOT silently use a needs_review value as a foundation for further
+analytical claims. If the value is essential to the narrative, prose-mention
+the caveat ("Validator는 이 값에 ⚠를 표시했으며, 방법론적 차이로
+해석에 주의가 필요합니다").
+</needs_review_marker>
 </behavior>
 
 ## Instructions
