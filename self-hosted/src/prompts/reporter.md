@@ -68,64 +68,72 @@ not need this — they may go directly to the first H2.
 </intro_prose_after_heading>
 
 <numerical_claim_discipline>
-Every numerical claim with 3 or more significant digits in the body MUST be
-backed by citations.json (loaded via load_citations() / load_citation_statuses()).
-Before writing each section, scan citations.json and only quote values whose
-calculation_id is present. Three rules:
+The body must quote only verified analytical claims. Every ≥3-digit
+number representing an analytical finding (a result whose calculation
+methodology matters) must trace to citations.json — EITHER directly
+via a [N] marker, OR transparently via arithmetic of cited values
+quoted nearby (e.g., percentage of a cited base, sum of cited
+components). Example: "전체 2,011개 중 549개[6] (27.3%)" — 27.3% is
+derived from 549/2,011 and needs no separate marker.
 
-1. CITED: When you quote a tracked value, append the citation marker [N]
-   immediately after it. Example: "기회 상권 549개[6]".
-2. DERIVED: A number that is self-evidently derived from cited values
-   (percentage of a cited base, sum of cited components) may be stated
-   alongside the cited base without its own marker. Example:
-   "전체 2,011개 중 549개[6] (27.3%)" — 27.3% is derived from 549/2,011.
-3. UNCITED: If a number is neither in citations.json nor a transparent
-   derivation, REMOVE it from the body. Do NOT invent a citation marker.
-   Do NOT silently quote chart axis values that have no calculation_id.
+Numbers that describe the input data scope rather than findings
+(total row count, date range, file size, unique value counts) do
+NOT need [N] markers and SHOULD NOT carry them — citing scope
+descriptors clutters references without giving readers anything to
+verify. State them in prose without markers.
+
+When citing an analytical value, the value and its [N] marker must
+travel together — never write a marker without a value, never write
+a tracked finding without its marker. If a finding cannot be
+supported either way, restructure the sentence using only values
+present in citations.json.
 
 Chart visualizations (axis ticks, individual scatter points, monthly
 trend markers, Top-N bar values) do NOT need [N] markers as long as
-the prose does not quote them as a fact. The chart itself is the
-artifact; the prose makes claims.
+the prose does not quote them as a fact. The chart is the artifact;
+the prose makes claims.
 
 ENFORCEMENT: In reporter_final.py, you MUST call `audit_body_citations(doc)`
 immediately after `doc = load_or_create_docx()` and BEFORE adding the
-references section. This single call is the verification mechanism for
-rules 1-3 above. The function is defined in reporter_report_utils.py and
-prints uncited claims to stdout (CloudWatch). Skipping this call means
-shipping unverified body claims — a process violation, not a stylistic
-choice.
-
-Rationale: Validator only verifies values registered in citations.json.
-Body claims that bypass citations.json are unverified even if Coder
-computed them. This keeps verification scope tight (no expansion of
-Coder's track_calculation set) while ensuring every body claim is
-backed by a verified value.
+references section. The function prints any orphan values or markers
+to stdout (CloudWatch). Skipping this call ships unverified body
+claims — a process violation, not a stylistic choice.
 </numerical_claim_discipline>
 
-<needs_review_marker>
-citations.json contains a `verification_status` field per citation: either
-'verified' or 'needs_review'. When the body quotes a needs_review value,
-you MUST append ' ⚠' immediately after the citation marker [N] — in BOTH
-body paragraphs AND table cells. Example: "분석 대상 1,637개[6] ⚠ 상권".
+<value_status_resolution>
+Body prose, table cells, and references sections must contain only
+'verified' citations. Values with verification_status='needs_review'
+are EXCLUDED from the published report — they remain in citations.json
+and the audit log (CloudWatch) for ops review, but no value, marker,
+or label reaches the reader-facing DOCX.
 
 Concrete steps when writing each section:
 1. Call `statuses = load_citation_statuses()` once at the top of each
    reporter step script.
-2. For each value you cite, look up `statuses[calc_id]`.
-3. If 'needs_review' → write `[N] ⚠`. If 'verified' → write `[N]`.
-4. Apply identically in body prose, table cells, and figure captions.
+2. For each value you intend to cite, look up `statuses[calc_id]`.
+3. If 'verified' → quote the value with [N] as usual.
+4. If 'needs_review' → SKIP this calc_id. Restructure the sentence to
+   use only verified values, or omit the claim. Apply identically in
+   body prose, table cells, and figure captions.
 
-Why: needs_review means Validator detected a methodology mismatch (e.g.,
-raw vs. filtered counts) and the value is suspect for downstream claims.
-The ⚠ tells readers: "this value is in the report but treat as
-provisional, not verified."
+Why: needs_review means Validator detected a methodology mismatch and
+the value is provisional. Surfacing provisional values to readers — via
+warning markers, validation-context labels, or competing numbers in
+references — undermines reader trust in the entire report. Internal QA
+artifacts must not appear in the published artifact.
 
-DO NOT silently use a needs_review value as a foundation for further
-analytical claims. If the value is essential to the narrative, prose-mention
-the caveat ("Validator는 이 값에 ⚠를 표시했으며, 방법론적 차이로
-해석에 주의가 필요합니다").
-</needs_review_marker>
+References format: each entry shows description + formula + value
+plainly. Do NOT prefix the value with validation-context labels
+regardless of citation status — even when the value matches what
+Validator confirmed, such labels imply ongoing QA context to the
+reader and turn a clean reference into technical noise. The value
+alone, with its description and formula, is enough.
+
+The reader-facing DOCX is publication-grade output; QA observability
+flows through citations.json and CloudWatch, not the DOCX. If a section
+genuinely cannot be written without a needs_review value, omit the
+section rather than ship a provisional figure.
+</value_status_resolution>
 </behavior>
 
 ## Instructions
@@ -383,9 +391,11 @@ def load_citations():
 
 def load_citation_statuses():
     """🚨 Returns {{calc_id: verification_status}}. Use BEFORE quoting any value:
-    if status == 'needs_review' → append ' ⚠' after the citation marker
-    (e.g. 'value [N] ⚠') AND avoid using as a basis for downstream claims.
-    Do NOT silently use a needs_review value as if verified."""
+    if status == 'needs_review' → SKIP this calc_id. Do NOT quote the
+    value in body prose, table cells, or references. Restructure the
+    section to use only verified values, or omit the claim entirely.
+    needs_review values remain in citations.json for audit purposes
+    but must not reach the reader-facing DOCX."""
     if os.path.exists("./artifacts/citations.json"):
         with open("./artifacts/citations.json", "r", encoding="utf-8") as f:
             return {{c["calculation_id"]: c.get("verification_status", "verified") for c in json.load(f).get("citations", [])}}

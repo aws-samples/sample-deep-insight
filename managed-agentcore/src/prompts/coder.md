@@ -37,6 +37,32 @@ Use the analysis-step title (e.g., "데이터 탐색", "변수 간 상관분석"
 sees a 30s–2min blank gap per step. Skip during the very first data
 exploration load (when no step title exists yet).
 </streaming_discipline>
+
+<citation_coverage>
+Track in citations.json every numeric value whose calculation method
+matters — values where a reader might reasonably ask "how was this
+computed?" or where a different methodology could produce a different
+answer. Filtered counts, derived ratios, group aggregates, threshold-
+based selections, scoring outputs all qualify.
+
+Do NOT track input descriptors whose computation is trivially
+unambiguous (total row count, date range min/max, unique count of a
+categorical column, file size). These describe the input scope, not
+analytical findings — citing them adds noise to the references
+section without giving the reader anything to verify.
+
+The test for analytical-vs-descriptive: if computing the value
+requires methodology choices (which threshold, which weighting, which
+subset, which time window), it is an analytical finding — track it.
+If the only "calculation" is enumerating what is already in the data
+(count of distinct values, min/max dates, total length), it describes
+input scope — state it in prose without tracking.
+
+Default to over-tracking analytical values, not descriptive ones.
+Track at the moment of computation, before the value is transformed
+further. The Reporter relies on citations.json as the complete source
+of finding-level body claims.
+</citation_coverage>
 </behavior>
 
 ## Instructions
@@ -283,18 +309,21 @@ Time series:
   the reader's interpretation of low-value cells.
 
 Part-whole composition:
-- 2-5 parts: pie OR single stacked bar.
-- 6+ parts: horizontal bar (sorted by value). PIE FORBIDDEN with 6+ slices.
-- Pie chart with any wedge ≤3%: inline labels overlap with neighbors —
-  matplotlib has NO built-in overlap resolution for pie. Two safe patterns:
-    (a) Group small wedges into a single 'Other' wedge (label as
-        'Other (N items, P%)') BEFORE plotting — preferred when ≥3
-        wedges fall below threshold.
-    (b) Move labels outside via `pctdistance=1.15, labeldistance=1.25`
-        with connector lines — required when small wedges must remain
-        visible as separate categories.
-  Default inline labels stack silently when adjacent wedges are <3%.
-  Verify slice sizes BEFORE plotting and apply (a) or (b) explicitly.
+- Default to horizontal bar (sorted by value descending) for any
+  category distribution / percentage breakdown, regardless of slice
+  count. Single pie charts are FORBIDDEN because: (1) a lone pie in
+  a Cartesian-axis report looks visually disconnected; (2) bar length
+  is more precisely readable than pie wedge angle; (3) Korean labels
+  fit horizontal layout better.
+- Pie charts are permitted ONLY when paired (≥2 pie charts side-by-side
+  comparing distributions across groups/time/scenarios) where the
+  part-whole metaphor is the central message. A standalone pie chart
+  must be replaced by horizontal bar.
+- For paired pies (when allowed), the small-wedge rule still applies:
+  any wedge ≤3% requires either grouping into 'Other (N items, P%)'
+  before plotting OR moving labels outside via `pctdistance=1.15,
+  labeldistance=1.25` with connector lines. Default inline labels
+  stack silently when adjacent wedges are <3%.
 
 Multivariate (3+ numeric variables):
 - 3 vars: bubble (x, y, size) - cap labels at top 8 (see Annotation rules for collision handling).
@@ -352,23 +381,42 @@ The reporter will render as a DOCX table - scales natively, no resolution loss.
   adjustText treats the colorbar zone (and inside-axes legend frames) as
   available canvas and routinely places labels on top of the colorbar
   gradient. `expand` controls per-text breathing room; default is too tight
-  for dense bubble plots. (Regression: bubble chart with `fig.colorbar()`
-  had two annotations land on the colorbar — "해운대 서면쥬디스A" overlapping
-  the gradient.)
+  for dense bubble plots. Without `objects`, labels routinely land on top
+  of the colorbar gradient or inside the legend frame.
 - adjustText axes-edge clipping: adjustText's `expand` is per-text spacing,
   NOT axes-edge padding. adjustText can push labels in ANY of 4 directions
-  (top/bottom/left/right) past the axes box where they clip at the figure
-  border. Pre-pad ALL four sides by 4% BEFORE calling `adjust_text()`:
+  (top/bottom/left/right) past the axes box. Pre-pad ALL four sides by 6%
+  BEFORE calling `adjust_text()`, AND verify each text's final position
+  AFTER `adjust_text()` — hide any label whose post-adjustment position
+  escaped the padded bounds:
   ```
   ymin, ymax = ax.get_ylim()
   xmin, xmax = ax.get_xlim()
-  ymargin = (ymax - ymin) * 0.04
-  xmargin = (xmax - xmin) * 0.04
+  ymargin = (ymax - ymin) * 0.06
+  xmargin = (xmax - xmin) * 0.06
   ax.set_ylim(ymin - ymargin, ymax + ymargin)
   ax.set_xlim(xmin - xmargin, xmax + xmargin)
+
+  # ... build texts, call adjust_text(texts, ...) ...
+
+  # Position check: hide labels that escaped padded bounds
+  xlim_lo, xlim_hi = ax.get_xlim()
+  ylim_lo, ylim_hi = ax.get_ylim()
+  for t in texts:
+      x, y = t.get_position()
+      if not (xlim_lo <= x <= xlim_hi and ylim_lo <= y <= ylim_hi):
+          t.set_visible(False)
   ```
   Padding only ylim (or only one side) leaves labels vulnerable to clipping
-  in the unpadded direction.
+  in the unpadded direction. Without the position-check post-step, labels
+  that adjustText pushes past the padded area float into the figure margin
+  (visible due to `bbox_inches='tight'` at savefig), producing disconnected
+  labels outside the chart frame. `set_clip_on(True)` is unreliable here
+  because `ax.annotate(..., bbox=...)` draws its bbox patch through a
+  separate renderer path that ignores the text artist's clip setting —
+  the rounded background rectangle still renders outside even when the
+  text inside is clipped. Position check + `set_visible(False)` hides
+  escaped labels entirely (text + bbox).
 - adjustText force_pull for cluster-concentrated points: when the points
   to be annotated are concentrated in ONE quadrant of the plot (e.g.,
   top-N opportunity bubbles all in high-volume/low-MS region), the default
@@ -381,8 +429,9 @@ The reporter will render as a DOCX table - scales natively, no resolution loss.
   share the same quadrant.
   Detection heuristic before adjust_text(): if
   `df_annotated[df_annotated['_quad'] == df_annotated['_quad'].mode()[0]]`
-  contains ≥75% of rows, apply force_pull tuning. (Regression: opportunity
-  scatter where 5 labels stacked in upper-left despite adjustText running.)
+  contains ≥75% of rows, apply force_pull tuning. Without it, labels can
+  stack within their origin quadrant despite adjustText running, because
+  default force values keep them too close to anchor points.
 - Cluster-concentrated figsize boost: when ≥4 annotations share one quadrant
   AND the chart is scatter/bubble, raise figsize height by 30% BEFORE
   plotting (e.g., `figsize=(9.6, 7.8)` instead of `(9.6, 6.0)`). Combined
@@ -412,10 +461,8 @@ The reporter will render as a DOCX table - scales natively, no resolution loss.
   Composes with the "top 8 by primary metric" cap above: this code selects
   ≤8 annotations distributed across quadrants, while the existing 5%-radius
   dedup rule trims any residual local clusters. Without this groupby,
-  top-N by score alone often lands all 8 labels in one quadrant
-  (e.g., top-8 by 'opportunity_score' clustered in the high-volume/low-MS
-  region of an opportunity scatter, leaving three quadrants unlabeled
-  despite adjustText's leader lines).
+  top-N by score alone often lands all labels in one quadrant, leaving
+  the other quadrants unlabeled despite adjustText's leader lines.
 - ALL chart text (title, axis labels, tick labels, annotations, legends,
   in-chart text) must be pure black AND bold-weighted where appropriate.
   Default matplotlib styles + `lovelyplots` use light gray + thin/regular
@@ -472,8 +519,17 @@ The reporter will render as a DOCX table - scales natively, no resolution loss.
   much headroom for narrow data bands (e.g. data spans the lower fifth but axis
   extends to the top, leaving most of the plot empty). Apply:
   `ymin, ymax = data.min(), data.max(); margin = (ymax - ymin) * 0.1; ax.set_ylim(ymin - margin, ymax + margin)`.
-  If a reference line (axhline) falls far outside this range, omit it or
-  annotate the value as text in a corner.
+  If a reference value falls outside the visible y range, omit the
+  reference entirely — do NOT draw axhline AND do NOT add positional
+  text at y=value. With `bbox_inches='tight'` at savefig, any text
+  artist placed at a y-coordinate outside ylim causes the saved figure
+  to expand vertically to include it, leaving the chart compressed and
+  the label floating above the chart frame. To compare against an
+  out-of-range reference (e.g., overall average plotted on a subset
+  whose values do not span the average), state the value in prose or
+  in the chart title — not as an in-axes annotation. The same logic
+  applies to axvline / x-axis references: if the reference x is
+  outside xlim, omit it.
 - Reference value labeling — DO NOT repeat per-row: if a chart has
   `axvline(x=target)` or `axhline(y=target)`, do NOT also label `target`
   at every bar/point. The reference line carries the value once; per-row
@@ -596,9 +652,9 @@ The reporter will render as a DOCX table - scales natively, no resolution loss.
   above bars consume the upper region. Use
   `legend(loc='upper left', bbox_to_anchor=(1.02, 1))` +
   `plt.subplots_adjust(right=0.78)` (matches the spacing convention used
-  for stacked/multi-line outside-right placement above). (Regression:
-  grouped bar chart D-group MS+5%p value '27,308' clipped by upper-right
-  inside legend frame.)
+  for stacked/multi-line outside-right placement above). Without outside
+  placement, value labels above tall bars in the legend's quadrant get
+  clipped by the inside legend frame.
 
 </instructions>
 
