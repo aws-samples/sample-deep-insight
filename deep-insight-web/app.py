@@ -24,6 +24,12 @@ from urllib.parse import quote
 
 from ops.job_tracker import track_job_start, track_job_link, track_job_failure
 from ops.admin_router import admin_router
+from chat_agent import (
+    session_manager as chat_session_manager,
+    LOCAL_UPLOAD_DIR,
+    generate_suggestions,
+    execute_sql_for_session,
+)
 
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response, StreamingResponse
@@ -416,30 +422,44 @@ async def upload(
     data_file: UploadFile = File(...),
     column_definitions: UploadFile | None = File(None),
 ):
-    """Upload data file (required) and column_definitions.json (optional) to S3."""
-    if not S3_BUCKET_NAME:
-        return {"success": False, "error": "S3_BUCKET_NAME not configured"}
-
+    """Upload data file (required) and column_definitions.json (optional) to S3 or local."""
     upload_id = str(uuid.uuid4())
-    s3 = boto3.client("s3", region_name=AWS_REGION)
-    s3_paths = []
+    normalized_filename = unicodedata.normalize('NFC', data_file.filename)
 
-    # Upload data file (keep original filename)
-    data_key = f"uploads/{upload_id}/{unicodedata.normalize('NFC', data_file.filename)}"
-    s3.put_object(Bucket=S3_BUCKET_NAME, Key=data_key, Body=await data_file.read())
-    s3_paths.append(f"s3://{S3_BUCKET_NAME}/{data_key}")
-    logger.info(f"Uploaded: s3://{S3_BUCKET_NAME}/{data_key}")
+    if S3_BUCKET_NAME:
+        # S3 mode (production)
+        s3 = boto3.client("s3", region_name=AWS_REGION)
+        s3_paths = []
 
-    # Upload column definitions (optional)
-    if column_definitions:
-        coldef_key = f"uploads/{upload_id}/column_definitions.json"
-        s3.put_object(
-            Bucket=S3_BUCKET_NAME, Key=coldef_key, Body=await column_definitions.read()
-        )
-        s3_paths.append(f"s3://{S3_BUCKET_NAME}/{coldef_key}")
-        logger.info(f"Uploaded: s3://{S3_BUCKET_NAME}/{coldef_key}")
+        data_key = f"uploads/{upload_id}/{normalized_filename}"
+        s3.put_object(Bucket=S3_BUCKET_NAME, Key=data_key, Body=await data_file.read())
+        s3_paths.append(f"s3://{S3_BUCKET_NAME}/{data_key}")
+        logger.info(f"Uploaded: s3://{S3_BUCKET_NAME}/{data_key}")
 
-    return {"success": True, "upload_id": upload_id, "s3_paths": s3_paths}
+        if column_definitions:
+            coldef_key = f"uploads/{upload_id}/column_definitions.json"
+            s3.put_object(
+                Bucket=S3_BUCKET_NAME, Key=coldef_key, Body=await column_definitions.read()
+            )
+            s3_paths.append(f"s3://{S3_BUCKET_NAME}/{coldef_key}")
+            logger.info(f"Uploaded: s3://{S3_BUCKET_NAME}/{coldef_key}")
+
+        return {"success": True, "upload_id": upload_id, "s3_paths": s3_paths}
+    else:
+        # Local mode (development/testing)
+        dest = LOCAL_UPLOAD_DIR / upload_id
+        dest.mkdir(parents=True, exist_ok=True)
+
+        data_bytes = await data_file.read()
+        (dest / normalized_filename).write_bytes(data_bytes)
+        logger.info(f"Local upload: {dest / normalized_filename}")
+
+        if column_definitions:
+            coldef_bytes = await column_definitions.read()
+            (dest / "column_definitions.json").write_bytes(coldef_bytes)
+            logger.info(f"Local upload: {dest / 'column_definitions.json'}")
+
+        return {"success": True, "upload_id": upload_id, "s3_paths": [str(dest)]}
 
 
 # ---------- Feature 4: Analysis + SSE streaming ----------
@@ -678,6 +698,219 @@ def download_artifact(session_id: str, filename: str):
         )
     except Exception as e:
         logger.error(f"Download failed: {e}")
+        return {"success": False, "error": str(e)}
+
+
+# ---------- Feature 7: Data Q&A Chat ----------
+
+SSE_CHAT_KEEPALIVE = 30
+
+
+class ChatRequest(BaseModel):
+    upload_id: str
+    message: str
+
+
+class ChatResetRequest(BaseModel):
+    upload_id: str
+
+
+def chat_sse_generator(upload_id: str, message: str):
+    """Run Strands Agent chat and yield SSE events for the browser.
+
+    The agent loop (tool calling, retries) is handled by Strands SDK.
+    This generator reads events from a background thread and relays them as SSE,
+    sending keepalive comments every SSE_CHAT_KEEPALIVE seconds.
+    """
+    event_queue = queue.Queue()
+
+    def _run_agent():
+        """Run the agent in a background thread using asyncio for stream_async."""
+        import asyncio
+
+        def _flush_side_channel(session):
+            """Push any pending rich outputs (SQL, charts, tables) from tools to the event queue."""
+            while session.side_channel:
+                output_type, data = session.side_channel.pop(0)
+                if output_type == "sql":
+                    event_queue.put({"type": "sql", "sql": data})
+                elif output_type == "chart":
+                    event_queue.put({"type": "chart", "image": data})
+                elif output_type == "table":
+                    event_queue.put({"type": "table", "html": data})
+
+        def _process_event(event, session):
+            # After every event, check if tools pushed rich outputs
+            _flush_side_channel(session)
+
+            # Extract text deltas
+            if "data" in event and "delta" in event:
+                delta = event["delta"]
+                if "text" in delta:
+                    event_queue.put({"type": "text", "text": delta["text"]})
+            # Extract tool use from complete messages
+            elif "message" in event and event["message"].get("role") == "assistant":
+                content = event["message"].get("content", [])
+                for item in content:
+                    if isinstance(item, dict) and "toolUse" in item:
+                        tool_name = item["toolUse"].get("name", "")
+                        event_queue.put({"type": "tool_call", "tool": tool_name})
+
+        def _log_usage(session):
+            """Log per-turn token usage from the Strands EventLoopMetrics.
+
+            `stream_async` calls reset_usage_metrics() at the start of each turn,
+            so accumulated_usage after the iterator drains = this turn's usage.
+            """
+            try:
+                usage = session.agent.event_loop_metrics.accumulated_usage
+                # Usage is a TypedDict-like mapping
+                logger.info(
+                    "chat usage upload_id=%s input=%s output=%s total=%s "
+                    "cache_read=%s cache_write=%s",
+                    upload_id,
+                    usage.get("inputTokens"),
+                    usage.get("outputTokens"),
+                    usage.get("totalTokens"),
+                    usage.get("cacheReadInputTokens"),
+                    usage.get("cacheWriteInputTokens"),
+                )
+            except Exception as e:
+                logger.warning(f"Could not log usage: {e}")
+
+        async def _stream():
+            session = chat_session_manager.get_or_create(upload_id)
+            session.ensure_agent_created()
+            async for event in session.agent.stream_async(message):
+                _process_event(event, session)
+            # Final flush in case tool output arrived after last event
+            _flush_side_channel(session)
+            # Log token usage for this turn (prompt caching observability)
+            _log_usage(session)
+
+        try:
+            asyncio.run(_stream())
+        except Exception as e:
+            logger.error(f"Chat agent error: {e}", exc_info=True)
+            event_queue.put({"type": "error", "text": str(e)})
+        finally:
+            event_queue.put(None)  # End-of-stream sentinel
+
+    thread = threading.Thread(target=_run_agent, daemon=True)
+    thread.start()
+
+    while True:
+        try:
+            event_data = event_queue.get(timeout=SSE_CHAT_KEEPALIVE)
+        except queue.Empty:
+            yield ": keepalive\n\n"
+            continue
+
+        if event_data is None:
+            break
+
+        yield format_sse(event_data)
+
+    yield format_sse({"type": "done"})
+
+
+@app.post("/chat")
+def chat(request: ChatRequest):
+    """Data Q&A chat endpoint with SSE streaming."""
+    logger.info(f"Chat request: upload_id={request.upload_id}, message={request.message[:80]}...")
+    return StreamingResponse(
+        chat_sse_generator(request.upload_id, request.message),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "Connection": "keep-alive"},
+    )
+
+
+@app.post("/chat/reset")
+def chat_reset(request: ChatResetRequest):
+    """Clear chat history for a session."""
+    chat_session_manager.remove(request.upload_id)
+    logger.info(f"Chat reset: upload_id={request.upload_id}")
+    return {"success": True}
+
+
+class SuggestionsRequest(BaseModel):
+    upload_id: str
+
+
+@app.post("/chat/suggestions")
+def chat_suggestions(request: SuggestionsRequest):
+    """Generate dynamic example questions based on the uploaded data's schema."""
+    try:
+        suggestions = generate_suggestions(request.upload_id)
+        return {"success": True, "suggestions": suggestions}
+    except Exception as e:
+        logger.error(f"Suggestions error: {e}")
+        return {"success": True, "suggestions": [
+            "데이터의 기본 통계를 보여줘",
+            "가장 많이 팔린 상품 TOP 5는?",
+            "매출 추이 차트를 그려줘",
+        ]}
+
+
+class SqlExecuteRequest(BaseModel):
+    upload_id: str
+    sql: str
+
+
+@app.post("/sql/execute")
+def sql_execute(request: SqlExecuteRequest):
+    """Run user-edited SQL directly against the session's DuckDB (read-only, no LLM).
+
+    Used by the in-chat SQL editor so users can tweak queries and re-run
+    without another agent turn. Results are returned as pre-formatted HTML.
+    """
+    logger.info(
+        f"SQL execute: upload_id={request.upload_id}, "
+        f"sql={request.sql[:120]}..."
+    )
+    return execute_sql_for_session(request.upload_id, request.sql)
+
+
+# ---------- Meta (dataset summary for Q&A welcome) ----------
+
+
+@app.get("/chat/meta")
+def chat_meta(upload_id: str):
+    """Return dataset summary for the Q&A welcome card: row count, columns (with
+    types + user-supplied descriptions from column_definitions.json when available).
+    """
+    try:
+        session = chat_session_manager.get_or_create(upload_id)
+        session.ensure_data_loaded()
+        cols = session.run_query(
+            f"DESCRIBE {session.table_name}"
+        ).fetchall()
+
+        # Build description lookup from column_definitions.json (optional)
+        desc_by_name: dict[str, str] = {}
+        coldef = session.column_definitions
+        if isinstance(coldef, list):
+            for item in coldef:
+                if not isinstance(item, dict):
+                    continue
+                name = item.get("column_name") or item.get("name")
+                desc = item.get("column_desc") or item.get("description") or ""
+                if name:
+                    desc_by_name[str(name)] = str(desc)
+
+        return {
+            "success": True,
+            "table": session.table_name,
+            "rows": session.row_count,
+            "filename": session.csv_filename,
+            "columns": [
+                {"name": c[0], "type": c[1], "desc": desc_by_name.get(c[0], "")}
+                for c in cols
+            ],
+            "has_descriptions": bool(desc_by_name),
+        }
+    except Exception as e:
+        logger.error(f"chat_meta failed: {e}")
         return {"success": False, "error": str(e)}
 
 

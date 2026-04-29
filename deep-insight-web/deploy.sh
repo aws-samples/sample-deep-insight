@@ -395,8 +395,19 @@ TASK_POLICY=$(cat <<POLICY
         {
             "Sid": "S3Upload",
             "Effect": "Allow",
-            "Action": ["s3:PutObject"],
+            "Action": ["s3:PutObject", "s3:GetObject"],
             "Resource": "arn:aws:s3:::${S3_BUCKET}/uploads/*"
+        },
+        {
+            "Sid": "S3UploadsList",
+            "Effect": "Allow",
+            "Action": ["s3:ListBucket"],
+            "Resource": "arn:aws:s3:::${S3_BUCKET}",
+            "Condition": {
+                "StringLike": {
+                    "s3:prefix": "uploads/*"
+                }
+            }
         },
         {
             "Sid": "S3Feedback",
@@ -430,7 +441,10 @@ TASK_POLICY=$(cat <<POLICY
         {
             "Sid": "BedrockInvokeClaude",
             "Effect": "Allow",
-            "Action": ["bedrock:InvokeModel"],
+            "Action": [
+                "bedrock:InvokeModel",
+                "bedrock:InvokeModelWithResponseStream"
+            ],
             "Resource": [
                 "arn:aws:bedrock:*:*:inference-profile/global.anthropic.claude-*",
                 "arn:aws:bedrock:*::foundation-model/anthropic.claude-*"
@@ -495,8 +509,8 @@ td = {
         'cpuArchitecture': 'ARM64',
         'operatingSystemFamily': 'LINUX'
     },
-    'cpu': '256',
-    'memory': '512',
+    'cpu': '1024',
+    'memory': '2048',
     'executionRoleArn': '${EXECUTION_ROLE_ARN}',
     'taskRoleArn': '${TASK_ROLE_ARN_VALUE}',
     'containerDefinitions': [{

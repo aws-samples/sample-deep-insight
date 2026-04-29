@@ -34,6 +34,40 @@ function initDOMRefs() {
     rejectBtn = document.getElementById("reject-btn");
 }
 
+// ==================== View tabs ====================
+// Active view name: 'analysis' (default) or 'chat'. Switched via activateView().
+let activeView = "analysis";
+
+function activateView(name) {
+    const tabAnalysis = document.getElementById("tab-analysis");
+    const tabChat = document.getElementById("tab-chat");
+    const viewAnalysis = document.getElementById("view-analysis");
+    const viewChat = document.getElementById("view-chat");
+
+    // Q&A tab is disabled until upload completes
+    if (name === "chat" && tabChat.disabled) return;
+
+    activeView = name;
+    tabAnalysis.classList.toggle("active", name === "analysis");
+    tabAnalysis.setAttribute("aria-selected", name === "analysis");
+    tabChat.classList.toggle("active", name === "chat");
+    tabChat.setAttribute("aria-selected", name === "chat");
+    viewAnalysis.classList.toggle("view-active", name === "analysis");
+    viewChat.classList.toggle("view-active", name === "chat");
+
+    if (name === "chat") {
+        // Lazy render Q&A welcome on first open
+        if (typeof initChatWelcomeIfNeeded === "function") initChatWelcomeIfNeeded();
+    }
+}
+
+function enableChatTab(uploadId) {
+    const tabChat = document.getElementById("tab-chat");
+    tabChat.disabled = false;
+    tabChat.classList.remove("disabled");
+    if (typeof setChatUploadId === "function") setChatUploadId(uploadId);
+}
+
 // ==================== Init ====================
 document.addEventListener("DOMContentLoaded", () => {
     initDOMRefs();
@@ -43,4 +77,5 @@ document.addEventListener("DOMContentLoaded", () => {
     initUpload();
     initAnalyze();
     initPlanModal();
+    initChat();
 });
