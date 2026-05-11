@@ -316,9 +316,16 @@ async def generate_prompts(
         try:
             coldef_data = json.loads(raw)
         except json.JSONDecodeError as e:
+            # Surface only the offset/line so the user can fix their file —
+            # don't include the raw exception text (which echoes the bad
+            # bytes verbatim and trips CodeQL's stack-trace-exposure rule).
+            logger.warning(f"column_definitions JSON parse failed: {e}")
             return JSONResponse(
                 status_code=400,
-                content={"success": False, "error": f"Invalid JSON: {e}"},
+                content={
+                    "success": False,
+                    "error": f"Invalid JSON at line {e.lineno}, column {e.colno}",
+                },
             )
 
         if not isinstance(coldef_data, list) or not coldef_data:

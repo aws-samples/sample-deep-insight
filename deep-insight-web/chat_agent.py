@@ -47,6 +47,49 @@ CHAT_MODEL_ID = os.environ.get(
 ENABLE_PROMPT_CACHE = os.environ.get("ENABLE_PROMPT_CACHE", "1") != "0"
 LOCAL_UPLOAD_DIR = Path("/tmp/deep-insight-uploads")
 
+# Strict allow-list for upload_id. CodeQL's path-injection taint analysis
+# recognizes regex.fullmatch on `^[allowed-chars]+$` as a sanitizer barrier;
+# the looser `Path.resolve().relative_to(root)` check we previously used does
+# the same job at runtime but is not part of CodeQL's known sanitizer set,
+# so the alert kept re-firing. Re-enforcing here at the chat_agent.py boundary
+# is also defense in depth — app.py validates request bodies, but anything
+# importing chat_agent.session_manager directly bypasses that layer.
+_UPLOAD_ID_RE = re.compile(r"^[A-Za-z0-9_-]+$")
+_MAX_UPLOAD_ID_LEN = 64
+
+
+def _check_upload_id(upload_id: str) -> str:
+    """Return the upload_id only if it passes the strict allow-list.
+
+    Raises ValueError otherwise. By design rejects "..", "/", "\\", and any
+    character that could traverse out of LOCAL_UPLOAD_DIR.
+    """
+    if not isinstance(upload_id, str) or not upload_id \
+            or len(upload_id) > _MAX_UPLOAD_ID_LEN \
+            or not _UPLOAD_ID_RE.fullmatch(upload_id):
+        raise ValueError("Invalid upload_id")
+    return upload_id
+
+
+def _safe_join_under_upload_dir(*parts: str) -> Path:
+    """Join `parts` under LOCAL_UPLOAD_DIR and assert the result stays inside.
+
+    Uses `os.path.realpath` + `os.path.commonpath`, which CodeQL recognizes
+    as a path-traversal sanitizer barrier. Raises ValueError if the joined
+    path escapes the upload root via "..", a symlink, or a literal "/".
+    """
+    root = os.path.realpath(str(LOCAL_UPLOAD_DIR))
+    candidate = os.path.realpath(os.path.join(root, *parts))
+    # commonpath raises if drives differ on Windows; Path objects on macOS/
+    # Linux give a stable answer.
+    try:
+        if os.path.commonpath([root, candidate]) != root:
+            raise ValueError("Path escapes upload root")
+    except ValueError:
+        raise ValueError("Path escapes upload root") from None
+    return Path(candidate)
+
+
 EXEC_TIMEOUT = 30
 TEXT_OUTPUT_LIMIT = 10_000
 IMAGE_SIZE_LIMIT = 500_000
@@ -63,11 +106,12 @@ def _list_upload_files(upload_id: str) -> list[tuple[str, bytes]]:
 
     Supports both S3 mode (if S3_BUCKET_NAME set) and local mode.
 
-    Both branches treat `upload_id` and the discovered filenames as
-    untrusted: callers in app.py validate `upload_id` via `_validate_id`,
-    but as a defense-in-depth this function additionally constrains the
-    local-mode path to remain inside `LOCAL_UPLOAD_DIR`.
+    `upload_id` is re-validated here even though app.py also validates at
+    each endpoint — this is the boundary CodeQL's path-injection analysis
+    sees, and any future caller importing this module directly skips the
+    HTTP-layer check.
     """
+    upload_id = _check_upload_id(upload_id)
     files: list[tuple[str, bytes]] = []
 
     if S3_BUCKET_NAME:
@@ -80,14 +124,12 @@ def _list_upload_files(upload_id: str) -> list[tuple[str, bytes]]:
             body = s3.get_object(Bucket=S3_BUCKET_NAME, Key=key)["Body"].read()
             files.append((filename, body))
     else:
-        # Defense in depth: confirm the resolved path stays within
-        # LOCAL_UPLOAD_DIR even if upload_id slipped through validation.
-        upload_root = LOCAL_UPLOAD_DIR.resolve()
-        local_dir = (LOCAL_UPLOAD_DIR / upload_id).resolve()
+        # _check_upload_id already rejected "..", "/", and "\". This realpath
+        # + commonpath check below is defense-in-depth against symlink shenan-
+        # igans inside LOCAL_UPLOAD_DIR.
         try:
-            local_dir.relative_to(upload_root)
+            local_dir = _safe_join_under_upload_dir(upload_id)
         except ValueError:
-            # local_dir is outside upload_root — refuse the traversal.
             return files
         if local_dir.exists():
             for p in sorted(local_dir.iterdir()):
@@ -194,26 +236,28 @@ class ChatSession:
 
     def _load_data_locked(self) -> None:
         """Body of ensure_data_loaded; caller must hold self._init_lock."""
-        csv_name, csv_bytes, coldef = _find_csv_and_coldef(self.upload_id)
+        # Re-check upload_id against the strict allow-list at the boundary
+        # where it flows into a path. This is what CodeQL recognizes as the
+        # path-injection sanitizer.
+        upload_id = _check_upload_id(self.upload_id)
+
+        csv_name, csv_bytes, coldef = _find_csv_and_coldef(upload_id)
         self.csv_filename = csv_name
         self.column_definitions = coldef
 
-        # Defense in depth: even though /upload sanitizes, csv_name has flowed
-        # through S3 / disk and may have been written by an older codepath.
-        # Take the basename and reject traversal sequences before joining.
-        safe_csv_name = Path(csv_name).name
+        # csv_name came back from S3 / disk listing — treat it as untrusted.
+        # Take the basename and reject "."/".." or any path separator before
+        # using it. _UPLOAD_ID_RE-style allow-list isn't appropriate here
+        # because legitimate filenames include spaces / Korean / dots.
+        safe_csv_name = os.path.basename(csv_name)
         if not safe_csv_name or safe_csv_name in (".", "..") \
-                or "/" in safe_csv_name or "\\" in safe_csv_name:
-            raise ValueError(f"Unsafe CSV name in upload {self.upload_id}")
+                or "/" in safe_csv_name or "\\" in safe_csv_name \
+                or "\x00" in safe_csv_name:
+            raise ValueError(f"Unsafe CSV name in upload {upload_id}")
 
-        # Write CSV to a tmp file DuckDB can read from (read_csv_auto needs a path).
-        tmp_path = LOCAL_UPLOAD_DIR / self.upload_id / f"_chat_{safe_csv_name}"
-        # Confirm the resolved path stays inside the upload directory — guards
-        # against any remaining traversal in a malformed safe_csv_name.
-        upload_root = (LOCAL_UPLOAD_DIR / self.upload_id).resolve()
-        if not str(tmp_path.resolve()).startswith(str(upload_root) + os.sep) \
-                and tmp_path.resolve() != upload_root:
-            raise ValueError(f"Tmp path escapes upload root: {tmp_path}")
+        # Write CSV to a tmp file DuckDB can read from (read_csv_auto needs
+        # a path). Build via realpath/commonpath so CodeQL sees the sanitizer.
+        tmp_path = _safe_join_under_upload_dir(upload_id, f"_chat_{safe_csv_name}")
         tmp_path.parent.mkdir(parents=True, exist_ok=True)
         tmp_path.write_bytes(csv_bytes)
 
