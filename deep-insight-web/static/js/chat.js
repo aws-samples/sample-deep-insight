@@ -265,8 +265,23 @@ function extractAndShowSuggestions(bubble) {
     const match = html.match(/\[SUGGESTIONS\]([\s\S]*?)\[\/SUGGESTIONS\]/);
     if (!match) return;
     bubble.innerHTML = html.replace(match[0], "").replace(/<br>\s*$/, "");
-    const items = match[1].split("|").map(s => s.replace(/<[^>]*>/g, "").trim()).filter(Boolean);
+    const items = match[1].split("|").map(s => stripTags(s).trim()).filter(Boolean);
     if (items.length) showFollowUpChips(items);
+}
+
+// Idempotent tag stripping. A single regex pass leaves overlapping tags
+// behind ("<scr<script>ipt>" → "<script>"), so we iterate to a fixed point.
+// Suggestion text feeds chip labels (textContent today), but downgrading the
+// stripper is the kind of change that silently re-opens XSS if a later edit
+// flips the chip target to innerHTML.
+function stripTags(s) {
+    let prev;
+    let cur = String(s == null ? "" : s);
+    do {
+        prev = cur;
+        cur = cur.replace(/<[^>]*>/g, "");
+    } while (cur !== prev);
+    return cur;
 }
 
 // ==================== Bubbles / indicators ====================

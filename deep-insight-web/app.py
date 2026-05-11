@@ -34,7 +34,7 @@ from chat_agent import (
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 try:
     _env_path = Path(__file__).resolve().parents[1] / "managed-agentcore" / ".env"
@@ -75,6 +75,27 @@ def health():
 # ---------- Sample data endpoints ----------
 
 _SAFE_FILENAME = re.compile(r"^[a-zA-Z0-9_\-\.]+$")
+# Allowed pattern for upload/session/request IDs: UUID-like (alphanumeric +
+# hyphen/underscore). Defined here at module scope so all request models can
+# share it. Anchored in the validators (Pydantic uses `re.search` by default).
+_SAFE_ID = re.compile(r"^[a-zA-Z0-9_-]+$")
+_MAX_ID_LEN = 64
+
+
+def _validate_id(value: str, field: str = "id") -> str:
+    """Reject IDs that don't match _SAFE_ID. Used by both Pydantic validators
+    and FastAPI query parameters. Returns the value unchanged if valid.
+
+    Without this, callers could submit `upload_id="../foo"` (local-mode path
+    traversal) or another user's UUID (S3-mode IDOR via /chat/meta /
+    /sql/execute / /chat). UUIDs are unguessable but leak via browser
+    history, ALB logs, and admin DynamoDB rows, so structural validation
+    is the durable defense.
+    """
+    if not isinstance(value, str) or not value or len(value) > _MAX_ID_LEN \
+            or not _SAFE_ID.match(value):
+        raise ValueError(f"Invalid {field}")
+    return value
 
 
 @app.get("/sample-data")
@@ -370,11 +391,21 @@ class AnalyzeRequest(BaseModel):
     upload_id: str
     query: str
 
+    @field_validator("upload_id")
+    @classmethod
+    def _check_upload_id(cls, v: str) -> str:
+        return _validate_id(v, "upload_id")
+
 
 class FeedbackRequest(BaseModel):
     request_id: str
     approved: bool
     feedback: str = ""
+
+    @field_validator("request_id")
+    @classmethod
+    def _check_request_id(cls, v: str) -> str:
+        return _validate_id(v, "request_id")
 
 
 # ---------- AgentCore Client & SSE Helpers ----------
@@ -482,7 +513,10 @@ def _read_agentcore_events(response, event_queue):
             if event_data is not None:
                 event_queue.put(event_data)
     except Exception as e:
-        event_queue.put({"type": "error", "text": str(e)})
+        # Don't echo exception details (boto3/IAM messages disclose bucket
+        # name, IAM principal, region). Log server-side instead.
+        logger.error(f"SSE iter_lines failed: {e}", exc_info=True)
+        event_queue.put({"type": "error", "text": "Stream interrupted"})
     finally:
         event_queue.put(None)  # End-of-stream sentinel
 
@@ -574,8 +608,11 @@ def agentcore_sse_generator(query: str, data_directory: str, upload_id: str = ""
         yield format_sse({"type": "done", "text": ""})
 
     except Exception as e:
-        logger.error(f"AgentCore invocation error: {e}")
-        yield format_sse({"type": "error", "text": str(e)})
+        # Don't echo `str(e)` to the browser — boto3/IAM messages can leak
+        # the runtime ARN, IAM principal, region, and account ID. Keep the
+        # raw message in server logs and DynamoDB (admin-only) only.
+        logger.error(f"AgentCore invocation error: {e}", exc_info=True)
+        yield format_sse({"type": "error", "text": "Analysis failed"})
         track_job_failure(upload_id, str(e))
 
 
@@ -626,8 +663,8 @@ def feedback(request: FeedbackRequest):
 
 # ---------- Feature 6: Report download ----------
 
-# Allowed pattern: UUID or UUID-like session IDs (alphanumeric, hyphens, underscores)
-_SAFE_ID = re.compile(r"^[a-zA-Z0-9_-]+$")
+# _SAFE_ID is defined at module top alongside _SAFE_FILENAME (used here for
+# session_id and elsewhere for upload_id / request_id validation).
 _REPORT_EXTENSIONS = {".docx", ".pdf", ".txt", ".png", ".jpg", ".jpeg", ".gif", ".svg"}
 
 
@@ -697,8 +734,10 @@ def download_artifact(session_id: str, filename: str):
             },
         )
     except Exception as e:
-        logger.error(f"Download failed: {e}")
-        return {"success": False, "error": str(e)}
+        # Do NOT echo the exception to the client — it can leak the S3 key,
+        # bucket name, IAM error codes, or stacktrace. Keep details server-side.
+        logger.error(f"Download failed: {e}", exc_info=True)
+        return {"success": False, "error": "Download failed"}
 
 
 # ---------- Feature 7: Data Q&A Chat ----------
@@ -710,9 +749,19 @@ class ChatRequest(BaseModel):
     upload_id: str
     message: str
 
+    @field_validator("upload_id")
+    @classmethod
+    def _check_upload_id(cls, v: str) -> str:
+        return _validate_id(v, "upload_id")
+
 
 class ChatResetRequest(BaseModel):
     upload_id: str
+
+    @field_validator("upload_id")
+    @classmethod
+    def _check_upload_id(cls, v: str) -> str:
+        return _validate_id(v, "upload_id")
 
 
 def chat_sse_generator(upload_id: str, message: str):
@@ -791,8 +840,10 @@ def chat_sse_generator(upload_id: str, message: str):
         try:
             asyncio.run(_stream())
         except Exception as e:
+            # Same rationale as the /analyze SSE generator: keep boto3/IAM
+            # / Bedrock error details server-side.
             logger.error(f"Chat agent error: {e}", exc_info=True)
-            event_queue.put({"type": "error", "text": str(e)})
+            event_queue.put({"type": "error", "text": "Chat agent error"})
         finally:
             event_queue.put(None)  # End-of-stream sentinel
 
@@ -836,6 +887,11 @@ def chat_reset(request: ChatResetRequest):
 class SuggestionsRequest(BaseModel):
     upload_id: str
 
+    @field_validator("upload_id")
+    @classmethod
+    def _check_upload_id(cls, v: str) -> str:
+        return _validate_id(v, "upload_id")
+
 
 @app.post("/chat/suggestions")
 def chat_suggestions(request: SuggestionsRequest):
@@ -855,6 +911,11 @@ def chat_suggestions(request: SuggestionsRequest):
 class SqlExecuteRequest(BaseModel):
     upload_id: str
     sql: str
+
+    @field_validator("upload_id")
+    @classmethod
+    def _check_upload_id(cls, v: str) -> str:
+        return _validate_id(v, "upload_id")
 
 
 @app.post("/sql/execute")
@@ -879,6 +940,10 @@ def chat_meta(upload_id: str):
     """Return dataset summary for the Q&A welcome card: row count, columns (with
     types + user-supplied descriptions from column_definitions.json when available).
     """
+    try:
+        _validate_id(upload_id, "upload_id")
+    except ValueError:
+        return {"success": False, "error": "Invalid upload_id"}
     try:
         session = chat_session_manager.get_or_create(upload_id)
         session.ensure_data_loaded()
@@ -910,8 +975,8 @@ def chat_meta(upload_id: str):
             "has_descriptions": bool(desc_by_name),
         }
     except Exception as e:
-        logger.error(f"chat_meta failed: {e}")
-        return {"success": False, "error": str(e)}
+        logger.error(f"chat_meta failed: {e}", exc_info=True)
+        return {"success": False, "error": "Failed to load dataset metadata"}
 
 
 # ---------- Main ----------

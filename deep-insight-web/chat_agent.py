@@ -18,6 +18,7 @@ import logging
 import os
 import re
 import threading
+import time
 from pathlib import Path
 
 import duckdb
@@ -25,6 +26,7 @@ import pandas as pd
 import numpy as np
 
 import boto3
+from botocore.config import Config
 from strands import Agent, tool
 from strands.models.bedrock import BedrockModel
 from strands.models.model import CacheConfig
@@ -130,6 +132,17 @@ class ChatSession:
         self.row_count: int = 0
         self.csv_filename: str = ""
         self.side_channel: list = []
+        self._tmp_csv_path: Path | None = None
+        # Serializes one-time setup (load + lockdown) against concurrent
+        # callers. Without this, /chat/meta and /chat/suggestions firing on
+        # page load can both pass the `if self.conn is not None` guard and
+        # then race on `SET lock_configuration=true`, which only permits one
+        # call per connection. RLock so ensure_agent_created can call
+        # ensure_data_loaded under the same lock without deadlocking.
+        self._init_lock = threading.RLock()
+        # Time of last activity (chat / sql exec / meta) used by the session
+        # manager for idle-eviction. Updated on every touch().
+        self.last_active: float = time.time()
 
     # ---- Thread-safe DB helpers ----
 
@@ -149,10 +162,25 @@ class ChatSession:
             return cur.execute(sql, params)
 
     def ensure_data_loaded(self):
-        """Load CSV from upload storage into an in-memory DuckDB table."""
+        """Load CSV from upload storage into an in-memory DuckDB table.
+
+        Idempotent + thread-safe: page load fires /chat/meta and
+        /chat/suggestions in parallel and both may hit a fresh session.
+        Without the lock, both threads pass the `self.conn is None` check,
+        race to load the CSV, and the second `SET lock_configuration=true`
+        fails ("configuration has been locked").
+        """
+        # Fast path without taking the lock.
         if self.conn is not None:
             return
+        with self._init_lock:
+            # Re-check inside the lock — another thread may have just loaded.
+            if self.conn is not None:
+                return
+            self._load_data_locked()
 
+    def _load_data_locked(self) -> None:
+        """Body of ensure_data_loaded; caller must hold self._init_lock."""
         csv_name, csv_bytes, coldef = _find_csv_and_coldef(self.upload_id)
         self.csv_filename = csv_name
         self.column_definitions = coldef
@@ -163,6 +191,8 @@ class ChatSession:
         tmp_path.write_bytes(csv_bytes)
 
         self.conn = duckdb.connect(":memory:")
+        # Track tmp CSV for cleanup on session close.
+        self._tmp_csv_path = tmp_path
         # Register the CSV as a table named `data`. read_csv_auto infers types.
         self.run_query(
             f"CREATE TABLE {self.table_name} AS "
@@ -172,6 +202,18 @@ class ChatSession:
         self.row_count = self.run_query(
             f"SELECT COUNT(*) FROM {self.table_name}"
         ).fetchone()[0]
+
+        # Seal the session against external filesystem / network / extension
+        # access. The user can edit SQL in the Q&A UI, so we must prevent
+        # `COPY ... TO '/tmp/leak.csv'`, `INSTALL`/`LOAD`, `ATTACH 'http://...'`,
+        # and similar escape paths. Must run AFTER the initial read_csv_auto
+        # because that itself uses LocalFileSystem.
+        self.run_query("SET enable_external_access=false")
+        self.run_query(
+            "SET disabled_filesystems="
+            "'LocalFileSystem,HTTPFileSystem,S3FileSystem'"
+        )
+        self.run_query("SET lock_configuration=true")
 
         self._build_schema_summary()
         logger.info(
@@ -231,7 +273,13 @@ class ChatSession:
         """Create the Strands Agent with tools bound to this session's connection."""
         if self.agent is not None:
             return
+        with self._init_lock:
+            if self.agent is not None:
+                return
+            self._create_agent_locked()
 
+    def _create_agent_locked(self) -> None:
+        """Body of ensure_agent_created; caller must hold self._init_lock."""
         self.ensure_data_loaded()
         tools = _create_tools(self, self.side_channel)
 
@@ -240,9 +288,18 @@ class ChatSession:
         # turn input cost to ~10% (Bedrock ephemeral cache, 5-minute TTL).
         # `cache_config=auto` also adds a cache point on the most recent user
         # message so conversation history benefits as it grows.
+        # Bound the Bedrock call: without read_timeout a hung response holds
+        # both the background agent thread and the SSE connection indefinitely.
+        # Values mirror managed-agentcore/src/utils/strands_sdk_utils.py but
+        # are tighter (Q&A turns are short, not 15-min analysis).
         bedrock_kwargs: dict = {
             "model_id": CHAT_MODEL_ID,
             "region_name": AWS_REGION,
+            "boto_client_config": Config(
+                read_timeout=120,
+                connect_timeout=10,
+                retries=dict(max_attempts=3, mode="adaptive"),
+            ),
         }
         # Build system prompt. When caching is on, attach a cachePoint block so
         # Bedrock caches the (large, invariant) system prompt across turns.
@@ -272,6 +329,10 @@ class ChatSession:
             conversation_manager=SlidingWindowConversationManager(window_size=30),
         )
 
+    def touch(self) -> None:
+        """Mark the session as recently active (used by LRU/idle eviction)."""
+        self.last_active = time.time()
+
     def close(self):
         if self.conn is not None:
             try:
@@ -280,27 +341,100 @@ class ChatSession:
                 pass
             self.conn = None
         self.agent = None
+        # Clean up the tmp CSV copy DuckDB read from. /tmp is ephemeral but
+        # filling it under load is still bad — Fargate's writable layer is
+        # small and shared across requests.
+        if self._tmp_csv_path is not None:
+            try:
+                self._tmp_csv_path.unlink(missing_ok=True)
+            except Exception as e:
+                logger.warning(
+                    f"Failed to unlink tmp CSV {self._tmp_csv_path}: {e}"
+                )
+            self._tmp_csv_path = None
 
 
 # ---------- SessionManager ----------
 
 
+# Eviction tunables (overridable via env). Defaults are tuned for a 2 GB
+# Fargate task with ~5 concurrent users and 50 MB CSVs (≈ 1.5 GB worst case).
+SESSION_MAX = int(os.environ.get("CHAT_SESSION_MAX", "20"))
+SESSION_IDLE_TTL_SEC = int(os.environ.get("CHAT_SESSION_IDLE_TTL_SEC", "1800"))
+
+
 class SessionManager:
+    """LRU + idle-TTL bounded session cache.
+
+    Each ChatSession pins (DuckDB :memory: ≈ CSV size) + (pandas df ≈ CSV size)
+    + (Strands agent history) + (a tmp CSV on disk). Without bounds, sessions
+    accumulate for the lifetime of the container. We evict on every access:
+
+      1. Drop sessions whose `last_active` is older than IDLE_TTL_SEC.
+      2. If still over MAX, drop the least-recently-active sessions.
+
+    Eviction calls `session.close()` which releases the DuckDB connection,
+    drops the agent (and its conversation history), and unlinks the tmp CSV.
+    """
+
     def __init__(self):
+        # Insertion-order dict + last_active on each session is enough — we
+        # don't need OrderedDict.move_to_end because eviction sorts by
+        # last_active anyway.
         self._sessions: dict[str, ChatSession] = {}
         self._lock = threading.Lock()
 
     def get_or_create(self, upload_id: str) -> ChatSession:
         with self._lock:
-            if upload_id not in self._sessions:
-                self._sessions[upload_id] = ChatSession(upload_id)
-            return self._sessions[upload_id]
+            session = self._sessions.get(upload_id)
+            if session is None:
+                session = ChatSession(upload_id)
+                self._sessions[upload_id] = session
+            session.touch()
+            # Evict AFTER insert+touch so the just-added session has the
+            # newest last_active and won't be selected as the LRU victim.
+            self._evict_locked()
+            return session
 
     def remove(self, upload_id: str):
         with self._lock:
             session = self._sessions.pop(upload_id, None)
         if session:
             session.close()
+
+    def _evict_locked(self) -> None:
+        """Drop idle and over-cap sessions. Caller must hold self._lock."""
+        now = time.time()
+        # 1) Idle eviction.
+        idle_keys = [
+            k for k, s in self._sessions.items()
+            if (now - s.last_active) > SESSION_IDLE_TTL_SEC
+        ]
+        for k in idle_keys:
+            s = self._sessions.pop(k, None)
+            if s:
+                logger.info(
+                    f"SessionManager: idle-evict upload_id={k} "
+                    f"(idle={int(now - s.last_active)}s)"
+                )
+                try:
+                    s.close()
+                except Exception:
+                    pass
+
+        # 2) LRU eviction if still over cap.
+        overflow = len(self._sessions) - SESSION_MAX
+        if overflow > 0:
+            ranked = sorted(
+                self._sessions.items(), key=lambda kv: kv[1].last_active
+            )
+            for k, s in ranked[:overflow]:
+                self._sessions.pop(k, None)
+                logger.info(f"SessionManager: lru-evict upload_id={k}")
+                try:
+                    s.close()
+                except Exception:
+                    pass
 
 
 session_manager = SessionManager()
@@ -400,11 +534,13 @@ The table name is `{table_name}`. You MUST query this table via SQL — never gu
 
 ## Chart Rules
 - `create_chart(sql, chart_code)` runs the SQL and binds the result DataFrame to `df` for the chart code.
-- For trends over time → line chart. For category comparison → bar chart. For share/proportion → pie. For distribution → histogram / box plot.
-- ALWAYS set a descriptive `plt.title(...)`, and axis labels when useful.
+- A pre-built matplotlib `fig` and `ax` are provided. Use the OO API: `ax.plot(...)`, `ax.bar(...)`, `ax.set_title(...)`, etc.
+- For trends over time → `ax.plot`. For category comparison → `ax.bar`. For share/proportion → `ax.pie`. For distribution → `ax.hist` / `ax.boxplot`.
+- ALWAYS set a descriptive title via `ax.set_title(...)`, and axis labels via `ax.set_xlabel(...)` / `ax.set_ylabel(...)` when useful.
 - Write labels in the same language as the user's question (Korean by default).
 - Korean fonts and a clean light theme are pre-configured — do NOT set `rcParams`, `style.use`, or fonts inside `chart_code`.
-- Do NOT call `plt.show()` or `plt.savefig()` — the tool handles saving.
+- Do NOT import or call `plt` (matplotlib.pyplot) directly. Do NOT call `plt.show()`, `plt.savefig()`, `plt.close()`, or `plt.figure()` — the tool handles all of that.
+- For multi-axis layouts use `fig.subplots(...)` to add more axes; do NOT call `plt.subplots`.
 
 ## Response Rules (Insight-first — do NOT produce empty "interpretation" filler)
 - FIRST sentence must be a headline insight that includes a specific number from the result
@@ -441,7 +577,28 @@ The table name is `{table_name}`. You MUST query this table via SQL — never gu
 
 
 def _safe_exec(code: str, extra_globals: dict, timeout: int = EXEC_TIMEOUT) -> dict:
-    """Run matplotlib chart code in a restricted sandbox with a timeout."""
+    """Run matplotlib chart code in a restricted sandbox with a timeout.
+
+    TRUST BOUNDARY — read this before adding caller paths.
+
+    The only intended caller is `create_chart`, where `code` is produced by an
+    LLM that has been given a constrained system prompt and a SQL-only data
+    surface. We block the obvious escape hatches (`__import__`, `open`,
+    `exec`, `eval`, `compile`, `breakpoint`, `exit`, `quit`, `input`) but the
+    sandbox is NOT robust against an attacker with arbitrary code-injection
+    capability. Specifically, the classic Python sandbox escape
+    `().__class__.__base__.__subclasses__()` is reachable from here and gives
+    access to file/process primitives.
+
+    Implications:
+      - Do NOT call `_safe_exec` with user-supplied code (e.g. from a chat
+        message or HTTP body) without an additional trust layer.
+      - If the LLM is ever exposed to direct prompt injection from the user's
+        data file or chat message, this becomes a remote-code-execution path
+        on the container. Any future change that broadens the input surface
+        MUST tighten the sandbox first (AST allowlist + multiprocessing
+        worker with rlimits is the recommended replacement).
+    """
     safe_builtins = {
         k: v for k, v in __builtins__.items()
         if k not in (
@@ -487,7 +644,12 @@ def _format_df_html(df: pd.DataFrame) -> str:
             lambda x: f"{x:,.0f}" if pd.notna(x) and abs(x) >= 1 and x == int(x)
             else (f"{x:,.2f}" if pd.notna(x) else "")
         )
-    return formatted.to_html(classes="chat-table", index=False, border=0)
+    # escape=True is the pandas default but we set it explicitly: this HTML is
+    # injected with innerHTML on the client (chat.js), so any future contributor
+    # flipping escape would silently open an XSS hole via CSV cell content.
+    return formatted.to_html(
+        classes="chat-table", index=False, border=0, escape=True
+    )
 
 
 def _df_summary_for_llm(df: pd.DataFrame, top_n: int = 10) -> str:
@@ -550,6 +712,110 @@ def _df_summary_for_llm(df: pd.DataFrame, top_n: int = 10) -> str:
     return "\n".join(lines)
 
 
+# ---------- Chart rendering (matplotlib OO API, thread-safe) ----------
+
+
+# Resolve the Korean font name once at import time. fontManager.ttflist scan is
+# expensive and the result is process-stable.
+_KOREAN_FONT_NAME: str | None = None
+
+
+def _resolve_korean_font() -> str | None:
+    global _KOREAN_FONT_NAME
+    if _KOREAN_FONT_NAME is not None:
+        return _KOREAN_FONT_NAME or None
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.font_manager as fm
+        for name in ["NanumGothic", "NanumBarunGothic", "Malgun Gothic", "AppleGothic"]:
+            if any(name == f.name for f in fm.fontManager.ttflist):
+                _KOREAN_FONT_NAME = name
+                return name
+        # koreanize_matplotlib registers a fallback into the global font cache.
+        # We still don't use plt.rcParams at runtime, but the registration is
+        # one-time and safe.
+        try:
+            import koreanize_matplotlib  # noqa: F401
+        except ImportError:
+            pass
+    except Exception as e:
+        logger.warning(f"Korean font resolution failed: {e}")
+    _KOREAN_FONT_NAME = ""  # cache the negative
+    return None
+
+
+# Per-figure style overrides applied via rcParams context. Mirrors the prior
+# global plt.rcParams.update() but scoped to a single render call.
+_CHART_STYLE = {
+    "figure.facecolor": "#ffffff",
+    "axes.facecolor": "#ffffff",
+    "axes.edgecolor": "#999999",
+    "axes.labelcolor": "#111111",
+    "axes.labelsize": 13,
+    "axes.titlesize": 15,
+    "axes.titleweight": "bold",
+    "text.color": "#111111",
+    "xtick.color": "#333333",
+    "ytick.color": "#333333",
+    "xtick.labelsize": 11,
+    "ytick.labelsize": 11,
+    "grid.color": "#dddddd",
+    "legend.fontsize": 11,
+    "figure.dpi": 100,
+    "axes.unicode_minus": False,
+}
+
+
+def _render_chart_oo(chart_code: str, result_df: pd.DataFrame):
+    """Render `chart_code` on a fresh Figure using the OO API.
+
+    Returns (fig, image_bytes) on success or (None, error_string) on failure.
+    Uses matplotlib.figure.Figure directly (NOT pyplot) so concurrent calls do
+    not share rcParams / global figure registry. The figure is held only for
+    this call's lifetime and is garbage-collected when the function returns.
+    """
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib as mpl
+    from matplotlib.figure import Figure
+
+    try:
+        import seaborn as sns
+    except ImportError:
+        sns = None
+
+    style = dict(_CHART_STYLE)
+    font = _resolve_korean_font()
+    if font:
+        style["font.family"] = font
+
+    # rc_context scopes rcParams changes to this block — even though we use the
+    # OO API, some downstream calls (e.g. seaborn) still read rcParams at draw
+    # time. Without the context, two concurrent renders could read each other's
+    # style.
+    with mpl.rc_context(style):
+        fig = Figure(figsize=(10, 6))
+        ax = fig.subplots()
+
+        exec_globals_chart = {
+            "pd": pd, "np": np, "df": result_df,
+            "fig": fig, "ax": ax, "sns": sns,
+        }
+
+        exec_result = _safe_exec(chart_code, exec_globals_chart)
+        if exec_result.get("error"):
+            return None, f"Chart error: {exec_result['error']}"
+
+        buf = io.BytesIO()
+        fig.savefig(
+            buf, format="png", dpi=200, bbox_inches="tight",
+            facecolor="#ffffff", edgecolor="none",
+        )
+        buf.seek(0)
+        return fig, buf.read()
+
+
 # Public helper: re-run user-edited SQL from the /sql/execute endpoint.
 def execute_sql_for_session(upload_id: str, sql: str, max_rows: int = 500) -> dict:
     """Execute a read-only SQL query against the session's DuckDB and return HTML.
@@ -566,6 +832,13 @@ def execute_sql_for_session(upload_id: str, sql: str, max_rows: int = 500) -> di
         session.ensure_data_loaded()
         result_df = session.run_query(sql).df()
     except Exception as e:
+        # codeql[py/stack-trace-exposure] — intentional UX: this endpoint is
+        # the SQL editor's "Run" button. The user typed the SQL, so showing
+        # the DuckDB parse/runtime error back is the entire point — without
+        # it, the editor is unusable. The DuckDB session is sealed against
+        # filesystem / network access (see ensure_data_loaded), so the worst
+        # an error can leak is column / table name hints from the user's own
+        # uploaded CSV.
         return {"success": False, "error": f"{type(e).__name__}: {e}"}
 
     total = len(result_df)
@@ -669,18 +942,24 @@ def _create_tools(
     def create_chart(sql: str, chart_code: str) -> str:
         """Execute SQL, then run matplotlib code to create a chart from the results.
 
-        The result DataFrame of `sql` is available as `df` inside `chart_code`.
-        `plt` is matplotlib.pyplot, `sns` is seaborn (if available).
-        Do NOT call plt.show() or plt.savefig(). Do NOT set rcParams or fonts.
-        Korean fonts and a light theme are pre-configured by the tool.
+        Inside `chart_code` you have:
+          - `df`  : the result DataFrame of `sql`
+          - `fig` : a fresh matplotlib Figure (already styled, light theme)
+          - `ax`  : the default Axes (use `fig.subplots(...)` to add more)
+          - `pd`, `np`, `sns` (seaborn if available)
+
+        Use the matplotlib OO API on `ax` / `fig`. Do NOT import or call `plt`
+        (matplotlib.pyplot) directly — pyplot mutates global state and is not
+        safe under concurrent users. Do NOT call savefig / close — the tool
+        handles output.
 
         Args:
             sql: The SQL query used to populate `df`.
-            chart_code: Matplotlib code that creates the figure.
+            chart_code: Matplotlib code that draws on the provided `fig` / `ax`.
 
         Example:
             sql: "SELECT month, SUM(sales) AS total FROM data GROUP BY month ORDER BY month"
-            chart_code: "plt.figure(figsize=(10,6))\\nplt.plot(df['month'], df['total'], marker='o')\\nplt.title('Monthly Sales')"
+            chart_code: "ax.plot(df['month'], df['total'], marker='o')\\nax.set_title('Monthly Sales')"
         """
         try:
             norm = _normalize_sql(sql)
@@ -692,65 +971,14 @@ def _create_tools(
             if result_df.empty:
                 return "Query returned no rows; cannot draw a chart."
 
-            import matplotlib
-            matplotlib.use("Agg")
-            import matplotlib.pyplot as plt
-            import matplotlib.font_manager as fm
-
-            # Korean font: try common system fonts first, fallback to koreanize_matplotlib
-            _korean_font_set = False
-            for font_name in ["NanumGothic", "NanumBarunGothic", "Malgun Gothic", "AppleGothic"]:
-                if any(font_name == f.name for f in fm.fontManager.ttflist):
-                    plt.rcParams["font.family"] = font_name
-                    _korean_font_set = True
-                    break
-            if not _korean_font_set:
-                try:
-                    import koreanize_matplotlib  # noqa: F401
-                except ImportError:
-                    pass
-            plt.rcParams["axes.unicode_minus"] = False
-
-            try:
-                import seaborn as sns
-            except ImportError:
-                sns = None
-
-            # Light theme with bold titles
-            plt.rcParams.update({
-                "figure.facecolor": "#ffffff",
-                "axes.facecolor": "#ffffff",
-                "axes.edgecolor": "#999999",
-                "axes.labelcolor": "#111111",
-                "axes.labelsize": 13,
-                "axes.titlesize": 15,
-                "axes.titleweight": "bold",
-                "text.color": "#111111",
-                "xtick.color": "#333333",
-                "ytick.color": "#333333",
-                "xtick.labelsize": 11,
-                "ytick.labelsize": 11,
-                "grid.color": "#dddddd",
-                "legend.fontsize": 11,
-                "figure.dpi": 100,
-            })
-
-            exec_globals_chart = {
-                "pd": pd, "np": np, "df": result_df,
-                "plt": plt, "sns": sns,
-            }
-
-            exec_result = _safe_exec(chart_code, exec_globals_chart)
-            if exec_result.get("error"):
-                plt.close("all")
-                return f"Chart error: {exec_result['error']}"
-
-            buf = io.BytesIO()
-            plt.savefig(buf, format="png", dpi=200, bbox_inches="tight",
-                        facecolor="#ffffff", edgecolor="none")
-            plt.close("all")
-            buf.seek(0)
-            image_bytes = buf.read()
+            # Build a Figure via the OO API. Avoids pyplot's global state
+            # (plt.rcParams / plt.close('all')) which is shared across threads
+            # — under concurrent users, one user's plt.close('all') can wipe
+            # another's figure mid-render.
+            fig, image_bytes = _render_chart_oo(chart_code, result_df)
+            if isinstance(image_bytes, str):
+                # error string returned from helper
+                return image_bytes
 
             if len(image_bytes) > IMAGE_SIZE_LIMIT:
                 return "Chart image exceeds size limit. Simplify the visualization."
@@ -767,11 +995,6 @@ def _create_tools(
             )
 
         except Exception as e:
-            try:
-                import matplotlib.pyplot as plt
-                plt.close("all")
-            except Exception:
-                pass
             return f"Chart error: {type(e).__name__}: {e}"
 
     return [describe_schema, query_sql, create_chart]
