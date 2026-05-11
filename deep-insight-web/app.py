@@ -98,6 +98,40 @@ def _validate_id(value: str, field: str = "id") -> str:
     return value
 
 
+_MAX_FILENAME_LEN = 255
+
+
+def _sanitize_filename(name: str) -> str:
+    """Reduce a user-supplied filename to a safe basename.
+
+    The browser-supplied `data_file.filename` flows into both S3 keys and the
+    local on-disk path (`LOCAL_UPLOAD_DIR / upload_id / name`), and from there
+    into `chat_agent.py:_load_data_locked` which constructs
+    `tmp_path = LOCAL_UPLOAD_DIR / self.upload_id / f"_chat_{name}"`. Without
+    sanitization a filename like `../../etc/passwd` or `foo/../../bar.csv`
+    escapes the upload directory.
+
+    Strategy: NFC-normalize, strip all directory separators by taking the
+    basename, reject empty / dot-only names, cap length, reject control chars
+    and NUL bytes. Returns the cleaned name or raises ValueError.
+    """
+    if not isinstance(name, str) or not name:
+        raise ValueError("Empty filename")
+    normalized = unicodedata.normalize("NFC", name)
+    # Take the basename — drops any directory components a hostile client put
+    # in the multipart filename. PurePosixPath handles forward slashes; we
+    # also explicitly strip backslashes for Windows-style payloads.
+    basename = normalized.replace("\\", "/").rsplit("/", 1)[-1]
+    # Reject "..", ".", empty after stripping, or NUL/control bytes.
+    if not basename or basename in (".", "..") \
+            or any(ord(c) < 32 for c in basename) \
+            or "\x00" in basename:
+        raise ValueError("Invalid filename")
+    if len(basename) > _MAX_FILENAME_LEN:
+        raise ValueError("Filename too long")
+    return basename
+
+
 @app.get("/sample-data")
 def list_sample_data():
     """List available sample datasets from the sample_data/ directory."""
@@ -257,10 +291,12 @@ CSV data:
             content={"success": False, "error": "LLM returned invalid JSON. Please try again."},
         )
     except Exception as e:
-        logger.error(f"Column definition generation failed: {e}")
+        # Same rationale as S2/S7 / C2 — Bedrock errors disclose model ARN,
+        # IAM principal, and region. Keep details server-side only.
+        logger.error(f"Column definition generation failed: {e}", exc_info=True)
         return JSONResponse(
             status_code=500,
-            content={"success": False, "error": str(e)},
+            content={"success": False, "error": "Column definition generation failed"},
         )
 
 
@@ -368,10 +404,10 @@ Column definitions:
             content={"success": False, "error": "LLM returned invalid JSON. Please try again."},
         )
     except Exception as e:
-        logger.error(f"Prompt generation failed: {e}")
+        logger.error(f"Prompt generation failed: {e}", exc_info=True)
         return JSONResponse(
             status_code=500,
-            content={"success": False, "error": str(e)},
+            content={"success": False, "error": "Prompt generation failed"},
         )
 
 
@@ -455,7 +491,13 @@ async def upload(
 ):
     """Upload data file (required) and column_definitions.json (optional) to S3 or local."""
     upload_id = str(uuid.uuid4())
-    normalized_filename = unicodedata.normalize('NFC', data_file.filename)
+    try:
+        normalized_filename = _sanitize_filename(data_file.filename or "")
+    except ValueError:
+        return JSONResponse(
+            status_code=400,
+            content={"success": False, "error": "Invalid filename"},
+        )
 
     if S3_BUCKET_NAME:
         # S3 mode (production)
@@ -657,8 +699,8 @@ def feedback(request: FeedbackRequest):
         logger.info(f"Feedback uploaded: s3://{S3_BUCKET_NAME}/{s3_key}")
         return {"success": True, "s3_path": f"s3://{S3_BUCKET_NAME}/{s3_key}"}
     except Exception as e:
-        logger.error(f"Feedback upload failed: {e}")
-        return {"success": False, "error": str(e)}
+        logger.error(f"Feedback upload failed: {e}", exc_info=True)
+        return {"success": False, "error": "Feedback upload failed"}
 
 
 # ---------- Feature 6: Report download ----------
@@ -691,8 +733,8 @@ def list_artifacts(session_id: str):
         logger.info(f"Artifacts for {session_id}: {filenames}")
         return {"success": True, "session_id": session_id, "filenames": filenames}
     except Exception as e:
-        logger.error(f"List artifacts failed: {e}")
-        return {"success": False, "error": str(e)}
+        logger.error(f"List artifacts failed: {e}", exc_info=True)
+        return {"success": False, "error": "Failed to list artifacts"}
 
 
 @app.get("/download/{session_id}/{filename:path}")

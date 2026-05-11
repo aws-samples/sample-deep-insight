@@ -62,6 +62,11 @@ def _list_upload_files(upload_id: str) -> list[tuple[str, bytes]]:
     """Return list of (filename, bytes) for files uploaded under upload_id.
 
     Supports both S3 mode (if S3_BUCKET_NAME set) and local mode.
+
+    Both branches treat `upload_id` and the discovered filenames as
+    untrusted: callers in app.py validate `upload_id` via `_validate_id`,
+    but as a defense-in-depth this function additionally constrains the
+    local-mode path to remain inside `LOCAL_UPLOAD_DIR`.
     """
     files: list[tuple[str, bytes]] = []
 
@@ -75,7 +80,15 @@ def _list_upload_files(upload_id: str) -> list[tuple[str, bytes]]:
             body = s3.get_object(Bucket=S3_BUCKET_NAME, Key=key)["Body"].read()
             files.append((filename, body))
     else:
-        local_dir = LOCAL_UPLOAD_DIR / upload_id
+        # Defense in depth: confirm the resolved path stays within
+        # LOCAL_UPLOAD_DIR even if upload_id slipped through validation.
+        upload_root = LOCAL_UPLOAD_DIR.resolve()
+        local_dir = (LOCAL_UPLOAD_DIR / upload_id).resolve()
+        try:
+            local_dir.relative_to(upload_root)
+        except ValueError:
+            # local_dir is outside upload_root — refuse the traversal.
+            return files
         if local_dir.exists():
             for p in sorted(local_dir.iterdir()):
                 if p.is_file():
@@ -185,8 +198,22 @@ class ChatSession:
         self.csv_filename = csv_name
         self.column_definitions = coldef
 
+        # Defense in depth: even though /upload sanitizes, csv_name has flowed
+        # through S3 / disk and may have been written by an older codepath.
+        # Take the basename and reject traversal sequences before joining.
+        safe_csv_name = Path(csv_name).name
+        if not safe_csv_name or safe_csv_name in (".", "..") \
+                or "/" in safe_csv_name or "\\" in safe_csv_name:
+            raise ValueError(f"Unsafe CSV name in upload {self.upload_id}")
+
         # Write CSV to a tmp file DuckDB can read from (read_csv_auto needs a path).
-        tmp_path = LOCAL_UPLOAD_DIR / self.upload_id / f"_chat_{csv_name}"
+        tmp_path = LOCAL_UPLOAD_DIR / self.upload_id / f"_chat_{safe_csv_name}"
+        # Confirm the resolved path stays inside the upload directory — guards
+        # against any remaining traversal in a malformed safe_csv_name.
+        upload_root = (LOCAL_UPLOAD_DIR / self.upload_id).resolve()
+        if not str(tmp_path.resolve()).startswith(str(upload_root) + os.sep) \
+                and tmp_path.resolve() != upload_root:
+            raise ValueError(f"Tmp path escapes upload root: {tmp_path}")
         tmp_path.parent.mkdir(parents=True, exist_ok=True)
         tmp_path.write_bytes(csv_bytes)
 
