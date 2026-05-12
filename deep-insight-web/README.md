@@ -2,7 +2,7 @@
 
 > Browser-based interface for data upload, analysis, HITL plan review, and report download
 
-**Last Updated**: 2026-02
+**Last Updated**: 2026-04
 
 ---
 
@@ -11,6 +11,7 @@
 Web UI for Deep Insight — a FastAPI server that connects to the Managed AgentCore backend and provides a browser-based experience for non-technical users. For the complete project overview and deployment comparison, see the [root README](../README.md).
 
 - **Browser-Based**: Upload data, review plans, download reports — no CLI needed
+- **Data Q&A**: Ask natural-language questions on the uploaded CSV — Text2SQL with editable, re-runnable SQL
 - **Bilingual**: Korean / English language support
 - **Secure**: Two deployment options — VPN CIDR or CloudFront + Cognito auth
 
@@ -95,7 +96,7 @@ Both scripts handle all infrastructure in a single run:
 4. **ALB + Target Group + Listener** — Internet-facing ALB with 3600s idle timeout for long analysis sessions
 5. **IAM Task Role** — Least-privilege permissions (S3 upload/feedback/artifacts, AgentCore invoke)
 6. **CloudWatch Log Group** — Container logging
-7. **ECS Task Definition** — Fargate (auto-detects ARM64 or X86_64), 256 CPU / 512 MB
+7. **ECS Task Definition** — Fargate (auto-detects ARM64 or X86_64), 1024 CPU / 2048 MB (Data Q&A runs pandas/matplotlib/DuckDB in-container)
 8. **ECS Service** — Creates or updates with rolling deployment
 9. **CloudFront** — *(Option B only)* Creates distribution with ALB origin
 
@@ -112,10 +113,110 @@ Both scripts handle all infrastructure in a single run:
 | HITL review | `POST /feedback` | Submit plan approval/rejection (uploaded to S3) |
 | Artifacts | `GET /artifacts/{session_id}` | List generated report files |
 | Download | `GET /download/{session_id}/{filename}` | Download a report file |
+| Column auto-gen | `POST /generate-column-definitions` | Generate `column_definitions.json` from CSV header + sample rows (Bedrock Claude) |
+| Prompt auto-gen | `POST /generate-prompts` | Generate 3 sample analysis prompts from `column_definitions.json` |
+| Data Q&A chat | `POST /chat` | DuckDB-backed Text2SQL chat with SSE streaming |
+| Chat reset | `POST /chat/reset` | Clear chat history for a session |
+| Chat suggestions | `POST /chat/suggestions` | Schema-heuristic starter questions |
+| Dataset meta | `GET /chat/meta` | Row count, columns, types, descriptions |
+| SQL re-run | `POST /sql/execute` | Execute user-edited SQL directly (no LLM) |
 
 > For detailed feature specifications, see the [Development Plan](../docs/features/web-ui/03-development-plan.md).
 >
 > For Ops Admin (job tracking, notifications, dashboard), see the [Ops Deployment Guide](ops/README.md).
+
+---
+
+## Data Q&A
+
+Conversational exploration on the uploaded CSV. Complements the long-form
+analysis flow (`/analyze`, 15–30 min) with fast, iterative questions.
+
+Enabled automatically after upload — a "Data Q&A" tab appears next to "Analysis"
+at the top of the page.
+
+### How it works
+
+```
+Upload CSV --> DuckDB in-memory table (read_csv_auto)
+                    |
+User question --> Strands Agent + Claude Sonnet 4.6
+                    |
+                    |-- query_sql(sql)                     -> table (SSE)
+                    |-- create_chart(sql, matplotlib_code) -> PNG (SSE)
+                    |-- describe_schema
+                    v
+             Answer streamed back with SQL block + table/chart
+                    |
+User edits SQL --> POST /sql/execute (re-run without LLM, ms latency)
+```
+
+### Highlights
+
+- **Text2SQL with transparency**: Generated SQL is always shown in the chat bubble; collapsible by default
+- **Inline SQL editor**: `▶ 실행` re-runs as-is, `✎ 편집` opens editor; no extra LLM call needed
+- **Light-themed charts**: matplotlib with Korean font (NanumGothic), bold titles, click to zoom
+- **Dynamic starter questions**: From schema heuristics — no LLM call on welcome load
+- **Follow-up chips**: LLM inlines `[SUGGESTIONS]q1|q2|q3[/SUGGESTIONS]` at response end
+- **Column-definitions aware**: Uses `column_definitions.json` (optional, auto-generated) in the system prompt for domain-accurate SQL
+- **Insight-first Response Rules**: System prompt forces concrete numeric headlines and bans filler phrases ("경향이 있습니다" etc.)
+
+### Prompt caching
+
+System prompt + tool specs + conversation history are cached via Bedrock
+ephemeral cache using `SystemContentBlock + cachePoint` and
+`CacheConfig(strategy="auto")`. TTL is 5 minutes, which is a Bedrock
+platform default (not configurable); this matches the typical inter-turn
+gap in an interactive Q&A session.
+
+Measured 5-turn session in production:
+
+| Turn | total input | cache_read | hit% |
+|---|---|---|---|
+| 1 | 5,938 | 2,653 | 44.7% |
+| 2 | 12,243 | 10,822 | 88.4% |
+| 3 | 10,963 | 9,760 | 89.0% |
+| 4 | 13,048 | 12,112 | 92.8% |
+| 5 | 15,281 | 14,038 | 91.9% |
+
+Per-turn input cost drops to ~10% on cache hits; session-level savings
+typically 50%+ depending on conversation length (write premium grows with
+history).
+
+Toggle via env var: `ENABLE_PROMPT_CACHE=0` disables caching (useful for
+local debugging).
+
+### Environment variables
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `CHAT_MODEL_ID` | `global.anthropic.claude-sonnet-4-6` | Chat agent LLM |
+| `ENABLE_PROMPT_CACHE` | `1` | Set `0` to disable prompt caching |
+| `WEB_UTILITY_MODEL_ID` | `global.anthropic.claude-sonnet-4-6` | Column/prompt auto-generation utility |
+
+### Observing prompt caching hits
+
+```bash
+# Live tail of per-turn usage metrics
+aws logs tail /ecs/deep-insight-web --region us-west-2 --follow | grep "chat usage"
+```
+
+Each chat turn logs `input=… output=… cache_read=… cache_write=…` (values are
+cumulative within a task; diff consecutive lines for per-turn deltas).
+
+### Local development
+
+Chat runs without S3 if `S3_BUCKET_NAME` is unset — uploaded CSVs go to
+`/tmp/deep-insight-uploads/{upload_id}/` instead. Only Bedrock credentials
+(`AWS_PROFILE` or env vars) are required.
+
+```bash
+cd deep-insight-web
+pip install -r requirements.txt
+export AWS_REGION=us-west-2    # CHAT_MODEL_ID uses global. profile
+python app.py
+# localhost:8080 → upload CSV → "Data Q&A" tab → ask
+```
 
 ---
 
@@ -145,6 +246,7 @@ Browser --> CloudFront (HTTPS) --> Lambda@Edge (Cognito auth)
 - **AgentCore Native Protocol**: `boto3.invoke_agent_runtime()` with SSE streaming
 - **SSE keepalive**: Sends `: keepalive` comments every 30s to prevent proxy idle timeout
 - **HITL flow**: `plan_review_request` SSE event -> browser modal -> `POST /feedback` -> S3 -> AgentCore polls
+- **Data Q&A flow**: `/chat` invokes a Strands Agent (Claude Sonnet 4.6) with three tools — `describe_schema`, `query_sql`, `create_chart`. DuckDB runs in-container against the uploaded CSV; **AgentCore is not on this path**, so chat responses return in seconds rather than minutes.
 - **Env vars**: Reuses `managed-agentcore/.env` (no separate `.env.example`)
 
 ---
@@ -192,4 +294,45 @@ aws elbv2 describe-target-health \
     --query 'TargetGroups[0].TargetGroupArn' --output text \
     --region us-west-2)" \
   --region us-west-2
+```
+
+### Data Q&A: `AccessDeniedException: bedrock:InvokeModel` or `s3:ListBucket`
+
+The task role's inline policy is out of sync — happens when `deploy-cloudfront.sh`
+or `deploy.sh` adds new Sids but the role already existed (older script
+versions only created policy on role creation).
+
+Re-run the deploy script; it now always refreshes the inline policy:
+
+```bash
+bash deploy-cloudfront.sh   # or deploy.sh
+```
+
+Verify the policy contains the expected Sids:
+
+```bash
+aws iam get-role-policy \
+  --role-name deep-insight-web-task-role \
+  --policy-name deep-insight-web-task-policy \
+  --query 'PolicyDocument.Statement[].Sid'
+# Expected: ["S3Upload", "S3UploadsList", "S3Feedback",
+#            "S3ArtifactsList", "S3ArtifactsGet",
+#            "AgentCoreInvoke", "BedrockInvokeClaude"]
+```
+
+### Data Q&A: chart labels render as □□□
+
+The container is missing Korean fonts. The Dockerfile installs `fontconfig +
+fonts-nanum` before the `USER appuser` switch. If an older image was pushed
+before this change, rebuild and redeploy:
+
+```bash
+bash deploy-cloudfront.sh   # or deploy.sh — forces new image build + push
+```
+
+Verify Nanum is present inside the container:
+
+```bash
+docker run --rm 603420654815.dkr.ecr.us-west-2.amazonaws.com/deep-insight-web:latest \
+  fc-list | grep -i nanum
 ```

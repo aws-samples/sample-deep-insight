@@ -41,7 +41,17 @@
         <p class="hero-learn"><a href="https://catalog.us-east-1.prod.workshops.aws/workshops/ee17ba6e-edc4-4921-aaf6-ca472841c49b/ko-KR" id="hero-workshop-link" target="_blank" data-i18n="hero_learn">안전한 오픈소스 아키텍처와 코드를 통해 나만의 에이전트를 구축하세요</a></p>
     </section>
 
+    <!-- View tabs (Analysis = default / Data Q&A = enabled after upload) -->
+    <nav class="view-tabs" role="tablist">
+        <button class="view-tab active" id="tab-analysis" role="tab" aria-selected="true"
+                onclick="activateView('analysis')" data-i18n="tab_analysis">분석</button>
+        <button class="view-tab disabled" id="tab-chat" role="tab" aria-selected="false"
+                disabled onclick="activateView('chat')" data-i18n="tab_chat">Data Q&A</button>
+    </nav>
+
     <main>
+        <!-- ============ View: Analysis (default) ============ -->
+        <section id="view-analysis" class="view view-active">
         <!-- Guide -->
         <div class="card" id="guide-card">
             <div class="guide-header" onclick="toggleGuide()">
@@ -228,6 +238,37 @@
             <p class="section-note" data-i18n="reports_note">Chrome 브라우저에서 다운로드 시 보안 경고가 표시되면 우측 상단의 "Keep" 버튼을 클릭하세요 (HTTP 연결)</p>
             <div id="download-list"></div>
         </div>
+        </section>
+
+        <!-- ============ View: Data Q&A ============ -->
+        <section id="view-chat" class="view">
+            <div class="qna-shell">
+                <!-- Dataset summary card (rendered after upload) -->
+                <div id="qna-meta" class="qna-meta"></div>
+
+                <!-- Chat area (messages + input) -->
+                <div class="qna-chat">
+                    <div id="chat-messages" class="chat-messages"></div>
+                    <div class="chat-input-area">
+                        <div class="input-wrapper">
+                            <textarea id="chat-input" data-i18n-placeholder="chat_placeholder"
+                                      placeholder="Ask about your data..." rows="1"></textarea>
+                            <button id="chat-send-btn" class="chat-send-btn" onclick="sendChatMessage()" title="Send">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                            </button>
+                        </div>
+                        <div class="chat-input-actions">
+                            <button class="btn btn-sm btn-outline" onclick="resetChat()" data-i18n="chat_reset">초기화</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart zoom modal -->
+            <div id="chart-modal" class="chart-modal" onclick="closeChartModal()">
+                <img id="chart-modal-img" src="" alt="chart">
+            </div>
+        </section>
     </main>
 
     <!-- Plan review modal -->
@@ -278,12 +319,13 @@
     </div>
 
     <footer>
-        <div class="footer-version">Deep Insight v1.2.0</div>
+        <div class="footer-version">Deep Insight v1.3.0</div>
     </footer>
 
     <script src="/static/js/app.js"></script>
     <script src="/static/js/i18n.js"></script>
     <script src="/static/js/upload.js"></script>
     <script src="/static/js/analyze.js"></script>
+    <script src="/static/js/chat.js"></script>
 </body>
 </html>

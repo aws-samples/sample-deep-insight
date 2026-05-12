@@ -76,6 +76,7 @@ function initUpload() {
                 statusDiv.style.color = "var(--green)";
                 analyzeSection.classList.remove("hidden");
                 analyzeBtn.disabled = false;
+                enableChatTab(data.upload_id);
                 analyzeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
             } else {
                 statusDiv.textContent = translations[currentLang].status_upload_failed + (data.error || "Unknown error");
