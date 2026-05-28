@@ -39,6 +39,10 @@ setup/.venv/
 
 # Artifacts (all generated files)
 artifacts/
+artifacts_*/
+
+# Customer/test data — not for commit (demo data like moon_market stays tracked)
+data/jinro/
 
 # IDE & Editors
 .vscode/

@@ -1,5 +1,4 @@
 ---
-CURRENT_TIME: {CURRENT_TIME}
 ---
 
 ## Role

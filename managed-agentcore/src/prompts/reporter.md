@@ -1,5 +1,4 @@
 ---
-CURRENT_TIME: {CURRENT_TIME}
 USER_REQUEST: {USER_REQUEST}
 FULL_PLAN: {FULL_PLAN}
 ---
@@ -93,11 +92,13 @@ trend markers, Top-N bar values) do NOT need [N] markers as long as
 the prose does not quote them as a fact. The chart is the artifact;
 the prose makes claims.
 
-ENFORCEMENT: In reporter_final.py, you MUST call `audit_body_citations(doc)`
-immediately after `doc = load_or_create_docx()` and BEFORE adding the
-references section. The function prints any orphan values or markers
-to stdout (CloudWatch). Skipping this call ships unverified body
-claims — a process violation, not a stylistic choice.
+ENFORCEMENT: In reporter_final.py, you MUST pre-strip all [N] then call
+`resolve_body_citations(doc)` immediately after `doc = load_or_create_docx()`
+and BEFORE adding the references section. The resolver is the SOLE marker
+source: it value-matches every body/table number against verified citations
+and inserts the correct [N] deterministically, so generation-time hand-written
+markers are not relied upon. Skipping this ships unverified body claims — a
+process violation, not a stylistic choice.
 </numerical_claim_discipline>
 
 <value_status_resolution>
@@ -401,49 +402,98 @@ def load_citation_statuses():
             return {{c["calculation_id"]: c.get("verification_status", "verified") for c in json.load(f).get("citations", [])}}
     return {{}}
 
-def audit_body_citations(doc):
-    """🚨 MUST be called in reporter_final.py before generating final docs.
-    Self-audits body paragraphs: scans every numerical claim (≥3 digits)
-    and warns if not cited (no [N] marker after) AND not within 0.5%
-    tolerance of any verified citation value. Advisory only — does NOT
-    modify the document. Result printed to stdout for CloudWatch capture.
-    Returns the list of uncited claims for further inspection."""
-    cited_values = []
+def resolve_body_citations(doc):
+    """🚨 WRITE VERBATIM — do NOT rewrite the run-offset insertion or the
+    disambiguation logic. Deterministic post-hoc citation resolver, called from
+    reporter_final.py before the references section. For every body-prose number
+    that EQUALS a verified citation value (within tolerance) but lacks a [N]
+    marker, it inserts the correct marker at the run level (preserving
+    formatting) — fixing generation-time citation misses without relying on LLM
+    recall. Numbers with NO verified citation (scope counts, future targets,
+    unverified values) are left uncited by design — that is the genuine
+    coverage signal, not noise. Returns (inserted_count, unresolved_list)."""
+    verified = []
     if os.path.exists("./artifacts/citations.json"):
         with open("./artifacts/citations.json", "r", encoding="utf-8") as f:
             for c in json.load(f).get("citations", []):
+                if c.get("verification_status", "verified") != "verified":
+                    continue
                 try:
-                    cited_values.append(float(c.get("value", 0)))
+                    verified.append((float(c.get("value")), c["citation_id"], c.get("description", "")))
                 except (TypeError, ValueError):
                     pass
-    num_re = re.compile(r'(?<![\w.])(\d{{1,3}}(?:[,]\d{{3}})+|\d{{3,}})(?:\.\d+)?')
-    uncited = []
-    for para in doc.paragraphs:
-        txt = para.text
-        if not txt or '데이터 출처' in txt or txt.strip().startswith('['):
+    # number (+optional unit) (+optional existing [N]); catches percentages + units
+    num_re = re.compile(r'(-?\d{{1,3}}(?:[,]\d{{3}})+|-?\d+(?:\.\d+)?)\s*(%p|%|[^\s\d\[\].,()]{{1,3}})?\s*(\[\d+\])?')
+    inserted, unresolved, in_refs = 0, [], False
+    targets = []
+    for para in doc.paragraphs:  # body only (skip references section)
+        t = para.text
+        if t and len(t) < 40 and any(h in t for h in ('데이터 출처 및 계산 근거', '참고문헌', 'References')):
+            in_refs = True
+        if in_refs or (t and t.lstrip().startswith('[')):
             continue
+        targets.append(para)
+    for _tbl in doc.tables:  # table cells too — data values also get value-matched markers
+        for _row in _tbl.rows:
+            for _cell in _row.cells:
+                targets.extend(_cell.paragraphs)
+    for para in targets:
+        txt = para.text
+        if not txt:
+            continue
+        edits = []
         for m in num_re.finditer(txt):
-            raw = m.group(0).replace(',', '')
+            if m.group(3):  # already cited
+                continue
             try:
-                val = float(raw)
+                val = float(m.group(1).replace(',', ''))
             except ValueError:
                 continue
-            tail = txt[m.end():m.end()+8]
-            if re.match(r'\s*\[\d+\]', tail):
+            unit = m.group(2) or ''
+            # (a) temporal refs (dates/periods) never get a data citation, even when the
+            #     value coincides with a finding (e.g. "14일"/"3개월" vs a count of 14/3).
+            if any(t in unit for t in ('년', '월', '일', '시', '분', '초', '주')) or (not unit and 1900 <= int(val) <= 2100):
                 continue
-            tol = max(abs(val) * 0.005, 0.5)
-            if any(abs(val - cv) <= tol for cv in cited_values):
+            tol = max(abs(val) * 0.005, 0.05)
+            cands = [(cid, desc) for (v, cid, desc) in verified if abs(val - v) <= tol]
+            if not cands:
+                unresolved.append((val, txt[max(0, m.start()-20):m.end()+20].strip()))
                 continue
-            uncited.append((val, txt[max(0, m.start()-25):m.end()+25]))
-    if uncited:
-        print(f"⚠ Self-audit: {{len(uncited)}} uncited numerical claim(s) found:")
-        for v, ctx in uncited[:20]:
-            print(f"    [{{v}}] near: ...{{ctx.strip()}}...")
-        if len(uncited) > 20:
-            print(f"    ... and {{len(uncited) - 20}} more")
-    else:
-        print("✅ Self-audit: all body numerical claims are cited or derived.")
-    return uncited
+            def _ov(desc):  # substring overlap of description terms with the sentence
+                return sum(1 for tok in re.split(r'[\s/()]+', desc) if len(tok) >= 2 and tok in txt)
+            if len(cands) > 1:
+                scored = sorted((_ov(desc), cid, desc) for (cid, desc) in cands)
+                if scored[-1][0] == scored[-2][0]:  # top two tie → ambiguous → skip (avoid wrong [N])
+                    continue
+                cid, cdesc = scored[-1][1], scored[-1][2]
+            else:
+                cid, cdesc = cands[0][0], cands[0][1]
+            # (b) small values collide easily — a section/figure/rank/label number can
+            #     equal a small finding. Cite only if the citation's description actually
+            #     appears in the sentence. Large/distinctive values (>=100) are trusted.
+            if abs(val) < 100 and (_ov(cdesc) == 0 or (unit not in ('%', '%p') and re.search(r'[^\W\d_]', unit))):
+                continue  # small + letter-unit (any script, not %/%p) = ordinal/counter/word, not a metric
+            end = m.end(2) if m.group(2) else m.end(1)
+            edits.append((end, cid))
+        for end, cid in sorted(edits, reverse=True):  # right-to-left: keep earlier offsets valid
+            acc, placed = 0, False
+            for run in para.runs:
+                rlen = len(run.text)
+                if acc <= end <= acc + rlen:
+                    loc = end - acc
+                    run.text = run.text[:loc] + cid + run.text[loc:]
+                    placed = True
+                    break
+                acc += rlen
+            if not placed and para.runs:
+                para.runs[-1].text += cid
+                placed = True
+            if placed:
+                inserted += 1
+    print(f"✅ Citation resolver: inserted {{inserted}} marker(s); {{len(unresolved)}} number(s) left uncited (no verified citation)")
+    for val, ctx in unresolved[:15]:
+        print(f"    uncited: {{val}} near ...{{ctx}}...")
+    return inserted, unresolved
 
 print("✅ Utility file created")
 '''
@@ -487,33 +537,138 @@ from docx import Document
 
 doc = load_or_create_docx()
 
-# 🚨 MANDATORY — self-audit body numerical claims vs citations.json
-# Logs uncited claims to stdout. Advisory; does NOT modify the document.
-audit_body_citations(doc)
+# 🚨 PRE-STRIP — remove ALL [N] (body + table cells) so the resolver is the SOLE
+# marker source: every marker is then value-matched, making mis-citation
+# structurally impossible. Edit <w:t> nodes directly — NOT run.text, whose setter
+# clears the run (rPr aside) and would DELETE inline <w:drawing> charts in it.
+def _prestrip(_p):
+    for _r in _p.runs:
+        for _te in _r._element.findall(qn('w:t')):
+            _te.text = re.sub(r'\[\d+\]', '', _te.text or '')
+for _p in doc.paragraphs:
+    _prestrip(_p)
+for _t in doc.tables:
+    for _row in _t.rows:
+        for _cell in _row.cells:
+            for _p in _cell.paragraphs:
+                _prestrip(_p)
 
-# Add references section
-if os.path.exists('./artifacts/citations.json'):
-    add_heading(doc, '데이터 출처 및 계산 근거', level=2)
+# 🚨 MANDATORY — post-hoc citation resolver. Inserts [N] for body + table numbers
+# that equal a verified citation value; resolver is the sole marker source.
+inserted, unresolved = resolve_body_citations(doc)
+
+# Normalize marker spacing: one space between a value and its [N] ("53.20%[1]" ->
+# "53.20% [1]"), body + table cells. Assign only when changed — the run.text
+# setter clears the run, deleting any inline <w:drawing> chart in it.
+def _space_markers(_p):
+    for _r in _p.runs:
+        _new = re.sub(r'(?<=\S)\s*(\[\d+\])', r' \1', _r.text)
+        if _new != _r.text:
+            _r.text = _new
+for _p in doc.paragraphs:
+    _space_markers(_p)
+for _t in doc.tables:
+    for _row in _t.rows:
+        for _cell in _row.cells:
+            for _p in _cell.paragraphs:
+                _space_markers(_p)
+
+# Renumber used citations contiguously, then add references (first-appearance order).
+# verify-all-high gives citations.json large IDs (e.g. [10],[15]); only a subset is
+# cited, so listing them verbatim leaves gaps ([1],[2],[10],[11],[15]). Renumber so
+# the reader sees [1],[2],[3]… — applied to body+table markers AND citations.json
+# TOGETHER (the Auditor matches body [N] to citations.json[N] by id; an inconsistent
+# relabel would cause false Type B). Edit <w:t> nodes (NOT run.text) so inline
+# <w:drawing> charts survive.
+_order = []  # used citation numbers in first-appearance order — scan the SAME <w:t>
+def _collect(_p):  # nodes the renumber rewrites, so refs can't diverge from the body
+    for _r in _p.runs:
+        for _te in _r._element.findall(qn('w:t')):
+            for _n in re.findall(r'\[(\d+)\]', _te.text or ''):
+                if _n not in _order:
+                    _order.append(_n)
+for _p in doc.paragraphs:
+    _collect(_p)
+for _t in doc.tables:
+    for _row in _t.rows:
+        for _cell in _row.cells:
+            for _p in _cell.paragraphs:
+                _collect(_p)
+if _order and os.path.exists('./artifacts/citations.json'):
     with open('./artifacts/citations.json', 'r', encoding='utf-8') as f:
-        for c in json.load(f).get('citations', []):
-            add_paragraph(doc, f"{{c['citation_id']}} {{c['description']}}: {{c['formula']}}")
+        _cdata = json.load(f)
+    _remap = {{_o: str(_i + 1) for _i, _o in enumerate(_order)}}  # used → 1..K
+    _next = len(_order)
+    for _c in _cdata.get('citations', []):  # remaining (unused) → K+1.., keep order
+        _o = _c['citation_id'].strip('[]')
+        if _o not in _remap:
+            _next += 1
+            _remap[_o] = str(_next)
+    def _renumber(_p):
+        for _r in _p.runs:
+            for _te in _r._element.findall(qn('w:t')):
+                if _te.text and '[' in _te.text:
+                    _te.text = re.sub(r'\[(\d+)\]', lambda m: '[' + _remap.get(m.group(1), m.group(1)) + ']', _te.text)
+    for _p in doc.paragraphs:
+        _renumber(_p)
+    for _t in doc.tables:
+        for _row in _t.rows:
+            for _cell in _row.cells:
+                for _p in _cell.paragraphs:
+                    _renumber(_p)
+    for _c in _cdata.get('citations', []):  # sync citations.json ids (calc_id/aliases untouched)
+        _o = _c['citation_id'].strip('[]')
+        if _o in _remap:
+            _c['citation_id'] = '[' + _remap[_o] + ']'
+    with open('./artifacts/citations.json', 'w', encoding='utf-8') as f:
+        json.dump(_cdata, f, ensure_ascii=False, indent=2)
+    # list ONLY the numbers actually present in the body after renumber (re-scan the
+    # same <w:t> nodes) so the reference list can never diverge from the in-text
+    # markers — no orphan reference, no gap.
+    _present = set()
+    def _present_scan(_p):
+        for _r in _p.runs:
+            for _te in _r._element.findall(qn('w:t')):
+                _present.update(re.findall(r'\[(\d+)\]', _te.text or ''))
+    for _p in doc.paragraphs:
+        _present_scan(_p)
+    for _t in doc.tables:
+        for _row in _t.rows:
+            for _cell in _row.cells:
+                for _p in _cell.paragraphs:
+                    _present_scan(_p)
+    _by_id = {{_c['citation_id']: _c for _c in _cdata.get('citations', [])}}
+    add_heading(doc, '데이터 출처 및 계산 근거', level=2)
+    for _i in sorted(int(_x) for _x in _present):
+        _c = _by_id.get('[' + str(_i) + ']')
+        if _c:
+            add_paragraph(doc, f"[{{_i}}] {{_c['description']}}: {{_c['formula']}}")
 
 save_docx(doc, './artifacts/final_report_with_citations.docx')
 
-# Generate clean version without citations
+# Generate clean version without citations — strip markers (+ leading space) from
+# body AND table cells via <w:t> nodes (chart-safe).
 doc2 = Document('./artifacts/final_report_with_citations.docx')
+def _strip_markers(_p):
+    for _run in _p.runs:
+        for _t_elem in _run._element.findall(qn('w:t')):
+            _t_elem.text = re.sub(r'\s*\[\d+\]', '', _t_elem.text or '')
 for para in doc2.paragraphs:
-    for run in para.runs:
-        for t_elem in run._element.findall(qn('w:t')):
-            t_elem.text = re.sub(r'\\[\\d+\\]', '', t_elem.text or '')
+    _strip_markers(para)
+for _tbl in doc2.tables:
+    for _row in _tbl.rows:
+        for _cell in _row.cells:
+            for _p in _cell.paragraphs:
+                _strip_markers(_p)
 
-# Remove references section
-to_remove, found = [], False
-for para in doc2.paragraphs:
-    if '데이터 출처' in para.text: found = True
-    if found: to_remove.append(para)
-for para in to_remove:
-    para._element.getparent().remove(para._element)
+# Remove references section (match the full heading, not the bare '데이터 출처'
+# title label, which would truncate the body).
+_paras = doc2.paragraphs
+_ref_i = next((i for i in range(len(_paras) - 1, -1, -1)
+               if '데이터 출처 및 계산 근거' in _paras[i].text), None)
+if _ref_i is not None:  # references appended last; earlier match = TOC/section-list entry
+    for para in _paras[_ref_i:]:
+        para._element.getparent().remove(para._element)
 
 doc2.save('./artifacts/final_report.docx')
 

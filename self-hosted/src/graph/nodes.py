@@ -14,6 +14,7 @@ from src.tools.coder_agent_tool import coder_agent_tool
 from src.tools.reporter_agent_tool import reporter_agent_tool
 from src.tools.tracker_agent_tool import tracker_agent_tool
 from src.tools.validator_agent_tool import validator_agent_tool
+from src.tools.auditor_agent_tool import auditor_agent_tool
 
 # Simple logger setup
 logger = logging.getLogger(__name__)
@@ -334,7 +335,7 @@ async def supervisor_node(task=None, **kwargs):
         enable_reasoning=False,
         prompt_cache_info=(True, "default"),  # enable prompt caching for reasoning agent
         tool_cache=True,
-        tools=[coder_agent_tool, reporter_agent_tool, tracker_agent_tool, validator_agent_tool],  # Add coder, reporter, tracker and validator agents as tools
+        tools=[coder_agent_tool, reporter_agent_tool, tracker_agent_tool, validator_agent_tool, auditor_agent_tool],  # coder, reporter, tracker, validator, auditor
         streaming=True,
     )
 

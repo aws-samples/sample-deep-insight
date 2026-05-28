@@ -42,3 +42,7 @@ under_development/
 dist/
 build/
 *.egg-info/
+
+# Customer-referencing PoC research — keep the file locally, never commit
+# (already covered by under_development/, pinned explicitly for safety)
+under_development/260522-data-validation-jinro/citation-marker-misuse.md

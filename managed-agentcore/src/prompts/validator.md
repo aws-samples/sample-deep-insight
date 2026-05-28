@@ -1,5 +1,4 @@
 ---
-CURRENT_TIME: {CURRENT_TIME}
 USER_REQUEST: {USER_REQUEST}
 FULL_PLAN: {FULL_PLAN}
 ---
@@ -46,10 +45,23 @@ gap per validation step.
 - **MANDATORY source_file loading**: When `source_file` is a Coder-generated artifact path (e.g. lives under `./artifacts/` and ends in `.pkl`, `.csv`, or `.json`), you MUST load THAT exact file using the appropriate Python loader for its extension AND use IT as the SOLE verification source. Do NOT load raw input data or other artifacts as alternatives, even if the formula columns look unfamiliar — the named source_file is the authoritative version. If `source_columns` is also provided, use exactly those column names (no guessing alternatives like '*_기울기' vs '*_변화'). If you cannot load source_file (missing or parse error), mark `needs_review` with the reason; do NOT silently substitute another data source.
 
 **Validation Workflow:**
-1. Load calculation metadata → filter priority calculations (max 20)
+1. Load calculation metadata → **dedup identical entries** → select priority calculations (ALL high; medium not verified)
 2. Validate against original data sources with type-safe comparison
 3. Generate citations with sequential numbers [1], [2], [3]...
 4. Create validation report documenting results
+
+**🚨 DEDUP RULE — MERGE IDENTICAL CALCULATIONS BEFORE FILTERING:**
+- Different Coder steps may register the *same* calculation under different IDs.
+  Example: two calc IDs (e.g. `overall_avg` and `avg_overall`) carry the same
+  value and formula. Without dedup, both end up in citations.json under
+  different markers (e.g. `[1]` and `[9]`) — confusing readers and inflating
+  the citation budget.
+- Dedup key: tuple of `(round(value, 4), formula.strip(), tuple(sorted(source_columns)))`.
+- Action: keep the FIRST occurrence; record duplicate IDs in an `aliases` field
+  on the kept entry for audit trail. Do NOT silently drop them — aliases preserve
+  traceability for downstream consumers.
+- Apply dedup BEFORE the priority filter. Otherwise distinct calculations get
+  cut while duplicates compete for budget slots.
 
 **Self-Contained Code:**
 - Every script should include all imports (pandas, json, pickle, numpy, etc.)
@@ -328,9 +340,33 @@ else:
 
 print(f"Total calculations: {{len(calculations)}}")
 
-high = [c for c in calculations if c.get('importance') == 'high']
-medium = [c for c in calculations if c.get('importance') == 'medium']
-priority_calcs = (high[:15] + medium[:5])[:20]
+# DEDUP — merge identical (value, formula, source_columns) before filtering.
+# Different Coder steps may register the same calc under different IDs;
+# without dedup these duplicate slots in citations.json (e.g. [1]==[9]).
+def _dedup_key(c):
+    val = c.get('value')
+    try:
+        val_key = round(float(val), 4)
+    except (TypeError, ValueError):
+        val_key = str(val)
+    formula = (c.get('formula') or '').strip()
+    cols = tuple(sorted(c.get('source_columns') or []))
+    return (val_key, formula, cols)
+
+seen = {{}}
+for c in calculations:
+    k = _dedup_key(c)
+    if k in seen:
+        seen[k].setdefault('aliases', []).append(c.get('id'))
+    else:
+        seen[k] = dict(c)
+dedup_calcs = list(seen.values())
+n_dup = len(calculations) - len(dedup_calcs)
+print(f"Dedup: {{len(calculations)}} -> {{len(dedup_calcs)}} ({{n_dup}} duplicates merged into aliases)")
+
+high = [c for c in dedup_calcs if c.get('importance') == 'high']
+medium = [c for c in dedup_calcs if c.get('importance') == 'medium']
+priority_calcs = high   # verify ALL high (high == "body-quoted"); medium is summarized-not-quoted → not verified
 
 print(f"High: {{len(high)}}, Medium: {{len(medium)}}, Selected: {{len(priority_calcs)}}")
 

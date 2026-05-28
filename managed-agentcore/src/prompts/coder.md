@@ -1,5 +1,4 @@
 ---
-CURRENT_TIME: {CURRENT_TIME}
 USER_REQUEST: {USER_REQUEST}
 FULL_PLAN: {FULL_PLAN}
 ---
@@ -182,6 +181,41 @@ def save_calculation_metadata(path="./artifacts/calculation_metadata.json"):
 '''
 )
 ```
+
+**🚨 Importance Tagging Discipline:**
+
+The Validator verifies ALL `high`-importance calcs (no cap), and only a verified
+calc can receive a citation [N]. Wrong tagging causes DeepTRACE defects: if a
+body-text claim's value is tagged `"low"`/`"medium"`, it is NOT verified → the
+body quotes it uncited (Type A), or Reporter falls back to a topically-similar
+marker (value mismatch). (Observed failure mode: several distinct body values
+collapsed onto a single `[1]` because their calcs were never verified/cited.)
+
+Rules:
+- `"high"`: ANY value that will appear *verbatim* in body text. Includes
+  executive-summary stats, headline percentages, change metrics, every value
+  the body quotes from a chart (e.g. "월별 최고점 11월 53.86%"), every
+  cohort/segment metric referenced in narrative, the first/last/min/max of
+  any series the body discusses.
+- `"medium"`: Supporting evidence the body summarizes but doesn't quote
+  per-value (e.g. individual series points when body says "12개월간 완만한
+  하락" without naming each month).
+- `"low"`: Intermediate/scaffolding values used only to derive other calcs;
+  input-scope metadata (row counts, date ranges, file sizes, distinct counts).
+
+**When in doubt, prefer `"high"`.** ALL `high` calcs are verified (no cap), and
+references list only the values actually cited — so over-tagging costs almost
+nothing, while under-tagging risks an uncited body value. Track EVERY per-group /
+per-segment / per-period metric the narrative may discuss (each promo's AOV, each
+cohort's revenue, each day's value) as `"high"`, not just the headline.
+
+Common pitfalls:
+- A body-quoted value tagged `"medium"` → only `"high"` is verified now, so a
+  `"medium"` value cannot be cited → body quotes it anyway → uncited (Type A).
+  Fix: tag body-quoted values `"high"`, never `"medium"`.
+- Computing a per-group value for a chart/table but NOT tracking it → body quotes
+  it → uncited (Type A). Fix: track each computed value the narrative may cite.
+  (Pure input-scope counts like "N products" stay untracked.)
 
 **All Subsequent Scripts: Import and Use**
 ```python
