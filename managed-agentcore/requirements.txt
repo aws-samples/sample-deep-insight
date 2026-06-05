@@ -2,8 +2,8 @@
 # Synced with pyproject.toml
 
 # Core packages
+# Note: 'jupyter' meta-package was removed; only ipykernel is needed for code execution
 ipykernel==7.1.0
-jupyter==1.1.1
 boto3==1.42.7
 
 # Strands SDK and AgentCore

@@ -56,7 +56,7 @@ fi
 # ---------- Test 2: self-hosted imports ----------
 echo ""; echo "=== Test 2: self-hosted imports ==="
 cd "${PROJECT_ROOT}/self-hosted"
-IMPORTS=(boto3 strands dotenv matplotlib pandas numpy seaborn plotly docx weasyprint reportlab sklearn PIL yaml lxml mistune)
+IMPORTS=(boto3 strands dotenv matplotlib pandas numpy seaborn plotly docx weasyprint reportlab sklearn PIL yaml lxml)
 FAILED=""
 for pkg in "${IMPORTS[@]}"; do
     uv run python -c "import ${pkg}" 2>/dev/null || FAILED="${FAILED} ${pkg}"
@@ -72,7 +72,7 @@ echo ""; echo "=== Test 3: self-hosted versions ==="
 cd "${PROJECT_ROOT}/self-hosted"
 VERS=$(uv run python -c "
 import importlib.metadata as m
-pkgs=['boto3','strands-agents','strands-agents-tools','cryptography','tornado','orjson','protobuf','pyasn1','urllib3','idna','requests','langchain-core','langsmith','python-multipart','mistune','lxml','gitpython','pygments','weasyprint','python-docx']
+pkgs=['boto3','strands-agents','strands-agents-tools','cryptography','tornado','orjson','protobuf','pyasn1','urllib3','idna','requests','langchain-core','langsmith','python-multipart','lxml','gitpython','pygments','weasyprint','python-docx']
 for p in pkgs:
     try: print(f'{p}=={m.version(p)}')
     except: print(f'{p}==NA')
