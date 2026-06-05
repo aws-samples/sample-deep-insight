@@ -45,6 +45,24 @@ markdown==3.10
 fpdf2==2.8.5
 
 # Other utilities
-python-dotenv==1.2.1
+python-dotenv==1.2.2
 pillow>=11.2.1
 langchain==1.0.7
+
+# Security pins — verified container versions (PR #86 container-side verification, 2026-06-05)
+# These are transitive deps that float under pip; pinned here for reproducibility
+# after a full E2E PASS on this exact set. Dependabot will still propose bumps.
+cryptography==48.0.0
+lxml==6.1.1
+pyasn1==0.6.3
+urllib3==2.7.0
+idna==3.18
+requests==2.34.2
+tornado==6.5.6
+orjson==3.11.9
+protobuf==5.29.6
+mistune==3.2.1
+pygments==2.20.0
+python-multipart==0.0.32
+langchain-core==1.4.0
+langsmith==0.8.9
