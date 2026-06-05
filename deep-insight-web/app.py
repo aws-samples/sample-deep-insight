@@ -22,6 +22,16 @@ import re
 import unicodedata
 from urllib.parse import quote
 
+# Load .env BEFORE importing modules that read os.environ at import time
+# (chat_agent, ops.*). In container deployments the .env file is absent
+# and env vars are injected by ECS — load_dotenv silently no-ops then.
+try:
+    _env_path = Path(__file__).resolve().parents[1] / "managed-agentcore" / ".env"
+    if _env_path.exists():
+        load_dotenv(_env_path)
+except (IndexError, OSError):
+    pass
+
 from ops.job_tracker import track_job_start, track_job_link, track_job_failure
 from ops.admin_router import admin_router
 from chat_agent import (
@@ -35,13 +45,6 @@ from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, field_validator
-
-try:
-    _env_path = Path(__file__).resolve().parents[1] / "managed-agentcore" / ".env"
-    if _env_path.exists():
-        load_dotenv(_env_path)
-except (IndexError, OSError):
-    pass  # Running in container — env vars injected by ECS
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
