@@ -19,20 +19,21 @@
 
 ## *Latest News* 🔥
 
+- **[2026/05]** Citation integrity validation — every number cited in a report is re-verified and linked to its calculation via `[N]` markers, with an independent Auditor (DeepTRACE A/B/C/D) blocking unverified or hallucinated figures (self-hosted + managed) ([details](./docs/features/data-validation/citation-validation-explained.md))
 - **[2026/04]** Auto-generate sample analysis prompts — AI generates 3 sample prompts (간단/중간/복잡 — simple/medium/complex) from your column-definitions JSON, replacing the previous hard-coded fallback chips. Each generated prompt references actual column names so it's immediately runnable. ([details](./docs/features/prompt-generation/README.md))
 - **[2026/04]** Auto-generate column definitions — AI builds `column_definitions.json` from a CSV header + sample rows, removing the manual JSON-authoring barrier for non-technical users. Includes a Table/JSON review panel with manual edit support. ([details](./docs/features/json-generation/README.md))
 - **[2026/04]** CloudFront + Cognito deployment option for Web UI — HTTPS with Lambda@Edge authentication for external demos and customer PoCs ([details](./deep-insight-web/README.md))
 - **[2026/03]** Ops Dashboard - job tracking, email notifications, and admin dashboard with Cognito authentication ([details](./deep-insight-web/ops/README.md))
 - **[2026/02]** Web UI (v1.1.0) - browser-based interface for data upload, analysis, HITL plan review, and report download ([details](https://github.com/aws-samples/sample-deep-insight/blob/main/deep-insight-web/README.md))
+
+<details>
+<summary>Show older updates</summary>
+
 - **[2025/12]** Claude Code-style Skill System - dynamically discover and load specialized skills (PDF, DOCX, XLSX processing, etc.) in Strands Agents with lazy loading for optimal performance ([details](./docs/features/skill-system/README.md))
 - **[2025/12]** Human in the Loop (HITL) - review and steer the analysis plan before execution, giving users control over the analysis direction ([details](./docs/features/hitl-workflow/README.md))
 - **[2025/12]** Managed AgentCore deployment - production-ready with Bedrock AgentCore Runtime, Custom Code Interpreter (Fargate), and 100% private VPC
 - **[2025/12]** File-based code execution - significantly reduces NameError/ImportError rates compared to REPL-based approaches
 - **[2025/12]** Output token optimization with shared utils scripts - repeatedly used functions are generated once and imported, reducing redundant code generation
-
-<details>
-<summary>Show older updates</summary>
-
 - **[2025/11]** Added per-agent token tracking with detailed metrics - monitor input/output tokens and cache reads/writes for complete cost visibility and optimization
 - **[2025/11]** Added editable DOCX report generation - all analysis results are exportable to fully editable Word documents for easy customization and sharing
 - **[2025/10]** Released Deep Insight Workshop ([Korean](https://catalog.us-east-1.prod.workshops.aws/workshops/ee17ba6e-edc4-4921-aaf6-ca472841c49b/ko-KR) | [English](https://catalog.us-east-1.prod.workshops.aws/workshops/ee17ba6e-edc4-4921-aaf6-ca472841c49b/en-US))
