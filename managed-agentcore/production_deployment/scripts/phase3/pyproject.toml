@@ -12,8 +12,10 @@ dependencies = [
     "pyyaml>=6.0",
     "termcolor==3.2.0",
     "aws-opentelemetry-distro==0.12.0",
+    # 'jupyter' meta-package removed (mirrors #89 for self-hosted); only
+    # ipykernel is needed — IPython.display is satisfied via ipykernel's
+    # IPython dep, and code execution uses subprocess, not jupyter kernels.
     "ipykernel>=7.1.0",
-    "jupyter>=1.1.1",
     "langchain-core>=0.3.0",
     "fastapi>=0.129.0",
     "uvicorn>=0.38.0",
