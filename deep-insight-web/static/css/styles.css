@@ -1261,11 +1261,18 @@ footer {
 
 /* Tables in chat */
 .chat-table-wrapper {
-    overflow-x: auto;
+    overflow: auto;
+    max-height: 420px;
     margin: 0.6rem 0;
     border-radius: var(--radius-xs);
     border: 1px solid var(--border);
     background: var(--bg-elevated);
+}
+/* Sticky header so column names stay visible while scrolling rows */
+.chat-table-wrapper table.chat-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 .chat-table-wrapper table.chat-table {
     font-size: 0.78rem;
@@ -1468,6 +1475,15 @@ footer {
     font-family: var(--font-mono);
 }
 .sql-rerun-result { padding: 0.5rem 0.75rem 0.75rem; }
+.sql-rerun-result .chat-table-wrapper {
+    max-height: 420px;
+    overflow: auto;
+}
+.sql-rerun-result .chat-table-wrapper table.chat-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
 .sql-rerun-header {
     font-size: 0.72rem;
     color: var(--text-muted);

@@ -606,12 +606,52 @@ The table name is `{table_name}`. You MUST query this table via SQL — never gu
 ## Chart Rules
 - `create_chart(sql, chart_code)` runs the SQL and binds the result DataFrame to `df` for the chart code.
 - A pre-built matplotlib `fig` and `ax` are provided. Use the OO API: `ax.plot(...)`, `ax.bar(...)`, `ax.set_title(...)`, etc.
-- For trends over time → `ax.plot`. For category comparison → `ax.bar`. For share/proportion → `ax.pie`. For distribution → `ax.hist` / `ax.boxplot`.
 - ALWAYS set a descriptive title via `ax.set_title(...)`, and axis labels via `ax.set_xlabel(...)` / `ax.set_ylabel(...)` when useful.
 - Write labels in the same language as the user's question (Korean by default).
 - Korean fonts and a clean light theme are pre-configured — do NOT set `rcParams`, `style.use`, or fonts inside `chart_code`.
+- A consistent brand color palette (orange-led: `#E68A1F`, blue, teal, purple, gray, pink) is pre-configured via `axes.prop_cycle`. Do NOT pass `color=`, `c=`, `palette=`, or `cmap=` arguments to `ax.bar`, `ax.barh`, `ax.plot`, `ax.scatter`, `sns.barplot`, etc. — let matplotlib pick from the cycle. Specifying a color manually overrides the brand palette and produces inconsistent visuals across the app.
+- For heatmaps (`sns.heatmap`, `ax.imshow`), ALWAYS use `cmap='Blues'`. Do NOT pick other colormaps (예: `YlOrRd`, `viridis`, `RdYlGn`) to match the orange bar palette — heatmaps and bar charts intentionally use different color systems: bars encode *categories* via prop_cycle, heatmaps encode *value magnitude* via a sequential blue ramp.
 - Do NOT import or call `plt` (matplotlib.pyplot) directly. Do NOT call `plt.show()`, `plt.savefig()`, `plt.close()`, or `plt.figure()` — the tool handles all of that.
 - For multi-axis layouts use `fig.subplots(...)` to add more axes; do NOT call `plt.subplots`.
+
+## Chart Type Selection (avoid antipatterns)
+- Trends over time → `ax.plot` (with `marker='o'` if ≤ 20 points).
+- Category comparison or share/proportion → horizontal bar (`ax.barh`), sorted by value descending. Pie charts are FORBIDDEN — they degrade fast as categories grow and Korean labels overlap.
+- Distribution of one numeric variable → `ax.hist` (bins=20) or `ax.boxplot`.
+- N >= 8 categories on a single chart: keep top 7, aggregate the rest into a single "기타" / "Other" row BEFORE plotting. Do NOT render every category.
+- Korean category labels on a vertical bar overlap. Default to horizontal (`ax.barh`) whenever any label has > 4 Korean chars or there are > 6 categories.
+- Two categorical axes (cross-tab pattern: `GROUP BY cat_A, cat_B` with one numeric aggregate) — DO NOT split into multiple bar charts side by side. Pick ONE single chart based on the shape:
+    * `|cat_A| ≥ 4 AND |cat_B| ≥ 4` → heatmap (`sns.heatmap(..., annot=True, fmt='d')` or `ax.imshow` + `ax.text`).
+    * One side is small (`min(|cat_A|, |cat_B|) ≤ 3`) → grouped horizontal bar with `hue=` set to the smaller side.
+    * One axis is a time series (월/년/날짜) → small multiples line (per-series line chart, ≤ 5 series), NOT a heatmap.
+    * Question asks for "TOP N" or ranking → sorted horizontal bar, optionally with `hue` if a secondary categorical exists.
+  Signal phrases that imply this pattern even without literal "비교": "A별 B의 차이/선호도/분포/패턴".
+- For horizontal bar with N items, set `fig.set_size_inches(10, max(4, 0.4 * N))` so labels never collide.
+- When annotating bar values, ALWAYS use `ax.bar_label(container, padding=4, fmt=lambda v: f"{{v:,.0f}}")` (or with a unit suffix, e.g. `fmt=lambda v: f"{{v:,.0f}}만원"`). The `fmt` argument MUST be a callable — NEVER pass an old-style format string like `"%,.0f"`. Python's `%` formatter does not support thousands comma and will print the format spec verbatim onto the chart.
+- NEVER hand-place value labels with `ax.text(...)` or a manual `for i, v in enumerate(...)` loop. Such loops desync from the bar order whenever the SQL result is sorted differently from the draw order, which produces labels attached to the wrong bars (a silent data-correctness bug). `bar_label` always tracks the container's actual draw order.
+- ALWAYS hide top + right spines on bar/line/scatter charts: `ax.spines['top'].set_visible(False); ax.spines['right'].set_visible(False)`. Without this, value labels at the bar end visibly collide with the right spine.
+- Extend the value-axis limit by ~25% so labels don't run off the figure edge: `ax.set_xlim(0, max(values) * 1.25)` for horizontal bars, `ax.set_ylim(0, max(values) * 1.20)` for vertical bars. Manual `ax.text` value labels MUST also leave a gap of ≥ 2% of the axis range.
+
+## Time-Series Specific
+- Plot at most 5 series on a single line chart. With > 5 series the chart becomes spaghetti.
+- If the SQL returns > 5 categories over time, FILTER to the top 5 by total value in the SQL itself (e.g. `WHERE category IN (top 5 from a subquery)`) — do NOT plot all categories then "trust the legend".
+- Sort the x-axis chronologically and rotate date labels: `ax.tick_params(axis='x', rotation=30)`.
+
+## Axes Hygiene (prevent overlapping/empty axes)
+- The provided `ax` is the ONLY axes you should use by default. Do NOT call `ax.twinx()`, `ax.twiny()`, or `fig.add_subplot(...)`. If a question truly needs two y-scales, draw two separate `create_chart` calls instead of overlaying.
+- If a small-multiples layout is justified (e.g. comparing 2 groups side by side), you MAY replace the default axes ONCE: `fig.clear(); axes = fig.subplots(1, 2)` — this REMOVES the original `ax` so there is no leftover empty 0.0–1.0 axes underneath. Never call `fig.subplots(...)` without `fig.clear()` first.
+- Place the legend OUTSIDE the axes when present: `ax.legend(bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0)`. Never let legend boxes cover the data.
+- Always call `fig.tight_layout()` as the last line of `chart_code` to prevent label clipping.
+
+## Korean Currency Formatting
+- KRW values almost always exceed 6 digits, which makes raw 원 labels (예: `1,820,044원`) collide with axis ticks and bar ends. ALWAYS scale to a friendlier unit before plotting:
+  - 1,000 ≤ value < 1,000,000 → divide by 1,000, label unit as "천원"
+  - 1,000,000 ≤ value < 100,000,000 → divide by 10,000, label unit as "만원"
+  - value ≥ 100,000,000 → divide by 100,000,000, label unit as "억원"
+- Apply the scale to BOTH bar values AND axis tick labels. Use `FuncFormatter(lambda v, _: f"{{v/10000:,.0f}}")` (만원 case) so ticks read "150" not "1500000". Use f-string formatting only — do NOT use old-style `format(v, ',.0f')` or `"%,.0f"` strings.
+- Reflect the scale in the axis label: `ax.set_xlabel('매출액 (만원)')`. Never leave the scientific notation tag (`1e6`) on the axis — it always means the unit is wrong.
+- Bar value labels follow the same scale (예: `153만원 (17.9%)`), NOT raw 원 (예: `1,533,901원 (17.88%)`). To attach the unit, divide the values BEFORE plotting (`df["amount_만원"] = df["amount"] / 10000`) and pass `fmt=lambda v: f"{{v:,.0f}}만원"` to `bar_label`. Do NOT divide inside the lambda — the bar heights you pass to `ax.barh` must already be in the chosen unit so axis ticks and label values agree.
+- ALWAYS use Python f-string formatting (`f"{{v:,.0f}}"`, `f"{{p:.1f}}%"`) — round percentages to 1 decimal place and currency to whole units. Never embed raw `float` directly in a label (Python prints `16.939999999999998` for what should be `16.9%`).
 
 ## Response Rules (Insight-first — do NOT produce empty "interpretation" filler)
 - FIRST sentence must be a headline insight that includes a specific number from the result
@@ -818,6 +858,15 @@ def _resolve_korean_font() -> str | None:
 
 # Per-figure style overrides applied via rcParams context. Mirrors the prior
 # global plt.rcParams.update() but scoped to a single render call.
+#
+# axes.prop_cycle: starts with AWS-inspired orange so single-series charts get
+# a consistent brand color, with neutral / blue / teal / muted-pink fillers
+# that read well next to the chat UI's blue primary. Heatmaps are NOT affected
+# (they read from `image.cmap` instead) — left at matplotlib's default `viridis`
+# so dark-end contrast on the chat dark background stays readable.
+from cycler import cycler
+_CHART_PALETTE = ["#E68A1F", "#3A7BD5", "#2EB39C", "#7E57C2", "#5C6B7A", "#D86A6A"]
+
 _CHART_STYLE = {
     "figure.facecolor": "#ffffff",
     "axes.facecolor": "#ffffff",
@@ -835,6 +884,7 @@ _CHART_STYLE = {
     "legend.fontsize": 11,
     "figure.dpi": 100,
     "axes.unicode_minus": False,
+    "axes.prop_cycle": cycler(color=_CHART_PALETTE),
 }
 
 
