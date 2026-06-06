@@ -147,25 +147,36 @@ class strands_utils():
         ## BedrockModel params: https://strandsagents.com/latest/api-reference/models/?h=bedrockmodel#strands.models.bedrock.BedrockModel
         # max_tokens: Claude 3.5/4 models support up to 8192 output tokens by default, extended to 64K for Sonnet
         # Increased from 8192*5 (40,960) to 8192*8 (65,536) to prevent MaxTokensReachedException
-        llm = BedrockModel(
+        #
+        # Reasoning agents (e.g. Planner on Opus 4.7/4.8) MUST use adaptive thinking:
+        # Opus 4.7+ removed the legacy `thinking.type.enabled` + `budget_tokens` fields
+        # and the `temperature`/`top_p`/`top_k` sampling params (all return 400). Adaptive
+        # thinking replaces the fixed budget (effort defaults to `high`; set explicitly here).
+        # Non-reasoning agents keep `temperature` + `thinking.disabled`, which Sonnet 4.6 /
+        # Haiku 4.5 accept.
+        bedrock_kwargs = dict(
             model_id=model_id,
             streaming=True,
             cache_tools="default" if tool_cache else None,
             max_tokens=64000,
             stop_sequences=["\n\nHuman"],
-            temperature=1 if enable_reasoning else 0.01,
-            additional_request_fields={
-                "thinking": {
-                    "type": "enabled" if enable_reasoning else "disabled",
-                    **({"budget_tokens": 8192} if enable_reasoning else {}),
-                }
-            },
             boto_client_config=Config(
                 read_timeout=900,
                 connect_timeout=900,
                 retries=dict(max_attempts=50, mode="adaptive"),
-            )
+            ),
         )
+        if enable_reasoning:
+            bedrock_kwargs["additional_request_fields"] = {
+                "thinking": {"type": "adaptive"},
+                "output_config": {"effort": "high"},
+            }
+        else:
+            bedrock_kwargs["temperature"] = 0.01
+            bedrock_kwargs["additional_request_fields"] = {
+                "thinking": {"type": "disabled"},
+            }
+        llm = BedrockModel(**bedrock_kwargs)
 
         return llm
 
