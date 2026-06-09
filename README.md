@@ -19,6 +19,7 @@
 
 ## *Latest News* 🔥
 
+- **[2026/06]** Data Q&A — natural-language chat over the uploaded CSV with DuckDB Text2SQL, sandboxed in-process (no data leaves your AWS account), Bedrock prompt caching for ~90% input-token savings on multi-turn dialogue, and an inline SQL editor so analysts can inspect, edit, and re-run the generated SQL without another LLM call. ([details](./deep-insight-web/README.md#data-qa))
 - **[2026/04]** Auto-generate sample analysis prompts — AI generates 3 sample prompts (간단/중간/복잡 — simple/medium/complex) from your column-definitions JSON, replacing the previous hard-coded fallback chips. Each generated prompt references actual column names so it's immediately runnable. ([details](./docs/features/prompt-generation/README.md))
 - **[2026/04]** Auto-generate column definitions — AI builds `column_definitions.json` from a CSV header + sample rows, removing the manual JSON-authoring barrier for non-technical users. Includes a Table/JSON review panel with manual edit support. ([details](./docs/features/json-generation/README.md))
 - **[2026/04]** CloudFront + Cognito deployment option for Web UI — HTTPS with Lambda@Edge authentication for external demos and customer PoCs ([details](./deep-insight-web/README.md))
