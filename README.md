@@ -19,7 +19,7 @@
 
 ## *Latest News* 🔥
 
-- **[2026/06]** Data Q&A — natural-language chat over the uploaded CSV with DuckDB Text2SQL, sandboxed in-process (no data leaves your AWS account), Bedrock prompt caching for ~90% input-token savings on multi-turn dialogue, and an inline SQL editor so analysts can inspect, edit, and re-run the generated SQL without another LLM call. ([details](./deep-insight-web/README.md#data-qa))
+- **[2026/06]** Data Q&A — the **inner loop** to analysis's outer loop: natural-language chat over the uploaded CSV with DuckDB Text2SQL, sandboxed in-process (no data leaves your AWS account), Bedrock prompt caching for ~90% input-token savings on multi-turn dialogue, and an inline SQL editor so analysts can inspect, edit, and re-run the generated SQL without another LLM call. ([details](./deep-insight-web/DATA_QA.md))
 - **[2026/05]** Citation integrity validation — every number cited in a report is re-verified and linked to its calculation via `[N]` markers, with an independent Auditor (DeepTRACE A/B/C/D) blocking unverified or hallucinated figures (self-hosted + managed) ([details](./docs/features/data-validation/citation-validation-explained.md))
 - **[2026/04]** Auto-generate sample analysis prompts — AI generates 3 sample prompts (간단/중간/복잡 — simple/medium/complex) from your column-definitions JSON, replacing the previous hard-coded fallback chips. Each generated prompt references actual column names so it's immediately runnable. ([details](./docs/features/prompt-generation/README.md))
 - **[2026/04]** Auto-generate column definitions — AI builds `column_definitions.json` from a CSV header + sample rows, removing the manual JSON-authoring barrier for non-technical users. Includes a Table/JSON review panel with manual edit support. ([details](./docs/features/json-generation/README.md))
@@ -96,6 +96,7 @@ Production deployment using AWS Bedrock AgentCore Runtime with VPC Private Mode:
 
 Browser-based interface for non-technical users:
 - ✅ Upload data, review plans, download reports from the browser
+- ✅ Two workflows: **outer loop** (long-form multi-agent analysis) + **inner loop** ([Data Q&A](./deep-insight-web/DATA_QA.md) — fast Text2SQL chat on the same CSV)
 - ✅ Korean/English language support
 - ✅ Two deployment options: VPN CIDR (internal) or CloudFront + Cognito (external)
 - ✅ Optional: Ops dashboard for job tracking and email notifications
@@ -125,6 +126,12 @@ Browser-based interface for non-technical users:
 > **Workflow**: Input (CSV data file: `Dat-fresh-food-claude.csv`) → Process (Natural language prompt: "Analyze sales performance, generate charts, extract insights") → Output (DOCX report with analysis, visualizations, and marketing insights)
 
 [▶️ Watch Full Demo on YouTube](https://www.youtube.com/watch?v=pn5aPfYSnp0)
+
+### Data Q&A (Inner Loop)
+
+> Conversational, second-scale Text2SQL exploration on the uploaded CSV — the inner loop that complements the long-form analysis report. ([guide](./deep-insight-web/DATA_QA.md))
+
+[▶️ Watch the Deep Insight Chat demo on YouTube](https://youtu.be/i5NoAIq7sDk?list=PLrAWXV_UoWzhwubfImuoz6GCHlZnrRdDc)
 
 ### Sample Outputs
 
