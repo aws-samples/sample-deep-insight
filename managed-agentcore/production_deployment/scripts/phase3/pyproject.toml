@@ -19,6 +19,6 @@ dependencies = [
     "langchain-core>=0.3.0",
     "fastapi>=0.129.0",
     "uvicorn>=0.38.0",
-    "python-multipart>=0.0.20",
+    "python-multipart>=0.0.31",
     "fastmcp>=2.10.0",
 ]
