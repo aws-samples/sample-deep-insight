@@ -153,10 +153,10 @@ def cleanup_fargate_session() -> None:
             print("📤 Initiating final S3 upload and waiting for completion...", flush=True)
             completion_result = fargate_manager._session_manager.complete_session(wait_for_s3=True)
 
-            if completion_result and completion_result.get("status") == "success":
+            if completion_result and completion_result.get("upload_completed"):
                 print("✅ S3 upload confirmed - all Fargate artifacts uploaded", flush=True)
             else:
-                print("⚠️ S3 upload status unclear, but proceeding with cleanup", flush=True)
+                print("⚠️ S3 upload NOT confirmed - proceeding with forced task cleanup", flush=True)
 
         # 2. Force cleanup of all Fargate tasks (fail-safe)
         print("🔍 Checking for any remaining Fargate tasks...", flush=True)
