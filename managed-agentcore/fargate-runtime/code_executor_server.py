@@ -878,7 +878,11 @@ def auto_shutdown():
         session_manager.complete_session()
 
     time.sleep(10)  # Wait for S3 upload completion
-    sys.exit(0)
+    # os._exit (not sys.exit): auto_shutdown runs in a daemon thread, and
+    # sys.exit() only raises SystemExit in the *calling* thread — the Flask
+    # main thread keeps running, so the process (and the Fargate task) would
+    # never actually exit. os._exit forces the whole process to terminate.
+    os._exit(0)
 
 if __name__ == "__main__":
     print("=" * 60, flush=True)
