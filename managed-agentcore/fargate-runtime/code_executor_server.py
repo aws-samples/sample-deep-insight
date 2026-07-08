@@ -119,6 +119,7 @@ from io import StringIO
 import contextlib
 import unicodedata
 import boto3
+from botocore.config import Config as BotoConfig
 from flask import Flask, request, jsonify
 from pathlib import Path
 import shutil
@@ -164,11 +165,22 @@ class SessionManager:
             self.complete_session()
 
     def complete_session(self):
-        """Complete session - Upload all results to S3"""
-        if self.is_complete:
-            return
+        """Complete session - Upload all results to S3.
 
-        self.is_complete = True
+        Returns:
+            bool: True if the S3 upload completed successfully, False otherwise.
+
+        Idempotency: if a previous call already finished the upload
+        (is_complete=True), returns True immediately without re-uploading.
+        If a previous attempt FAILED, is_complete is reset to False so a
+        subsequent retry (from the runtime or auto-shutdown) can re-run the
+        upload — this prevents a single transient error from permanently
+        losing the generated report.
+        """
+        if self.is_complete:
+            # Already uploaded successfully on a prior call - nothing to do.
+            return True
+
         print(f"🏁 Session {self.session_id} complete. Uploading to S3...", flush=True)
 
         try:
@@ -181,12 +193,18 @@ class SessionManager:
                 "executions": self.executions
             }
 
-            # Upload to S3
+            # Upload to S3 (raises on any artifact upload failure)
             self.upload_to_s3(session_result)
 
+            # Only mark complete AFTER a confirmed successful upload, so a
+            # failed attempt leaves the session retryable.
+            self.is_complete = True
             print(f"✅ Session {self.session_id} uploaded to S3", flush=True)
+            return True
         except Exception as e:
-            print(f"❌ Failed to upload session to S3: {e}", flush=True)
+            # Keep is_complete=False so the next retry can re-attempt the upload.
+            print(f"❌ Failed to upload session to S3 (will remain retryable): {e}", flush=True)
+            return False
 
     def upload_to_s3(self, session_result):
         """Upload session results and generated files to S3"""
@@ -199,7 +217,17 @@ class SessionManager:
         if not bucket:
             raise ValueError("S3_BUCKET_NAME environment variable is required but not set")
 
-        s3_client = boto3.client('s3', region_name=aws_region)
+        # Resilient S3 client: adaptive retries absorb transient errors such as
+        # "Connection reset by peer" (ECONNRESET) that previously caused the
+        # final report to be silently dropped. Explicit timeouts prevent a hung
+        # socket from blocking completion indefinitely.
+        s3_config = BotoConfig(
+            retries={'max_attempts': 10, 'mode': 'adaptive'},
+            connect_timeout=10,
+            read_timeout=120,
+            max_pool_connections=20,
+        )
+        s3_client = boto3.client('s3', region_name=aws_region, config=s3_config)
 
         print(f"☁️ Starting S3 upload to s3://{bucket}/deep-insight/fargate_sessions/{self.session_id}/", flush=True)
 
@@ -244,9 +272,23 @@ class SessionManager:
 
         print(f"✅ S3 upload completed for session {self.session_id}", flush=True)
 
+    # Per-file upload retry (on top of the boto3 client-level adaptive retries).
+    # Guards against a transient error striking the same file repeatedly.
+    UPLOAD_FILE_MAX_ATTEMPTS = 3
+    UPLOAD_FILE_RETRY_BASE = 2  # seconds; exponential backoff 2s, 4s, ...
+
     def _upload_directory_to_s3(self, s3_client, bucket, local_dir, s3_prefix):
-        """Upload all files in directory to S3"""
+        """Upload all files in a directory to S3.
+
+        Raises:
+            Exception: if any file fails to upload after all retries. Surfacing
+            the failure (instead of swallowing it) lets complete_session() report
+            an accurate failure status so the caller can retry the whole session
+            completion — previously a dropped report was logged but reported as
+            success, hiding the data loss.
+        """
         uploaded_count = 0
+        failures = []
 
         for root, dirs, files in os.walk(local_dir):
             for file in files:
@@ -254,32 +296,54 @@ class SessionManager:
                 relative_path = os.path.relpath(local_file_path, local_dir)
                 s3_key = f"{s3_prefix}/{relative_path}".replace('\\', '/')
 
-                try:
-                    # Set ContentType based on file extension
-                    content_type = 'application/octet-stream'
-                    if file.endswith('.json'):
-                        content_type = 'application/json'
-                    elif file.endswith('.txt'):
-                        content_type = 'text/plain'
-                    elif file.endswith('.csv'):
-                        content_type = 'text/csv'
-                    elif file.endswith('.png'):
-                        content_type = 'image/png'
-                    elif file.endswith('.jpg') or file.endswith('.jpeg'):
-                        content_type = 'image/jpeg'
-                    elif file.endswith('.pdf'):
-                        content_type = 'application/pdf'
-                    elif file.endswith('.py'):
-                        content_type = 'text/x-python'
+                # Set ContentType based on file extension
+                content_type = 'application/octet-stream'
+                if file.endswith('.json'):
+                    content_type = 'application/json'
+                elif file.endswith('.txt'):
+                    content_type = 'text/plain'
+                elif file.endswith('.csv'):
+                    content_type = 'text/csv'
+                elif file.endswith('.png'):
+                    content_type = 'image/png'
+                elif file.endswith('.jpg') or file.endswith('.jpeg'):
+                    content_type = 'image/jpeg'
+                elif file.endswith('.pdf'):
+                    content_type = 'application/pdf'
+                elif file.endswith('.py'):
+                    content_type = 'text/x-python'
 
-                    s3_client.upload_file(
-                        local_file_path, bucket, s3_key,
-                        ExtraArgs={'ContentType': content_type}
-                    )
-                    uploaded_count += 1
-                    print(f"    📤 {relative_path} → s3://{bucket}/{s3_key}", flush=True)
-                except Exception as e:
-                    print(f"    ❌ Upload failed for {relative_path}: {e}", flush=True)
+                last_error = None
+                for attempt in range(1, self.UPLOAD_FILE_MAX_ATTEMPTS + 1):
+                    try:
+                        s3_client.upload_file(
+                            local_file_path, bucket, s3_key,
+                            ExtraArgs={'ContentType': content_type}
+                        )
+                        uploaded_count += 1
+                        print(f"    📤 {relative_path} → s3://{bucket}/{s3_key}", flush=True)
+                        last_error = None
+                        break
+                    except Exception as e:
+                        last_error = e
+                        if attempt < self.UPLOAD_FILE_MAX_ATTEMPTS:
+                            wait = self.UPLOAD_FILE_RETRY_BASE ** attempt
+                            print(f"    ⚠️ Upload attempt {attempt}/{self.UPLOAD_FILE_MAX_ATTEMPTS} "
+                                  f"failed for {relative_path}: {e} - retrying in {wait}s", flush=True)
+                            time.sleep(wait)
+                        else:
+                            print(f"    ❌ Upload failed for {relative_path} after "
+                                  f"{self.UPLOAD_FILE_MAX_ATTEMPTS} attempts: {e}", flush=True)
+
+                if last_error is not None:
+                    failures.append((relative_path, last_error))
+
+        if failures:
+            # Re-raise so complete_session() knows the upload did NOT fully succeed.
+            failed_names = ', '.join(name for name, _ in failures)
+            raise RuntimeError(
+                f"{len(failures)} file(s) failed to upload to S3: {failed_names}"
+            )
 
         return uploaded_count
 
@@ -642,11 +706,22 @@ def complete_session():
             "error": "Session ID mismatch - completion request routed to wrong container"
         }), 403
 
-    session_manager.complete_session()
+    upload_ok = session_manager.complete_session()
+    if not upload_ok:
+        # Signal failure so the runtime's retry logic re-attempts completion
+        # instead of tearing down the container with the report still local.
+        return jsonify({
+            "message": "Session completion failed - S3 upload did not finish",
+            "session_id": session_manager.session_id,
+            "total_executions": len(session_manager.executions),
+            "upload_completed": False
+        }), 500
+
     return jsonify({
         "message": "Session completed",
         "session_id": session_manager.session_id,
-        "total_executions": len(session_manager.executions)
+        "total_executions": len(session_manager.executions),
+        "upload_completed": True
     })
 
 @app.route('/file-sync', methods=['POST'])

@@ -116,10 +116,17 @@ class SessionBasedFargateManager:
     TASK_IP_POLL_INTERVAL = 3          # Polling interval for task IP check (seconds)
     HEALTH_CHECK_TIMEOUT = 5           # Timeout for container health check (seconds)
     CODE_EXECUTION_TIMEOUT = 600       # Timeout for code execution (seconds) - Increased for long-running tasks like DOCX generation
-    SESSION_COMPLETE_TIMEOUT = 10      # Timeout for session completion signal (seconds)
+    SESSION_COMPLETE_TIMEOUT = 60      # Timeout for session completion signal (seconds) - upload runs synchronously on the container
     STATUS_CHECK_TIMEOUT = 5           # Timeout for session status check (seconds)
     S3_UPLOAD_WAIT = 15                # Wait time for S3 upload completion (seconds)
     CONTAINER_PORT = 8080              # Container HTTP port
+
+    # Session completion retry (guards against transient "Connection reset by
+    # peer" on the completion-trigger HTTP call, which previously dropped the
+    # final report). Backoff is generous because the single-threaded container
+    # may be busy uploading and unable to answer immediately.
+    SESSION_COMPLETE_MAX_RETRIES = 4   # Total attempts for the completion HTTP call
+    SESSION_COMPLETE_RETRY_BASE = 2    # seconds; exponential backoff 2s, 4s, 8s, ...
 
     # ========================================================================
     # HELPER METHODS (DRY - Don't Repeat Yourself)
@@ -571,43 +578,85 @@ class SessionBasedFargateManager:
         print(f"🏁 [Session {session_id}] Completing session...", flush=True)
 
         try:
+            self._ensure_http_session()
+        except Exception:
+            print(f"⚠️ HTTP session not available for completion", flush=True)
+            return {"error": "No HTTP session"}
+
+        # 1. Send session completion signal, retrying on transient failures.
+        #    The container uploads all artifacts (including the final report)
+        #    synchronously when it receives this request, so a single dropped
+        #    request (e.g. "Connection reset by peer") must NOT be treated as
+        #    completion - otherwise the report is lost. We only proceed to tear
+        #    down the container after a confirmed HTTP 200 (upload_completed).
+        result = {}
+        upload_confirmed = False
+        last_error = None
+
+        for attempt in range(1, self.SESSION_COMPLETE_MAX_RETRIES + 1):
             try:
-                self._ensure_http_session()
-            except Exception:
-                print(f"⚠️ HTTP session not available for completion", flush=True)
-                return {"error": "No HTTP session"}
+                # Include session_id so the container can reject misrouted requests
+                response = self.http_session.post(
+                    f"http://{self.alb_dns}/session/complete",
+                    json={"session_id": session_id},
+                    timeout=self.SESSION_COMPLETE_TIMEOUT
+                )
 
-            # 1. Send session completion signal (🍪 use http_session - per-request isolation)
-            # Include session_id so the container can reject misrouted requests
-            response = self.http_session.post(
-                f"http://{self.alb_dns}/session/complete",
-                json={"session_id": session_id},
-                timeout=self.SESSION_COMPLETE_TIMEOUT
-            )
-            result = response.json() if response.status_code == 200 else {}
+                if response.status_code == 200:
+                    result = response.json() if response.content else {}
+                    upload_confirmed = True
+                    print(f"✅ [Session {session_id}] Completion confirmed by container "
+                          f"(attempt {attempt}/{self.SESSION_COMPLETE_MAX_RETRIES})", flush=True)
+                    break
 
-            # 2. Wait for S3 upload
-            if wait_for_s3:
-                print(f"⏳ Waiting for S3 upload...", flush=True)
-                time.sleep(self.S3_UPLOAD_WAIT)
+                # 500 => container received the request but the upload failed;
+                # it keeps the session retryable, so retrying is safe and useful.
+                last_error = f"HTTP {response.status_code}: {response.text[:200]}"
+                print(f"⚠️ [Session {session_id}] Completion attempt "
+                      f"{attempt}/{self.SESSION_COMPLETE_MAX_RETRIES} returned {last_error}", flush=True)
 
-            # 3. Session cleanup
-            self._cleanup_session(self.current_session)
+            except requests.exceptions.RequestException as e:
+                # Transient network error (connection reset, timeout, etc.).
+                # The request likely never reached the container, so the
+                # container's complete_session() is idempotent and safe to retry.
+                last_error = str(e)
+                print(f"⚠️ [Session {session_id}] Completion attempt "
+                      f"{attempt}/{self.SESSION_COMPLETE_MAX_RETRIES} failed: {e}", flush=True)
 
-            # 4. Reset current session information
-            self.current_session = None
+            if attempt < self.SESSION_COMPLETE_MAX_RETRIES:
+                wait = self.SESSION_COMPLETE_RETRY_BASE ** attempt
+                print(f"⏳ [Session {session_id}] Retrying completion in {wait}s...", flush=True)
+                time.sleep(wait)
 
-            print(f"✅ [Session {session_id}] Session completed successfully!", flush=True)
+        if not upload_confirmed:
+            # All retries exhausted. Do NOT deregister/stop the container here -
+            # leaving it alive lets the container's 1-hour auto-shutdown make a
+            # final upload attempt as a fail-safe. Report failure to the caller.
+            print(f"❌ [Session {session_id}] Completion FAILED after "
+                  f"{self.SESSION_COMPLETE_MAX_RETRIES} attempts: {last_error}", flush=True)
+            print(f"   ⏭️ Skipping container teardown so auto-shutdown can retry the S3 upload.", flush=True)
+            return {"error": last_error or "completion failed", "upload_completed": False}
 
-            return {
-                "session_id": session_id,
-                "status": "completed",
-                "total_executions": result.get('total_executions', 0)
-            }
+        # 2. Brief settle wait (upload already finished synchronously on the
+        #    container before it returned 200; this absorbs any S3 read-after-write lag)
+        if wait_for_s3:
+            print(f"⏳ Waiting for S3 upload to settle...", flush=True)
+            time.sleep(self.S3_UPLOAD_WAIT)
 
-        except Exception as e:
-            print(f"❌ [Session {session_id}] Error completing session: {e}", flush=True)
-            return {"error": str(e)}
+        # 3. Session cleanup (safe now: upload is confirmed complete)
+        self._cleanup_session(self.current_session)
+
+        # 4. Reset current session information
+        self.current_session = None
+
+        print(f"✅ [Session {session_id}] Session completed successfully!", flush=True)
+
+        return {
+            "session_id": session_id,
+            "status": "completed",
+            "total_executions": result.get('total_executions', 0),
+            "upload_completed": True
+        }
 
     def _cleanup_session(self, session_info: Dict[str, Any]):
         """Session cleanup (ALB deregister + Task stop)"""

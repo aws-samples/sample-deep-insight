@@ -367,6 +367,12 @@ class GlobalFargateSessionManager:
                 logger.warning("⚠️ No request ID for cleanup")
                 return
 
+            # Tracks whether it is safe to finalize this request (drop HTTP
+            # client + block recreation). Stays True for the no-session paths;
+            # set False only when an S3 upload could not be confirmed, so we
+            # keep the session retryable for the auto-shutdown fail-safe.
+            upload_completed = True
+
             if cleanup_request_id in self._sessions:
                 session_info = self._sessions[cleanup_request_id]
                 logger.info(f"🧹 Cleaning up session for request {cleanup_request_id}: {session_info['session_id']}")
@@ -374,26 +380,52 @@ class GlobalFargateSessionManager:
                 container_ip = session_info.get('container_ip')
 
                 # FIX: Call complete_session() first (before ALB removal)
-                # 1. Allow container to upload to S3 first
+                # 1. Trigger the container's S3 upload (now retried internally on
+                #    transient errors like "Connection reset by peer").
                 logger.info(f"🏁 Completing session (S3 upload)...")
                 self._session_manager.current_session = session_info['fargate_session']
-                self._session_manager.complete_session()
+                completion_result = self._session_manager.complete_session()
+                upload_completed = bool(
+                    completion_result and completion_result.get("upload_completed")
+                )
 
-                # 2. Then release container IP and remove from ALB (safe now)
-                if container_ip and container_ip in self._used_container_ips:
-                    del self._used_container_ips[container_ip]
-                    logger.info(f"🧹 Released container IP: {container_ip}")
-                    logger.info(f"   Remaining IPs: {list(self._used_container_ips.keys())}")
+                if upload_completed:
+                    # 2. Upload confirmed → safe to release IP and tear down container.
+                    if container_ip and container_ip in self._used_container_ips:
+                        del self._used_container_ips[container_ip]
+                        logger.info(f"🧹 Released container IP: {container_ip}")
+                        logger.info(f"   Remaining IPs: {list(self._used_container_ips.keys())}")
 
-                    # Remove container from ALB Target Group (prevents zombie targets)
-                    # Execute after complete_session() to prevent HTTP 502 errors
-                    self._deregister_from_alb(container_ip)
+                        # Remove container from ALB Target Group (prevents zombie targets)
+                        # Execute after confirmed upload to prevent HTTP 502 errors
+                        self._deregister_from_alb(container_ip)
 
-                # Remove from session dictionary
-                del self._sessions[cleanup_request_id]
-                logger.info(f"✅ Session cleanup completed. Remaining sessions: {len(self._sessions)}")
+                    # Remove from session dictionary
+                    del self._sessions[cleanup_request_id]
+                    logger.info(f"✅ Session cleanup completed. Remaining sessions: {len(self._sessions)}")
+                else:
+                    # Upload NOT confirmed → leave the container registered and
+                    # alive so its 1-hour auto-shutdown can make a final upload
+                    # attempt. Do NOT delete the session here, so we don't lose
+                    # the ability to observe/retry it.
+                    logger.error(
+                        f"❌ S3 upload not confirmed for session "
+                        f"{session_info['session_id']} (request {cleanup_request_id}). "
+                        f"Leaving container alive for auto-shutdown fail-safe retry; "
+                        f"skipping ALB deregister and session deletion."
+                    )
             else:
                 logger.warning(f"⚠️ No session found for request {cleanup_request_id}")
+
+            if not upload_completed:
+                # Keep the HTTP client and do NOT block recreation: the session
+                # is intentionally left alive so the upload can still complete
+                # (via container auto-shutdown). Finalizing here would orphan it.
+                logger.warning(
+                    f"⚠️ Skipping final cleanup for request {cleanup_request_id} "
+                    f"because the S3 upload was not confirmed."
+                )
+                return
 
             # Clean up HTTP client (remove cookies)
             if cleanup_request_id in self._http_clients:
