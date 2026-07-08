@@ -147,6 +147,8 @@ class GlobalFargateSessionManager:
     _sessions = {}  # {request_id: session_info} - Per-request session management
     _http_clients = {}  # {request_id: http_session} - Per-request HTTP client (cookie isolation)
     _used_container_ips = {}  # {container_ip: request_id} - IP-based container ownership tracking
+    # Failed-upload sessions kept alive for auto_shutdown salvage; reclaimed once their ECS task stops.
+    _orphaned_sessions = {}   # {request_id: {session_id, container_ip, task_arn, orphaned_at}}
     _current_request_id = None  # Current context request ID
     _session_creation_failures = {}  # {request_id: failure_count} - Session creation failure tracking
     _cleaned_up_requests = set()  # Cleaned-up request IDs (prevents recreation)
@@ -213,6 +215,11 @@ class GlobalFargateSessionManager:
         try:
             if not self._current_request_id:
                 raise Exception("Request context not set. Call set_request_context() first.")
+
+            # Reclaim any orphaned sessions whose Fargate task has now stopped
+            # (best-effort: frees IP/ALB/HTTP-client/session state left by a prior
+            # failed completion). Never blocks the request.
+            self._reclaim_stopped_orphans()
 
             # Prevent new session creation for already cleaned-up requests
             if self._current_request_id in self._cleaned_up_requests:
@@ -404,15 +411,28 @@ class GlobalFargateSessionManager:
                     del self._sessions[cleanup_request_id]
                     logger.info(f"✅ Session cleanup completed. Remaining sessions: {len(self._sessions)}")
                 else:
-                    # Upload NOT confirmed → leave the container registered and
-                    # alive so its 1-hour auto-shutdown can make a final upload
-                    # attempt. Do NOT delete the session here, so we don't lose
-                    # the ability to observe/retry it.
+                    # Upload NOT confirmed → keep the container ALIVE (do NOT StopTask)
+                    # so auto_shutdown can make a final direct-to-S3 salvage upload.
+                    # That salvage does NOT use the ALB, so:
+                    #   Tier 1: deregister the ALB target now → no permanent zombie target.
+                    #   Tier 2: move the record out of _sessions into _orphaned_sessions so a
+                    #           same-request_id retry creates a FRESH session (not a reuse of
+                    #           this doomed container); a later sweep reclaims the IP once the
+                    #           task actually stops. IP stays held until then.
+                    if container_ip:
+                        self._deregister_from_alb(container_ip)   # Tier 1 (idempotent)
+                    self._orphaned_sessions[cleanup_request_id] = {
+                        'session_id': session_info['session_id'],
+                        'container_ip': container_ip,
+                        'task_arn': session_info.get('fargate_session', {}).get('task_arn'),
+                        'orphaned_at': datetime.now(),
+                    }
+                    del self._sessions[cleanup_request_id]         # Tier 2: out of the reuse path
                     logger.error(
                         f"❌ S3 upload not confirmed for session "
                         f"{session_info['session_id']} (request {cleanup_request_id}). "
-                        f"Leaving container alive for auto-shutdown fail-safe retry; "
-                        f"skipping ALB deregister and session deletion."
+                        f"ALB target deregistered; container left alive for auto_shutdown salvage; "
+                        f"session moved to orphan list (IP {container_ip} held until its task stops)."
                     )
             else:
                 logger.warning(f"⚠️ No session found for request {cleanup_request_id}")
@@ -1123,6 +1143,76 @@ class GlobalFargateSessionManager:
         except Exception as alb_error:
             # Continue session cleanup even if ALB deregistration fails
             logger.warning(f"⚠️ Failed to deregister ALB target {container_ip}: {alb_error}")
+
+    def _is_tasks_stopped(self, task_arns):
+        """Return the set of task ARNs that are STOPPED (or no longer exist).
+
+        Batched: one ecs.describe_tasks call per 100 ARNs. On any API error,
+        returns an empty set (conservative — never reclaim a session while unsure
+        its container/IP is truly gone).
+        """
+        arns = [a for a in task_arns if a]
+        if not arns:
+            return set()
+        stopped = set()
+        try:
+            ecs_client = boto3.client('ecs', region_name=self._get_aws_region())
+            for i in range(0, len(arns), 100):          # describe_tasks: max 100 tasks/call
+                batch = arns[i:i + 100]
+                resp = ecs_client.describe_tasks(cluster=ECS_CLUSTER_NAME, tasks=batch)
+                present = set()
+                for t in resp.get('tasks', []):
+                    present.add(t['taskArn'])
+                    if t.get('lastStatus') == 'STOPPED':
+                        stopped.add(t['taskArn'])
+                for a in batch:                          # absent from response → already gone
+                    if a not in present:
+                        stopped.add(a)
+        except Exception as e:
+            logger.warning(f"⚠️ Could not query ECS task status for orphan reclaim: {e}")
+            return set()
+        return stopped
+
+    def _reclaim_stopped_orphans(self):
+        """Reclaim coordinator state for orphaned sessions whose task has stopped.
+
+        An orphan is a session whose final S3 upload could not be confirmed; its
+        container was left alive for the auto_shutdown salvage. Once that task
+        actually stops, its IP / ALB target / HTTP client / session record are
+        safe to reclaim. Best-effort: never raises into the request path.
+        """
+        if not self._orphaned_sessions:
+            return
+        try:
+            arns = [o.get('task_arn') for o in self._orphaned_sessions.values()]
+            stopped = self._is_tasks_stopped(arns)
+            for req_id in list(self._orphaned_sessions.keys()):
+                # Never reclaim the request currently starting up (would add it to
+                # _cleaned_up_requests and FATAL-block its own fresh session).
+                if req_id == self._current_request_id:
+                    continue
+                orphan = self._orphaned_sessions.get(req_id)
+                if not orphan:
+                    continue
+                task_arn = orphan.get('task_arn')
+                if not task_arn or task_arn not in stopped:
+                    continue                              # still running / unknown → leave it
+                ip = orphan.get('container_ip')
+                try:
+                    if ip:
+                        self._deregister_from_alb(ip)     # idempotent
+                        self._used_container_ips.pop(ip, None)
+                    self._http_clients.pop(req_id, None)
+                    self._orphaned_sessions.pop(req_id, None)
+                    self._cleaned_up_requests.add(req_id)
+                    logger.info(
+                        f"🧹 Reclaimed stopped orphan session {orphan.get('session_id')} "
+                        f"(request {req_id}, freed IP {ip})"
+                    )
+                except Exception as e:
+                    logger.warning(f"⚠️ Failed to reclaim orphan {req_id}: {e}")
+        except Exception as e:
+            logger.warning(f"⚠️ Orphan reclaim sweep failed: {e}")
 
     def _auto_cleanup(self):
         """Automatically clean up all sessions on program exit"""
