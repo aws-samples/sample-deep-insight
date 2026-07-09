@@ -14,8 +14,8 @@ Usage (in reporter agent):
 The function is idempotent: re-running on an already-upgraded DOCX is a no-op.
 PNGs without a matching SVG sibling pass through unchanged.
 
-Matching strategy: each embedded PNG is hashed (SHA-1) and looked up against the
-SHA-1 of every PNG in artifacts_dir whose .svg sibling exists. This works
+Matching strategy: each embedded PNG is hashed (SHA-256) and looked up against the
+SHA-256 of every PNG in artifacts_dir whose .svg sibling exists. This works
 regardless of how python-docx renamed images during insertion.
 """
 from __future__ import annotations
