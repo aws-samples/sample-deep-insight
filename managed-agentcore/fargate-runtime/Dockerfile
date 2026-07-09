@@ -64,5 +64,11 @@ COPY code_executor_server.py .
 ENV PYTHONUNBUFFERED=1
 ENV ENV_NAME=production
 
+# Run as a non-root user. The executor writes to /app/data, /app/artifacts,
+# and /tmp/session_* at runtime, so grant ownership of /app to that user.
+RUN groupadd --system executor && useradd --system --gid executor --create-home executor \
+    && chown -R executor:executor /app
+USER executor
+
 # Run Python script when container starts
 CMD ["python", "-u", "code_executor_server.py"]

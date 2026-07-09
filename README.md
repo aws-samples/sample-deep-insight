@@ -5,7 +5,7 @@
 
   <div align="center">
     <a href="https://github.com/aws-samples/aws-ai-ml-workshop-kr/graphs/commit-activity"><img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/aws-samples/aws-ai-ml-workshop-kr"/></a>
-    <a href="https://github.com/aws-samples/aws-ai-ml-workshop-kr/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/badge/LICENSE-MIT-green"/></a>
+    <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/LICENSE-MIT--0-green"/></a>
     <a href="https://www.python.org/downloads/"><img alt="Python" src="https://img.shields.io/badge/python-3.12+-blue.svg"/></a>
   </div>
 
@@ -167,7 +167,7 @@ git push origin feature/your-feature-name
 
 ## License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT-0 License** - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 

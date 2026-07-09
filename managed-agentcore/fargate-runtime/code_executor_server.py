@@ -110,6 +110,7 @@ import os
 import json
 import uuid
 import traceback
+import tempfile
 import threading
 import time
 import subprocess
@@ -134,7 +135,7 @@ class SessionManager:
         self.max_executions = 500
         self.start_time = datetime.now()
         self.is_complete = False
-        self.workspace = f"/tmp/session_{self.session_id}"
+        self.workspace = os.path.join(tempfile.gettempdir(), f"session_{self.session_id}")
         os.makedirs(self.workspace, exist_ok=True)
 
         # Create data and artifacts directories for file I/O

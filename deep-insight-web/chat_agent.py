@@ -17,6 +17,7 @@ import json
 import logging
 import os
 import re
+import tempfile
 import threading
 import time
 from pathlib import Path
@@ -45,7 +46,11 @@ CHAT_MODEL_ID = os.environ.get(
 # schema) and tool specs are static across a session, so caching them yields
 # ~90% input-token savings on repeat turns. Set to "0" to disable for debugging.
 ENABLE_PROMPT_CACHE = os.environ.get("ENABLE_PROMPT_CACHE", "1") != "0"
-LOCAL_UPLOAD_DIR = Path("/tmp/deep-insight-uploads")
+# Upload root defaults to a path under the system temp dir; override with
+# UPLOAD_DIR when the container mounts a dedicated writable volume.
+LOCAL_UPLOAD_DIR = Path(
+    os.environ.get("UPLOAD_DIR", os.path.join(tempfile.gettempdir(), "deep-insight-uploads"))
+)
 
 # Strict allow-list for upload_id. CodeQL's path-injection taint analysis
 # recognizes regex.fullmatch on `^[allowed-chars]+$` as a sanitizer barrier;
