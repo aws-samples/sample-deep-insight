@@ -1,15 +1,30 @@
 import boto3
 import json
+import secrets
+import string
 import time
 from boto3.session import Session
+
+
+def _generate_password(length: int = 16) -> str:
+    """Generate a random password satisfying the pool's password policy."""
+    alphabet = string.ascii_letters + string.digits
+    return (
+        ''.join(secrets.choice(alphabet) for _ in range(length))
+        + secrets.choice(string.ascii_uppercase)
+        + secrets.choice(string.ascii_lowercase)
+        + secrets.choice(string.digits)
+        + secrets.choice('!@#$%^&*')
+    )
+
 
 def setup_cognito_user_pool():
     boto_session = Session()
     region = boto_session.region_name
-    
+
     # Initialize Cognito client
     cognito_client = boto3.client('cognito-idp', region_name=region)
-    
+
     try:
         # Create User Pool
         user_pool_response = cognito_client.create_user_pool(
@@ -34,29 +49,30 @@ def setup_cognito_user_pool():
         )
         client_id = app_client_response['UserPoolClient']['ClientId']
         
-        # Create User
+        # Create User with randomly generated credentials
+        test_password = _generate_password()
         cognito_client.admin_create_user(
             UserPoolId=pool_id,
             Username='testuser',
-            TemporaryPassword='Temp123!',
+            TemporaryPassword=_generate_password(),
             MessageAction='SUPPRESS'
         )
-        
+
         # Set Permanent Password
         cognito_client.admin_set_user_password(
             UserPoolId=pool_id,
             Username='testuser',
-            Password='MyPassword123!',
+            Password=test_password,
             Permanent=True
         )
-        
+
         # Authenticate User and get Access Token
         auth_response = cognito_client.initiate_auth(
             ClientId=client_id,
             AuthFlow='USER_PASSWORD_AUTH',
             AuthParameters={
                 'USERNAME': 'testuser',
-                'PASSWORD': 'MyPassword123!'
+                'PASSWORD': test_password
             }
         )
         bearer_token = auth_response['AuthenticationResult']['AccessToken']

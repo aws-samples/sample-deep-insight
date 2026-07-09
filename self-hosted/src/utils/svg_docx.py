@@ -42,8 +42,8 @@ _SVG_EXT_URI = '{96DAC541-7B7A-43D3-8B79-37D633B846F1}'  # Microsoft standard SV
 _IMAGE_REL_TYPE = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image'
 
 
-def _sha1_file(path: Path) -> str:
-    h = hashlib.sha1()
+def _sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
     with path.open('rb') as f:
         for chunk in iter(lambda: f.read(65536), b''):
             h.update(chunk)
@@ -74,7 +74,7 @@ def finalize_svg_embeddings(docx_path: Union[str, Path], artifacts_dir: Union[st
     for png_file in artifacts_dir.rglob('*.png'):
         svg_file = png_file.with_suffix('.svg')
         if svg_file.exists():
-            png_hash_to_svg[_sha1_file(png_file)] = svg_file
+            png_hash_to_svg[_sha256_file(png_file)] = svg_file
 
     if not png_hash_to_svg:
         return 0
@@ -90,7 +90,7 @@ def finalize_svg_embeddings(docx_path: Union[str, Path], artifacts_dir: Union[st
 
         media_to_svg: dict[str, Path] = {}
         for png_in_docx in media_dir.glob('*.png'):
-            docx_hash = _sha1_file(png_in_docx)
+            docx_hash = _sha256_file(png_in_docx)
             if docx_hash in png_hash_to_svg:
                 media_to_svg[png_in_docx.name] = png_hash_to_svg[docx_hash]
 
