@@ -116,9 +116,9 @@ class SessionBasedFargateManager:
     TASK_IP_POLL_INTERVAL = 3          # Polling interval for task IP check (seconds)
     HEALTH_CHECK_TIMEOUT = 5           # Timeout for container health check (seconds)
     CODE_EXECUTION_TIMEOUT = 600       # Timeout for code execution (seconds) - Increased for long-running tasks like DOCX generation
-    SESSION_COMPLETE_TIMEOUT = 60      # Timeout for session completion signal (seconds) - upload runs synchronously on the container
+    SESSION_COMPLETE_TIMEOUT = 600      # Timeout for session completion signal (seconds) - upload runs synchronously on the container
     STATUS_CHECK_TIMEOUT = 5           # Timeout for session status check (seconds)
-    S3_UPLOAD_WAIT = 15                # Wait time for S3 upload completion (seconds)
+    S3_UPLOAD_WAIT = 600                # Wait time for S3 upload completion (seconds)
     CONTAINER_PORT = 8080              # Container HTTP port
 
     # Session completion retry (guards against transient "Connection reset by
