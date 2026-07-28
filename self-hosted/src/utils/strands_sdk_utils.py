@@ -135,6 +135,27 @@ class StreamableAgent:
 
         yield {"type": "agent_complete", "event_type": "complete", "message": f"{agent_name} processing complete"}
 
+# Sampling parameters (`temperature`, `top_p`, `top_k`) were removed from the
+# Claude 5 family and from Opus 4.7 onward; sending one to those models fails with
+# "`temperature` is deprecated for this model". Older families still accept them,
+# and the Coordinator depends on a near-zero temperature to keep its routing
+# deterministic. Omitting the parameter is the safe default -- a newly released
+# model then works without a code change -- so opt in only for the families that
+# are known to still accept it.
+_SAMPLING_PARAM_MODEL_FAMILIES = (
+    "claude-haiku-4-5",
+    "claude-sonnet-4-6",
+    "claude-sonnet-4-5",
+    "claude-opus-4-6",
+    "claude-opus-4-5",
+)
+
+
+def _accepts_sampling_params(model_id):
+    """Whether model_id still accepts temperature/top_p/top_k."""
+    return any(family in model_id for family in _SAMPLING_PARAM_MODEL_FAMILIES)
+
+
 class strands_utils():
 
     @staticmethod
@@ -148,12 +169,12 @@ class strands_utils():
         # max_tokens: Claude 3.5/4 models support up to 8192 output tokens by default, extended to 64K for Sonnet
         # Increased from 8192*5 (40,960) to 8192*8 (65,536) to prevent MaxTokensReachedException
         #
-        # Reasoning agents (e.g. Planner on Opus 4.7/4.8) MUST use adaptive thinking:
-        # Opus 4.7+ removed the legacy `thinking.type.enabled` + `budget_tokens` fields
-        # and the `temperature`/`top_p`/`top_k` sampling params (all return 400). Adaptive
-        # thinking replaces the fixed budget (effort defaults to `high`; set explicitly here).
-        # Non-reasoning agents keep `temperature` + `thinking.disabled`, which Sonnet 4.6 /
-        # Haiku 4.5 accept.
+        # Reasoning agents (e.g. Planner on Opus 5) MUST use adaptive thinking:
+        # Opus 4.7+ and the Claude 5 family removed the legacy `thinking.type.enabled` +
+        # `budget_tokens` fields and the `temperature`/`top_p`/`top_k` sampling params
+        # (all return 400). Adaptive thinking replaces the fixed budget (effort defaults
+        # to `high`; set explicitly here). Non-reasoning agents use `thinking.disabled`,
+        # plus `temperature` only on the older families that still accept it.
         bedrock_kwargs = dict(
             model_id=model_id,
             streaming=True,
@@ -172,7 +193,8 @@ class strands_utils():
                 "output_config": {"effort": "high"},
             }
         else:
-            bedrock_kwargs["temperature"] = 0.01
+            if _accepts_sampling_params(model_id):
+                bedrock_kwargs["temperature"] = 0.01
             bedrock_kwargs["additional_request_fields"] = {
                 "thinking": {"type": "disabled"},
             }

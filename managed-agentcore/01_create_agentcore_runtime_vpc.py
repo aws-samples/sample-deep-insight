@@ -81,7 +81,9 @@ ENV_VAR_GROUPS = {
         'CONTAINER_NAME': None,         # Container name in Fargate task definition
         'S3_BUCKET_NAME': None,
         'BEDROCK_MODEL_ID': None,
-        # Agent Model IDs
+        # Agent Model IDs. Unset entries are skipped when the env vars are
+        # assembled, so an agent missing here falls back to DEFAULT_MODEL_ID
+        # inside the runtime -- keep this list in sync with .env.example.
         'DEFAULT_MODEL_ID': None,
         'COORDINATOR_MODEL_ID': None,
         'PLANNER_MODEL_ID': None,
@@ -89,7 +91,9 @@ ENV_VAR_GROUPS = {
         'CODER_MODEL_ID': None,
         'VALIDATOR_MODEL_ID': None,
         'REPORTER_MODEL_ID': None,
+        'AUDITOR_MODEL_ID': None,
         'TRACKER_MODEL_ID': None,
+        'WEB_UTILITY_MODEL_ID': None,
     },
     'fargate': {
         # Network configuration for ECS Fargate Containers (spawned by runtime)
