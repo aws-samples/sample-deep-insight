@@ -25,7 +25,7 @@ Web UI for Deep Insight — a FastAPI server that connects to the Managed AgentC
 
 | Requirement | Details | Check Command |
 |-------------|---------|---------------|
-| Managed AgentCore | Phase 1–3 deployed ([guide](../managed-agentcore/README.md)) | `cat ../managed-agentcore/.env` |
+| Managed AgentCore | Phase 1–4 deployed ([guide](../managed-agentcore/README.md)) | `grep RUNTIME_ARN ../managed-agentcore/.env` |
 | Docker | 20.x+ | `docker --version` |
 
 > **Important**: The Web UI requires a running Managed AgentCore deployment. The `managed-agentcore/.env` file must exist with `RUNTIME_ARN`, `AWS_REGION`, and `S3_BUCKET_NAME` configured.
@@ -43,19 +43,29 @@ Two deployment methods are available:
 | **HTTPS** | No (HTTP via VPN) | Yes (CloudFront terminates TLS) |
 | **Best for** | Internal teams on VPN | External demos, customer PoCs |
 
+> Set these once per terminal session. They are Deep Insight variables, not ones the AWS CLI reads on its own, so the commands below pass them explicitly. Deriving them from `managed-agentcore/.env` keeps the commands in step with whatever you actually deployed (e.g. `us-west-2`, `us-east-1`, `ap-northeast-2`):
+>
+> ```bash
+> export DEEPINSIGHT_REGION=$(grep '^AWS_REGION=' ../managed-agentcore/.env | cut -d= -f2)
+> export DEEPINSIGHT_ACCOUNT=$(grep '^AWS_ACCOUNT_ID=' ../managed-agentcore/.env | cut -d= -f2)
+> ```
+
 ### Option A: VPN CIDR (direct ALB)
 
 ```bash
 cd deep-insight-web
 
-# Deploy with VPN CIDR restriction
+# Deploy with VPN CIDR restriction -- the network range allowed to reach the ALB.
+# e.g. "10.0.0.0/8" for a corporate VPN range, or "203.0.113.42/32" for a single
+# address. To find the address you are connecting from:
+#   curl -s https://checkip.amazonaws.com
 bash deploy.sh "<YOUR_VPN_CIDR>"
 
 # Wait for service to stabilize
 aws ecs wait services-stable \
   --cluster deep-insight-cluster-prod \
   --services deep-insight-web-service \
-  --region us-west-2
+  --region "$DEEPINSIGHT_REGION"
 
 # Clean up
 bash deploy.sh cleanup
@@ -73,7 +83,7 @@ bash deploy-cloudfront.sh
 aws ecs wait services-stable \
   --cluster deep-insight-cluster-prod \
   --services deep-insight-web-service \
-  --region us-west-2
+  --region "$DEEPINSIGHT_REGION"
 
 # (Optional) Add Cognito authentication
 bash add-cognito-auth.sh <CLOUDFRONT_DISTRIBUTION_ID>
@@ -140,7 +150,7 @@ at the top of the page.
 ```
 Upload CSV --> DuckDB in-memory table (read_csv_auto)
                     |
-User question --> Strands Agent + Claude Sonnet 4.6
+User question --> Strands Agent + Claude Sonnet 5
                     |
                     |-- query_sql(sql)                     -> table (SSE)
                     |-- create_chart(sql, matplotlib_code) -> PNG (SSE)
@@ -190,15 +200,15 @@ local debugging).
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `CHAT_MODEL_ID` | `global.anthropic.claude-sonnet-4-6` | Chat agent LLM |
+| `CHAT_MODEL_ID` | `global.anthropic.claude-sonnet-5` | Chat agent LLM |
 | `ENABLE_PROMPT_CACHE` | `1` | Set `0` to disable prompt caching |
-| `WEB_UTILITY_MODEL_ID` | `global.anthropic.claude-sonnet-4-6` | Column/prompt auto-generation utility |
+| `WEB_UTILITY_MODEL_ID` | `global.anthropic.claude-sonnet-5` | Column/prompt auto-generation utility |
 
 ### Observing prompt caching hits
 
 ```bash
 # Live tail of per-turn usage metrics
-aws logs tail /ecs/deep-insight-web --region us-west-2 --follow | grep "chat usage"
+aws logs tail /ecs/deep-insight-web --region "$DEEPINSIGHT_REGION" --follow | grep "chat usage"
 ```
 
 Each chat turn logs `input=… output=… cache_read=… cache_write=…` (values are
@@ -213,7 +223,9 @@ Chat runs without S3 if `S3_BUCKET_NAME` is unset — uploaded CSVs go to
 ```bash
 cd deep-insight-web
 pip install -r requirements.txt
-export AWS_REGION=us-west-2    # CHAT_MODEL_ID uses global. profile
+# boto3 reads AWS_REGION directly. Any region works -- CHAT_MODEL_ID is a
+# global. inference profile -- so this falls back when DEEPINSIGHT_REGION is unset.
+export AWS_REGION="${DEEPINSIGHT_REGION:-us-west-2}"
 python app.py
 # localhost:8080 → upload CSV → "Data Q&A" tab → ask
 ```
@@ -246,7 +258,7 @@ Browser --> CloudFront (HTTPS) --> Lambda@Edge (Cognito auth)
 - **AgentCore Native Protocol**: `boto3.invoke_agent_runtime()` with SSE streaming
 - **SSE keepalive**: Sends `: keepalive` comments every 30s to prevent proxy idle timeout
 - **HITL flow**: `plan_review_request` SSE event -> browser modal -> `POST /feedback` -> S3 -> AgentCore polls
-- **Data Q&A flow**: `/chat` invokes a Strands Agent (Claude Sonnet 4.6) with three tools — `describe_schema`, `query_sql`, `create_chart`. DuckDB runs in-container against the uploaded CSV; **AgentCore is not on this path**, so chat responses return in seconds rather than minutes.
+- **Data Q&A flow**: `/chat` invokes a Strands Agent (Claude Sonnet 5) with three tools — `describe_schema`, `query_sql`, `create_chart`. DuckDB runs in-container against the uploaded CSV; **AgentCore is not on this path**, so chat responses return in seconds rather than minutes.
 - **Env vars**: Reuses `managed-agentcore/.env` (no separate `.env.example`)
 
 ---
@@ -279,8 +291,8 @@ aws logs get-log-events --log-group-name /ecs/deep-insight-web \
     --log-group-name /ecs/deep-insight-web \
     --order-by LastEventTime --descending \
     --query 'logStreams[0].logStreamName' --output text \
-    --region us-west-2)" \
-  --region us-west-2 --query 'events[*].message' --output text
+    --region "$DEEPINSIGHT_REGION")" \
+  --region "$DEEPINSIGHT_REGION" --query 'events[*].message' --output text
 ```
 
 ### ECS task cycling (starts, registers, then deregisters)
@@ -292,8 +304,8 @@ aws elbv2 describe-target-health \
   --target-group-arn "$(aws elbv2 describe-target-groups \
     --names deep-insight-web-tg \
     --query 'TargetGroups[0].TargetGroupArn' --output text \
-    --region us-west-2)" \
-  --region us-west-2
+    --region "$DEEPINSIGHT_REGION")" \
+  --region "$DEEPINSIGHT_REGION"
 ```
 
 ### Data Q&A: `AccessDeniedException: bedrock:InvokeModel` or `s3:ListBucket`
@@ -333,6 +345,6 @@ bash deploy-cloudfront.sh   # or deploy.sh — forces new image build + push
 Verify Nanum is present inside the container:
 
 ```bash
-docker run --rm 603420654815.dkr.ecr.us-west-2.amazonaws.com/deep-insight-web:latest \
+docker run --rm "${DEEPINSIGHT_ACCOUNT}.dkr.ecr.${DEEPINSIGHT_REGION}.amazonaws.com/deep-insight-web:latest" \
   fc-list | grep -i nanum
 ```
