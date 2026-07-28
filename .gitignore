@@ -24,6 +24,9 @@ ENV/
 # Environment
 .env
 .env.local
+# Timestamped copies made before a redeploy or cleanup; they hold the same
+# account ids, VPC ids and ARNs as .env itself.
+.env.bak*
 
 # OS
 .DS_Store
