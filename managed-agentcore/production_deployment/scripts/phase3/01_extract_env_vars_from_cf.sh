@@ -146,6 +146,7 @@ EXISTING_SUPERVISOR_MODEL_ID=""
 EXISTING_CODER_MODEL_ID=""
 EXISTING_VALIDATOR_MODEL_ID=""
 EXISTING_REPORTER_MODEL_ID=""
+EXISTING_AUDITOR_MODEL_ID=""
 EXISTING_TRACKER_MODEL_ID=""
 if [ -f "$ENV_FILE" ]; then
     EXISTING_WEB_UTILITY_MODEL_ID=$(grep "^WEB_UTILITY_MODEL_ID=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d'=' -f2-)
@@ -156,6 +157,7 @@ if [ -f "$ENV_FILE" ]; then
     EXISTING_CODER_MODEL_ID=$(grep "^CODER_MODEL_ID=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d'=' -f2-)
     EXISTING_VALIDATOR_MODEL_ID=$(grep "^VALIDATOR_MODEL_ID=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d'=' -f2-)
     EXISTING_REPORTER_MODEL_ID=$(grep "^REPORTER_MODEL_ID=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d'=' -f2-)
+    EXISTING_AUDITOR_MODEL_ID=$(grep "^AUDITOR_MODEL_ID=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d'=' -f2-)
     EXISTING_TRACKER_MODEL_ID=$(grep "^TRACKER_MODEL_ID=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d'=' -f2-)
 fi
 
@@ -235,14 +237,15 @@ AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID
 # ============================================================
 # Bedrock Model Configuration
 # ============================================================
-DEFAULT_MODEL_ID=${EXISTING_DEFAULT_MODEL_ID:-global.anthropic.claude-sonnet-4-6}
+DEFAULT_MODEL_ID=${EXISTING_DEFAULT_MODEL_ID:-global.anthropic.claude-sonnet-5}
 COORDINATOR_MODEL_ID=${EXISTING_COORDINATOR_MODEL_ID:-global.anthropic.claude-haiku-4-5-20251001-v1:0}
-PLANNER_MODEL_ID=${EXISTING_PLANNER_MODEL_ID:-global.anthropic.claude-opus-4-6-v1}
-SUPERVISOR_MODEL_ID=${EXISTING_SUPERVISOR_MODEL_ID:-global.anthropic.claude-sonnet-4-6}
-CODER_MODEL_ID=${EXISTING_CODER_MODEL_ID:-global.anthropic.claude-sonnet-4-6}
-VALIDATOR_MODEL_ID=${EXISTING_VALIDATOR_MODEL_ID:-global.anthropic.claude-sonnet-4-6}
-REPORTER_MODEL_ID=${EXISTING_REPORTER_MODEL_ID:-global.anthropic.claude-sonnet-4-6}
-TRACKER_MODEL_ID=${EXISTING_TRACKER_MODEL_ID:-global.anthropic.claude-sonnet-4-6}
+PLANNER_MODEL_ID=${EXISTING_PLANNER_MODEL_ID:-global.anthropic.claude-opus-5}
+SUPERVISOR_MODEL_ID=${EXISTING_SUPERVISOR_MODEL_ID:-global.anthropic.claude-sonnet-5}
+CODER_MODEL_ID=${EXISTING_CODER_MODEL_ID:-global.anthropic.claude-sonnet-5}
+VALIDATOR_MODEL_ID=${EXISTING_VALIDATOR_MODEL_ID:-global.anthropic.claude-sonnet-5}
+REPORTER_MODEL_ID=${EXISTING_REPORTER_MODEL_ID:-global.anthropic.claude-sonnet-5}
+AUDITOR_MODEL_ID=${EXISTING_AUDITOR_MODEL_ID:-global.anthropic.claude-sonnet-5}
+TRACKER_MODEL_ID=${EXISTING_TRACKER_MODEL_ID:-global.anthropic.claude-sonnet-5}
 
 # ============================================================
 # Phase 1: Infrastructure Outputs
@@ -314,7 +317,7 @@ cat >> "$ENV_FILE" <<EOF
 # ============================================================
 # Web UI Utility Model (column-definitions / sample-prompts auto-gen)
 # ============================================================
-WEB_UTILITY_MODEL_ID=${EXISTING_WEB_UTILITY_MODEL_ID:-global.anthropic.claude-sonnet-4-6}
+WEB_UTILITY_MODEL_ID=${EXISTING_WEB_UTILITY_MODEL_ID:-global.anthropic.claude-sonnet-5}
 EOF
 
 # Preserve existing Runtime configuration (if exists)
