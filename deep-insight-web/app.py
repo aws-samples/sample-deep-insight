@@ -203,6 +203,21 @@ def get_sample_report(filename: str):
 # ---------- Feature 1.5: Auto-generate column definitions ----------
 
 
+def _model_text(result: dict) -> str:
+    """Return the text block from a Bedrock Anthropic response.
+
+    The response carries a list of content blocks, and a model that thinks puts a
+    thinking block first -- index 0 is not reliably the text. Models differ in
+    whether they think by default for a given prompt, so select by block type.
+    """
+    text = next(
+        (b["text"] for b in result.get("content", []) if b.get("type") == "text"), ""
+    ).strip()
+    if not text:
+        raise ValueError("model response contained no text block")
+    return text
+
+
 def _parse_csv_preview(raw_bytes: bytes, max_rows: int = 5) -> tuple[list[str], list[list[str]]]:
     """Read CSV header and up to max_rows sample rows from raw bytes."""
     import csv
@@ -274,7 +289,7 @@ CSV data:
         )
 
         result = json.loads(response["body"].read())
-        text_content = result["content"][0]["text"].strip()
+        text_content = _model_text(result)
 
         # Strip markdown code fences if present (```json ... ```)
         if text_content.startswith("```"):
@@ -384,7 +399,7 @@ Column definitions:
         )
 
         result = json.loads(response["body"].read())
-        text_content = result["content"][0]["text"].strip()
+        text_content = _model_text(result)
 
         # Strip markdown code fences if present (mirrors /generate-column-definitions)
         if text_content.startswith("```"):

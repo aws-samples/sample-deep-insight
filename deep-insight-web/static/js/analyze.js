@@ -318,7 +318,10 @@ async function fetchArtifacts(sessionId) {
 async function fetchArtifactsWithRetry(sessionId, retries = 10, delayMs = 15000) {
     appendOutput("[Waiting for reports to upload...]\n", "event-text");
     for (let i = 0; i < retries; i++) {
-        await new Promise(r => setTimeout(r, delayMs));
+        // Poll before sleeping: the artifacts are often already in S3 by the time
+        // the workflow reports complete, and sleeping first made the wait message
+        // sit on screen for delayMs even then. Skip the sleep on the last pass so
+        // a run that never finds them does not stall an extra interval.
         const found = await fetchArtifacts(sessionId);
         if (found) {
             const endTime = new Date();
@@ -326,8 +329,13 @@ async function fetchArtifactsWithRetry(sessionId, retries = 10, delayMs = 15000)
             const fmt = d => d.toLocaleTimeString();
             appendOutput("[Reports ready]\n", "event-done");
             appendOutput("Start: " + fmt(analysisStartTime) + "  End: " + fmt(endTime) + "  Elapsed: " + elapsed + "s (" + (elapsed / 60).toFixed(1) + "min)\n", "event-done");
+            // appendOutput re-adds the streaming indicator on every call, so the
+            // terminal paths here have to clear it or it stays up after the run.
+            removeStreamingIndicator();
             return;
         }
+        if (i < retries - 1) await new Promise(r => setTimeout(r, delayMs));
     }
     appendOutput("[Reports not available yet. Try refreshing later.]\n", "event-error");
+    removeStreamingIndicator();
 }
