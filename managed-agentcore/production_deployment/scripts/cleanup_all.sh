@@ -31,10 +31,22 @@ if [ -z "$REGION" ]; then
     exit 1
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# Resolve the target account BEFORE prompting. Credentials, not any argument,
+# decide which account is wiped, so the operator must see the account id first.
+AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text 2>/dev/null || true)
+if [ -z "$AWS_ACCOUNT_ID" ]; then
+    echo -e "${RED}Error: unable to resolve the AWS account. Check your credentials.${NC}"
+    exit 1
+fi
+
 echo -e "${BLUE}============================================${NC}"
 echo -e "${BLUE}Deep Insight - Complete Cleanup${NC}"
 echo -e "${BLUE}============================================${NC}"
 echo ""
+echo -e "${RED}AWS Account:${NC} $AWS_ACCOUNT_ID"
 echo -e "${YELLOW}Environment:${NC} $ENVIRONMENT"
 echo -e "${YELLOW}Region:${NC} $REGION"
 echo ""
@@ -48,17 +60,15 @@ echo -e "${RED}   - VPC Endpoints${NC}"
 echo -e "${RED}   - S3 Buckets (templates and logs)${NC}"
 echo -e "${RED}   - IAM Roles${NC}"
 echo ""
-read -p "Are you absolutely sure? Type 'DELETE' to confirm: " CONFIRM
 
-if [ "$CONFIRM" != "DELETE" ]; then
+# Typing the account id (not a fixed word) forces the operator to read which
+# account the current credentials point at.
+read -p "Type the target account id ($AWS_ACCOUNT_ID) to confirm: " CONFIRM
+
+if [ "$CONFIRM" != "$AWS_ACCOUNT_ID" ]; then
     echo -e "${YELLOW}Cleanup cancelled${NC}"
     exit 0
 fi
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-
-AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 
 echo ""
 echo -e "${BLUE}============================================${NC}"
@@ -295,27 +305,47 @@ echo -e "${BLUE}Cleanup S3 Buckets${NC}"
 echo -e "${BLUE}============================================${NC}"
 echo ""
 
-# Delete nested templates bucket
-TEMPLATE_BUCKET="deep-insight-templates-${ENVIRONMENT}-${REGION}-${AWS_ACCOUNT_ID}"
-echo "Checking for template bucket: $TEMPLATE_BUCKET"
-if aws s3 ls "s3://$TEMPLATE_BUCKET" --region "$REGION" 2>/dev/null; then
-    echo "Deleting template bucket..."
-    aws s3 rb "s3://$TEMPLATE_BUCKET" --force --region "$REGION" 2>/dev/null || true
-    echo -e "${GREEN}✓${NC} Template bucket deleted"
-else
-    echo "Template bucket not found"
-fi
+# Both buckets this project creates have versioning enabled (phase1/deploy.sh
+# turns it on for the template bucket, and the SessionDataBucket template sets
+# it too). "aws s3 rb --force" only removes current objects, so non-current
+# versions and delete markers keep the bucket alive - they must be removed too.
+delete_bucket() {
+    local bucket="$1" label="$2" payload count
+    if ! aws s3api head-bucket --bucket "$bucket" >/dev/null 2>&1; then
+        echo "$label not found: $bucket"
+        return 0
+    fi
 
-# Delete session data bucket
-SESSION_BUCKET="deep-insight-logs-${REGION}-${AWS_ACCOUNT_ID}"
-echo "Checking for session data bucket: $SESSION_BUCKET"
-if aws s3 ls "s3://$SESSION_BUCKET" --region "$REGION" 2>/dev/null; then
-    echo "Deleting session data bucket..."
-    aws s3 rb "s3://$SESSION_BUCKET" --force --region "$REGION" 2>/dev/null || true
-    echo -e "${GREEN}✓${NC} Session data bucket deleted"
-else
-    echo "Session data bucket not found"
-fi
+    echo "Deleting $label: $bucket"
+    aws s3 rm "s3://$bucket" --recursive --region "$REGION" >/dev/null 2>&1 || true
+
+    payload=$(mktemp)
+    while true; do
+        aws s3api list-object-versions --bucket "$bucket" --max-keys 500 \
+            --region "$REGION" --output json > "$payload" 2>/dev/null || break
+        count=$(jq '[((.Versions // []) + (.DeleteMarkers // []))] | add | length' "$payload" 2>/dev/null || echo 0)
+        if [ "${count:-0}" -eq 0 ]; then
+            break
+        fi
+        jq '{Objects: [((.Versions // []) + (.DeleteMarkers // []))[] | {Key, VersionId}], Quiet: true}' \
+            "$payload" > "${payload}.del" 2>/dev/null || break
+        aws s3api delete-objects --bucket "$bucket" --region "$REGION" \
+            --delete "file://${payload}.del" >/dev/null 2>&1 || break
+    done
+    rm -f "$payload" "${payload}.del"
+
+    aws s3api delete-bucket --bucket "$bucket" --region "$REGION" >/dev/null 2>&1 || true
+
+    # Report what actually happened instead of assuming success.
+    if aws s3api head-bucket --bucket "$bucket" >/dev/null 2>&1; then
+        echo -e "${RED}✗${NC} $label still exists: $bucket - delete it manually"
+    else
+        echo -e "${GREEN}✓${NC} $label deleted"
+    fi
+}
+
+delete_bucket "deep-insight-templates-${ENVIRONMENT}-${REGION}-${AWS_ACCOUNT_ID}" "Template bucket"
+delete_bucket "deep-insight-logs-${REGION}-${AWS_ACCOUNT_ID}" "Session data bucket"
 
 echo ""
 echo -e "${GREEN}============================================${NC}"

@@ -126,25 +126,64 @@ if [ "${1}" = "cleanup" ]; then
         aws elbv2 delete-target-group --target-group-arn "$TG_ARN" --region "$REGION" 2>/dev/null || true
     fi
 
-    echo "Deleting ECS security group..."
+    echo "Deleting web security groups..."
     SG_WEB_ID=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=${SG_WEB_NAME}" "Name=vpc-id,Values=${VPC_ID}" \
         --region "$REGION" --query "SecurityGroups[0].GroupId" --output text 2>/dev/null || true)
-    if [ -n "$SG_WEB_ID" ] && [ "$SG_WEB_ID" != "None" ]; then
-        # Remove VPC endpoint SG rule
-        aws ec2 revoke-security-group-ingress \
-            --group-id "$SG_VPCE" \
-            --protocol tcp --port 443 \
-            --source-group "$SG_WEB_ID" \
-            --region "$REGION" 2>/dev/null || true
-        aws ec2 delete-security-group --group-id "$SG_WEB_ID" --region "$REGION" 2>/dev/null || true
-    fi
-
-    echo "Deleting ALB security group..."
     SG_ALB_WEB_ID=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=${SG_ALB_WEB_NAME}" "Name=vpc-id,Values=${VPC_ID}" \
         --region "$REGION" --query "SecurityGroups[0].GroupId" --output text 2>/dev/null || true)
-    if [ -n "$SG_ALB_WEB_ID" ] && [ "$SG_ALB_WEB_ID" != "None" ]; then
-        aws ec2 delete-security-group --group-id "$SG_ALB_WEB_ID" --region "$REGION" 2>/dev/null || true
-    fi
+
+    # A security group cannot be deleted while another group's rules reference it.
+    # The ALB and ECS groups reference each other, so both directions must be
+    # revoked before either delete can succeed. Rules are revoked by rule id
+    # rather than protocol/port so a mismatched port cannot silently skip one.
+    revoke_sg_refs() {
+        local group_id="$1" referenced_id="$2" rule_id is_egress
+        case "$group_id" in ""|None) return 0 ;; esac
+        case "$referenced_id" in ""|None) return 0 ;; esac
+        aws ec2 describe-security-group-rules --region "$REGION" \
+            --filters "Name=group-id,Values=${group_id}" \
+            --query "SecurityGroupRules[?ReferencedGroupInfo.GroupId=='${referenced_id}'].[SecurityGroupRuleId,IsEgress]" \
+            --output text 2>/dev/null | while read -r rule_id is_egress; do
+                if [ -n "$rule_id" ]; then
+                    if [ "$is_egress" = "True" ]; then
+                        aws ec2 revoke-security-group-egress --group-id "$group_id" \
+                            --security-group-rule-ids "$rule_id" --region "$REGION" >/dev/null 2>&1 || true
+                    else
+                        aws ec2 revoke-security-group-ingress --group-id "$group_id" \
+                            --security-group-rule-ids "$rule_id" --region "$REGION" >/dev/null 2>&1 || true
+                    fi
+                fi
+            done
+    }
+
+    # ENIs left behind by the just-deleted ALB and ECS tasks keep holding these
+    # groups for a short while, so wait for them to detach before deleting.
+    delete_sg() {
+        local group_id="$1" sg_name="$2" attempt eni_count
+        case "$group_id" in ""|None) return 0 ;; esac
+        for attempt in $(seq 1 20); do
+            eni_count=$(aws ec2 describe-network-interfaces --region "$REGION" \
+                --filters "Name=group-id,Values=${group_id}" \
+                --query 'length(NetworkInterfaces)' --output text 2>/dev/null || echo 0)
+            if [ "$eni_count" = "0" ]; then
+                break
+            fi
+            echo "  waiting for ${eni_count} ENI(s) to detach from ${sg_name}..."
+            sleep 15
+        done
+        if aws ec2 delete-security-group --group-id "$group_id" --region "$REGION" >/dev/null 2>&1; then
+            echo "  deleted ${sg_name} (${group_id})"
+        else
+            echo "  WARNING: could not delete ${sg_name} (${group_id}) - delete it manually"
+        fi
+    }
+
+    revoke_sg_refs "$SG_ALB_WEB_ID" "$SG_WEB_ID"
+    revoke_sg_refs "$SG_WEB_ID" "$SG_ALB_WEB_ID"
+    revoke_sg_refs "$SG_VPCE" "$SG_WEB_ID"
+
+    delete_sg "$SG_WEB_ID" "$SG_WEB_NAME"
+    delete_sg "$SG_ALB_WEB_ID" "$SG_ALB_WEB_NAME"
 
     echo "Deleting IAM role and policy..."
     aws iam delete-role-policy --role-name "$TASK_ROLE_NAME" --policy-name "$TASK_ROLE_POLICY_NAME" 2>/dev/null || true
