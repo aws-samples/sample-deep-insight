@@ -14,13 +14,14 @@ set -e
 #   - managed-agentcore/.env populated (from Phase 1+2 deployment)
 #
 # Usage:
-#   bash deploy.sh <VPN_CIDR>    # First deploy (creates ALB SG with VPN CIDR)
-#   bash deploy.sh               # Subsequent deploys (reuses existing ALB SG)
+#   bash deploy.sh <VPN_CIDR>[,<VPN_CIDR>...]   # Ensure ALB SG allows these CIDRs
+#   bash deploy.sh               # Subsequent deploys (leaves ALB SG rules as-is)
 #   bash deploy.sh cleanup       # Remove all resources
 #
 # Examples:
-#   bash deploy.sh "10.0.0.0/8"  # First deploy
-#   bash deploy.sh               # Redeploy (image + task def update only)
+#   bash deploy.sh "10.0.0.0/8"                     # First deploy
+#   bash deploy.sh "10.0.0.0/8,192.168.0.0/16"      # Two VPN ranges
+#   bash deploy.sh                                  # Redeploy (image + task def update only)
 # ============================================================
 
 export AWS_PAGER=""
@@ -231,8 +232,8 @@ SG_ALB_WEB_ID=$(aws ec2 describe-security-groups \
 if [ -z "$SG_ALB_WEB_ID" ] || [ "$SG_ALB_WEB_ID" = "None" ]; then
     if [ -z "$VPN_CIDR" ]; then
         echo "ERROR: VPN CIDR is required on first deploy (ALB SG does not exist yet)."
-        echo "Usage: bash deploy.sh <VPN_CIDR>"
-        echo "Example: bash deploy.sh \"10.0.0.0/8\""
+        echo "Usage: bash deploy.sh <VPN_CIDR>[,<VPN_CIDR>...]"
+        echo "Example: bash deploy.sh \"10.0.0.0/8,192.168.0.0/16\""
         exit 1
     fi
 
@@ -243,20 +244,40 @@ if [ -z "$SG_ALB_WEB_ID" ] || [ "$SG_ALB_WEB_ID" = "None" ]; then
         --region "$REGION" \
         --query "GroupId" --output text)
 
-    aws ec2 authorize-security-group-ingress \
-        --group-id "$SG_ALB_WEB_ID" \
-        --protocol tcp --port 80 \
-        --cidr "$VPN_CIDR" \
-        --region "$REGION" > /dev/null
-
     # Remove default egress-all rule (least privilege)
     aws ec2 revoke-security-group-egress \
         --group-id "$SG_ALB_WEB_ID" \
         --protocol all --cidr 0.0.0.0/0 \
         --region "$REGION" > /dev/null
-    echo "ALB SG: ${SG_ALB_WEB_ID} (inbound: ${VPN_CIDR}:80)"
+    echo "ALB SG: ${SG_ALB_WEB_ID} (created)"
 else
     echo "ALB SG: ${SG_ALB_WEB_ID} (already exists)"
+fi
+
+# Ensure an inbound rule for every CIDR given, on every deploy rather than only
+# at creation. An organization can reach the ALB from more than one VPN range,
+# and those ranges surface over time -- authorizing only at creation meant a
+# second range could not be added without deleting the security group first.
+# Accepts a comma- or space-separated list.
+if [ -n "$VPN_CIDR" ]; then
+    for cidr in ${VPN_CIDR//,/ }; do
+        EXISTING_ALB_INGRESS=$(aws ec2 describe-security-group-rules \
+            --filters "Name=group-id,Values=${SG_ALB_WEB_ID}" \
+            --region "$REGION" \
+            --query "SecurityGroupRules[?IsEgress==\`false\` && FromPort==\`80\` && CidrIpv4=='${cidr}'].SecurityGroupRuleId" \
+            --output text 2>/dev/null || true)
+
+        if [ -z "$EXISTING_ALB_INGRESS" ]; then
+            aws ec2 authorize-security-group-ingress \
+                --group-id "$SG_ALB_WEB_ID" \
+                --protocol tcp --port 80 \
+                --cidr "$cidr" \
+                --region "$REGION" > /dev/null
+            echo "ALB SG: added inbound ${cidr}:80"
+        else
+            echo "ALB SG: inbound ${cidr}:80 already exists"
+        fi
+    done
 fi
 
 # 3b: ECS Security Group (allow traffic from web ALB SG)
