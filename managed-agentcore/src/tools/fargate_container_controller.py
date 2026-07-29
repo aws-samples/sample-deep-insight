@@ -118,7 +118,15 @@ class SessionBasedFargateManager:
     CODE_EXECUTION_TIMEOUT = 600       # Timeout for code execution (seconds) - Increased for long-running tasks like DOCX generation
     SESSION_COMPLETE_TIMEOUT = 600      # Timeout for session completion signal (seconds) - upload runs synchronously on the container
     STATUS_CHECK_TIMEOUT = 5           # Timeout for session status check (seconds)
-    S3_UPLOAD_WAIT = 600                # Wait time for S3 upload completion (seconds)
+    # Settle pause before teardown. There is nothing left to wait for: the
+    # container uploads synchronously and only answers 200 once S3 holds the
+    # objects, and S3 is read-after-write consistent. A few seconds absorbs
+    # clock skew between the two sides.
+    # This was 600s, a leftover from when the upload was asynchronous. Nothing
+    # caught it because the teardown never survived the sleep -- the runtime was
+    # reclaimed first, so the ALB deregistration and StopTask that follow it
+    # never ran at all, leaving a dead target registered after every run.
+    S3_UPLOAD_WAIT = 5                 # Settle pause before ALB deregister + StopTask (seconds)
     CONTAINER_PORT = 8080              # Container HTTP port
 
     # Session completion retry (guards against transient "Connection reset by
