@@ -25,7 +25,7 @@ Web UI for Deep Insight — a FastAPI server that connects to the Managed AgentC
 
 | Requirement | Details | Check Command |
 |-------------|---------|---------------|
-| Managed AgentCore | Phase 1–4 deployed ([guide](../managed-agentcore/README.md)) | `grep RUNTIME_ARN ../managed-agentcore/.env` |
+| Managed AgentCore | Phase 1–3 deployed ([guide](../managed-agentcore/README.md)) | `cat ../managed-agentcore/.env` |
 | Docker | 20.x+ | `docker --version` |
 
 > **Important**: The Web UI requires a running Managed AgentCore deployment. The `managed-agentcore/.env` file must exist with `RUNTIME_ARN`, `AWS_REGION`, and `S3_BUCKET_NAME` configured.
@@ -43,30 +43,19 @@ Two deployment methods are available:
 | **HTTPS** | No (HTTP via VPN) | Yes (CloudFront terminates TLS) |
 | **Best for** | Internal teams on VPN | External demos, customer PoCs |
 
-> **Run these from the repository root**, once per terminal session — the paths below are relative to it, and the `cd deep-insight-web` in each option follows afterwards. They are Deep Insight variables, not ones the AWS CLI reads on its own, so the commands below pass them explicitly. Deriving them from `managed-agentcore/.env` keeps the commands in step with whatever you actually deployed (e.g. `us-west-2`, `us-east-1`, `ap-northeast-2`):
->
-> ```bash
-> # from the repository root
-> export DEEPINSIGHT_REGION=$(grep '^AWS_REGION=' managed-agentcore/.env | cut -d= -f2)
-> export DEEPINSIGHT_ACCOUNT=$(grep '^AWS_ACCOUNT_ID=' managed-agentcore/.env | cut -d= -f2)
-> ```
-
 ### Option A: VPN CIDR (direct ALB)
 
 ```bash
 cd deep-insight-web
 
-# Deploy with VPN CIDR restriction -- the network range allowed to reach the ALB.
-# e.g. "10.0.0.0/8" for a corporate VPN range, or "203.0.113.42/32" for a single
-# address. To find the address you are connecting from:
-#   curl -s https://checkip.amazonaws.com
+# Deploy with VPN CIDR restriction
 bash deploy.sh "<YOUR_VPN_CIDR>"
 
 # Wait for service to stabilize
 aws ecs wait services-stable \
   --cluster deep-insight-cluster-prod \
   --services deep-insight-web-service \
-  --region "$DEEPINSIGHT_REGION"
+  --region us-west-2
 
 # Clean up
 bash deploy.sh cleanup
@@ -84,7 +73,7 @@ bash deploy-cloudfront.sh
 aws ecs wait services-stable \
   --cluster deep-insight-cluster-prod \
   --services deep-insight-web-service \
-  --region "$DEEPINSIGHT_REGION"
+  --region us-west-2
 
 # (Optional) Add Cognito authentication
 bash add-cognito-auth.sh <CLOUDFRONT_DISTRIBUTION_ID>
@@ -138,98 +127,27 @@ Both scripts handle all infrastructure in a single run:
 
 ---
 
-## Data Q&A
+## Two Workflows: Outer Loop & Inner Loop
 
-Conversational exploration on the uploaded CSV. Complements the long-form
-analysis flow (`/analyze`, 15–30 min) with fast, iterative questions.
+Deep Insight runs two distinct workflows on the same uploaded data:
 
-Enabled automatically after upload — a "Data Q&A" tab appears next to "Analysis"
-at the top of the page.
+| | Outer loop — **Analysis** | Inner loop — **Data Q&A** |
+|---|---|---|
+| **Endpoint** | `POST /analyze` | `POST /chat` |
+| **Latency** | 15–30 min, runs to completion | Seconds, iterative dialogue |
+| **Path** | AgentCore Runtime (multi-agent) | In-container DuckDB Text2SQL |
+| **Output** | Complete DOCX report | Inline table / chart per question |
+| **User posture** | "Hand it off and wait" | "Poke at it directly" |
 
-### How it works
+The **outer loop** is the long-form multi-agent analysis that produces a full
+report. The **inner loop** (Data Q&A) is conversational, second-scale
+exploration on the uploaded CSV — for the questions you have while (or before)
+deciding what the full report should cover. It's enabled automatically after
+upload, as a "Data Q&A" tab next to "Analysis".
 
-```
-Upload CSV --> DuckDB in-memory table (read_csv_auto)
-                    |
-User question --> Strands Agent + Claude Sonnet 5
-                    |
-                    |-- query_sql(sql)                     -> table (SSE)
-                    |-- create_chart(sql, matplotlib_code) -> PNG (SSE)
-                    |-- describe_schema
-                    v
-             Answer streamed back with SQL block + table/chart
-                    |
-User edits SQL --> POST /sql/execute (re-run without LLM, ms latency)
-```
-
-### Highlights
-
-- **Text2SQL with transparency**: Generated SQL is always shown in the chat bubble; collapsible by default
-- **Inline SQL editor**: `▶ 실행` re-runs as-is, `✎ 편집` opens editor; no extra LLM call needed
-- **Light-themed charts**: matplotlib with Korean font (NanumGothic), bold titles, click to zoom
-- **Dynamic starter questions**: From schema heuristics — no LLM call on welcome load
-- **Follow-up chips**: LLM inlines `[SUGGESTIONS]q1|q2|q3[/SUGGESTIONS]` at response end
-- **Column-definitions aware**: Uses `column_definitions.json` (optional, auto-generated) in the system prompt for domain-accurate SQL
-- **Insight-first Response Rules**: System prompt forces concrete numeric headlines and bans filler phrases ("경향이 있습니다" etc.)
-
-### Prompt caching
-
-System prompt + tool specs + conversation history are cached via Bedrock
-ephemeral cache using `SystemContentBlock + cachePoint` and
-`CacheConfig(strategy="auto")`. TTL is 5 minutes, which is a Bedrock
-platform default (not configurable); this matches the typical inter-turn
-gap in an interactive Q&A session.
-
-Measured 5-turn session in production:
-
-| Turn | total input | cache_read | hit% |
-|---|---|---|---|
-| 1 | 5,938 | 2,653 | 44.7% |
-| 2 | 12,243 | 10,822 | 88.4% |
-| 3 | 10,963 | 9,760 | 89.0% |
-| 4 | 13,048 | 12,112 | 92.8% |
-| 5 | 15,281 | 14,038 | 91.9% |
-
-Per-turn input cost drops to ~10% on cache hits; session-level savings
-typically 50%+ depending on conversation length (write premium grows with
-history).
-
-Toggle via env var: `ENABLE_PROMPT_CACHE=0` disables caching (useful for
-local debugging).
-
-### Environment variables
-
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `CHAT_MODEL_ID` | `global.anthropic.claude-sonnet-5` | Chat agent LLM |
-| `ENABLE_PROMPT_CACHE` | `1` | Set `0` to disable prompt caching |
-| `WEB_UTILITY_MODEL_ID` | `global.anthropic.claude-sonnet-5` | Column/prompt auto-generation utility |
-
-### Observing prompt caching hits
-
-```bash
-# Live tail of per-turn usage metrics
-aws logs tail /ecs/deep-insight-web --region "$DEEPINSIGHT_REGION" --follow | grep "chat usage"
-```
-
-Each chat turn logs `input=… output=… cache_read=… cache_write=…` (values are
-cumulative within a task; diff consecutive lines for per-turn deltas).
-
-### Local development
-
-Chat runs without S3 if `S3_BUCKET_NAME` is unset — uploaded CSVs go to
-`/tmp/deep-insight-uploads/{upload_id}/` instead. Only Bedrock credentials
-(`AWS_PROFILE` or env vars) are required.
-
-```bash
-cd deep-insight-web
-pip install -r requirements.txt
-# boto3 reads AWS_REGION directly. Any region works -- CHAT_MODEL_ID is a
-# global. inference profile -- so this falls back when DEEPINSIGHT_REGION is unset.
-export AWS_REGION="${DEEPINSIGHT_REGION:-us-west-2}"
-python app.py
-# localhost:8080 → upload CSV → "Data Q&A" tab → ask
-```
+> 📖 **[Data Q&A (inner loop) — full guide →](./DATA_QA.md)** How it works,
+> Text2SQL transparency, prompt caching measurements, env vars, local
+> development, and inner-loop-specific troubleshooting.
 
 ---
 
@@ -259,7 +177,7 @@ Browser --> CloudFront (HTTPS) --> Lambda@Edge (Cognito auth)
 - **AgentCore Native Protocol**: `boto3.invoke_agent_runtime()` with SSE streaming
 - **SSE keepalive**: Sends `: keepalive` comments every 30s to prevent proxy idle timeout
 - **HITL flow**: `plan_review_request` SSE event -> browser modal -> `POST /feedback` -> S3 -> AgentCore polls
-- **Data Q&A flow**: `/chat` invokes a Strands Agent (Claude Sonnet 5) with three tools — `describe_schema`, `query_sql`, `create_chart`. DuckDB runs in-container against the uploaded CSV; **AgentCore is not on this path**, so chat responses return in seconds rather than minutes.
+- **Data Q&A flow**: `/chat` invokes a Strands Agent (Claude Sonnet 4.6) with three tools — `describe_schema`, `query_sql`, `create_chart`. DuckDB runs in-container against the uploaded CSV; **AgentCore is not on this path**, so chat responses return in seconds rather than minutes.
 - **Env vars**: Reuses `managed-agentcore/.env` (no separate `.env.example`)
 
 ---
@@ -292,8 +210,8 @@ aws logs get-log-events --log-group-name /ecs/deep-insight-web \
     --log-group-name /ecs/deep-insight-web \
     --order-by LastEventTime --descending \
     --query 'logStreams[0].logStreamName' --output text \
-    --region "$DEEPINSIGHT_REGION")" \
-  --region "$DEEPINSIGHT_REGION" --query 'events[*].message' --output text
+    --region us-west-2)" \
+  --region us-west-2 --query 'events[*].message' --output text
 ```
 
 ### ECS task cycling (starts, registers, then deregisters)
@@ -305,47 +223,10 @@ aws elbv2 describe-target-health \
   --target-group-arn "$(aws elbv2 describe-target-groups \
     --names deep-insight-web-tg \
     --query 'TargetGroups[0].TargetGroupArn' --output text \
-    --region "$DEEPINSIGHT_REGION")" \
-  --region "$DEEPINSIGHT_REGION"
+    --region us-west-2)" \
+  --region us-west-2
 ```
 
-### Data Q&A: `AccessDeniedException: bedrock:InvokeModel` or `s3:ListBucket`
-
-The task role's inline policy is out of sync — happens when `deploy-cloudfront.sh`
-or `deploy.sh` adds new Sids but the role already existed (older script
-versions only created policy on role creation).
-
-Re-run the deploy script; it now always refreshes the inline policy:
-
-```bash
-bash deploy-cloudfront.sh   # or deploy.sh
-```
-
-Verify the policy contains the expected Sids:
-
-```bash
-aws iam get-role-policy \
-  --role-name deep-insight-web-task-role \
-  --policy-name deep-insight-web-task-policy \
-  --query 'PolicyDocument.Statement[].Sid'
-# Expected: ["S3Upload", "S3UploadsList", "S3Feedback",
-#            "S3ArtifactsList", "S3ArtifactsGet",
-#            "AgentCoreInvoke", "BedrockInvokeClaude"]
-```
-
-### Data Q&A: chart labels render as □□□
-
-The container is missing Korean fonts. The Dockerfile installs `fontconfig +
-fonts-nanum` before the `USER appuser` switch. If an older image was pushed
-before this change, rebuild and redeploy:
-
-```bash
-bash deploy-cloudfront.sh   # or deploy.sh — forces new image build + push
-```
-
-Verify Nanum is present inside the container:
-
-```bash
-docker run --rm "${DEEPINSIGHT_ACCOUNT}.dkr.ecr.${DEEPINSIGHT_REGION}.amazonaws.com/deep-insight-web:latest" \
-  fc-list | grep -i nanum
-```
+> **Data Q&A (inner loop) issues** — `AccessDeniedException` on
+> `bedrock:InvokeModel`/`s3:ListBucket`, or chart labels rendering as □□□ — are
+> covered in [DATA_QA.md → Troubleshooting](./DATA_QA.md#troubleshooting).
