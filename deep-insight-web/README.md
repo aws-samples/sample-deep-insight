@@ -43,11 +43,12 @@ Two deployment methods are available:
 | **HTTPS** | No (HTTP via VPN) | Yes (CloudFront terminates TLS) |
 | **Best for** | Internal teams on VPN | External demos, customer PoCs |
 
-> Set these once per terminal session. They are Deep Insight variables, not ones the AWS CLI reads on its own, so the commands below pass them explicitly. Deriving them from `managed-agentcore/.env` keeps the commands in step with whatever you actually deployed (e.g. `us-west-2`, `us-east-1`, `ap-northeast-2`):
+> **Run these from the repository root**, once per terminal session — the paths below are relative to it, and the `cd deep-insight-web` in each option follows afterwards. They are Deep Insight variables, not ones the AWS CLI reads on its own, so the commands below pass them explicitly. Deriving them from `managed-agentcore/.env` keeps the commands in step with whatever you actually deployed (e.g. `us-west-2`, `us-east-1`, `ap-northeast-2`):
 >
 > ```bash
-> export DEEPINSIGHT_REGION=$(grep '^AWS_REGION=' ../managed-agentcore/.env | cut -d= -f2)
-> export DEEPINSIGHT_ACCOUNT=$(grep '^AWS_ACCOUNT_ID=' ../managed-agentcore/.env | cut -d= -f2)
+> # from the repository root
+> export DEEPINSIGHT_REGION=$(grep '^AWS_REGION=' managed-agentcore/.env | cut -d= -f2)
+> export DEEPINSIGHT_ACCOUNT=$(grep '^AWS_ACCOUNT_ID=' managed-agentcore/.env | cut -d= -f2)
 > ```
 
 ### Option A: VPN CIDR (direct ALB)

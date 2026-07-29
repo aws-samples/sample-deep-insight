@@ -42,10 +42,19 @@ cd setup/ && ./create-uv-env.sh deep-insight 3.12 && cd ..
 # 3. Configure AWS credentials (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html)
 aws configure
 
-# 4. Copy environment file
+# 4. Verify Bedrock model access — each should print ACTIVE
+for m in global.anthropic.claude-sonnet-5 \
+         global.anthropic.claude-opus-5 \
+         global.anthropic.claude-haiku-4-5-20251001-v1:0; do
+  printf "%s " "$m"
+  aws bedrock get-inference-profile --inference-profile-identifier "$m" \
+    --query status --output text
+done
+
+# 5. Copy environment file
 cp .env.example .env
 
-# 5. Run analysis
+# 6. Run analysis
 uv run python main.py --user_query "Analyze from sales and marketing perspectives, generate charts and extract insights. The analysis target is the './data/moon_market/kr/' directory. moon-market-fresh-food-sales.csv is the data file, and column_definitions.json contains column descriptions."
 ```
 

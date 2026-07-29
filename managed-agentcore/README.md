@@ -50,13 +50,28 @@ Four-phase deployment:
 
 **Quick commands**:
 ```bash
-# Phase 1 + 2: Infrastructure (Automated), Any region is possible (i.e. us-west-2)
+# Set the deployment region once — every command below uses it
+export DEEPINSIGHT_REGION=us-west-2   # e.g. us-west-2, us-east-1, ap-northeast-2
+
+# Back up an existing .env — Phase 3 regenerates it (run from managed-agentcore/)
+[ -f .env ] && cp .env .env.bak
+
+# Verify Bedrock model access in the target region — each should print ACTIVE
+for m in global.anthropic.claude-sonnet-5 \
+         global.anthropic.claude-opus-5 \
+         global.anthropic.claude-haiku-4-5-20251001-v1:0; do
+  printf "%s " "$m"
+  aws bedrock get-inference-profile --inference-profile-identifier "$m" \
+    --region "$DEEPINSIGHT_REGION" --query status --output text
+done
+
+# Phase 1 + 2: Infrastructure (Automated)
 cd production_deployment/scripts
-./deploy_phase1_phase2.sh prod us-west-2
+./deploy_phase1_phase2.sh prod "$DEEPINSIGHT_REGION"
 
 # Phase 3: Environment Setup
 cd phase3
-./01_extract_env_vars_from_cf.sh prod us-west-2  # Specify your deployment region
+./01_extract_env_vars_from_cf.sh prod "$DEEPINSIGHT_REGION"
 ./02_create_uv_env.sh deep-insight
 ./03_patch_dockerignore.sh
 
@@ -208,14 +223,18 @@ Supports deployment to **9 AWS regions**:
 
 Due to ENI (Elastic Network Interface) release timing, **cleanup requires two steps**:
 
+> In a new shell, set `DEEPINSIGHT_REGION` again. After a deployment the region is
+> recorded in `.env`, so it can be read back rather than retyped:
+> `export DEEPINSIGHT_REGION=$(grep '^AWS_REGION=' .env | cut -d= -f2)`
+
 ```bash
 # Step 1: Delete Phase 4 (AgentCore Runtime)
 cd production_deployment/scripts/phase4
-./cleanup.sh prod --region us-west-2
+./cleanup.sh prod --region "$DEEPINSIGHT_REGION"
 
 # Step 2: Wait ~6 hours for ENI release, then delete remaining phases
 cd production_deployment/scripts
-./cleanup_all.sh prod us-west-2
+./cleanup_all.sh prod "$DEEPINSIGHT_REGION"
 ```
 
 **⚠️ Why two steps?** AgentCore Runtime creates ENIs in your VPC. These ENIs take ~6 hours to be released after runtime deletion. Phase 1/2 cleanup will fail if ENIs are still attached.
@@ -233,7 +252,7 @@ cd production_deployment/scripts
 ```bash
 # Phase 4: Delete Runtime
 cd production_deployment/scripts/phase4
-./cleanup.sh prod --region us-west-2
+./cleanup.sh prod --region "$DEEPINSIGHT_REGION"
 
 # ⏳ Wait ~6 hours for ENI release before proceeding
 
@@ -244,11 +263,11 @@ rm -rf production_deployment/scripts/phase3/.venv production_deployment/scripts/
 
 # Phase 2: Delete Fargate resources
 cd production_deployment/scripts/phase2
-./cleanup.sh prod --region us-west-2
+./cleanup.sh prod --region "$DEEPINSIGHT_REGION"
 
 # Phase 1: Delete VPC infrastructure
 cd production_deployment/scripts/phase1
-./cleanup.sh prod --region us-west-2
+./cleanup.sh prod --region "$DEEPINSIGHT_REGION"
 ```
 
 ---

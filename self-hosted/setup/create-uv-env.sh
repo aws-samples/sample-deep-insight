@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # UV 환경 설정 및 Jupyter 커널 등록 스크립트 (pyproject.toml 기반)
-# 사용법: ./setup_uv_jupyter.sh <환경이름> [python버전]
+# 사용법: ./create-uv-env.sh <환경이름> [python버전]
 
 set -e  # 에러 발생 시 스크립트 중단
 
