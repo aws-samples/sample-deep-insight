@@ -31,7 +31,10 @@ macOS (arm64), Amazon EC2 (arm64)
 | Python | 3.12+ | Phase 4 | `python3 --version` |
 
 ```bash
-# Quick verification (run from managed-agentcore/)
+# from the repository root
+cd managed-agentcore
+
+# Quick verification
 ./production_deployment/scripts/check_prerequisites.sh
 
 # Auto-install missing tools
