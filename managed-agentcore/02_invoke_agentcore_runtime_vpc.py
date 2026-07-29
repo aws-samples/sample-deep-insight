@@ -378,6 +378,14 @@ def main():
                     elapsed = event_data.get("elapsed_seconds", 0)
                     timeout = event_data.get("timeout_seconds", 300)
                     print(f"{YELLOW}⏳ Waiting for plan feedback... ({elapsed}s / {timeout}s){NC}", end='\r', flush=True)
+                elif event_type == "workflow_complete":
+                    # The runtime marks this as its final event but does not close the
+                    # SSE stream afterwards, so iter_lines() would keep blocking until
+                    # read_timeout (1 hour) and then raise -- reporting a fully
+                    # successful run as a failure. Stop reading once the final event
+                    # arrives instead of waiting for a close that never comes.
+                    strands_utils.process_event_for_display(event_data)
+                    break
                 else:
                     # Process normal events
                     strands_utils.process_event_for_display(event_data)

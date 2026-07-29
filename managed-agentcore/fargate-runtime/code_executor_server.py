@@ -869,9 +869,34 @@ def sync_to_s3(s3_client, bucket_name, s3_key_prefix, local_path):
             "files_count": 0
         }
 
+MAX_SESSION_LIFETIME = 3600   # Hard cap for a session that never completes
+POST_COMPLETE_GRACE = 60      # Linger after a successful upload before exiting
+COMPLETION_POLL_INTERVAL = 5  # How often to check whether the session finished
+
+
 def auto_shutdown():
-    """Auto-shutdown after 1 hour"""
-    time.sleep(3600)  # 1 hour
+    """Terminate the task once the session is done, or after a hard 1-hour cap.
+
+    Two exits, deliberately asymmetric:
+
+    - Session completed: is_complete is set only after the S3 upload succeeds,
+      so the artifacts are safe and nothing else needs this container --
+      /health has been returning 503 since completion, so the ALB already
+      drained it and it can no longer serve anyone. Waiting out the full cap
+      would just bill idle Fargate time (a 15-minute analysis used to hold the
+      task for another 45 minutes).
+    - Session not completed: keep the cap. A failed upload leaves is_complete
+      False on purpose so the report can still be salvaged here; exiting early
+      would discard work that only exists inside this container.
+    """
+    deadline = time.time() + MAX_SESSION_LIFETIME
+
+    while time.time() < deadline:
+        if session_manager.is_complete:
+            print(f"✅ Session complete - shutting down in {POST_COMPLETE_GRACE}s", flush=True)
+            time.sleep(POST_COMPLETE_GRACE)
+            os._exit(0)
+        time.sleep(COMPLETION_POLL_INTERVAL)
 
     print("⏰ Auto-shutdown timeout reached", flush=True)
 
