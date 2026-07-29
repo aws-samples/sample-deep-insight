@@ -648,6 +648,10 @@ async def agentcore_streaming_execution(
 
     context_token = set_session_context(AGENTCORE_SESSION_NAME)
 
+    # The final event is held back until teardown finishes -- see Step 5 below.
+    final_event = None
+    cleanup_done = False
+
     try:
         # Step 3: Setup observability tracing
         tracer = trace.get_tracer(
@@ -672,6 +676,19 @@ async def agentcore_streaming_execution(
                 # Stream small/medium events as keepalives
                 if event.get("type") in STREAM_EVENT_TYPES:
                     streamed_count += 1
+                    if event.get("type") == "workflow_complete":
+                        # Hold the final event back. Yielding it ends the HTTP
+                        # response, and AgentCore starts reclaiming the runtime
+                        # from that moment -- everything after the last yield is
+                        # racing that reclaim. Session teardown reliably lost:
+                        # the S3 upload finished, but the ALB deregistration and
+                        # StopTask that follow it never ran, leaving a dead IP
+                        # registered in the target group after every run.
+                        # Releasing this event only after teardown keeps the
+                        # stream open across cleanup, and gives the client a
+                        # completion signal that is actually true.
+                        final_event = _enrich_event(event, streamed_count, request_id)
+                        continue
                     yield _enrich_event(event, streamed_count, request_id)
             print(f"📊 Total events: {event_count}, Streamed: {streamed_count}")
 
@@ -691,9 +708,22 @@ async def agentcore_streaming_execution(
                 "total-events": event_count
             })
 
+            # Step 8: Tear down the Fargate session while the response stream is
+            # still open. Must come after _save_token_usage_to_s3, which needs
+            # the session that cleanup drops.
+            _cleanup_request_session(request_id)
+            cleanup_done = True
+
+            # Step 9: Teardown is finished -- release the final event and end
+            # the response.
+            if final_event is not None:
+                yield final_event
+
     finally:
-        # Step 8: Clean up resources
-        _cleanup_request_session(request_id)
+        # Cleanup normally ran in Step 8 above; this covers the paths that never
+        # reached it (an exception mid-stream, or the client disconnecting).
+        if not cleanup_done:
+            _cleanup_request_session(request_id)
         otel_context.detach(context_token)
 
 if __name__ == "__main__":
