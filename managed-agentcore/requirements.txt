@@ -50,7 +50,7 @@ langchain==1.0.7
 # Security pins — verified container versions (PR #86 container-side verification, 2026-06-05)
 # These are transitive deps that float under pip; pinned here for reproducibility
 # after a full E2E PASS on this exact set. Dependabot will still propose bumps.
-cryptography==48.0.0
+cryptography==50.0.0
 lxml==6.1.1
 pyasn1==0.6.3
 urllib3==2.7.0
