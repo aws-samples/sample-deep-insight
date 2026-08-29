@@ -63,7 +63,7 @@ mistune==3.2.1
 pygments==2.20.0
 python-multipart==0.0.32
 langchain-core==1.4.0
-langsmith==0.8.9
+langsmith==0.8.18
 aiohttp==3.14.0
 pyjwt==2.13.0
 langgraph==1.0.10
