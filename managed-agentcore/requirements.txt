@@ -52,7 +52,7 @@ langchain==1.0.7
 # after a full E2E PASS on this exact set. Dependabot will still propose bumps.
 cryptography==48.0.0
 lxml==6.1.1
-pyasn1==0.6.3
+pyasn1==0.6.4
 urllib3==2.7.0
 idna==3.18
 requests==2.34.2
