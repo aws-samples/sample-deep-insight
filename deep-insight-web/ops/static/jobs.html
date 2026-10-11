@@ -6,6 +6,8 @@
     <title>Deep Insight — Admin Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/admin/static/trace-view.css">
+    <link rel="stylesheet" href="/admin/static/files-view.css">
     <style>
         :root {
             --bg-deep: #0d0f13;
@@ -136,6 +138,88 @@
         .status-start { color: var(--amber); background: var(--amber-bg); }
         .stale-badge { color: var(--red); font-size: 0.75rem; font-weight: 600; margin-left: 0.4rem; }
         .query-cell { max-width: 300px; overflow: hidden; text-overflow: ellipsis; }
+        th.num, td.num { text-align: right; }
+        .io-cell {
+            max-width: 340px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        .io-cell.muted { color: var(--text-muted); font-style: italic; }
+        tr.job-row.selected td { background: var(--accent-glow); }
+
+        /* Side panel: trace of the clicked job */
+        .drawer-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 20;
+        }
+        .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: min(1240px, 88vw);
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-card);
+            border-left: 1px solid var(--border);
+            box-shadow: -12px 0 32px rgba(0, 0, 0, 0.35);
+            transform: translateX(100%);
+            transition: transform 0.22s ease;
+            z-index: 21;
+        }
+        .drawer.open { transform: none; }
+        .drawer-resize {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -4px;
+            width: 8px;
+            cursor: col-resize;
+            z-index: 1;
+        }
+        .drawer-resize:hover, .drawer-resize.dragging { background: rgba(74, 124, 255, 0.35); }
+        body.resizing { cursor: col-resize; user-select: none; }
+        .drawer-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.4rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .drawer-title { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; flex: 1; }
+        .drawer-title-main { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; }
+        .drawer-query { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); font-size: 0.85rem; }
+        .drawer-meta { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); }
+        .drawer-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+        .drawer-body { flex: 1; min-height: 0; padding: 1rem 1.4rem; overflow: hidden; }
+        .drawer-files { overflow-y: auto; }
+        .drawer-tabs { display: flex; gap: 0.2rem; padding: 0 1.4rem; border-bottom: 1px solid var(--border); }
+        .drawer-tab {
+            padding: 0.6rem 0.9rem;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-muted);
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .drawer-tab:hover { color: var(--text-secondary); }
+        .drawer-tab.active { color: var(--text-primary); border-bottom-color: var(--accent); }
+        .drawer-tab .tab-count { margin-left: 0.3rem; color: var(--text-muted); font-weight: 500; }
+        .drawer-empty { color: var(--text-muted); padding: 2rem 0; }
+        .drawer-error { color: var(--red); font-size: 0.8rem; word-break: break-word; }
+        .btn-accent { color: var(--accent); border-color: rgba(74, 124, 255, 0.4); }
         .mono { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted); }
         .empty-state { text-align: center; color: var(--text-muted); padding: 3rem; font-size: 1rem; }
     </style>
@@ -176,13 +260,12 @@
         <table>
             <thead>
                 <tr>
+                    <th data-i18n="th_timestamp">Timestamp</th>
                     <th data-i18n="th_status">Status</th>
-                    <th data-i18n="th_query">Query</th>
-                    <th data-i18n="th_started">Started</th>
-                    <th data-i18n="th_duration">Duration</th>
-                    <th data-i18n="th_tokens">Tokens</th>
-                    <th data-i18n="th_cache_hit">Cache Hit</th>
-                    <th data-i18n="th_report">Report</th>
+                    <th data-i18n="th_input">Input</th>
+                    <th data-i18n="th_output">Output</th>
+                    <th class="num" data-i18n="th_latency">Latency</th>
+                    <th class="num" data-i18n="th_tokens">Tokens</th>
                 </tr>
             </thead>
             <tbody id="jobsBody">
@@ -190,7 +273,18 @@
         </table>
     </div>
 
+    <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+    <aside class="drawer" id="drawer" aria-hidden="true">
+        <div class="drawer-resize" id="drawerResize" title="Drag to resize"></div>
+        <div class="drawer-header" id="drawerHeader"></div>
+        <div class="drawer-tabs" id="drawerTabs"></div>
+        <div class="drawer-body" id="drawerBody"></div>
+        <div class="drawer-body drawer-files" id="drawerFiles" hidden></div>
+    </aside>
+
     <script src="/admin/static/admin-i18n.js"></script>
+    <script src="/admin/static/trace-view.js"></script>
+    <script src="/admin/static/files-view.js"></script>
     <script>
         var allJobs = [];
         var currentFilter = '';
@@ -247,7 +341,7 @@
             if (filtered.length === 0) {
                 var tr = document.createElement('tr');
                 var td = document.createElement('td');
-                td.colSpan = 7;
+                td.colSpan = 6;
                 td.className = 'empty-state';
                 td.textContent = t('jobs_empty');
                 tr.appendChild(td);
@@ -257,12 +351,12 @@
 
             filtered.forEach(function(job) {
                 var tr = document.createElement('tr');
-                tr.className = 'job-row';
-                tr.addEventListener('click', function() {
-                    window.location.href = '/admin/dashboard/' + encodeURIComponent(job.job_id);
-                });
+                tr.className = 'job-row' + (job.job_id === drawerJobId ? ' selected' : '');
+                tr.dataset.jobId = job.job_id;
+                tr.addEventListener('click', function() { openDrawer(job.job_id); });
 
-                // Status cell
+                tr.appendChild(createCell(formatTime(job.started_at), 'mono'));
+
                 var statusTd = document.createElement('td');
                 var statusSpan = document.createElement('span');
                 statusSpan.className = 'status status-' + job.status.toLowerCase();
@@ -276,35 +370,228 @@
                 }
                 tr.appendChild(statusTd);
 
-                // Query cell
-                var queryTd = document.createElement('td');
-                queryTd.className = 'query-cell';
-                queryTd.textContent = (job.user_query || '').substring(0, 60);
-                queryTd.title = job.user_query || '';
-                tr.appendChild(queryTd);
+                var input = createCell(TraceView.preview(job.user_query || '-', 160), 'io-cell');
+                input.title = job.user_query || '';
+                tr.appendChild(input);
 
-                // Started
-                tr.appendChild(createCell(formatTime(job.started_at), 'mono'));
+                var out = outputText(job);
+                var output = createCell(out.text, 'io-cell' + (out.muted ? ' muted' : ''));
+                output.title = job.output_preview || '';
+                tr.appendChild(output);
 
-                // Duration
-                var duration = job.elapsed_seconds
+                var latency = job.elapsed_seconds
                     ? formatDuration(job.elapsed_seconds)
                     : (job.status === 'Start' ? t('jobs_running') : '-');
-                tr.appendChild(createCell(duration, 'mono'));
-
-                // Tokens
-                tr.appendChild(createCell(formatTokens(job.total_tokens), 'mono'));
-
-                // Cache hit
-                var cacheHit = job.cache_hit_rate != null ? job.cache_hit_rate + '%' : '-';
-                tr.appendChild(createCell(cacheHit, 'mono'));
-
-                // Report
-                tr.appendChild(createCell(job.report_filename || '-', 'mono'));
+                tr.appendChild(createCell(latency, 'mono num'));
+                tr.appendChild(createCell(formatTokens(job.total_tokens), 'mono num'));
 
                 tbody.appendChild(tr);
             });
         }
+
+        // Output column: the run's final answer, else what is known about it
+        function outputText(job) {
+            if (job.output_preview) return { text: TraceView.preview(job.output_preview, 160) };
+            if (job.status === 'Start') return { text: t('jobs_running'), muted: true };
+            if (job.status === 'Failed') return { text: job.error_message ? TraceView.preview(job.error_message, 160) : '-', muted: true };
+            return { text: job.report_filename || '-', muted: true };
+        }
+
+        // ---------- Side panel ----------
+
+        var drawerJobId = null;
+        var drawerTimer = null;
+        var drawerState = {};
+        var drawerTab = 'trace';
+        var drawerFiles = null;
+
+        function renderDrawerTabs() {
+            var tabs = document.getElementById('drawerTabs');
+            tabs.replaceChildren();
+            [['trace', t('drawer_tab_trace')], ['files', t('drawer_tab_files')]].forEach(function(tab) {
+                var btn = TraceView.el('button', 'drawer-tab' + (drawerTab === tab[0] ? ' active' : ''), tab[1]);
+                if (tab[0] === 'files' && drawerFiles && !drawerFiles.error) {
+                    btn.appendChild(TraceView.el('span', 'tab-count', String((drawerFiles.artifacts || []).length)));
+                }
+                btn.onclick = function() { drawerTab = tab[0]; showDrawerTab(); };
+                tabs.appendChild(btn);
+            });
+        }
+
+        function showDrawerTab() {
+            renderDrawerTabs();
+            document.getElementById('drawerBody').hidden = drawerTab !== 'trace';
+            document.getElementById('drawerFiles').hidden = drawerTab !== 'files';
+        }
+
+        async function loadDrawerFiles() {
+            var jobId = drawerJobId;
+            var files = await FilesView.fetchFiles(jobId);
+            if (jobId !== drawerJobId) return;
+            drawerFiles = files;
+            var box = document.getElementById('drawerFiles');
+            box.replaceChildren();
+            FilesView.render(box, jobId, findJob(jobId), files);
+            renderDrawerTabs();
+            renderDrawerHeader();
+        }
+
+        function findJob(id) {
+            return allJobs.find(function(j) { return j.job_id === id; });
+        }
+
+        // The open job is in the URL (?job=<id>), so a link opens it again
+        function setJobParam(jobId) {
+            var url = new URL(window.location.href);
+            if (jobId) url.searchParams.set('job', jobId); else url.searchParams.delete('job');
+            history.replaceState(null, '', url);
+        }
+
+        function openDrawer(jobId) {
+            if (drawerJobId !== jobId) { drawerState = {}; drawerFiles = null; }
+            drawerJobId = jobId;
+            setJobParam(jobId);
+            document.getElementById('drawer').classList.add('open');
+            document.getElementById('drawer').setAttribute('aria-hidden', 'false');
+            document.getElementById('drawerBackdrop').classList.add('open');
+            document.querySelectorAll('tr.job-row').forEach(function(r) {
+                r.classList.toggle('selected', r.dataset.jobId === jobId);
+            });
+            renderDrawerHeader();
+            var body = document.getElementById('drawerBody');
+            body.replaceChildren(TraceView.el('div', 'drawer-empty', t('trace_loading')));
+            document.getElementById('drawerFiles').replaceChildren(TraceView.el('div', 'drawer-empty', t('files_loading')));
+            showDrawerTab();
+            loadDrawerTrace();
+            loadDrawerFiles();
+        }
+
+        function closeDrawer() {
+            drawerJobId = null;
+            setJobParam(null);
+            if (drawerTimer) { clearTimeout(drawerTimer); drawerTimer = null; }
+            document.getElementById('drawer').classList.remove('open');
+            document.getElementById('drawer').setAttribute('aria-hidden', 'true');
+            document.getElementById('drawerBackdrop').classList.remove('open');
+            document.querySelectorAll('tr.job-row.selected').forEach(function(r) { r.classList.remove('selected'); });
+        }
+
+        function renderDrawerHeader() {
+            var job = findJob(drawerJobId);
+            var header = document.getElementById('drawerHeader');
+            header.replaceChildren();
+            if (!job) return;
+            var title = TraceView.el('div', 'drawer-title');
+            var main = TraceView.el('div', 'drawer-title-main');
+            var status = TraceView.el('span', 'status status-' + job.status.toLowerCase(), t('status_' + job.status.toLowerCase()));
+            main.appendChild(status);
+            main.appendChild(TraceView.el('span', null, formatTime(job.started_at)));
+            title.appendChild(main);
+            title.appendChild(TraceView.el('div', 'drawer-query', job.user_query || ''));
+            var meta = TraceView.el('div', 'drawer-meta');
+            meta.appendChild(TraceView.el('span', null, t('th_latency') + ' ' + (job.elapsed_seconds ? formatDuration(job.elapsed_seconds) : '-')));
+            meta.appendChild(TraceView.el('span', null, t('th_tokens') + ' ' + formatTokens(job.total_tokens)));
+            meta.appendChild(TraceView.el('span', null, job.job_id));
+            title.appendChild(meta);
+            if (job.status === 'Failed' && job.error_message) {
+                title.appendChild(TraceView.el('div', 'drawer-error', job.error_message));
+            }
+            header.appendChild(title);
+
+            var actions = TraceView.el('div', 'drawer-actions');
+            var report = drawerFiles && !drawerFiles.error ? FilesView.reportName(job, drawerFiles) : job.report_filename;
+            if (report) {
+                var dl = TraceView.el('a', 'btn-sm btn-accent', t('files_download_report'));
+                dl.href = FilesView.fileUrl(job.job_id, 'artifacts', report, true);
+                actions.appendChild(dl);
+            }
+            var close = TraceView.el('button', 'btn-sm', '✕');
+            close.title = t('drawer_close');
+            close.onclick = closeDrawer;
+            actions.appendChild(close);
+            header.appendChild(actions);
+        }
+
+        async function loadDrawerTrace() {
+            var jobId = drawerJobId;
+            if (drawerTimer) { clearTimeout(drawerTimer); drawerTimer = null; }
+            var data;
+            try {
+                var res = await fetch('/admin/api/jobs/' + encodeURIComponent(jobId) + '/trace');
+                data = await res.json();
+            } catch (e) {
+                data = { success: false };
+            }
+            if (jobId !== drawerJobId) return;  // closed or switched meanwhile
+            var job = findJob(jobId);
+            var body = document.getElementById('drawerBody');
+            body.replaceChildren();
+            if (!data.success) {
+                body.appendChild(TraceView.el('div', 'drawer-empty', t('trace_load_error')));
+            } else if (!data.available) {
+                body.appendChild(TraceView.el('div', 'drawer-empty', t('trace_unavailable')));
+            } else {
+                TraceView.render(body, data.records, { job: job, running: job && job.status === 'Start', state: drawerState });
+            }
+            if (job && job.status === 'Start') drawerTimer = setTimeout(refreshDrawer, 15000);
+        }
+
+        // A running job's panel: fetch just that job (the 30 s list refresh
+        // covers the rest), its trace, and its files once it has finished
+        async function refreshDrawer() {
+            var jobId = drawerJobId;
+            if (!jobId) return;
+            var before = findJob(jobId);
+            try {
+                var res = await fetch('/admin/api/jobs/' + encodeURIComponent(jobId));
+                var data = await res.json();
+                if (data.success) {
+                    var i = allJobs.findIndex(function(j) { return j.job_id === jobId; });
+                    if (i >= 0) allJobs[i] = data.job; else allJobs.push(data.job);
+                }
+            } catch (e) {
+                // keep the last known record; the next round tries again
+            }
+            if (jobId !== drawerJobId) return;
+            var after = findJob(jobId);
+            renderDrawerHeader();
+            loadDrawerTrace();
+            if (after && before && after.status !== before.status) {
+                loadDrawerFiles();
+                renderJobs();
+            }
+        }
+
+        // Drag the panel's left edge to resize it; the width is kept for next time
+        (function() {
+            var drawer = document.getElementById('drawer');
+            var handle = document.getElementById('drawerResize');
+            var saved = parseInt(localStorage.getItem('opsDrawerWidth'), 10);
+            if (saved) drawer.style.width = Math.min(saved, window.innerWidth - 60) + 'px';
+            handle.addEventListener('pointerdown', function(e) {
+                e.preventDefault();
+                handle.setPointerCapture(e.pointerId);
+                handle.classList.add('dragging');
+                document.body.classList.add('resizing');
+                drawer.style.transition = 'none';
+            });
+            handle.addEventListener('pointermove', function(e) {
+                if (!handle.classList.contains('dragging')) return;
+                var width = Math.max(520, Math.min(window.innerWidth - 60, window.innerWidth - e.clientX));
+                drawer.style.width = width + 'px';
+            });
+            handle.addEventListener('pointerup', function(e) {
+                handle.releasePointerCapture(e.pointerId);
+                handle.classList.remove('dragging');
+                document.body.classList.remove('resizing');
+                drawer.style.transition = '';
+                localStorage.setItem('opsDrawerWidth', parseInt(drawer.style.width, 10));
+            });
+        })();
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && drawerJobId) closeDrawer();
+        });
 
         function setFilter(btn) {
             document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -338,10 +625,14 @@
         // Re-render table when language changes
         function onLangChange() {
             renderJobs();
+            if (drawerJobId) { renderDrawerHeader(); showDrawerTab(); loadDrawerTrace(); loadDrawerFiles(); }
         }
 
         applyAdminLang();
-        fetchJobs();
+        fetchJobs().then(function() {
+            var linked = new URL(window.location.href).searchParams.get('job');
+            if (linked && findJob(linked)) openDrawer(linked);
+        });
         setInterval(fetchJobs, 30000);
     </script>
 </body>

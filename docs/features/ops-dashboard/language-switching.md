@@ -24,7 +24,8 @@
 ops/static/admin-i18n.js     — Translation dictionary + language toggle logic
 ops/static/login.html        — Login page (uses i18n)
 ops/static/jobs.html         — Job list dashboard (uses i18n)
-ops/static/job.html          — Job detail page (uses i18n)
+ops/static/trace-view.js     — Trace view in the job list's side panel (uses i18n)
+ops/static/files-view.js     — Files view in the side panel (uses i18n)
 ops/admin_router.py          — Serves JS files via /admin/static/{filename}
 ```
 
@@ -117,18 +118,18 @@ applyAdminLang()
 
 ### Why localStorage?
 
-The admin dashboard has 3 separate HTML pages (login, jobs, job detail). When the user navigates between them, a new page loads and all JavaScript state is lost.
+The admin dashboard has 2 separate HTML pages (login, jobs). When the user navigates between them, a new page loads and all JavaScript state is lost.
 
 Without localStorage:
 ```
-jobs.html (Korean) → click job → job.html loads → resets to Korean (default)
-                                                   ↑ user's English choice lost
+login.html (switch to English) → sign in → jobs.html loads → resets to Korean (default)
+                                                            ↑ user's English choice lost
 ```
 
 With localStorage:
 ```
-jobs.html (switch to English) → localStorage saves 'en'
-  → click job → job.html loads → reads 'en' from localStorage → English
+login.html (switch to English) → localStorage saves 'en'
+  → sign in → jobs.html loads → reads 'en' from localStorage → English
 ```
 
 ---
@@ -140,8 +141,7 @@ Each page optionally defines an `onLangChange()` function that `applyAdminLang()
 | Page | onLangChange | What It Does |
 |------|-------------|--------------|
 | `login.html` | Not defined | No dynamic content to re-render (all labels are static `data-i18n`) |
-| `jobs.html` | `renderJobs()` | Re-renders the entire table body with translated status badges, "running...", "STALE", and empty state text |
-| `job.html` | `renderJob(currentJob)` | Re-renders all detail rows with translated labels ("Started" → "시작 시각") |
+| `jobs.html` | `renderJobs()`, side panel reload | Re-renders the table (status badges, "running...", "STALE", empty state) and, if open, the side panel's header, tabs, trace and files |
 
 ---
 
@@ -163,7 +163,7 @@ FileResponse(file_path)
 
 **Why not serve HTML files through this route?**
 
-The HTML pages (jobs.html, job.html) are served through auth-protected routes (`/admin/dashboard`, `/admin/dashboard/{job_id}`) that require a valid JWT cookie. Serving them via `/admin/static/` would bypass authentication. Although the HTML files are just templates (no sensitive data — the APIs are separately protected), restricting the static route to `.js` and `.css` follows the principle of least privilege.
+The HTML pages (login.html, jobs.html) are served through routes (`/admin/login`, auth-protected `/admin/dashboard`) that require a valid JWT cookie. Serving them via `/admin/static/` would bypass authentication. Although the HTML files are just templates (no sensitive data — the APIs are separately protected), restricting the static route to `.js` and `.css` follows the principle of least privilege.
 
 ---
 

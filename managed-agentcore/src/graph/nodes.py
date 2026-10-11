@@ -306,6 +306,25 @@ async def planner_node(task=None, **kwargs):
         return response
 
 
+def _emit_plan_review_result(decision: str, revision_count: int, feedback: str = "", waited_seconds: int = 0):
+    """Record how a plan review ended, for the ops dashboard trace.
+
+    Not streamed to the client (not in STREAM_EVENT_TYPES); the runtime's
+    event log picks it up from the queue.
+
+    decision: approved | revision_requested | auto_approved_timeout | auto_approved_max_revisions
+    """
+    put_event({
+        "type": "plan_review_result",
+        "event_type": "plan_review_result",
+        "agent_name": "plan_reviewer",
+        "decision": decision,
+        "feedback": feedback,
+        "revision_count": revision_count,
+        "waited_seconds": waited_seconds,
+    })
+
+
 async def plan_reviewer_node(task=None, **kwargs):
     """
     Plan reviewer node that allows user to review and provide feedback on the generated plan.
@@ -351,6 +370,7 @@ async def plan_reviewer_node(task=None, **kwargs):
                 "message": f"Plan auto-approved (max {MAX_PLAN_REVISIONS} revisions reached)"
             })
             add_span_event(span, "auto_approve", {"reason": "max_revisions_reached", "revision_count": revision_count})
+            _emit_plan_review_result("auto_approved_max_revisions", revision_count)
             log_node_complete("PlanReviewer")
             return {"text": "Plan auto-approved after max revisions", "approved": True}
 
@@ -410,12 +430,15 @@ async def plan_reviewer_node(task=None, **kwargs):
                 "message": f"Plan auto-approved (timeout after {PLAN_FEEDBACK_TIMEOUT}s)"
             })
             add_span_event(span, "timeout_auto_approve", {"timeout_seconds": PLAN_FEEDBACK_TIMEOUT})
+            _emit_plan_review_result("auto_approved_timeout", revision_count,
+                                     waited_seconds=int(time.time() - start_time))
             log_node_complete("PlanReviewer")
             return {"text": "Plan auto-approved after timeout", "approved": True}
 
         # Process feedback
         is_approved = feedback_data.get('approved', True)
         user_feedback = feedback_data.get('feedback', '')
+        waited_seconds = int(time.time() - start_time)
 
         if is_approved:
             # User approved the plan
@@ -425,6 +448,7 @@ async def plan_reviewer_node(task=None, **kwargs):
             })
             logger.info(f"{Colors.GREEN}✅ Plan approved by user{Colors.END}")
             add_span_event(span, "plan_approved", {"approved": True})
+            _emit_plan_review_result("approved", revision_count, user_feedback, waited_seconds)
             log_node_complete("PlanReviewer")
             return {"text": "Plan approved", "approved": True}
         else:
@@ -438,6 +462,7 @@ async def plan_reviewer_node(task=None, **kwargs):
             })
             logger.info(f"{Colors.YELLOW}📝 Plan revision requested. Feedback: {user_feedback}{Colors.END}")
             add_span_event(span, "revision_requested", {"feedback": user_feedback, "new_revision_count": revision_count + 1})
+            _emit_plan_review_result("revision_requested", revision_count, user_feedback, waited_seconds)
             log_node_complete("PlanReviewer")
             return {"text": f"Revision requested: {user_feedback}", "approved": False, "feedback": user_feedback}
 

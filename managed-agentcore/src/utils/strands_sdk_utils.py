@@ -361,6 +361,16 @@ class strands_utils():
                 raise
 
     @staticmethod
+    def _message_text(message) -> str:
+        """Text of an agent message: a string, or content blocks (cache points skipped)."""
+        if isinstance(message, str):
+            return message
+        if isinstance(message, list):
+            return "\n".join(str(block.get("text")) for block in message
+                             if isinstance(block, dict) and block.get("text"))
+        return str(message)
+
+    @staticmethod
     async def process_streaming_response_yield(agent, message, agent_name="coordinator", source=None):
         """
         Process streaming response from agent with event conversion and global queue management
@@ -378,50 +388,73 @@ class strands_utils():
 
         session_id = "ABC"
 
-        # Use retry helper for robust streaming
-        async for event in strands_utils._retry_agent_streaming(agent, message):
-            # Convert Strands events to AgentCore format
-            agentcore_event = await strands_utils._convert_to_agentcore_event(event, agent_name, session_id, source)
-            if agentcore_event:
-                # Put event in global queue for unified processing
-                put_event(agentcore_event)
-                yield agentcore_event
-
-        # After streaming completes, extract usage info from agent's metrics (에이전트 응답이 종료된 이후 최종적으로 한번만 보낸다)
-        # Reference: https://strandsagents.com/latest/documentation/docs/user-guide/observability-evaluation/metrics/
+        # Mark the invocation's start and end for the ops trace (queue only, not
+        # yielded: callers only look at text and usage events)
+        put_event({
+            "timestamp": datetime.now().isoformat(),
+            "agent_name": agent_name,
+            "source": source or f"{agent_name}_node",
+            "type": "agent_start",
+            "event_type": "agent_start",
+            "input": strands_utils._message_text(message),
+        })
+        error = None
         try:
-            usage_info = None
+            # Use retry helper for robust streaming
+            async for event in strands_utils._retry_agent_streaming(agent, message):
+                # Convert Strands events to AgentCore format
+                agentcore_event = await strands_utils._convert_to_agentcore_event(event, agent_name, session_id, source)
+                if agentcore_event:
+                    # Put event in global queue for unified processing
+                    put_event(agentcore_event)
+                    yield agentcore_event
 
-            # Strands SDK stores token usage in agent.event_loop_metrics.accumulated_usage
-            if hasattr(agent, 'event_loop_metrics'):
-                metrics = agent.event_loop_metrics
-                if hasattr(metrics, 'accumulated_usage'):
-                    usage_info = metrics.accumulated_usage
+            # After streaming completes, extract usage info from agent's metrics (sent once, when the agent's response has ended)
+            # Reference: https://strandsagents.com/latest/documentation/docs/user-guide/observability-evaluation/metrics/
+            try:
+                usage_info = None
 
-            # If we found usage info, create and yield the event
-            if usage_info:
-                # Extract model ID from agent
-                model_id = agent.model.config.get('model_id', 'unknown')
+                # Strands SDK stores token usage in agent.event_loop_metrics.accumulated_usage
+                if hasattr(agent, 'event_loop_metrics'):
+                    metrics = agent.event_loop_metrics
+                    if hasattr(metrics, 'accumulated_usage'):
+                        usage_info = metrics.accumulated_usage
 
-                usage_event = {
-                    "timestamp": datetime.now().isoformat(),
-                    "session_id": session_id,
-                    "agent_name": agent_name,
-                    "model_id": model_id,
-                    "source": source or f"{agent_name}_node",
-                    "type": "agent_usage_stream",
-                    "event_type": "usage_metadata",
-                    "input_tokens": usage_info.get("inputTokens", 0),
-                    "output_tokens": usage_info.get("outputTokens", 0),
-                    "total_tokens": usage_info.get("totalTokens", 0),
-                    "cache_read_input_tokens": usage_info.get("cacheReadInputTokens", 0),
-                    "cache_write_input_tokens": usage_info.get("cacheWriteInputTokens", 0)
-                }
-                put_event(usage_event)
-                yield usage_event
+                # If we found usage info, create and yield the event
+                if usage_info:
+                    # Extract model ID from agent
+                    model_id = agent.model.config.get('model_id', 'unknown')
 
-        except Exception as e:
-            logger.warning(f"Could not extract usage info from {agent_name}: {e}")
+                    usage_event = {
+                        "timestamp": datetime.now().isoformat(),
+                        "session_id": session_id,
+                        "agent_name": agent_name,
+                        "model_id": model_id,
+                        "source": source or f"{agent_name}_node",
+                        "type": "agent_usage_stream",
+                        "event_type": "usage_metadata",
+                        "input_tokens": usage_info.get("inputTokens", 0),
+                        "output_tokens": usage_info.get("outputTokens", 0),
+                        "total_tokens": usage_info.get("totalTokens", 0),
+                        "cache_read_input_tokens": usage_info.get("cacheReadInputTokens", 0),
+                        "cache_write_input_tokens": usage_info.get("cacheWriteInputTokens", 0)
+                    }
+                    put_event(usage_event)
+                    yield usage_event
+
+            except Exception as e:
+                logger.warning(f"Could not extract usage info from {agent_name}: {e}")
+        except BaseException as e:
+            error = f"{type(e).__name__}: {e}"
+            raise
+        finally:
+            put_event({
+                "timestamp": datetime.now().isoformat(),
+                "agent_name": agent_name,
+                "type": "agent_end",
+                "event_type": "agent_end",
+                "error": error,
+            })
 
     # 툴 사용 ID와 툴 이름 매핑을 위한 클래스 변수
     _tool_use_mapping = {}
