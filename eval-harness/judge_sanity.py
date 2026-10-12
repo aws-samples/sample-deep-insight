@@ -16,7 +16,7 @@ Takes one real report and derives variants with a known right answer:
 plus one pairwise check: full vs no_strategies, judged in both orders, must
 prefer full. Paid: about 6 pointwise + 2 pairwise calls (see judge.yaml).
 
-    python judge_sanity.py eval_results/baseline/<run> --scenario moon_market_kr
+    python judge_sanity.py eval_results/baseline/<run> --scenario jungle_market
 """
 import argparse
 import json
@@ -37,10 +37,10 @@ SUMMARY_RE = re.compile(r"요약|summary", re.I)
 # Headings that end the strategy section in Deep Insight reports.
 AFTER_STRATEGY_RE = re.compile(r"리스크|한계|결론|데이터 출처|참고|risk|limitation|conclusion|reference", re.I)
 
-NUMBERS_ONLY = """Moon Market 매출 분석 보고서
-총 매출은 16,431,923원 [1]입니다.
-총 주문 건수는 836건 [2]입니다.
-평균 주문 금액은 19,655원 [3]입니다."""
+NUMBERS_ONLY = """Jungle Market 매출 분석 보고서
+총 매출은 $110,270.26 [1]입니다.
+총 주문 건수는 2,987건 [2]입니다.
+평균 주문 금액은 $36.92 [3]입니다."""
 
 WRONG_QUESTION = """직원 근태 분석 보고서
 2025년 5월 직원 120명의 평균 출근 시각은 오전 8시 52분이며, 지각률은 4.2%로 전월 대비 0.8%p 감소했습니다.

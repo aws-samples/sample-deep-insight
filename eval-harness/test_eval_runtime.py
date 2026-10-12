@@ -116,6 +116,6 @@ def test_unknown_preset(env):
 def test_run_eval_refuses_the_users_runtime(monkeypatch, tmp_path):
     import run_eval
     monkeypatch.setattr(run_eval, "dotenv_values", lambda p: {"RUNTIME_ARN": "arn:users"} if "managed-agentcore" in str(p) else {})
-    monkeypatch.setattr(sys, "argv", ["run_eval.py", "--scenario", "moon_market_kr", "--tag", "t", "--runtime-arn", "arn:users"])
+    monkeypatch.setattr(sys, "argv", ["run_eval.py", "--scenario", "jungle_market", "--tag", "t", "--runtime-arn", "arn:users"])
     with pytest.raises(SystemExit):
         run_eval.main()

@@ -23,7 +23,7 @@ def pair_reply(overall, crit="A"):
 
 @pytest.fixture
 def scenario():
-    return load_scenario("moon_market_kr")
+    return load_scenario("jungle_market")
 
 
 def test_strict_schema_closes_every_object():
@@ -133,7 +133,7 @@ def test_pairwise_summary_and_noise_pairing(tmp_path):
     assert s["win_rate"] == pytest.approx((1 + 0.5 + 0 + 0.5) / 4)
     assert (s["wins"], s["ties"], s["losses"], s["both_bad"]) == (1, 1, 1, 1)
     assert s["position_consistency"] == 0.75 and s["judge_cost_usd"] == 2.0
-    assert "| moon_market_kr | 4 | 50% |" in pairwise.table({"candidate": "c", "baseline": "b", "judge_model": "m", "scenarios": {"moon_market_kr": s}})
+    assert "| jungle_market | 4 | 50% |" in pairwise.table({"candidate": "c", "baseline": "b", "judge_model": "m", "scenarios": {"jungle_market": s}})
 
 
 def test_calibration_agreement(tmp_path, scenario):

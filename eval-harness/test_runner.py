@@ -32,7 +32,10 @@ class FakeS3:
     """Serves one session folder built by make_run, records feedback uploads."""
     def __init__(self, session_dir, session_id):
         self.session_dir, self.session_id = Path(session_dir), session_id
-        self.feedback = []
+        self.feedback, self.uploads = [], []
+
+    def upload_file(self, path, bucket, key):
+        self.uploads.append((Path(path).name, bucket, key))
 
     def put_object(self, Bucket, Key, Body, **_):
         self.feedback.append((Bucket, Key, json.loads(Body)))
@@ -71,13 +74,17 @@ def run(tmp_path, scenario_name, n_reviews, reported_session="sess-1", fallback=
     args = types.SimpleNamespace(tag="t", runtime_arn="arn:x", bucket="bucket-x", timeout=60, judge_ctx=None,
                                  allow_session_fallback=fallback)
     run_dir = tmp_path / "eval_results" / "t" / "r1"
-    meta, scores = run_eval.run_once(args, scenario_name, load_scenario(scenario_name), run_dir, (agentcore, s3))
+    scenario = load_scenario(scenario_name)
+    scenario["data_directory"] = run_eval.upload_data(s3, args.bucket, scenario_name, scenario["upload"])
+    meta, scores = run_eval.run_once(args, scenario_name, scenario, run_dir, (agentcore, s3))
     return meta, scores, s3, agentcore, run_dir
 
 
 def test_auto_approve_and_scoring(tmp_path):
-    meta, scores, s3, agentcore, run_dir = run(tmp_path, "moon_market_kr_simple", n_reviews=1)
-    assert agentcore.payload["data_directory"] == "./data/moon_market/kr/"
+    meta, scores, s3, agentcore, run_dir = run(tmp_path, "jungle_market_simple", n_reviews=1)
+    assert agentcore.payload["data_directory"] == "s3://bucket-x/uploads/eval-jungle-market-simple/"
+    # only the listed files go up: the answer sheet next to the CSV never reaches the agents
+    assert sorted(name for name, *_ in s3.uploads) == ["column_definitions.json", "jungle-market-sales.csv"]
     assert s3.feedback == [("bucket-x", "deep-insight/feedback/req-1.json", s3.feedback[0][2])]
     assert s3.feedback[0][2]["approved"] is True
     assert meta["status"] == "completed" and meta["session_id"] == "sess-1"
@@ -93,31 +100,31 @@ def test_auto_approve_and_scoring(tmp_path):
 
 
 def test_scripted_revision_then_approve(tmp_path):
-    meta, _, s3, _, _ = run(tmp_path, "moon_market_kr_revision", n_reviews=2)
+    meta, _, s3, _, _ = run(tmp_path, "jungle_market_revision", n_reviews=2)
     first, second = (f[2] for f in s3.feedback)
-    assert first["approved"] is False and "연령대" in first["feedback"]
+    assert first["approved"] is False and "도시별" in first["feedback"]
     assert second["approved"] is True
     assert meta["plan_revisions"] == 1
 
 
 def test_unreported_session_is_not_guessed(tmp_path):
     """No session_id from the runtime → fail as session_unresolved (used to grade the newest S3 session)."""
-    meta, scores, *_ = run(tmp_path, "moon_market_kr_simple", n_reviews=1, reported_session="")
+    meta, scores, *_ = run(tmp_path, "jungle_market_simple", n_reviews=1, reported_session="")
     assert meta["status"] == "session_unresolved" and meta["artifact_files"] == 0
     assert not scores["core_pass"] and scores["core_fail_reasons"][0] == "status"
 
 
 def test_session_fallback_is_opt_in_and_flagged(tmp_path):
-    meta, scores, *_ = run(tmp_path, "moon_market_kr_simple", n_reviews=1, reported_session="", fallback=True)
+    meta, scores, *_ = run(tmp_path, "jungle_market_simple", n_reviews=1, reported_session="", fallback=True)
     assert meta["session_id"] == "sess-1" and meta["session_id_source"] == "s3_newest_after_start"
     assert "another run" in scores["warning"]
 
 
 def _tag(tmp_path, tag, rows, configs=None):
     for i, scores in enumerate(rows):
-        d = tmp_path / tag / f"moon_market_kr-x-{i}"
+        d = tmp_path / tag / f"jungle_market-x-{i}"
         d.mkdir(parents=True)
-        (d / "run.json").write_text(json.dumps({"scenario": "moon_market_kr"}))
+        (d / "run.json").write_text(json.dumps({"scenario": "jungle_market"}))
         (d / "scores.json").write_text(json.dumps({"scores": scores}))
         if configs:
             (d / "config.json").write_text(json.dumps(configs[i]))
@@ -125,7 +132,7 @@ def _tag(tmp_path, tag, rows, configs=None):
 
 
 def _table(tmp_path, tags):
-    return compare.table("moon_market_kr", tags, {t: [s for _, s in compare.load_runs(t)] for t in tags})
+    return compare.table("jungle_market", tags, {t: [s for _, s in compare.load_runs(t)] for t in tags})
 
 
 def _row(text, label):
@@ -169,10 +176,10 @@ def test_mixed_configs_within_a_tag_are_flagged(tmp_path):
 def test_compare_warns_when_evaluators_differ(tmp_path):
     base = _tag(tmp_path, "base", [{"facts_found": 12, "factcheck_version": "factcheck-v1|m|key=a"} for _ in range(2)])
     cand = _tag(tmp_path, "cand", [{"facts_found": 12, "factcheck_version": "factcheck-v2|m|key=a"} for _ in range(2)])
-    text = compare.table("moon_market_kr", [base, cand], {t: [s for _, s in compare.load_runs(t)] for t in (base, cand)})
+    text = compare.table("jungle_market", [base, cand], {t: [s for _, s in compare.load_runs(t)] for t in (base, cand)})
     assert "2 evaluator versions" in text and "Re-grade" in text
     same = _tag(tmp_path, "same", [{"facts_found": 12, "factcheck_version": "factcheck-v1|m|key=a"} for _ in range(2)])
-    text = compare.table("moon_market_kr", [base, same], {t: [s for _, s in compare.load_runs(t)] for t in (base, same)})
+    text = compare.table("jungle_market", [base, same], {t: [s for _, s in compare.load_runs(t)] for t in (base, same)})
     assert "evaluator versions" not in text
 
 

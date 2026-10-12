@@ -103,13 +103,13 @@ def tag_dir(tmp_path, monkeypatch):
     monkeypatch.setattr(ls, "HERE", tmp_path)
     monkeypatch.setattr(calibrate, "HERE", tmp_path)
     tag = tmp_path / "eval_results" / "baseline"
-    run = make_run.make_clean_run(tag / "moon_market_kr_simple-20261002-000000-1")
-    (run / "run.json").write_text(json.dumps({"scenario": "moon_market_kr_simple", "status": "completed",
+    run = make_run.make_clean_run(tag / "jungle_market_simple-20261002-000000-1")
+    (run / "run.json").write_text(json.dumps({"scenario": "jungle_market_simple", "status": "completed",
                                               "started_at": "2026-10-02T06:00:00+00:00", "agent_span_s": {"coder": 12.0},
                                               "agent_calls": {"coder": 1}}))
     (run / "config.json").write_text(json.dumps({"git_sha": "abcdef1234567", "runtime_version": "5", "models": {"CODER_MODEL_ID": "global.anthropic.claude-sonnet-5"}}))
     (run / "usage.json").write_text(json.dumps({"by_agent": {"coder": {"model_id": "global.anthropic.claude-sonnet-5", "input": 1000, "output": 100, "cache_read": 0, "cache_write": 0}}}))
-    sc = load_scenario("moon_market_kr_simple")
+    sc = load_scenario("jungle_market_simple")
     verdict = {"requirements": [{"requirement_id": r["id"], "status": "met", "evidence": "quoted"} for r in sc["requirements"]],
                "criteria": [{"criterion": c, "score": 4, "justification": f"why {c}"} for c in ls.CRITERIA], "summary": "ok"}
     (run / "judge.json").write_text(json.dumps({"verdict": verdict, "metrics": {}}))
@@ -117,7 +117,7 @@ def tag_dir(tmp_path, monkeypatch):
     (run / "scores.json").write_text(json.dumps(result))
     (tag / "pairwise_vs_baseline.json").write_text(json.dumps({
         "baseline": "baseline", "candidate": "baseline", "judge_model": "m",
-        "scenarios": {"moon_market_kr_simple": {"pairs": 3, "win_rate": 0.5, "wins": 1, "ties": 1, "losses": 1, "both_bad": 0, "position_consistency": 2 / 3}}}))
+        "scenarios": {"jungle_market_simple": {"pairs": 3, "win_rate": 0.5, "wins": 1, "ties": 1, "losses": 1, "both_bad": 0, "position_consistency": 2 / 3}}}))
     return tag, run
 
 
@@ -125,7 +125,7 @@ def sync(tag, fake, queue=False, manifest=None):
     lf = ls.Langfuse("http://lf", "pk", "sk", session=fake)
     configs = ls.ensure_score_configs(lf, ["total_revenue", "segments"])
     run = next(tag.glob("*/run.json")).parent
-    ls.ensure_dataset_items(lf, {"moon_market_kr_simple": load_scenario("moon_market_kr_simple")}, {"moon_market_kr_simple": ls.repeat_of(run)})
+    ls.ensure_dataset_items(lf, {"jungle_market_simple": load_scenario("jungle_market_simple")}, {"jungle_market_simple": ls.repeat_of(run)})
     events, trace_id, scenario, _, started = ls.run_events(run, "baseline", configs)
     lf.ingest(events)
     ls.reset_dataset_run(lf, "baseline", ls.pairwise_names(tag))
@@ -145,8 +145,8 @@ def test_trace_has_report_scores_and_agents(tag_dir):
     fake = FakeLangfuse()
     _, trace_id, _ = sync(tag, fake)
     trace = next(e["body"] for e in fake.events if e["type"] == "trace-create")
-    assert trace["id"] == trace_id and "16,431,923원" in trace["output"]       # the report is readable in the UI
-    assert trace["tags"] == ["baseline", "moon_market_kr_simple", "PASS"] and trace["release"] == "abcdef123456"
+    assert trace["id"] == trace_id and "$110,270.26" in trace["output"]       # the report is readable in the UI
+    assert trace["tags"] == ["baseline", "jungle_market_simple", "PASS"] and trace["release"] == "abcdef123456"
     gen = next(e["body"] for e in fake.events if e["type"] == "generation-create")
     assert gen["name"] == "coder" and gen["usageDetails"]["input"] == 1000 and gen["costDetails"]["total"] > 0
     scores = {e["body"]["name"]: e["body"] for e in fake.events if e["type"] == "score-create"}
@@ -169,11 +169,11 @@ def test_dataset_item_run_item_and_pairwise(tag_dir):
     tag, _ = tag_dir
     fake = FakeLangfuse()
     _, trace_id, n_pw = sync(tag, fake)
-    item = fake.items[ls.item_id("moon_market_kr_simple", 1)]
+    item = fake.items[ls.item_id("jungle_market_simple", 1)]
     assert item["input"]["repeat"] == 1
     assert item["expectedOutput"]["pass"]["required_facts"] == ["total_revenue", "order_count", "avg_order_value"]
     answers = {a["id"]: a for a in item["expectedOutput"]["answer_key"]}
-    assert answers["total_revenue"]["value"] == 16431923.0
+    assert answers["total_revenue"]["value"] == 110270.26
     ranking = next(a for a in answers.values() if a["kind"] == "ranking")   # rankings carry their order, not a value
     assert ranking["order"] and "value" not in ranking
     assert fake.run_items == [{"runName": "baseline", "runDescription": "git abcdef1", "datasetItemId": item["id"], "traceId": trace_id,

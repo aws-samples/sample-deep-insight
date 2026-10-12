@@ -150,5 +150,5 @@ def test_scenarios_point_to_existing_files():
     for name, s in scenarios.items():
         assert (here / s["csv"]).is_file(), name
         assert (here / s["answer_key"]).is_file(), name
-        local = AGENTCORE / s["data_directory"]
-        assert local.is_dir(), f"{name}: {s['data_directory']} not in managed-agentcore/"
+        assert s["upload"] and all((here / f).is_file() for f in s["upload"]), name
+        assert not any("ground_truth" in f for f in s["upload"]), f"{name}: the answer sheet must not reach the agents"

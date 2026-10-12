@@ -1,6 +1,6 @@
 """Compare eval results between tags (e.g. baseline vs a candidate change).
 
-    python compare.py eval_results/baseline eval_results/opus55 [--scenario moon_market_kr] [--out compare.md]
+    python compare.py eval_results/baseline eval_results/opus55 [--scenario jungle_market] [--out compare.md]
 
 Each tag folder holds run folders with scores.json (from run_eval.py or
 grade.py). Prints one markdown table per scenario:

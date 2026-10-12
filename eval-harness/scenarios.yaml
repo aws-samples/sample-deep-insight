@@ -1,8 +1,12 @@
-# Eval scenarios: dataset × query. `data_directory` is the path inside the
-# runtime container (the runtime uploads it to Fargate), `csv` and
-# `answer_key` are local paths used by the graders (relative to eval-harness/).
+# Eval scenarios: dataset × query. The harness runs on jungle_market only:
+# moon_market and yummy_food are kept out of it as test sets, so prompts and
+# thresholds are never tuned against them.
 #
-# holdout: true  → don't look at these results while tuning prompts.
+# `upload` lists the local files run_eval.py puts in S3 (where the web app puts
+# uploads) for the runtime to read; the answer sheet next to the CSV is never
+# listed, so it can't reach the agents. `csv` and `answer_key` are local paths
+# used by the graders (relative to eval-harness/).
+#
 # hitl:          → feedback sent at each plan review, in order. Empty or
 #                  exhausted list = approve.
 # requirements:  → what the request asks for, one checkable item each. The LLM
@@ -16,14 +20,17 @@
 #                  Set from real runs: half of the lowest count in a normal run.
 
 scenarios:
-  moon_market_kr:
-    data_directory: ./data/moon_market/kr/
-    csv: ../managed-agentcore/data/moon_market/kr/moon-market-fresh-food-sales.csv
-    answer_key: answer_keys/moon_market_kr.json
+  # Main benchmark: open growth request. The data has planted patterns a
+  # shallow analysis gets wrong (duplicate rows, Simpson's paradox, a stockout,
+  # threshold bunching, a promotion halo); see ground_truth.md.
+  jungle_market:
+    upload: &jungle_files
+      - ../deep-insight-web/sample_data/jungle-market/jungle-market-sales.csv
+      - ../deep-insight-web/sample_data/jungle-market/column_definitions.json
+    csv: ../deep-insight-web/sample_data/jungle-market/jungle-market-sales.csv
+    answer_key: answer_keys/jungle_market.json
     query: |
-      분석대상은 ‘./data/moon_market/kr/’ 디렉토리 입니다.
-      moon-market-fresh-food-sales.csv 는 분석 파일이고,
-      column_definitions.json은 컬럼에 대한 설명입니다.
+      jungle-market-sales.csv 는 분석 파일이고, column_definitions.json은 컬럼에 대한 설명입니다.
       데이터에서 비즈니스 성장 기회를 발굴해줘:
       숨겨진 고객 패턴과 세그먼트를 발견하고, 수익 최적화 방안을 제시하며,
       마케팅과 운영 효율성을 높일 수 있는 개선점을 찾고,
@@ -44,21 +51,19 @@ scenarios:
       - id: expected_effect
         text: 각 전략에 기대 효과가 있고, 가능하면 수치와 산출 근거가 있다
     pass:
-      # baseline (3 runs): 99-188 calculations re-derived, 8-12 other answer-key numbers correct
-      # (keyword matcher, 16-fact key); re-set min_other_facts from baseline runs re-graded with the fact check
+      # not calibrated on real runs yet: re-set from the first baseline runs
       required_facts: [total_revenue]
-      min_other_facts: 4
-      min_recompute: 50
+      min_other_facts: 0
+      min_recompute: 10
       min_cited_checked: 5
 
   # Cheaper run for smoke-testing the harness itself.
-  moon_market_kr_simple:
-    data_directory: ./data/moon_market/kr/
-    csv: ../managed-agentcore/data/moon_market/kr/moon-market-fresh-food-sales.csv
-    answer_key: answer_keys/moon_market_kr.json
+  jungle_market_simple:
+    upload: *jungle_files
+    csv: ../deep-insight-web/sample_data/jungle-market/jungle-market-sales.csv
+    answer_key: answer_keys/jungle_market.json
     query: |
-      분석대상은 ‘./data/moon_market/kr/’ 디렉토리 입니다.
-      moon-market-fresh-food-sales.csv 는 분석 파일이고, column_definitions.json은 컬럼에 대한 설명입니다.
+      jungle-market-sales.csv 는 분석 파일이고, column_definitions.json은 컬럼에 대한 설명입니다.
       총 매출액, 주문 건수, 평균 주문 금액을 계산하고 카테고리별 매출 비중도 함께 보여줘. 결과물을 DOCX로 만들어줘.
     hitl: []
     requirements:
@@ -70,25 +75,23 @@ scenarios:
         text: 평균 주문 금액을 제시한다
       - id: category_share
         text: 카테고리별 매출 비중을 제시한다
-    pass:
+    pass: &simple_pass
       # the request names these three numbers, so all are required
-      # smoke run: 8 calculations re-derived
       required_facts: [total_revenue, order_count, avg_order_value]
       min_other_facts: 0
       min_recompute: 4
       min_cited_checked: 5
 
   # Exercises the plan-revision path (planner_revise) once before approving.
-  moon_market_kr_revision:
-    data_directory: ./data/moon_market/kr/
-    csv: ../managed-agentcore/data/moon_market/kr/moon-market-fresh-food-sales.csv
-    answer_key: answer_keys/moon_market_kr.json
+  jungle_market_revision:
+    upload: *jungle_files
+    csv: ../deep-insight-web/sample_data/jungle-market/jungle-market-sales.csv
+    answer_key: answer_keys/jungle_market.json
     query: |
-      분석대상은 ‘./data/moon_market/kr/’ 디렉토리 입니다.
-      moon-market-fresh-food-sales.csv 는 분석 파일이고, column_definitions.json은 컬럼에 대한 설명입니다.
+      jungle-market-sales.csv 는 분석 파일이고, column_definitions.json은 컬럼에 대한 설명입니다.
       총 매출액, 주문 건수, 평균 주문 금액을 계산하고 카테고리별 매출 비중도 함께 보여줘. 결과물을 DOCX로 만들어줘.
     hitl:
-      - "연령대별 매출 분석도 계획에 추가해줘."
+      - "도시별 매출 분석도 계획에 추가해줘."
     requirements:
       - id: total_revenue
         text: 총 매출액을 제시한다
@@ -98,24 +101,17 @@ scenarios:
         text: 평균 주문 금액을 제시한다
       - id: category_share
         text: 카테고리별 매출 비중을 제시한다
-      - id: age_group
-        text: 계획 검토에서 추가 요청한 연령대별 매출 분석이 포함되어 있다
-    pass:
-      # the request names these three numbers, so all are required
-      # smoke run: 8 calculations re-derived
-      required_facts: [total_revenue, order_count, avg_order_value]
-      min_other_facts: 0
-      min_recompute: 4
-      min_cited_checked: 5
+      - id: city_revenue
+        text: 계획 검토에서 추가 요청한 도시별 매출 분석이 포함되어 있다
+    pass: *simple_pass
 
-  # Needs a runtime image built after 2026-02-18 (dataset not in older images).
-  moon_market_en:
-    data_directory: ./data/moon_market/en/
-    csv: ../managed-agentcore/data/moon_market/en/moon-market-fresh-food-sales.csv
-    answer_key: answer_keys/moon_market_en.json
+  # The growth request in English (the data is English).
+  jungle_market_en:
+    upload: *jungle_files
+    csv: ../deep-insight-web/sample_data/jungle-market/jungle-market-sales.csv
+    answer_key: answer_keys/jungle_market.json
     query: |
-      The analysis target is the './data/moon_market/en/' directory.
-      moon-market-fresh-food-sales.csv is the data file and column_definitions.json describes the columns.
+      jungle-market-sales.csv is the data file and column_definitions.json describes the columns.
       Find business growth opportunities in the data: discover hidden customer patterns and segments,
       propose revenue optimization, find improvements for marketing and operational efficiency,
       and propose 3 actionable strategies to significantly grow next month's revenue, with priority and expected impact.
@@ -135,37 +131,8 @@ scenarios:
       - id: expected_effect
         text: Each strategy has an expected impact, quantified with its basis where possible
     pass:
-      # not calibrated on real runs yet (dataset not in the deployed image): defaults
+      # not calibrated on real runs yet: re-set from the first baseline runs
       required_facts: [total_revenue]
-      min_other_facts: 0
-      min_recompute: 10
-      min_cited_checked: 5
-
-  # Hold-out. Needs a runtime image built after 2026-02-05.
-  yummy_food:
-    holdout: true
-    data_directory: ./data/yummy_food/
-    csv: ../managed-agentcore/data/yummy_food/yummy-food-market.csv
-    answer_key: answer_keys/yummy_food.json
-    query: |
-      분석대상은 ‘./data/yummy_food/’ 디렉토리 입니다.
-      yummy-food-market.csv 는 분석 파일이고, column_definitions.json은 컬럼에 대한 설명입니다.
-      매체별·카테고리별 광고 성과(CTR, 전환율, ROAS)를 분석하고, 광고비 효율을 높일 수 있는 예산 재배분 전략 3가지를
-      기대 효과와 함께 제안해줘. 결과는 DOCX로 저장해줘.
-    hitl: []
-    requirements:
-      - id: media_performance
-        text: 매체별 광고 성과(CTR, 전환율, ROAS)를 비교한다
-      - id: category_performance
-        text: 카테고리별 광고 성과를 비교한다
-      - id: three_reallocations
-        text: 광고비 예산 재배분 전략을 3가지 제시한다
-      - id: expected_effect
-        text: 각 전략에 기대 효과가 있고, 가능하면 수치와 산출 근거가 있다
-
-    pass:
-      # not calibrated on real runs yet (dataset not in the deployed image): defaults
-      required_facts: [total_revenue, total_ad_spend]
       min_other_facts: 0
       min_recompute: 10
       min_cited_checked: 5

@@ -21,6 +21,10 @@ When it names none, the value only has to equal some group's value; those
 looser checks are counted in `recompute_lenient`. If no group's value matches
 either, the formula may mean something else ("weekdays" is not "per weekday"),
 so it counts as `recompute_unverified`, never as wrong.
+
+A file with exact duplicate rows (jungle_market) is also recomputed with the
+duplicates removed, since dropping them is the correct analysis; a value that
+matches only that way counts in `recompute_dedup`.
 """
 import re
 from pathlib import Path
@@ -72,7 +76,8 @@ def _key_series(df, key):
     """Series to group by for one key, plus whether it is a derived weekday."""
     if _norm(key) in WEEKDAY_KEYS:
         import pandas as pd
-        date_col = _column(df, "Date") or _column(df, "날짜")
+        date_col = (_column(df, "Date") or _column(df, "날짜")
+                    or next((c for c in df.columns if "date" in _norm(c)), None))
         if date_col is None:
             return None
         dates = pd.to_datetime(df[date_col], format="%m/%d/%y", errors="coerce")
@@ -96,6 +101,9 @@ def _labels(key_name, value):
         d = pd.to_datetime(v, format="%m/%d/%y", errors="coerce")
         if d is not pd.NaT:
             out += [d.strftime("%Y-%m-%d"), f"{d.month}월 {d.day}일", f"{d.month}/{d.day}"]
+    elif re.fullmatch(r"\d{4}-\d{2}-\d{2}", v):  # 2026-03-02 → 3월 2일, 3/2
+        y, m, d = (int(x) for x in v.split("-"))
+        out += [f"{m}월 {d}일", f"{m}/{d}"]
     elif v == "nan":
         out = ["없음", "미적용", "no promotion", "none"]
     return out
@@ -426,9 +434,14 @@ def grade(artifacts_dir, csv_path):
     if calcs is None:
         return {"recompute_supported": 0, "details": ["calculation_metadata.json unusable"]}
     df = load_csv(csv_path)
+    dedup = df.drop_duplicates() if df.duplicated().any() else None
     source_name = Path(csv_path).name
     details = []
-    supported = ok = lenient = unverified = 0
+    supported = ok = lenient = unverified = dedup_ok = 0
+
+    def matches(stored, r):
+        return same_value(stored, r["value"]) if "value" in r else any(same_value(stored, v) for v in r["candidates"])
+
     for cid, c in calcs.items():
         # Only calculations made directly on the raw file; derived artifacts
         # (.pkl, intermediate CSVs) have columns we cannot reproduce.
@@ -446,6 +459,13 @@ def grade(artifacts_dir, csv_path):
             supported += 1
             details.append(f"{cid}: non-numeric value {c.get('value')!r}")
             continue
+        if dedup is not None and not matches(stored, r):
+            try:
+                rd = recompute(c.get("formula"), dedup, c.get("description", ""))
+            except Exception:
+                rd = None
+            if rd is not None and matches(stored, rd):
+                r, dedup_ok = rd, dedup_ok + 1
         if "value" in r:
             supported += 1
             if same_value(stored, r["value"]):
@@ -465,6 +485,7 @@ def grade(artifacts_dir, csv_path):
         "recompute_total": len(calcs),
         "recompute_lenient": lenient,
         "recompute_unverified": unverified,
+        **({"recompute_dedup": dedup_ok} if dedup is not None else {}),
         "recompute_match_rate": ok / supported if supported else None,
         "details": details,
     }

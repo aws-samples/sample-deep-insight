@@ -8,10 +8,10 @@ A run folder is what run_eval.py writes (or a manual download from S3):
       run.json            optional, runner metadata (status, timings)
 
 Usage:
-    python grade.py <run_dir> --scenario moon_market_kr
-    python grade.py <run_dir> --scenario moon_market_kr --judge   # + LLM judge (paid)
+    python grade.py <run_dir> --scenario jungle_market
+    python grade.py <run_dir> --scenario jungle_market --judge   # + LLM judge (paid)
     python grade.py <run_dir> --csv path/to.csv --answer-key answer_keys/x.json
-    python grade.py <run_dir> --scenario moon_market_kr --no-factcheck   # no model calls
+    python grade.py <run_dir> --scenario jungle_market --no-factcheck   # no model calls
 
 The answer-key fact check (factcheck.py) calls a model on Bedrock and runs by
 default; its result is cached in <run_dir>/factcheck.json.

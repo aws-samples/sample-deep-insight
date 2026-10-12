@@ -1,7 +1,7 @@
 """Build synthetic run folders for grader tests.
 
 `make_clean_run` writes a run whose artifacts are all mutually consistent and
-correct for the moon_market_kr dataset. Each `corrupt_*` helper then breaks
+correct for the jungle_market dataset. Each `corrupt_*` helper then breaks
 exactly one thing, so a test can assert that the matching grader notices.
 Built at test time so no binary .docx fixtures live in git.
 """
@@ -11,19 +11,22 @@ from pathlib import Path
 import pandas as pd
 
 REPO = Path(__file__).resolve().parents[2]
-CSV = REPO / "managed-agentcore" / "data" / "moon_market" / "kr" / "moon-market-fresh-food-sales.csv"
+CSV = REPO / "deep-insight-web" / "sample_data" / "jungle-market" / "jungle-market-sales.csv"
 
 
 def _calcs():
-    df = pd.read_csv(CSV, encoding="utf-8-sig")
-    src = "./data/moon-market-fresh-food-sales.csv"
-    top = df.groupby("Category")["Amount"].sum().sort_values(ascending=False)
+    # Values after removing the file's exact duplicate rows, as a correct analysis does;
+    # the recompute grader accepts them through its deduplicated pass.
+    df = pd.read_csv(CSV).drop_duplicates()
+    src = "./data/jungle-market-sales.csv"
+    top = df.groupby("city")["line_total"].sum().sort_values(ascending=False)
     return [
-        {"id": "calc_001", "value": float(df["Amount"].sum()), "description": "총 매출", "formula": "SUM(Amount)", "source_file": src},
-        {"id": "calc_002", "value": float(len(df)), "description": "주문 건수", "formula": "COUNT(*)", "source_file": src},
-        {"id": "calc_003", "value": float(df["Amount"].mean()), "description": "평균 주문 금액", "formula": "AVG(Amount)", "source_file": src},
-        {"id": "calc_004", "value": float(top.iloc[0]), "description": f"{top.index[0]} 매출", "formula": "SUM(Amount) GROUP BY Category", "source_file": src},
-        {"id": "calc_005", "value": float(df["Product"].nunique()), "description": "상품 수", "formula": "COUNT(DISTINCT Product)", "source_file": src},
+        {"id": "calc_001", "value": round(float(df["line_total"].sum()), 2), "description": "총 매출", "formula": "SUM(line_total)", "source_file": src},
+        {"id": "calc_002", "value": float(df["order_id"].nunique()), "description": "주문 건수", "formula": "COUNT(DISTINCT order_id)", "source_file": src},
+        {"id": "calc_003", "value": float(df["line_total"].sum() / df["order_id"].nunique()), "description": "평균 주문 금액",
+         "formula": "SUM(line_total) / COUNT(DISTINCT order_id)", "source_file": src},
+        {"id": "calc_004", "value": round(float(top.iloc[0]), 2), "description": f"{top.index[0]} 매출", "formula": "SUM(line_total) GROUP BY city", "source_file": src},
+        {"id": "calc_005", "value": float(df["customer_id"].nunique()), "description": "고객 수", "formula": "COUNT(DISTINCT customer_id)", "source_file": src},
     ], top.index[0]
 
 
@@ -31,10 +34,10 @@ def _body(calcs, top_name):
     v = {c["id"]: c["value"] for c in calcs}
     return [
         "Executive Summary",
-        f"분석 기간 동안 총 {v['calc_002']:,.0f}건 [2]의 주문이 발생했고 총 매출은 {v['calc_001']:,.0f}원 [1]입니다.",
-        f"평균 주문 금액(객단가)은 {v['calc_003']:,.0f}원 [3]이며, 2025년 5월 1일부터 14일까지의 데이터입니다.",
-        f"{top_name} 카테고리 매출이 {v['calc_004']:,.0f}원 [4]으로 1위입니다.",
-        f"판매된 상품 수는 {v['calc_005']:,.0f}개 [5]입니다.",
+        f"분석 기간 동안 총 {v['calc_002']:,.0f}건 [2]의 주문이 발생했고 총 매출은 ${v['calc_001']:,.2f} [1]입니다.",
+        f"평균 주문 금액(AOV)은 ${v['calc_003']:,.2f} [3]이며, 2026년 3월 2일부터 15일까지의 데이터입니다.",
+        f"{top_name}의 매출이 ${v['calc_004']:,.2f} [4]로 도시 중 1위입니다.",
+        f"구매 고객 수는 {v['calc_005']:,.0f}명 [5]입니다.",
     ]
 
 
@@ -50,10 +53,10 @@ def clean_extraction(drop=()):
     v = {c["id"]: c["value"] for c in calcs}
     out = [
         statement("order_count", f"총 {v['calc_002']:,.0f}건", f"{v['calc_002']:,.0f}건", v["calc_002"], "count"),
-        statement("total_revenue", f"총 매출은 {v['calc_001']:,.0f}원", f"{v['calc_001']:,.0f}원", v["calc_001"], "KRW"),
-        statement("avg_order_value", f"평균 주문 금액(객단가)은 {v['calc_003']:,.0f}원", f"{v['calc_003']:,.0f}원", round(v["calc_003"]), "KRW"),
-        statement("category_rank1_revenue", f"{top} 카테고리 매출이 {v['calc_004']:,.0f}원", f"{v['calc_004']:,.0f}원", v["calc_004"], "KRW"),
-        statement("product_count", f"판매된 상품 수는 {v['calc_005']:,.0f}개", f"{v['calc_005']:,.0f}개", v["calc_005"], "count"),
+        statement("total_revenue", f"총 매출은 ${v['calc_001']:,.2f}", f"${v['calc_001']:,.2f}", v["calc_001"], "USD"),
+        statement("avg_order_value", f"평균 주문 금액(AOV)은 ${v['calc_003']:,.2f}", f"${v['calc_003']:,.2f}", round(v["calc_003"], 2), "USD"),
+        statement("top_city_revenue", f"{top}의 매출이 ${v['calc_004']:,.2f}", f"${v['calc_004']:,.2f}", v["calc_004"], "USD", subject=top),
+        statement("customer_count", f"구매 고객 수는 {v['calc_005']:,.0f}명", f"{v['calc_005']:,.0f}명", v["calc_005"], "count"),
     ]
     return {"statements": [s for s in out if s["fact_id"] not in drop]}
 
@@ -114,7 +117,7 @@ def corrupt_report_number(run_dir):
     """The report prints a number next to [4] that is not the cited value."""
     calcs, top_name = _calcs()
     body = _body(calcs, top_name)
-    body[4] = f"{top_name} 카테고리 매출이 2,686,000원 [4]으로 1위입니다."
+    body[4] = f"{top_name}의 매출이 $15,000.00 [4]로 도시 중 1위입니다."
     write_docx(Path(run_dir) / "artifacts" / "final_report_with_citations.docx", body, [])
 
 

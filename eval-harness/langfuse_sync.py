@@ -18,13 +18,13 @@ What goes where:
                                        use the same score configs as the judge
 
 Langfuse keeps one trace per dataset item per run, so each repeat of a
-scenario is its own item ("moon_market_kr #1", "#2", ...). Every timestamp is
+scenario is its own item ("jungle_market #1", "#2", ...). Every timestamp is
 the run's own time: the UI looks traces up by the time of the score or run
 item you click, and an upload-time stamp sends it to the wrong day. Langfuse
 doesn't let a score's time change once written, so trace and score ids carry
 a hash of the run's content: syncing unchanged results is a no-op, and changed
 results get a new trace while the old one is deleted (kept, with a warning, if
-people already labeled it). Credentials: LANGFUSE_HOST, LANGFUSE_PUBLIC_KEY,
+people already labeled it). Credentials: LANGFUSE_HOST (or LANGFUSE_BASE_URL), LANGFUSE_PUBLIC_KEY,
 LANGFUSE_SECRET_KEY from the environment or eval-harness/langfuse.env.
 
 The full report text and the request go to LANGFUSE_HOST. Use a self-hosted
@@ -171,10 +171,10 @@ def ensure_dataset_items(lf, scenarios, repeats):
     for name, s in scenarios.items():
         key = json.loads(Path(s["answer_key"]).read_text(encoding="utf-8"))
         base = {"datasetName": DATASET,
-                "input": {"scenario": name, "query": s["query"].strip(), "data_directory": s["data_directory"]},
+                "input": {"scenario": name, "query": s["query"].strip(), "data_files": [Path(f).name for f in s.get("upload") or []]},
                 "expectedOutput": {"requirements": s.get("requirements", []), "pass": s.get("pass", {}),
                                    "answer_key": [_answer(f) for f in key["facts"]]},
-                "metadata": {"holdout": bool(s.get("holdout")), "hitl": s.get("hitl") or []}}
+                "metadata": {"hitl": s.get("hitl") or []}}
         for k in range(1, max(repeats.get(name, 1), 1) + 1):
             lf.post("/api/public/dataset-items", {**base, "id": item_id(name, k), "input": {**base["input"], "repeat": k}})
         legacy = sid("item", name)  # one item per scenario, before repeats were split
@@ -390,6 +390,8 @@ def is_cloud_host(host):
 
 def credentials(allow_cloud=False):
     env = {**dotenv_values(HERE / "langfuse.env"), **os.environ}
+    # Langfuse SDK v3 names the host LANGFUSE_BASE_URL; LANGFUSE_HOST is the older name
+    env["LANGFUSE_HOST"] = env.get("LANGFUSE_HOST") or env.get("LANGFUSE_BASE_URL")
     keys = ("LANGFUSE_HOST", "LANGFUSE_PUBLIC_KEY", "LANGFUSE_SECRET_KEY")
     missing = [k for k in keys if not env.get(k)]
     if missing:

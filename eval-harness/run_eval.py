@@ -14,7 +14,7 @@ runtime's model configuration, and run grade.py.
       scores.json    from grade.py
 
 Usage:
-    python run_eval.py --scenario moon_market_kr --repeat 5 --tag baseline \\
+    python run_eval.py --scenario jungle_market --repeat 5 --tag baseline \\
         --runtime-arn arn:aws:bedrock-agentcore:... [--region us-west-2]
 
 The invoke and feedback logic mirrors managed-agentcore/02_invoke_agentcore_runtime_vpc.py,
@@ -126,6 +126,19 @@ def download_session(s3, bucket, session_id, dest):
     return n
 
 
+def upload_data(s3, bucket, scenario_name, files):
+    """Put a scenario's data files where the web app puts uploads; the S3 data_directory for the payload.
+
+    For datasets that aren't baked into the runtime image. Only the listed
+    files go up, so an answer sheet next to the CSV never reaches the agents.
+    """
+    prefix = f"uploads/eval-{scenario_name.replace('_', '-')}/"
+    for f in files:
+        path = (HERE / f).resolve()
+        s3.upload_file(str(path), bucket, prefix + path.name)
+    return f"s3://{bucket}/{prefix}"
+
+
 def run_once(args, scenario_name, scenario, run_dir, clients):
     agentcore, s3 = clients
     run_dir.mkdir(parents=True)
@@ -221,6 +234,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--scenario", required=True, action="append", help="repeatable")
     ap.add_argument("--repeat", type=int, default=1)
+    ap.add_argument("--first-repeat", type=int, default=1,
+                    help="number of the first repeat, so parallel batches under one tag don't share numbers (Langfuse keys items on it)")
     ap.add_argument("--tag", required=True, help="results go to eval_results/<tag>/")
     ap.add_argument("--runtime-arn", default=env.get("EVAL_RUNTIME_ARN") or env.get("RUNTIME_ARN"))
     ap.add_argument("--region", default=env.get("EVAL_REGION") or env.get("AWS_REGION") or "us-west-2")
@@ -228,7 +243,6 @@ def main():
                     help="run against the runtime the web app uses (model or image changes there reach users)")
     ap.add_argument("--bucket", default=env.get("S3_BUCKET_NAME"), help="defaults to the runtime's S3_BUCKET_NAME")
     ap.add_argument("--timeout", type=int, default=3600, help="seconds per run")
-    ap.add_argument("--allow-holdout", action="store_true")
     ap.add_argument("--allow-session-fallback", action="store_true",
                     help="if the runtime reports no session_id, grade the newest S3 session (only for a bucket nobody else uses)")
     ap.add_argument("--judge", action="store_true", help="also run the LLM judge on each run (paid, see judge.yaml)")
@@ -260,11 +274,12 @@ def main():
     failures = 0
     for name in args.scenario:
         scenario = load_scenario(name)
-        if scenario.get("holdout") and not args.allow_holdout:
-            ap.error(f"{name} is a holdout scenario; pass --allow-holdout to run it")
-        for i in range(1, args.repeat + 1):
+        if scenario.get("upload"):
+            scenario["data_directory"] = upload_data(s3, args.bucket, name, scenario["upload"])
+            log(f"{name}: data uploaded to {scenario['data_directory']}")
+        for i in range(args.first_repeat, args.first_repeat + args.repeat):
             run_dir = out_root / f"{name}-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{i}"
-            log(f"{name} run {i}/{args.repeat} → {run_dir.relative_to(HERE)}")
+            log(f"{name} run {i} ({i - args.first_repeat + 1}/{args.repeat}) → {run_dir.relative_to(HERE)}")
             meta, s = run_once(args, name, scenario, run_dir, (agentcore, s3))
             (run_dir / "config.json").write_text(json.dumps({**cfg, "bucket": args.bucket, "scenario": name}, indent=2, ensure_ascii=False), encoding="utf-8")
             failures += not s["core_pass"]

@@ -1,6 +1,6 @@
 """Pairwise LLM judge: candidate tag vs a frozen baseline tag.
 
-    python pairwise.py eval_results/baseline eval_results/opus55 [--scenario moon_market_kr] [--pairs matched|all]
+    python pairwise.py eval_results/baseline eval_results/opus55 [--scenario jungle_market] [--pairs matched|all]
     python pairwise.py eval_results/baseline eval_results/baseline     # noise check, expect ~50%
 
 Each candidate run's report is compared with a baseline run's report from the

@@ -13,8 +13,8 @@ from graders.numbers import matches, parse_numbers
 @pytest.fixture
 def scenario():
     # The fixture run is small (5 calculations), so grade it under the simple
-    # scenario's thresholds; moon_market_kr needs 50 recomputed calculations.
-    return load_scenario("moon_market_kr_simple")
+    # scenario's thresholds.
+    return load_scenario("jungle_market_simple")
 
 
 @pytest.fixture
@@ -34,7 +34,7 @@ def test_clean_run_passes(clean, scenario):
     assert s["citation_value_match_rate"] == 1.0
     assert s["cited_value_match_rate"] == 1.0 and s["cited_value_checked"] == 5
     assert s["recompute_supported"] == 5 and s["recompute_lenient"] == 0  # GROUP BY checked against the named group
-    assert s["recompute_match_rate"] == 1.0
+    assert s["recompute_match_rate"] == 1.0 and s["recompute_dedup"] == 2  # revenue and AOV only match after dedup
     assert s["required_facts_missing"] == []
     assert s["audit_pass"] is True
 
@@ -80,7 +80,7 @@ def test_unrecognised_formulas_fail(clean, scenario):
 def test_no_numbers_before_markers_fails(clean, scenario):
     """Citations the grader can't pair with a number → 0 compared → FAIL (used to pass)."""
     make_run.write_docx(clean / "artifacts" / "final_report_with_citations.docx",
-                        ["총 매출은 16,431,923원이며 주문은 836건, 평균 주문 금액은 19,655원입니다.", "출처는 [1] [2] [3] [4] [5]입니다."], [])
+                        ["총 매출은 $110,270.26이며 주문은 2,987건, 평균 주문 금액은 $36.92입니다.", "출처는 [1] [2] [3] [4] [5]입니다."], [])
     s = grade(clean, scenario)
     assert s["cited_value_checked"] == 0
     assert "cited_value_checked" in s["core_fail_reasons"]
@@ -92,7 +92,7 @@ def test_required_fact_missing_fails(clean, scenario):
     The fake model still quotes the AOV sentence; the quote isn't in the report
     any more, so it is discarded as unverified instead of counting."""
     calcs, top = make_run._calcs()
-    body = [l for l in make_run._body(calcs, top) if "객단가" not in l]
+    body = [l for l in make_run._body(calcs, top) if "AOV" not in l]
     make_run.write_docx(clean / "artifacts" / "final_report_with_citations.docx", body, [])
     s = grade(clean, scenario)
     assert s["required_facts_missing"] == ["avg_order_value"]
@@ -101,11 +101,12 @@ def test_required_fact_missing_fails(clean, scenario):
 
 
 def test_min_other_facts(clean):
-    growth = load_scenario("moon_market_kr")
-    rules = pass_rules(growth)
+    growth = load_scenario("jungle_market")
+    rules = {**pass_rules(growth), "min_other_facts": 5}
     s = grade(clean, growth)
-    assert rules["min_other_facts"] == 4
-    assert ("other_facts_found" in s["core_fail_reasons"]) == (s["other_facts_found"] < 4)
+    assert s["other_facts_found"] == 4 and "other_facts_found" in fail_reasons(s, rules)
+    rules["min_other_facts"] = s["other_facts_found"]
+    assert "other_facts_found" not in fail_reasons(s, rules)
 
 
 def test_judge_not_run_is_skipped_but_judge_error_fails(clean, scenario):
@@ -132,42 +133,62 @@ def test_failed_status_fails_core(clean, scenario):
 
 @pytest.fixture(scope="module")
 def df():
-    return recompute.load_csv(load_scenario("moon_market_kr")["csv"])
+    return recompute.load_csv(load_scenario("jungle_market")["csv"])
 
 
 @pytest.mark.parametrize("formula, description, expected", [
-    ("SUM(Amount) GROUP BY Category", "간편식/밀키트/샐러드 매출", 3048395),
-    ("SUM(Amount) grouped by Category", "헤어/바디/구강 카테고리 매출", 2180136),
-    ("SUM(Amount)/TOTAL(Amount)*100 GROUP BY Category", "간편식/밀키트/샐러드 카테고리 매출 비중", 18.551663),
-    ("MAX(SUM(Amount) GROUP BY Date)", "일별 매출 최고점", 1440065),
-    ("SUM(Amount) GROUP BY Date", "2025-05-02 일별 매출", 1440065),
-    ("SUM(Amount) GROUP BY Gender", "여성 고객 매출", 8577786),
-    ("SUM(Amount) WHERE Gender=F", "", 8577786),
+    ("SUM(line_total) GROUP BY category", "Bakery 매출", lambda d: d[d.category == "Bakery"].line_total.sum()),
+    ("SUM(line_total) grouped by city", "Paris 도시 매출", lambda d: d[d.city == "Paris"].line_total.sum()),
+    ("SUM(line_total)/TOTAL(line_total)*100 GROUP BY category", "Ready Meals 카테고리 매출 비중",
+     lambda d: d[d.category == "Ready Meals"].line_total.sum() / d.line_total.sum() * 100),
+    ("MAX(SUM(line_total) GROUP BY order_date)", "일별 매출 최고점", lambda d: d.groupby("order_date").line_total.sum().max()),
+    ("SUM(line_total) GROUP BY order_date", "2026-03-07 일별 매출", lambda d: d[d.order_date == "2026-03-07"].line_total.sum()),
+    ("SUM(line_total) GROUP BY order_date", "3월 9일 매출", lambda d: d[d.order_date == "2026-03-09"].line_total.sum()),
+    ("SUM(line_total) GROUP BY gender", "여성 고객 매출", lambda d: d[d.gender == "F"].line_total.sum()),
+    ("SUM(line_total) WHERE gender=F", "", lambda d: d[d.gender == "F"].line_total.sum()),
 ])
 def test_grouped_formulas(df, formula, description, expected):
     r = recompute.recompute(formula, df, description)
     assert r["lenient"] is False
-    assert r["value"] == pytest.approx(expected, rel=1e-6)
+    assert r["value"] == pytest.approx(float(expected(df)), rel=1e-9)
 
 
 def test_group_not_named_is_lenient(df):
-    r = recompute.recompute("SUM(Amount) GROUP BY Category", df, "어떤 카테고리 매출")
-    assert r["lenient"] is True and len(r["candidates"]) == 14
+    r = recompute.recompute("SUM(line_total) GROUP BY category", df, "어떤 카테고리 매출")
+    assert r["lenient"] is True and len(r["candidates"]) == df.category.nunique()
 
 
 def test_weekday_group(df):
-    r = recompute.recompute("SUM(Amount) GROUP BY weekday", df, "월요일 총매출")
-    assert r["lenient"] is False and r["value"] == pytest.approx(2398597)
+    """The weekday comes from the file's date column, whatever it is called (order_date here)."""
+    import pandas as pd
+    r = recompute.recompute("SUM(line_total) GROUP BY weekday", df, "토요일 총매출")
+    saturday = df[pd.to_datetime(df.order_date).dt.dayofweek == 5].line_total.sum()
+    assert r["lenient"] is False and r["value"] == pytest.approx(saturday)
 
 
 def test_wrong_group_value_is_caught(clean, scenario):
     """A segment number that doesn't match its group fails (segments weren't checked before)."""
     path = clean / "artifacts" / "calculation_metadata.json"
     data = json.loads(path.read_text())
-    data["calculations"][3]["value"] = 2686000.0  # the real past mis-statement of the top category
+    data["calculations"][3]["value"] = 17053.67  # the top city's revenue with the duplicate rows counted
     path.write_text(json.dumps(data, ensure_ascii=False))
     s = grade(clean, scenario)
     assert s["recompute_match_rate"] < 1.0
+
+
+def test_duplicate_rows_recomputed_with_and_without(tmp_path):
+    """A file with exact duplicate rows: the deduplicated value is right, the raw one too; anything else is wrong."""
+    csv = tmp_path / "sales.csv"
+    csv.write_text("order_id,line_total\nA,10\nB,20\nB,20\nC,5\n")
+    (tmp_path / "artifacts").mkdir()
+    calcs = [{"id": "dedup", "value": 35.0}, {"id": "raw", "value": 55.0}, {"id": "wrong", "value": 40.0}]
+    for c in calcs:
+        c.update(formula="SUM(line_total)", source_file="./data/sales.csv", description="total revenue")
+    (tmp_path / "artifacts" / "calculation_metadata.json").write_text(json.dumps({"calculations": calcs}))
+    s = recompute.grade(tmp_path / "artifacts", csv)
+    assert s["recompute_supported"] == 3 and s["recompute_dedup"] == 1
+    assert s["recompute_match_rate"] == pytest.approx(2 / 3)
+    assert any(d.startswith("wrong:") for d in s["details"])
 
 
 @pytest.mark.parametrize("stored, expected, ok", [
@@ -215,18 +236,18 @@ def test_matches(printed, decimals, stored, ok):
 # --- general expressions: shapes agents wrote in real runs -------------------------
 
 @pytest.mark.parametrize("formula, description, expected", [
-    ("SUM(Amount WHERE promotion-ids IS NULL)", "", lambda d: d[d["promotion-ids"].isna()].Amount.sum()),
-    ("MEAN(Amount WHERE promotion-ids NOT NULL)", "", lambda d: d[d["promotion-ids"].notna()].Amount.mean()),
-    ("SUM(Amount) WHERE Category=='건강식품'", "", lambda d: d[d.Category == "건강식품"].Amount.sum()),
-    ("SUM(Amount WHERE Category=='건강식품') / SUM(Amount) * 100", "", lambda d: d[d.Category == "건강식품"].Amount.sum() / d.Amount.sum() * 100),
-    ("SUM(Amount|category)/SUM(Amount)*100", "건강식품 매출 비중", lambda d: d[d.Category == "건강식품"].Amount.sum() / d.Amount.sum() * 100),
-    ("SUM(Amount|cat) / SUM(Amount|all)", "건강식품 비중", lambda d: d[d.Category == "건강식품"].Amount.sum() / d.Amount.sum()),
-    ("SUM(Amount WHERE Category==X) / SUM(Amount) * 100", "건강식품 비중", lambda d: d[d.Category == "건강식품"].Amount.sum() / d.Amount.sum() * 100),
-    ("SUM(Amount WHERE Category=='건강식품') / COUNT(rows WHERE Category=='건강식품')", "", lambda d: d[d.Category == "건강식품"].Amount.mean()),
-    ("STD(Amount)/MEAN(Amount)*100", "", lambda d: d.Amount.std() / d.Amount.mean() * 100),
-    ("SUM(Amount WHERE Product='{}')", "미역국 매출", lambda d: d[d.Product == "미역국"].Amount.sum()),
-    ("MAX(SUM(Amount) grouped by Age Group, Category)", "50대 최선호 카테고리(간편식/밀키트/샐러드) 매출",
-     lambda d: d[(d["Age Group"] == "50대") & (d.Category == "간편식/밀키트/샐러드")].Amount.sum()),
+    ("SUM(line_total WHERE promo_code IS NULL)", "", lambda d: d[d.promo_code.isna()].line_total.sum()),
+    ("MEAN(line_total WHERE promo_code NOT NULL)", "", lambda d: d[d.promo_code.notna()].line_total.mean()),
+    ("SUM(line_total) WHERE category=='Bakery'", "", lambda d: d[d.category == "Bakery"].line_total.sum()),
+    ("SUM(line_total WHERE category=='Bakery') / SUM(line_total) * 100", "", lambda d: d[d.category == "Bakery"].line_total.sum() / d.line_total.sum() * 100),
+    ("SUM(line_total|category)/SUM(line_total)*100", "Bakery 매출 비중", lambda d: d[d.category == "Bakery"].line_total.sum() / d.line_total.sum() * 100),
+    ("SUM(line_total|cat) / SUM(line_total|all)", "Bakery 비중", lambda d: d[d.category == "Bakery"].line_total.sum() / d.line_total.sum()),
+    ("SUM(line_total WHERE category==X) / SUM(line_total) * 100", "Bakery 비중", lambda d: d[d.category == "Bakery"].line_total.sum() / d.line_total.sum() * 100),
+    ("SUM(line_total WHERE category=='Bakery') / COUNT(rows WHERE category=='Bakery')", "", lambda d: d[d.category == "Bakery"].line_total.mean()),
+    ("STD(line_total)/MEAN(line_total)*100", "", lambda d: d.line_total.std() / d.line_total.mean() * 100),
+    ("SUM(line_total WHERE product_name='{}')", "Oat Milk 매출", lambda d: d[d.product_name == "Oat Milk"].line_total.sum()),
+    ("MAX(SUM(line_total) grouped by age_group, category)", "55+ 최선호 카테고리(Ready Meals) 매출",
+     lambda d: d[(d.age_group == "55+") & (d.category == "Ready Meals")].line_total.sum()),
 ])
 def test_general_expressions(df, formula, description, expected):
     r = recompute.recompute(formula, df, description)
@@ -234,18 +255,18 @@ def test_general_expressions(df, formula, description, expected):
     assert r["value"] == pytest.approx(float(expected(df)), rel=1e-9)
 
 
-@pytest.mark.parametrize("formula", ["cat_sales/total_sales*100", "STD(daily_sum)/MEAN(daily_sum)*100", "SUM(Amount WHERE seg)/SUM(Amount)",
-                                     "__import__('os').system('x')", "SUM(Amount) + foo"])
+@pytest.mark.parametrize("formula", ["cat_sales/total_sales*100", "STD(daily_sum)/MEAN(daily_sum)*100", "SUM(line_total WHERE seg)/SUM(line_total)",
+                                     "__import__('os').system('x')", "SUM(line_total) + foo"])
 def test_names_the_agent_made_up_stay_unsupported(df, formula):
     assert recompute.recompute(formula, df, "") is None
 
 
 def test_unnamed_group_that_matches_nothing_is_unverified_not_wrong(clean, scenario):
-    """'MEAN(Amount|weekday)' for 'weekdays' (Mon-Fri) matches no single weekday: unverified, not a mismatch."""
+    """'MEAN(line_total|weekday)' for 'weekdays' (Mon-Fri) matches no single weekday: unverified, not a mismatch."""
     path = clean / "artifacts" / "calculation_metadata.json"
     data = json.loads(path.read_text())
-    data["calculations"].append({"id": "calc_weekdays", "value": 19464.17, "description": "Average order value on weekdays",
-                                 "formula": "MEAN(Amount|weekday)", "source_file": data["calculations"][0]["source_file"]})
+    data["calculations"].append({"id": "calc_weekdays", "value": 7.0123, "description": "Average line value on weekdays",
+                                 "formula": "MEAN(line_total|weekday)", "source_file": data["calculations"][0]["source_file"]})
     path.write_text(json.dumps(data, ensure_ascii=False))
     s = grade(clean, scenario)
     assert s["recompute_match_rate"] == 1.0 and s["recompute_unverified"] == 1
