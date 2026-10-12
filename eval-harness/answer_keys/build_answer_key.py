@@ -68,8 +68,12 @@ def jungle_market():
     # The duplicates are a loading error, not a subset a report may choose: a figure that
     # counts them twice is wrong in the same scope, never "about another subset".
     once = "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
-    clean = {"period": "full period 2026-03-02 to 2026-03-15", "filter": once}
-    rawscope = {"period": "full period 2026-03-02 to 2026-03-15", "filter": "the raw file as loaded"}
+    # The file holds no other dates: a report that gives the whole data other dates mislabels
+    # it (a report did: "2025-01-01 ~ 01-14"), which must not turn every figure into "another period".
+    whole = ("the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels "
+             "its whole data with other dates is mislabeling this same period, not describing another one")
+    clean = {"period": whole, "filter": once}
+    rawscope = {"period": whole, "filter": "the raw file as loaded"}
     orders = df.groupby("order_id").agg(net=("line_total", "sum"), lines=("line_total", "size"), city=("city", "first"), date=("order_date", "first"),
                                         hour=("order_hour", "first"), ctype=("customer_type", "first"),
                                         channel=("channel", "first"), age=("age_group", "first"), promo=("promo_code", "first"))
