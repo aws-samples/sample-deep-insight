@@ -1,0 +1,780 @@
+{
+  "overview": {
+    "period": "2026-03-02 to 2026-03-15",
+    "raw_rows": 15680,
+    "clean_rows": 15569,
+    "orders": 2987,
+    "customers": 1847,
+    "revenue_usd": 110270.26,
+    "aov_usd": 36.92,
+    "avg_lines_per_order": 5.21,
+    "metric_definitions": {
+      "revenue": "sum of line_total after removing exact duplicate rows",
+      "aov": "revenue / number of distinct order_id",
+      "gross": "unit_price * quantity (before discount)"
+    }
+  },
+  "r1_duplicate_rows": {
+    "duplicate_rows": 111,
+    "affected": [
+      {
+        "city": "Sydney",
+        "order_date": "2026-03-10",
+        "rows": 111
+      }
+    ],
+    "duplicated_orders": 15,
+    "naive_top_revenue_city": "Sydney",
+    "correct_top_revenue_city": "Singapore",
+    "naive_revenue_by_city": {
+      "Sydney": 17053.67,
+      "Singapore": 16645.52,
+      "New York": 15996.43,
+      "Paris": 13790.41,
+      "London": 12608.1,
+      "Berlin": 12384.75,
+      "Seoul": 11552.02,
+      "Tokyo": 11034.23
+    },
+    "correct_revenue_by_city": {
+      "Singapore": 16645.52,
+      "Sydney": 16258.8,
+      "New York": 15996.43,
+      "Paris": 13790.41,
+      "London": 12608.1,
+      "Berlin": 12384.75,
+      "Seoul": 11552.02,
+      "Tokyo": 11034.23
+    }
+  },
+  "expected_city_profiles": {
+    "highest_bakery_share": "Paris",
+    "highest_cheese_share": "Paris",
+    "highest_ready_meals_share": "Tokyo",
+    "fewest_lines_per_order": "Tokyo",
+    "highest_plant_based_share": "Berlin",
+    "highest_aov": "New York",
+    "highest_app_share": "Seoul",
+    "by_city": {
+      "London": {
+        "orders": 338,
+        "revenue_usd": 12608.1,
+        "aov_usd": 37.3,
+        "avg_lines_per_order": 5.33,
+        "app_share": 0.59,
+        "bakery_revenue_share": 0.08,
+        "cheese_revenue_share": 0.08,
+        "ready_meals_revenue_share": 0.08,
+        "plant_based_revenue_share": 0.08
+      },
+      "New York": {
+        "orders": 315,
+        "revenue_usd": 15996.43,
+        "aov_usd": 50.78,
+        "avg_lines_per_order": 6.33,
+        "app_share": 0.54,
+        "bakery_revenue_share": 0.06,
+        "cheese_revenue_share": 0.06,
+        "ready_meals_revenue_share": 0.08,
+        "plant_based_revenue_share": 0.07
+      },
+      "Berlin": {
+        "orders": 334,
+        "revenue_usd": 12384.75,
+        "aov_usd": 37.08,
+        "avg_lines_per_order": 5.32,
+        "app_share": 0.47,
+        "bakery_revenue_share": 0.06,
+        "cheese_revenue_share": 0.07,
+        "ready_meals_revenue_share": 0.09,
+        "plant_based_revenue_share": 0.15
+      },
+      "Paris": {
+        "orders": 364,
+        "revenue_usd": 13790.41,
+        "aov_usd": 37.89,
+        "avg_lines_per_order": 5.45,
+        "app_share": 0.45,
+        "bakery_revenue_share": 0.13,
+        "cheese_revenue_share": 0.14,
+        "ready_meals_revenue_share": 0.07,
+        "plant_based_revenue_share": 0.08
+      },
+      "Tokyo": {
+        "orders": 428,
+        "revenue_usd": 11034.23,
+        "aov_usd": 25.78,
+        "avg_lines_per_order": 3.54,
+        "app_share": 0.61,
+        "bakery_revenue_share": 0.04,
+        "cheese_revenue_share": 0.06,
+        "ready_meals_revenue_share": 0.2,
+        "plant_based_revenue_share": 0.08
+      },
+      "Seoul": {
+        "orders": 402,
+        "revenue_usd": 11552.02,
+        "aov_usd": 28.74,
+        "avg_lines_per_order": 4.32,
+        "app_share": 0.82,
+        "bakery_revenue_share": 0.07,
+        "cheese_revenue_share": 0.07,
+        "ready_meals_revenue_share": 0.09,
+        "plant_based_revenue_share": 0.09
+      },
+      "Singapore": {
+        "orders": 412,
+        "revenue_usd": 16645.52,
+        "aov_usd": 40.4,
+        "avg_lines_per_order": 5.88,
+        "app_share": 0.59,
+        "bakery_revenue_share": 0.08,
+        "cheese_revenue_share": 0.07,
+        "ready_meals_revenue_share": 0.1,
+        "plant_based_revenue_share": 0.06
+      },
+      "Sydney": {
+        "orders": 394,
+        "revenue_usd": 16258.8,
+        "aov_usd": 41.27,
+        "avg_lines_per_order": 5.94,
+        "app_share": 0.54,
+        "bakery_revenue_share": 0.07,
+        "cheese_revenue_share": 0.07,
+        "ready_meals_revenue_share": 0.09,
+        "plant_based_revenue_share": 0.08
+      }
+    }
+  },
+  "expected_weekday": {
+    "avg_orders_per_day_by_weekday": {
+      "Monday": 201.0,
+      "Tuesday": 177.0,
+      "Wednesday": 197.5,
+      "Thursday": 187.5,
+      "Friday": 216.5,
+      "Saturday": 269.5,
+      "Sunday": 244.5
+    },
+    "busiest_weekday": "Saturday",
+    "quietest_weekday": "Tuesday",
+    "weekend_vs_weekday_ratio": 1.31
+  },
+  "expected_co_purchase": {
+    "most_frequent_pair": {
+      "pair": [
+        "Ground Coffee",
+        "Oat Milk"
+      ],
+      "orders_with_both": 477,
+      "runner_up": {
+        "pair": [
+          "Pasta Sauce",
+          "Spaghetti"
+        ],
+        "orders_with_both": 266
+      }
+    },
+    "strongest_bundle": [
+      "Spaghetti",
+      "Pasta Sauce",
+      "Parmesan Cheese"
+    ],
+    "strongest_bundle_note": "the top 3 pairs by lift are all pairs within this 3-product set",
+    "pairs_with_lift_above_2_min30": [
+      {
+        "pair": [
+          "Parmesan Cheese",
+          "Spaghetti"
+        ],
+        "orders_with_both": 253,
+        "lift": 4.8
+      },
+      {
+        "pair": [
+          "Pasta Sauce",
+          "Spaghetti"
+        ],
+        "orders_with_both": 266,
+        "lift": 4.71
+      },
+      {
+        "pair": [
+          "Parmesan Cheese",
+          "Pasta Sauce"
+        ],
+        "orders_with_both": 197,
+        "lift": 4.65
+      },
+      {
+        "pair": [
+          "Cereal",
+          "Whole Milk"
+        ],
+        "orders_with_both": 188,
+        "lift": 3.5
+      },
+      {
+        "pair": [
+          "Ground Coffee",
+          "Oat Milk"
+        ],
+        "orders_with_both": 477,
+        "lift": 3.34
+      },
+      {
+        "pair": [
+          "Baguette",
+          "Butter"
+        ],
+        "orders_with_both": 140,
+        "lift": 2.98
+      },
+      {
+        "pair": [
+          "Butter",
+          "Sourdough Bread"
+        ],
+        "orders_with_both": 143,
+        "lift": 2.88
+      }
+    ],
+    "highest_lift_outside_planted_pairs": {
+      "pair": [
+        "Granola Bars",
+        "Orange Juice"
+      ],
+      "orders_with_both": 30,
+      "lift": 1.84
+    },
+    "planted_rules": [
+      {
+        "lhs": [
+          "Spaghetti"
+        ],
+        "rhs": [
+          "Pasta Sauce"
+        ],
+        "orders_with_both": 266,
+        "support": 0.0891,
+        "confidence": 0.58,
+        "lift": 4.71
+      },
+      {
+        "lhs": [
+          "Pasta Sauce",
+          "Spaghetti"
+        ],
+        "rhs": [
+          "Parmesan Cheese"
+        ],
+        "orders_with_both": 195,
+        "support": 0.0653,
+        "confidence": 0.73,
+        "lift": 6.37
+      },
+      {
+        "lhs": [
+          "Baguette"
+        ],
+        "rhs": [
+          "Butter"
+        ],
+        "orders_with_both": 140,
+        "support": 0.0469,
+        "confidence": 0.51,
+        "lift": 2.98
+      },
+      {
+        "lhs": [
+          "Sourdough Bread"
+        ],
+        "rhs": [
+          "Butter"
+        ],
+        "orders_with_both": 143,
+        "support": 0.0479,
+        "confidence": 0.5,
+        "lift": 2.88
+      },
+      {
+        "lhs": [
+          "Cereal"
+        ],
+        "rhs": [
+          "Whole Milk"
+        ],
+        "orders_with_both": 188,
+        "support": 0.0629,
+        "confidence": 0.63,
+        "lift": 3.5
+      },
+      {
+        "lhs": [
+          "Ground Coffee"
+        ],
+        "rhs": [
+          "Oat Milk"
+        ],
+        "orders_with_both": 477,
+        "support": 0.1597,
+        "confidence": 0.68,
+        "lift": 3.34
+      },
+      {
+        "lhs": [
+          "Oat Milk"
+        ],
+        "rhs": [
+          "Ground Coffee"
+        ],
+        "orders_with_both": 477,
+        "support": 0.1597,
+        "confidence": 0.78,
+        "lift": 3.34
+      }
+    ],
+    "top_pairs_by_lift_min30": [
+      {
+        "pair": [
+          "Parmesan Cheese",
+          "Spaghetti"
+        ],
+        "orders_with_both": 253,
+        "lift": 4.8
+      },
+      {
+        "pair": [
+          "Pasta Sauce",
+          "Spaghetti"
+        ],
+        "orders_with_both": 266,
+        "lift": 4.71
+      },
+      {
+        "pair": [
+          "Parmesan Cheese",
+          "Pasta Sauce"
+        ],
+        "orders_with_both": 197,
+        "lift": 4.65
+      },
+      {
+        "pair": [
+          "Cereal",
+          "Whole Milk"
+        ],
+        "orders_with_both": 188,
+        "lift": 3.5
+      },
+      {
+        "pair": [
+          "Ground Coffee",
+          "Oat Milk"
+        ],
+        "orders_with_both": 477,
+        "lift": 3.34
+      },
+      {
+        "pair": [
+          "Baguette",
+          "Butter"
+        ],
+        "orders_with_both": 140,
+        "lift": 2.98
+      },
+      {
+        "pair": [
+          "Butter",
+          "Sourdough Bread"
+        ],
+        "orders_with_both": 143,
+        "lift": 2.88
+      },
+      {
+        "pair": [
+          "Granola Bars",
+          "Orange Juice"
+        ],
+        "orders_with_both": 30,
+        "lift": 1.84
+      },
+      {
+        "pair": [
+          "Avocados",
+          "Orange Juice"
+        ],
+        "orders_with_both": 30,
+        "lift": 1.55
+      },
+      {
+        "pair": [
+          "Apples",
+          "Muffins (4)"
+        ],
+        "orders_with_both": 42,
+        "lift": 1.53
+      }
+    ]
+  },
+  "r2_simpsons_paradox_save10": {
+    "comparison": "orders using SAVE10 vs orders with no promo_code",
+    "metric": "net AOV = mean over orders of sum(line_total), i.e. after the 10% discount",
+    "naive_overall": {
+      "save10_aov": 33.96,
+      "no_promo_aov": 35.79,
+      "save10_orders": 580,
+      "no_promo_orders": 2071
+    },
+    "save10_orders_by_new_customers": 0,
+    "gross_aov_overall": {
+      "save10_aov": 37.74,
+      "no_promo_aov": 35.79
+    },
+    "gross_note": "on gross AOV (before discount) SAVE10 orders are higher overall too, so the paradox exists only on net AOV",
+    "naive_conclusion": "SAVE10 orders have a LOWER AOV",
+    "correct_conclusion": "within every city SAVE10 orders have a HIGHER AOV; SAVE10 is concentrated in low-AOV cities (Tokyo, Seoul)",
+    "save10_share_of_orders_by_city": {
+      "London": 0.08,
+      "New York": 0.06,
+      "Berlin": 0.06,
+      "Paris": 0.09,
+      "Tokyo": 0.53,
+      "Seoul": 0.5,
+      "Singapore": 0.06,
+      "Sydney": 0.07
+    },
+    "by_city": {
+      "London": {
+        "save10_orders": 26,
+        "save10_aov": 45.31,
+        "no_promo_orders": 272,
+        "no_promo_aov": 35.38
+      },
+      "New York": {
+        "save10_orders": 19,
+        "save10_aov": 71.62,
+        "no_promo_orders": 243,
+        "no_promo_aov": 48.01
+      },
+      "Berlin": {
+        "save10_orders": 19,
+        "save10_aov": 51.93,
+        "no_promo_orders": 266,
+        "no_promo_aov": 34.19
+      },
+      "Paris": {
+        "save10_orders": 33,
+        "save10_aov": 44.17,
+        "no_promo_orders": 286,
+        "no_promo_aov": 35.26
+      },
+      "Tokyo": {
+        "save10_orders": 228,
+        "save10_aov": 26.73,
+        "no_promo_orders": 182,
+        "no_promo_aov": 23.4
+      },
+      "Seoul": {
+        "save10_orders": 203,
+        "save10_aov": 30.26,
+        "no_promo_orders": 170,
+        "no_promo_aov": 24.79
+      },
+      "Singapore": {
+        "save10_orders": 26,
+        "save10_aov": 48.74,
+        "no_promo_orders": 332,
+        "no_promo_aov": 37.97
+      },
+      "Sydney": {
+        "save10_orders": 26,
+        "save10_aov": 46.58,
+        "no_promo_orders": 320,
+        "no_promo_aov": 39.29
+      }
+    }
+  },
+  "r3_berlin_oat_milk_stockout": {
+    "stockout_dates": [
+      "2026-03-07",
+      "2026-03-08"
+    ],
+    "comparison_dates": [
+      "2026-03-14",
+      "2026-03-15"
+    ],
+    "comparison_note": "the stockout dates are a Saturday and Sunday; the baseline is the same weekdays one week later. Coffee is measured per 100 orders, so differences in order volume do not affect the comparison.",
+    "oat_milk_units_on_stockout_dates": 0,
+    "berlin_coffee_stockout_dates": {
+      "coffee_orders": 7,
+      "orders": 63,
+      "per_100_orders": 11.11
+    },
+    "berlin_coffee_comparison_dates": {
+      "coffee_orders": 16,
+      "orders": 59,
+      "per_100_orders": 27.12
+    },
+    "berlin_coffee_all_other_dates": {
+      "coffee_orders": 77,
+      "orders": 271,
+      "per_100_orders": 28.41
+    },
+    "coffee_drop_pct_vs_comparison_dates": 59.03,
+    "other_cities_coffee_stockout_dates": {
+      "coffee_orders": 109,
+      "orders": 456,
+      "per_100_orders": 23.9
+    },
+    "other_cities_coffee_comparison_dates": {
+      "coffee_orders": 104,
+      "orders": 450,
+      "per_100_orders": 23.11
+    },
+    "naive_conclusion": "a weekend dip in Berlin demand",
+    "correct_conclusion": "Oat Milk was out of stock in Berlin (0 units sold on both dates). Ground Coffee is usually bought together with Oat Milk, so those customers skipped coffee too. The coffee rate per 100 orders fell versus the following weekend in Berlin, while other cities' coffee rate on the same dates stayed at their following-weekend level.",
+    "berlin_orders_by_date": {
+      "2026-03-02": 18,
+      "2026-03-03": 13,
+      "2026-03-04": 22,
+      "2026-03-05": 23,
+      "2026-03-06": 22,
+      "2026-03-07": 32,
+      "2026-03-08": 31,
+      "2026-03-09": 20,
+      "2026-03-10": 20,
+      "2026-03-11": 27,
+      "2026-03-12": 19,
+      "2026-03-13": 28,
+      "2026-03-14": 23,
+      "2026-03-15": 36
+    }
+  },
+  "r4_welcome10_threshold_bunching": {
+    "rule": "WELCOME10: new customers get $10 off when gross order value >= $50",
+    "new_customer_orders": 390,
+    "metric": "gross order value = sum of unit_price * quantity (before the $10 discount)",
+    "new_orders_gross_histogram": {
+      "0-30": 172,
+      "30-35": 12,
+      "35-40": 11,
+      "40-45": 8,
+      "45-50": 4,
+      "50-55": 110,
+      "55-60": 27,
+      "60-65": 13,
+      "65-70": 12,
+      "70+": 21
+    },
+    "new_orders_net_histogram": {
+      "0-30": 172,
+      "30-35": 12,
+      "35-40": 11,
+      "40-45": 118,
+      "45-50": 31,
+      "50-55": 13,
+      "55-60": 12,
+      "60-65": 4,
+      "65-70": 7,
+      "70+": 10
+    },
+    "orders_net_40_45": 118,
+    "eligible_without_welcome10": 0,
+    "scoring": "full credit: $50-55 gross with the WELCOME10 $50 threshold as the reason. Partial credit: $40-45 net (the same orders after the $10 discount) with the threshold as the reason.",
+    "orders_45_50": 4,
+    "orders_50_55": 110,
+    "share_of_new_orders_in_50_55": 0.28,
+    "naive_conclusion": "nothing unusual: new and returning customers have about the same average order value",
+    "correct_conclusion": "new-customer orders pile up just above $50 (the WELCOME10 threshold) and almost none fall just below it: customers top up the basket to get the discount",
+    "new_gross_aov": 39.4,
+    "returning_gross_aov": 38.17
+  },
+  "r5_pasta30_halo_and_dip": {
+    "promo": "PASTA30: 30% off Spaghetti, 2026-03-09 to 2026-03-11",
+    "windows": {
+      "before": "2026-03-02 to 2026-03-08",
+      "promo": "2026-03-09 to 2026-03-11",
+      "after": "2026-03-12 to 2026-03-14"
+    },
+    "products": {
+      "Spaghetti": {
+        "units_per_day_before": 37.29,
+        "units_per_day_promo": 156.67,
+        "units_per_day_after": 20.67,
+        "promo_vs_before": 4.2,
+        "after_vs_before": 0.55
+      },
+      "Pasta Sauce": {
+        "units_per_day_before": 30.71,
+        "units_per_day_promo": 67.0,
+        "units_per_day_after": 26.0,
+        "promo_vs_before": 2.18,
+        "after_vs_before": 0.85
+      },
+      "Parmesan Cheese": {
+        "units_per_day_before": 28.57,
+        "units_per_day_promo": 64.0,
+        "units_per_day_after": 19.0,
+        "promo_vs_before": 2.24,
+        "after_vs_before": 0.67
+      }
+    },
+    "units_note": "units/day = sum of quantity / number of days, over ALL rows of the product. During the promo this includes Spaghetti rows that did not get PASTA30 because the order used SAVE10 or WELCOME10.",
+    "spaghetti_rows_in_promo_window": 205,
+    "spaghetti_rows_in_promo_window_without_pasta30": 52,
+    "naive_conclusion": "only Spaghetti sales went up",
+    "correct_conclusion": "non-discounted Pasta Sauce and Parmesan Cheese rose too (halo), and Spaghetti fell below the pre-promo level for 3 days afterwards (pantry loading)"
+  },
+  "r6_late_night_orders": {
+    "by_hour_band": {
+      "Morning (06-11)": {
+        "orders": 872,
+        "aov_usd": 35.61,
+        "avg_lines": 5.09
+      },
+      "Afternoon (12-17)": {
+        "orders": 833,
+        "aov_usd": 36.07,
+        "avg_lines": 5.1
+      },
+      "Evening (18-21)": {
+        "orders": 877,
+        "aov_usd": 35.64,
+        "avg_lines": 4.99
+      },
+      "Late night (22-05)": {
+        "orders": 405,
+        "aov_usd": 44.24,
+        "avg_lines": 6.2
+      }
+    },
+    "highest_aov_band": "Late night (22-05)",
+    "late_night_share_age_55plus": 0.41,
+    "late_night_share_web": 0.6,
+    "all_orders_share_age_55plus": 0.17,
+    "naive_conclusion": "late-night orders are small snack runs",
+    "correct_conclusion": "late night has the highest AOV, driven by customers aged 55+ ordering on Web"
+  },
+  "evaluation_questions": [
+    {
+      "id": "Q1",
+      "section": "B1",
+      "question": "Which city has the highest total revenue?",
+      "correct_answer": "Singapore ($16,645.52)",
+      "naive_answer": "Sydney ($17,053.67, duplicates not removed)"
+    },
+    {
+      "id": "Q2",
+      "section": "B1",
+      "question": "How many exact duplicate rows are there, and where do they come from?",
+      "correct_answer": "111 rows: all rows of Sydney on 2026-03-10",
+      "naive_answer": "no duplicates"
+    },
+    {
+      "id": "Q3",
+      "section": "A9",
+      "question": "Which product pair appears together in the most orders?",
+      "correct_answer": "Ground Coffee + Oat Milk (477 orders)"
+    },
+    {
+      "id": "Q4",
+      "section": "A9",
+      "question": "Which three products form the strongest bundle (highest lift)?",
+      "correct_answer": "Spaghetti + Pasta Sauce + Parmesan Cheese"
+    },
+    {
+      "id": "Q5",
+      "section": "B2",
+      "question": "Within each city, do SAVE10 orders have a higher or lower net AOV (mean of the order's sum of line_total) than orders with no promo code?",
+      "correct_answer": "Higher in all 8 cities",
+      "naive_answer": "Lower (all cities pooled: $33.96 vs $35.79)",
+      "scoring": "full credit only for 'higher in every city' with the explanation that SAVE10 is concentrated in low-AOV Tokyo and Seoul"
+    },
+    {
+      "id": "Q6",
+      "section": "B3",
+      "question": "Why did Ground Coffee sales drop in Berlin on 2026-03-07 and 2026-03-08?",
+      "correct_answer": "Oat Milk was out of stock in Berlin on those dates (0 units); coffee is co-purchased with Oat Milk. Coffee orders per 100 Berlin orders: 11.11 (7/63) vs 27.12 (16/59) on the following weekend",
+      "naive_answer": "a weekend dip in Berlin demand",
+      "scoring": "full credit requires naming the Oat Milk stockout as the cause"
+    },
+    {
+      "id": "Q7",
+      "section": "B4",
+      "question": "In which $5 range of gross order value do new-customer orders concentrate, and why?",
+      "correct_answer": "$50-55 gross (110 of 390 orders); customers top up to reach the WELCOME10 $50 threshold",
+      "naive_answer": "no concentration; new customers look like returning customers",
+      "scoring": "full credit: $50-55 gross with the WELCOME10 $50 threshold as the reason. Partial credit: $40-45 net (the same orders after the $10 discount) with the threshold as the reason."
+    },
+    {
+      "id": "Q8",
+      "section": "B5",
+      "question": "During PASTA30 (2026-03-09 to 03-11), did Pasta Sauce and Parmesan Cheese (not discounted) sell more units per day than in the week before?",
+      "correct_answer": "Yes: Pasta Sauce 2.18x and Parmesan Cheese 2.24x units/day vs the week before",
+      "naive_answer": "No, only Spaghetti went up"
+    },
+    {
+      "id": "Q9",
+      "section": "B5",
+      "question": "How did Spaghetti sell in the 3 days after PASTA30 compared with the week before?",
+      "correct_answer": "Lower: 0.55x units/day (pantry loading)",
+      "naive_answer": "back to normal"
+    },
+    {
+      "id": "Q10",
+      "section": "B6",
+      "question": "Which hour band (by order_hour: 06-11, 12-17, 18-21, 22-05) has the highest net AOV?",
+      "correct_answer": "Late night 22:00-05:59 ($44.24), driven by customers aged 55+ on Web",
+      "naive_answer": "not late night (assumed to be small snack orders)"
+    },
+    {
+      "id": "Q11",
+      "section": "A1",
+      "question": "Which city has the highest Bakery revenue share?",
+      "correct_answer": "Paris (13%)"
+    },
+    {
+      "id": "Q12",
+      "section": "A2",
+      "question": "Which city has the highest cheese revenue share?",
+      "correct_answer": "Paris (14%)"
+    },
+    {
+      "id": "Q13",
+      "section": "A3",
+      "question": "Which city has the highest Ready Meals revenue share?",
+      "correct_answer": "Tokyo (20%)"
+    },
+    {
+      "id": "Q14",
+      "section": "A4",
+      "question": "Which city has the fewest items (lines) per order?",
+      "correct_answer": "Tokyo (3.54)"
+    },
+    {
+      "id": "Q15",
+      "section": "A5",
+      "question": "Which city has the highest Plant-based revenue share?",
+      "correct_answer": "Berlin (15%)"
+    },
+    {
+      "id": "Q16",
+      "section": "A6",
+      "question": "Which city has the highest net AOV?",
+      "correct_answer": "New York ($50.78)"
+    },
+    {
+      "id": "Q17",
+      "section": "A7",
+      "question": "Which city has the highest share of App orders?",
+      "correct_answer": "Seoul (82%)"
+    },
+    {
+      "id": "Q18",
+      "section": "A8",
+      "question": "Which weekday has the most orders on average, and which the fewest?",
+      "correct_answer": "Most: Saturday, fewest: Tuesday"
+    }
+  ]
+}
