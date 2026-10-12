@@ -29,7 +29,11 @@ class FakeControl:
         return {"agentRuntimes": [{"agentRuntimeId": i, "agentRuntimeName": r["agentRuntimeName"]} for i, r in self.runtimes.items()]}
 
     def get_agent_runtime(self, agentRuntimeId):
-        return copy.deepcopy(self.runtimes[agentRuntimeId])
+        r = copy.deepcopy(self.runtimes[agentRuntimeId])
+        net = (r.get("networkConfiguration") or {}).get("networkModeConfig")
+        if net is not None:
+            net.setdefault("requireServiceS3Endpoint", False)  # AWS reports the default too
+        return r
 
     def create_agent_runtime(self, agentRuntimeName, **kw):
         if "requireServiceS3Endpoint" in str(kw.get("networkConfiguration")):  # as the real API does
@@ -42,7 +46,7 @@ class FakeControl:
     def update_agent_runtime(self, agentRuntimeId, **kw):
         net = (kw.get("networkConfiguration") or {}).get("networkModeConfig") or {}
         cur = (self.runtimes[agentRuntimeId].get("networkConfiguration") or {}).get("networkModeConfig") or {}
-        if agentRuntimeId != USERS_ID and net.get("requireServiceS3Endpoint") != cur.get("requireServiceS3Endpoint"):
+        if agentRuntimeId != USERS_ID and "requireServiceS3Endpoint" in net:  # rejected even when unchanged, as the real API does
             raise ValueError("Agents created after 2026-06-11 cannot modify requireServiceS3Endpoint.")
         self.updates.append(kw)
         r = self.runtimes[agentRuntimeId]

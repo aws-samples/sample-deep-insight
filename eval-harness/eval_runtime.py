@@ -83,7 +83,10 @@ def pinned(image_uri, region):
 
 def _update(ctl, current, **changes):
     """UpdateAgentRuntime replaces the configuration: pass everything back, change only what's asked."""
-    args = {k: current[k] for k in ["agentRuntimeArtifact", "description", "environmentVariables", *COPY] if current.get(k)}
+    args = {k: copy.deepcopy(current[k]) for k in ["agentRuntimeArtifact", "description", "environmentVariables", *COPY] if current.get(k)}
+    # GetAgentRuntime returns requireServiceS3Endpoint, but a runtime created after
+    # 2026-06-11 rejects any update that carries it, even unchanged; left out, it stays as is.
+    ((args.get("networkConfiguration") or {}).get("networkModeConfig") or {}).pop("requireServiceS3Endpoint", None)
     args.update(changes)
     ctl.update_agent_runtime(agentRuntimeId=current["agentRuntimeId"], metadataConfiguration={"requireMMDSV2": True}, **args)
     return wait_ready(ctl, current["agentRuntimeId"])
