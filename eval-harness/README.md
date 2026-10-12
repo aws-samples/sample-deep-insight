@@ -211,7 +211,7 @@ would be replaced.
 | per-agent tokens, cost, time span | one generation per agent |
 | `scores.json`, `judge.json` | trace scores; judge scores carry the judge's justification as the comment |
 | pairwise win rate | score on the candidate's dataset run |
-| human labels | annotation queue `deep-insight-calibration`, same score configs as the judge |
+| human labels | annotation queue `deep-insight-calibration-<scenario>` per scenario, showing only that scenario's requirements and the rubric criteria (same score configs as the judge) |
 
 ```bash
 # eval-harness/langfuse.env (git-ignored): LANGFUSE_HOST (or LANGFUSE_BASE_URL), LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY

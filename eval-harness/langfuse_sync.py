@@ -331,13 +331,13 @@ def retire_traces(lf, manifest, current):
 
 
 def _unqueue(lf, trace_id):
-    """Drop a deleted trace from the annotation queue so nobody is asked to label it."""
-    queue = next((q for q in lf.pages("/api/public/annotation-queues") if q["name"] == QUEUE), None)
-    if queue is None:
-        return
-    for item in lf.pages(f"/api/public/annotation-queues/{queue['id']}/items"):
-        if item["objectId"] == trace_id:
-            lf.delete(f"/api/public/annotation-queues/{queue['id']}/items/{item['id']}")
+    """Drop a deleted trace from the annotation queues so nobody is asked to label it."""
+    for queue in lf.pages("/api/public/annotation-queues"):
+        if not queue["name"].startswith(QUEUE):
+            continue
+        for item in lf.pages(f"/api/public/annotation-queues/{queue['id']}/items"):
+            if item["objectId"] == trace_id:
+                lf.delete(f"/api/public/annotation-queues/{queue['id']}/items/{item['id']}")
 
 
 def pairwise_names(tag_dir):
@@ -367,19 +367,32 @@ def pairwise_scores(lf, tag_dir):
     return len(events)
 
 
-def queue_traces(lf, trace_ids, configs):
-    queue = next((q for q in lf.pages("/api/public/annotation-queues") if q["name"] == QUEUE), None)
-    if queue is None:
-        ids = [configs[c] for c in CRITERIA] + [v for k, v in configs.items() if k.startswith("req.")]
-        queue = lf.post("/api/public/annotation-queues", {"name": QUEUE, "scoreConfigIds": ids,
-                        "description": "Label reports blind to the judge (hide API scores), then run calibrate.py langfuse"})
-    queued = {i["objectId"] for i in lf.pages(f"/api/public/annotation-queues/{queue['id']}/items")}
-    added = 0
-    for t in trace_ids:
-        if t not in queued:
-            lf.post(f"/api/public/annotation-queues/{queue['id']}/items", {"objectId": t, "objectType": "TRACE"})
-            added += 1
-    return queue, added
+def queue_name(scenario):
+    return f"{QUEUE}-{scenario}"
+
+
+def queue_traces(lf, traces, configs, scenarios):
+    """Add (trace_id, scenario) pairs to one queue per scenario, showing only that scenario's requirements.
+
+    Returns {queue name: traces added}.
+    """
+    existing = {q["name"]: q for q in lf.pages("/api/public/annotation-queues")}
+    added = {}
+    for scenario in sorted({sc for _, sc in traces}):
+        name = queue_name(scenario)
+        queue = existing.get(name)
+        if queue is None:
+            reqs = [f"req.{r['id']}" for r in scenarios[scenario].get("requirements", [])]
+            ids = [configs[c] for c in CRITERIA] + [configs[r] for r in reqs]
+            queue = lf.post("/api/public/annotation-queues", {"name": name, "scoreConfigIds": ids,
+                            "description": f"{scenario}: label reports blind to the judge (hide API scores), then run calibrate.py langfuse"})
+        queued = {i["objectId"] for i in lf.pages(f"/api/public/annotation-queues/{queue['id']}/items")}
+        added[name] = 0
+        for t, sc in traces:
+            if sc == scenario and t not in queued:
+                lf.post(f"/api/public/annotation-queues/{queue['id']}/items", {"objectId": t, "objectType": "TRACE"})
+                added[name] += 1
+    return added
 
 
 def is_cloud_host(host):
@@ -406,7 +419,7 @@ def credentials(allow_cloud=False):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("tags", nargs="+", help="tag folders under eval_results/")
-    ap.add_argument("--queue", action="store_true", help=f"add the traces to the annotation queue {QUEUE}")
+    ap.add_argument("--queue", action="store_true", help=f"add the traces to the annotation queue {QUEUE}-<scenario>")
     ap.add_argument("--dry-run", action="store_true", help="build the events and print counts; send nothing")
     ap.add_argument("--allow-cloud", action="store_true", help="allow a Langfuse Cloud host (report texts leave your account)")
     args = ap.parse_args()
@@ -451,15 +464,15 @@ def main():
         n_pw = pairwise_scores(lf, tag_dir)
         deleted, kept = retire_traces(lf, manifest, current)
         manifest.update(current)
-        all_traces += [t for t, *_ in linked]
+        all_traces += [(t, sc) for t, sc, *_ in linked]
         print(f"{tag}: {len(tag_runs[tag])} runs, {len(events)} events, {n_pw} pairwise scores → dataset run '{tag}'"
               + (f" · replaced {deleted} outdated trace(s)" if deleted else ""))
         for t in kept:
             print(f"  ⚠ kept outdated trace {t}: it has human labels; re-label its replacement {manifest[t]['superseded_by']}")
     manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
     if args.queue:
-        queue, added = queue_traces(lf, all_traces, configs)
-        print(f"annotation queue '{QUEUE}': {added} trace(s) added")
+        for name, n in queue_traces(lf, all_traces, configs, scenarios).items():
+            print(f"annotation queue '{name}': {n} trace(s) added")
     print(f"→ {lf.host}  (Datasets → {DATASET})")
     return 0
 

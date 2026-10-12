@@ -88,8 +88,8 @@ class FakeLangfuse:
             self.events += body["batch"]
             return Resp(207, {"successes": [], "errors": self.ingestion_errors})
         if path == "/api/public/annotation-queues":
-            q = {"id": "q1", **body}
-            self.queues["q1"] = q
+            q = {"id": f"q{len(self.queues) + 1}", **body}
+            self.queues[q["id"]] = q
             return Resp(200, q)
         if path.endswith("/items") and "annotation-queues" in path:
             self.queue_items.append(body["objectId"])
@@ -123,7 +123,7 @@ def tag_dir(tmp_path, monkeypatch):
 
 def sync(tag, fake, queue=False, manifest=None):
     lf = ls.Langfuse("http://lf", "pk", "sk", session=fake)
-    configs = ls.ensure_score_configs(lf, ["total_revenue", "segments"])
+    configs = ls.ensure_score_configs(lf, ["total_revenue", "order_count", "aov", "category_share", "segments"])
     run = next(tag.glob("*/run.json")).parent
     ls.ensure_dataset_items(lf, {"jungle_market_simple": load_scenario("jungle_market_simple")}, {"jungle_market_simple": ls.repeat_of(run)})
     events, trace_id, scenario, _, started = ls.run_events(run, "baseline", configs)
@@ -136,7 +136,7 @@ def sync(tag, fake, queue=False, manifest=None):
         ls.retire_traces(lf, manifest, current)
         manifest.update(current)
     if queue:
-        ls.queue_traces(lf, [trace_id], configs)
+        ls.queue_traces(lf, [(trace_id, scenario)], configs, {scenario: load_scenario(scenario)})
     return lf, trace_id, n_pw
 
 
@@ -237,9 +237,14 @@ def test_queue_adds_each_trace_once(tag_dir):
     tag, _ = tag_dir
     fake = FakeLangfuse()
     lf, trace_id, _ = sync(tag, fake, queue=True)
-    ls.queue_traces(lf, [trace_id], {c: f"cfg-{c}" for c in fake.configs})
-    assert fake.queue_items == [trace_id]
-    assert "cfg-insight_depth" in fake.queues["q1"]["scoreConfigIds"]
+    added = ls.queue_traces(lf, [(trace_id, "jungle_market_simple")], {c: f"cfg-{c}" for c in fake.configs},
+                            {"jungle_market_simple": load_scenario("jungle_market_simple")})
+    assert added == {"deep-insight-calibration-jungle_market_simple": 0} and fake.queue_items == [trace_id]
+    q = fake.queues["q1"]
+    assert q["name"] == "deep-insight-calibration-jungle_market_simple"
+    # only this scenario's requirements, plus the rubric criteria
+    assert "cfg-insight_depth" in q["scoreConfigIds"] and "cfg-req.total_revenue" in q["scoreConfigIds"]
+    assert "cfg-req.segments" not in q["scoreConfigIds"]
 
 
 def test_calibrate_reads_langfuse_annotations(tag_dir, capsys):
