@@ -1,0 +1,58 @@
+[
+  {
+    "column_name": "날짜",
+    "column_desc": "주문이 발생한 날짜 (형식: YYYY-MM-DD)"
+  },
+  {
+    "column_name": "매체",
+    "column_desc": "상품이 주문된 매체(예: 쿠빵, 네이바, 아마존, 컬삼)"
+  },
+  {
+    "column_name": "카테고리",
+    "column_desc": "주문한 상품의 카테고리(예: 간편식, 건강식품, 신선식품)"
+  },
+  {
+    "column_name": "상품명",
+    "column_desc": "주문한 상품의 이름"
+  },
+  {
+    "column_name": "노출수",
+    "column_desc": "상품이 매체에 노출된 횟수"
+  },
+  {
+    "column_name": "클릭수",
+    "column_desc": "광고를 보고 상품을 클릭한 횟수"
+  },
+  {
+    "column_name": "전환수",
+    "column_desc": "광고를 보고 상품을 구매한 횟수"
+  },
+  {
+    "column_name": "광고비용",
+    "column_desc": "상품이 매체에 광고되는데 드는 비용"
+  },
+  {
+    "column_name": "매출액",
+    "column_desc": "해당 매체에서 발생한 매출액"
+  },
+  {
+    "column_name": "CTR",
+    "column_desc": "클릭율"
+  },
+  {
+    "column_name": "전환율",
+    "column_desc": "주문 전환율"
+  },
+  {
+    "column_name": "ROAS",
+    "column_desc": "광고 투자 대비 실제 수익(매출액 ÷ 광고비용)"
+  },
+  {
+    "column_name": "주요구매연령",
+    "column_desc": "주요 고객의 연령대 그룹 (예: 20대, 30대, 40대, 50대 등)"
+  },
+    {
+    "column_name": "주요구매성별",
+    "column_desc": "주요 고객의 성별 (예: 남성, 여성)"
+  }
+]
