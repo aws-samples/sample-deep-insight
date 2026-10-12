@@ -2,7 +2,7 @@
 
 > Job tracking, email notifications, and admin dashboard for Deep Insight Web.
 
-**Last Updated**: 2026-03
+**Last Updated**: 2026-10
 
 ---
 
@@ -40,6 +40,7 @@ EventBridge (15 min) ──► Lambda: Start with no sign of life ──► Fail
 
 **References**:
 - [Planning Documents](../../docs/features/ops-dashboard/plan/) — business requirements, research, technical approach, implementation plan
+- [Agent Trace & Job Status](../../docs/features/ops-dashboard/agent-trace.md) — trace recording, job status that always settles, stale-job sweep, trace view design
 - [Admin Authentication](../../docs/features/ops-dashboard/admin-authentication.md) — Cognito JWT auth flow, cookie security, route protection
 - [Language Switching](../../docs/features/ops-dashboard/language-switching.md) — Korean/English i18n for admin dashboard pages
 
@@ -172,6 +173,12 @@ Click a row to open the job in a side panel (the URL gets `?job=<id>`, so the li
 
 - **Trace**: left half, the agents in run order: Coordinator, Planner, plan reviews (HITL, with the user's decision and feedback), and the Supervisor with each sub-agent it ran. The Supervisor's own work between agents shows as `Supervisor → Coder`, `Supervisor → Tracker`, … rows. Each row has a timeline bar, latency and tokens. Right half, the selected agent: its input, its output, then its process as a waterfall (one row per response or tool call: offset from the agent's start, status, duration and a bar on the agent's timeline; a filter for failed calls; the selected row opens below with input / output tabs), and metadata. A running job refreshes every 15 seconds and marks the running agents.
 - **Files**: input data, result documents (report first), generated images, and every generated file.
+
+<img src="img/admin_trace_side_panel.png" alt="Job side panel: agent trace with the selected agent's input and output" width="700"/>
+
+Selecting an agent shows its process as a waterfall of responses and tool calls:
+
+<img src="img/admin_trace_agent_process.png" alt="Agent detail: process waterfall of responses and tool calls" width="700"/>
 
 Jobs that ran before the runtime recorded traces show files only; jobs from before agent inputs were recorded show "not recorded" as the input.
 

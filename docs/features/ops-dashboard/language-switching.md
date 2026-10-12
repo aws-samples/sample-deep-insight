@@ -235,7 +235,7 @@ Keys follow a prefix-based naming pattern:
 | Persistence | None (resets on reload) | `localStorage` |
 | Default language | Korean | Korean |
 | Toggle function | `toggleLanguage()` | `toggleAdminLang()` |
-| Pages | 1 (SPA) | 3 (login, jobs, job detail) |
+| Pages | 1 (SPA) | 2 (login, jobs + job side panel) |
 | Dynamic re-render | `renderPromptExamples()` etc. | `onLangChange()` pattern |
 
 Different variable names (`adminI18n` vs `translations`) prevent conflicts if both systems are ever loaded on the same page.
