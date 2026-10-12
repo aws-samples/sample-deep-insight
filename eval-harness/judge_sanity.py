@@ -65,8 +65,8 @@ def remove_strategies(full):
     lines = full.splitlines()
     heads = [i for i, l in enumerate(lines) if _is_heading(l)]
 
-    def section(start_re, end_test):
-        start = next((i for i in heads if start_re.search(lines[i])), None)
+    def section(start_re, end_test, after=-1):
+        start = next((i for i in heads if i > after and start_re.search(lines[i])), None)
         if start is None:
             raise ValueError(f"no heading matching {start_re.pattern!r}; can't build no_strategies")
         end = next((i for i in heads if i > start and end_test(lines[i])), len(lines))
@@ -75,7 +75,8 @@ def remove_strategies(full):
     drop = set()
     s0, s1 = section(SUMMARY_RE, lambda l: not SUMMARY_RE.search(l))
     drop.update(range(s0, s1))
-    t0, t1 = section(STRATEGY_RE, lambda l: bool(AFTER_STRATEGY_RE.search(l)))
+    # after the summary: a subtitle such as "…매출 증대 실행 전략" is not the strategy section
+    t0, t1 = section(STRATEGY_RE, lambda l: bool(AFTER_STRATEGY_RE.search(l)), after=s1 - 1)
     drop.update(range(t0, t1))
     return "\n".join(l for i, l in enumerate(lines) if i not in drop and not STRATEGY_RE.search(l))
 
