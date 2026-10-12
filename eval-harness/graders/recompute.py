@@ -25,6 +25,13 @@ so it counts as `recompute_unverified`, never as wrong.
 A file with exact duplicate rows (jungle_market) is also recomputed with the
 duplicates removed, since dropping them is the correct analysis; a value that
 matches only that way counts in `recompute_dedup`.
+
+Agents often clean the file once and compute from a cached copy
+(df_clean.pkl). A calculation on such a derived file is recomputed from the raw
+CSV (and its deduplicated copy) when its formula only names CSV columns. A
+match counts (`recompute_derived`); a mismatch is not counted as wrong, since
+the cleaning may have filtered rows the grader can't know about
+(`recompute_derived_unmatched`).
 """
 import re
 from pathlib import Path
@@ -437,16 +444,16 @@ def grade(artifacts_dir, csv_path):
     dedup = df.drop_duplicates() if df.duplicated().any() else None
     source_name = Path(csv_path).name
     details = []
-    supported = ok = lenient = unverified = dedup_ok = 0
+    supported = ok = lenient = unverified = dedup_ok = derived = derived_unmatched = 0
 
     def matches(stored, r):
         return same_value(stored, r["value"]) if "value" in r else any(same_value(stored, v) for v in r["candidates"])
 
     for cid, c in calcs.items():
-        # Only calculations made directly on the raw file; derived artifacts
-        # (.pkl, intermediate CSVs) have columns we cannot reproduce.
-        if Path(str(c.get("source_file", ""))).name != source_name:
-            continue
+        # Calculations on a derived file (df_clean.pkl, an intermediate CSV) are
+        # only recomputed when the formula names nothing but CSV columns, and only
+        # a match counts: the derivation may have filtered rows.
+        is_raw = Path(str(c.get("source_file", ""))).name == source_name
         try:
             r = recompute(c.get("formula"), df, c.get("description", ""))
         except Exception:
@@ -456,8 +463,9 @@ def grade(artifacts_dir, csv_path):
         try:
             stored = float(c.get("value"))
         except (TypeError, ValueError):
-            supported += 1
-            details.append(f"{cid}: non-numeric value {c.get('value')!r}")
+            if is_raw:
+                supported += 1
+                details.append(f"{cid}: non-numeric value {c.get('value')!r}")
             continue
         if dedup is not None and not matches(stored, r):
             try:
@@ -466,6 +474,13 @@ def grade(artifacts_dir, csv_path):
                 rd = None
             if rd is not None and matches(stored, rd):
                 r, dedup_ok = rd, dedup_ok + 1
+        if not is_raw:
+            if matches(stored, r):
+                supported, ok, derived = supported + 1, ok + 1, derived + 1
+                lenient += "candidates" in r
+            else:
+                derived_unmatched += 1
+            continue
         if "value" in r:
             supported += 1
             if same_value(stored, r["value"]):
@@ -486,6 +501,8 @@ def grade(artifacts_dir, csv_path):
         "recompute_lenient": lenient,
         "recompute_unverified": unverified,
         **({"recompute_dedup": dedup_ok} if dedup is not None else {}),
+        "recompute_derived": derived,
+        "recompute_derived_unmatched": derived_unmatched,
         "recompute_match_rate": ok / supported if supported else None,
         "details": details,
     }

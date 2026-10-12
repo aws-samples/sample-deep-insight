@@ -191,6 +191,24 @@ def test_duplicate_rows_recomputed_with_and_without(tmp_path):
     assert any(d.startswith("wrong:") for d in s["details"])
 
 
+def test_derived_file_counts_only_when_it_matches(tmp_path):
+    """df_clean.pkl calculations: a match is recomputed support, a mismatch (rows filtered?) is not called wrong."""
+    csv = tmp_path / "sales.csv"
+    csv.write_text("order_id,line_total\nA,10\nB,20\nB,20\nC,5\n")
+    (tmp_path / "artifacts").mkdir()
+    calcs = [{"id": "raw", "value": 35.0, "source_file": "./data/sales.csv"},
+             {"id": "clean_ok", "value": 35.0, "source_file": "./artifacts/cache/df_clean.pkl"},
+             {"id": "clean_filtered", "value": 30.0, "source_file": "./artifacts/cache/df_clean.pkl"},
+             {"id": "clean_named", "value": 35.0, "source_file": "./artifacts/cache/df_clean.pkl", "formula": "total_sales / order_count"}]
+    for c in calcs:
+        c.setdefault("formula", "SUM(line_total)")
+        c["description"] = "total revenue"
+    (tmp_path / "artifacts" / "calculation_metadata.json").write_text(json.dumps({"calculations": calcs}))
+    s = recompute.grade(tmp_path / "artifacts", csv)
+    assert s["recompute_supported"] == 2 and s["recompute_match_rate"] == 1.0
+    assert s["recompute_derived"] == 1 and s["recompute_derived_unmatched"] == 1
+
+
 @pytest.mark.parametrize("stored, expected, ok", [
     (19655.0, 19655.41, True),           # stored as a whole number
     (18.6, 18.551663, True),             # stored to one decimal
