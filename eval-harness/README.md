@@ -37,7 +37,8 @@ two weeks of grocery orders in 8 cities with planted patterns a shallow
 analysis gets wrong (duplicate rows that change the top city, a Simpson's
 paradox on a coupon, a stockout, threshold bunching, a promotion halo). Its
 answer sheet (`ground_truth.json` / `.md`, Q1-Q18) lets a person grade a report
-without recomputing anything.
+without recomputing anything. [jungle_market.md](jungle_market.md) describes the
+data, the planted patterns, the answers and how to grade a report against them.
 
 **moon_market and yummy_food are test sets.** They have no scenarios, answer
 keys or gold cases here, and no prompt or threshold is tuned against them, so
