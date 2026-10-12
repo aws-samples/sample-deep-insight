@@ -59,13 +59,17 @@ def jungle_market():
     The dataset ships with its own answer sheet (ground_truth.json / .md next
     to the CSV, Q1-Q18); these facts are recomputed from the CSV and must
     agree with it. Every value is after removing the 111 exact duplicate rows
-    (Sydney, 2026-03-10) unless its scope says raw.
+    (Sydney, 2026-03-10) unless its scope says raw; the scope tells the fact checker that counting them
+    twice is an error, not another subset.
     """
     csv = REPO / "deep-insight-web" / "sample_data" / "jungle-market" / "jungle-market-sales.csv"
     raw = pd.read_csv(csv)
     df = raw.drop_duplicates()
-    clean = {"period": "full period 2026-03-02 to 2026-03-15", "filter": "after removing exact duplicate rows"}
-    rawscope = {"period": "full period 2026-03-02 to 2026-03-15", "filter": "raw file, duplicate rows included"}
+    # The duplicates are a loading error, not a subset a report may choose: a figure that
+    # counts them twice is wrong in the same scope, never "about another subset".
+    once = "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+    clean = {"period": "full period 2026-03-02 to 2026-03-15", "filter": once}
+    rawscope = {"period": "full period 2026-03-02 to 2026-03-15", "filter": "the raw file as loaded"}
     orders = df.groupby("order_id").agg(net=("line_total", "sum"), lines=("line_total", "size"), city=("city", "first"), date=("order_date", "first"),
                                         hour=("order_hour", "first"), ctype=("customer_type", "first"),
                                         channel=("channel", "first"), age=("age_group", "first"), promo=("promo_code", "first"))
@@ -186,7 +190,7 @@ def jungle_market():
         a, b = windows[w]
         sel = df[(df.product_name == product) & (df.order_date >= a) & (df.order_date <= b)]
         return sel["quantity"].sum() / ((pd.Timestamp(b) - pd.Timestamp(a)).days + 1)
-    pscope = {"period": "PASTA30 2026-03-09 to 03-11 vs the week before (03-02 to 03-08)", "filter": "after removing exact duplicate rows; all rows of the product"}
+    pscope = {"period": "PASTA30 2026-03-09 to 03-11 vs the week before (03-02 to 03-08)", "filter": once + "; all rows of the product"}
     for prod, id_ in [("Spaghetti", "spaghetti"), ("Pasta Sauce", "pasta_sauce"), ("Parmesan Cheese", "parmesan")]:
         f.append(value(f"{id_}_promo_lift_x", per_day(prod, "promo") / per_day(prod, "before"), f"{prod} units per day during PASTA30 divided by units per day in the week before",
                        "ratio", rel_tol=0.02, scope=pscope, note="" if id_ == "spaghetti" else "not discounted itself: a halo from the Spaghetti promotion"))

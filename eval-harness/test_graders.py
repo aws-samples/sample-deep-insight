@@ -191,6 +191,23 @@ def test_duplicate_rows_recomputed_with_and_without(tmp_path):
     assert any(d.startswith("wrong:") for d in s["details"])
 
 
+def test_overall_formula_with_the_group_in_the_description(tmp_path):
+    """'SUM(discount)/SUM(line_total)' described as 'PASTA30 할인율' is checked on the PASTA30 rows; a wrong value still fails."""
+    csv = tmp_path / "sales.csv"
+    csv.write_text("promo_code,line_total,discount\nPASTA30,7,3\nSAVE10,9,1\n,10,0\n")
+    (tmp_path / "artifacts").mkdir()
+    f = "SUM(discount)/(SUM(line_total)+SUM(discount))*100"
+    calcs = [{"id": "pasta", "value": 30.0, "description": "PASTA30 할인율"},
+             {"id": "none", "value": 0.0, "description": "No Promo 할인율"},
+             {"id": "wrong", "value": 12.0, "description": "SAVE10 할인율"}]
+    for c in calcs:
+        c.update(formula=f, source_file="./data/sales.csv")
+    (tmp_path / "artifacts" / "calculation_metadata.json").write_text(json.dumps({"calculations": calcs}))
+    s = recompute.grade(tmp_path / "artifacts", csv)
+    assert s["recompute_supported"] == 3 and s["recompute_lenient"] == 2
+    assert [d.split(":")[0] for d in s["details"]] == ["wrong"]
+
+
 def test_derived_file_counts_only_when_it_matches(tmp_path):
     """df_clean.pkl calculations: a match is recomputed support, a mismatch (rows filtered?) is not called wrong."""
     csv = tmp_path / "sales.csv"

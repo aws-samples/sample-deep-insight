@@ -20,7 +20,9 @@ description names exactly one group, the value is checked against that group.
 When it names none, the value only has to equal some group's value; those
 looser checks are counted in `recompute_lenient`. If no group's value matches
 either, the formula may mean something else ("weekdays" is not "per weekday"),
-so it counts as `recompute_unverified`, never as wrong.
+so it counts as `recompute_unverified`, never as wrong. A formula with no group
+at all that misses is also tried on the subset its description names
+("PASTA30 할인율": rows with promo_code PASTA30); a match there is lenient too.
 
 A file with exact duplicate rows (jungle_market) is also recomputed with the
 duplicates removed, since dropping them is the correct analysis; a value that
@@ -112,7 +114,7 @@ def _labels(key_name, value):
         y, m, d = (int(x) for x in v.split("-"))
         out += [f"{m}월 {d}일", f"{m}/{d}"]
     elif v == "nan":
-        out = ["없음", "미적용", "no promotion", "none"]
+        out = ["없음", "미적용", "no promotion", "no promo", "none"]
     return out
 
 
@@ -420,6 +422,32 @@ def _keys(key_text):
     return [k for k in re.split(r"\s*[+,&]\s*|\s+and\s+", key_text.strip(), flags=re.I) if k]
 
 
+def _named_subset(formula, df, description, stored):
+    """The formula over the one subset its description names ("PASTA30 할인율"), when that matches.
+
+    Agents often write the overall formula and put the group only in the
+    description. Each column value the description names is tried alone;
+    the matching value, if any, is returned.
+    """
+    import pandas as pd
+    text = (description or "").lower()
+    for col in df.columns:
+        values = df[col].unique()
+        if len(values) > 50:
+            continue
+        for v in values:
+            if not any(_mentions(text, lbl) for lbl in _labels(col, v)):
+                continue
+            sub = df[df[col].isna()] if pd.isna(v) else df[df[col] == v]
+            try:
+                r = recompute(formula, sub, description)
+            except Exception:
+                r = None
+            if r is not None and "value" in r and same_value(stored, r["value"]):
+                return r["value"]
+    return None
+
+
 def same_value(stored, expected):
     """Stored equals expected, or expected rounded to the precision the stored value was written with.
 
@@ -474,6 +502,12 @@ def grade(artifacts_dir, csv_path):
                 rd = None
             if rd is not None and matches(stored, rd):
                 r, dedup_ok = rd, dedup_ok + 1
+        if "value" in r and not matches(stored, r):
+            for frame in (df, dedup) if dedup is not None else (df,):
+                v = _named_subset(c.get("formula"), frame, c.get("description", ""), stored)
+                if v is not None:
+                    r = {"candidates": [v], "lenient": True}
+                    break
         if not is_raw:
             if matches(stored, r):
                 supported, ok, derived = supported + 1, ok + 1, derived + 1
