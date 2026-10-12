@@ -105,7 +105,8 @@ def jungle_market():
         ("ready_meals_share", share(df["category"] == "Ready Meals"), "Ready Meals category"),
         ("plant_based_share", share(df["category"] == "Plant-based"), "Plant-based category"),
     ]:
-        f.append(value(f"top_city_{id_}_pct", s.iloc[0] * 100, f"Share of {s.index[0]}'s net revenue that comes from the {what}: SUM(line_total) of those rows in the city / SUM(line_total) of the city", "percent", rel_tol=0.05, scope=clean,
+        f.append(value(f"top_city_{id_}_pct", s.iloc[0] * 100, f"Share of {s.index[0]}'s net revenue that comes from the {what}: SUM(line_total) of those rows in the city / SUM(line_total) of the city. "
+                       f"Not the city's share of the category's revenue (\"{s.index[0]}에서 발생한 비중\", category revenue in the city / all category revenue), a different quantity", "percent", rel_tol=0.05, scope=clean,
                        note=f"{s.index[0]} has the highest share among the 8 cities; next {s.index[1]} {s.iloc[1] * 100:.1f}%"))
         f.append(ranking(f"city_{id_}_ranking", s.index, f"Cities ranked by the share of their own net revenue (line_total) that comes from the {what}, highest first", scope=clean))
     oc = orders.groupby("city")

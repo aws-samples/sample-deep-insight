@@ -130,7 +130,7 @@
     {
       "id": "top_city_bakery_share_pct",
       "kind": "value",
-      "description": "Share of Paris's net revenue that comes from the Bakery category: SUM(line_total) of those rows in the city / SUM(line_total) of the city",
+      "description": "Share of Paris's net revenue that comes from the Bakery category: SUM(line_total) of those rows in the city / SUM(line_total) of the city. Not the city's share of the category's revenue (\"Paris에서 발생한 비중\", category revenue in the city / all category revenue), a different quantity",
       "scope": {
         "period": "full period 2026-03-02 to 2026-03-15",
         "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
@@ -163,7 +163,7 @@
     {
       "id": "top_city_cheese_share_pct",
       "kind": "value",
-      "description": "Share of Paris's net revenue that comes from the cheese products (Brie, Cheddar Cheese, Parmesan Cheese): SUM(line_total) of those rows in the city / SUM(line_total) of the city",
+      "description": "Share of Paris's net revenue that comes from the cheese products (Brie, Cheddar Cheese, Parmesan Cheese): SUM(line_total) of those rows in the city / SUM(line_total) of the city. Not the city's share of the category's revenue (\"Paris에서 발생한 비중\", category revenue in the city / all category revenue), a different quantity",
       "scope": {
         "period": "full period 2026-03-02 to 2026-03-15",
         "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
@@ -196,7 +196,7 @@
     {
       "id": "top_city_ready_meals_share_pct",
       "kind": "value",
-      "description": "Share of Tokyo's net revenue that comes from the Ready Meals category: SUM(line_total) of those rows in the city / SUM(line_total) of the city",
+      "description": "Share of Tokyo's net revenue that comes from the Ready Meals category: SUM(line_total) of those rows in the city / SUM(line_total) of the city. Not the city's share of the category's revenue (\"Tokyo에서 발생한 비중\", category revenue in the city / all category revenue), a different quantity",
       "scope": {
         "period": "full period 2026-03-02 to 2026-03-15",
         "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
@@ -229,7 +229,7 @@
     {
       "id": "top_city_plant_based_share_pct",
       "kind": "value",
-      "description": "Share of Berlin's net revenue that comes from the Plant-based category: SUM(line_total) of those rows in the city / SUM(line_total) of the city",
+      "description": "Share of Berlin's net revenue that comes from the Plant-based category: SUM(line_total) of those rows in the city / SUM(line_total) of the city. Not the city's share of the category's revenue (\"Berlin에서 발생한 비중\", category revenue in the city / all category revenue), a different quantity",
       "scope": {
         "period": "full period 2026-03-02 to 2026-03-15",
         "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
