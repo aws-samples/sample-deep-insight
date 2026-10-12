@@ -130,7 +130,7 @@
     {
       "id": "top_city_bakery_share_pct",
       "kind": "value",
-      "description": "Share of Paris's revenue from the Bakery category",
+      "description": "Share of Paris's net revenue that comes from the Bakery category: SUM(line_total) of those rows in the city / SUM(line_total) of the city",
       "scope": {
         "period": "full period 2026-03-02 to 2026-03-15",
         "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
@@ -143,7 +143,7 @@
     {
       "id": "city_bakery_share_ranking",
       "kind": "ranking",
-      "description": "Cities ranked by the share of their revenue from the Bakery category, highest first",
+      "description": "Cities ranked by the share of their own net revenue (line_total) that comes from the Bakery category, highest first",
       "scope": {
         "period": "full period 2026-03-02 to 2026-03-15",
         "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
@@ -163,7 +163,7 @@
     {
       "id": "top_city_cheese_share_pct",
       "kind": "value",
-      "description": "Share of Paris's revenue from the cheese products (Brie, Cheddar Cheese, Parmesan Cheese)",
+      "description": "Share of Paris's net revenue that comes from the cheese products (Brie, Cheddar Cheese, Parmesan Cheese): SUM(line_total) of those rows in the city / SUM(line_total) of the city",
       "scope": {
         "period": "full period 2026-03-02 to 2026-03-15",
         "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
@@ -176,7 +176,7 @@
     {
       "id": "city_cheese_share_ranking",
       "kind": "ranking",
-      "description": "Cities ranked by the share of their revenue from the cheese products (Brie, Cheddar Cheese, Parmesan Cheese), highest first",
+      "description": "Cities ranked by the share of their own net revenue (line_total) that comes from the cheese products (Brie, Cheddar Cheese, Parmesan Cheese), highest first",
       "scope": {
         "period": "full period 2026-03-02 to 2026-03-15",
         "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
@@ -196,7 +196,7 @@
     {
       "id": "top_city_ready_meals_share_pct",
       "kind": "value",
-      "description": "Share of Tokyo's revenue from the Ready Meals category",
+      "description": "Share of Tokyo's net revenue that comes from the Ready Meals category: SUM(line_total) of those rows in the city / SUM(line_total) of the city",
       "scope": {
         "period": "full period 2026-03-02 to 2026-03-15",
         "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
@@ -209,7 +209,7 @@
     {
       "id": "city_ready_meals_share_ranking",
       "kind": "ranking",
-      "description": "Cities ranked by the share of their revenue from the Ready Meals category, highest first",
+      "description": "Cities ranked by the share of their own net revenue (line_total) that comes from the Ready Meals category, highest first",
       "scope": {
         "period": "full period 2026-03-02 to 2026-03-15",
         "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
@@ -229,7 +229,7 @@
     {
       "id": "top_city_plant_based_share_pct",
       "kind": "value",
-      "description": "Share of Berlin's revenue from the Plant-based category",
+      "description": "Share of Berlin's net revenue that comes from the Plant-based category: SUM(line_total) of those rows in the city / SUM(line_total) of the city",
       "scope": {
         "period": "full period 2026-03-02 to 2026-03-15",
         "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
@@ -242,7 +242,7 @@
     {
       "id": "city_plant_based_share_ranking",
       "kind": "ranking",
-      "description": "Cities ranked by the share of their revenue from the Plant-based category, highest first",
+      "description": "Cities ranked by the share of their own net revenue (line_total) that comes from the Plant-based category, highest first",
       "scope": {
         "period": "full period 2026-03-02 to 2026-03-15",
         "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
@@ -432,7 +432,7 @@
     {
       "id": "save10_net_aov_pooled",
       "kind": "value",
-      "description": "Net AOV of orders with promo_code SAVE10, all cities pooled",
+      "description": "Net AOV (mean of each order's SUM(line_total)) of orders with promo_code SAVE10, all cities pooled; an order has at most one code",
       "scope": {
         "period": "full period 2026-03-02 to 2026-03-15",
         "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
@@ -445,7 +445,7 @@
     {
       "id": "no_promo_net_aov_pooled",
       "kind": "value",
-      "description": "Net AOV of orders with no promo_code, all cities pooled",
+      "description": "Net AOV (mean of each order's SUM(line_total)) of orders with no promo_code on any of their rows, all cities pooled; an order whose Spaghetti row has PASTA30 is a PASTA30 order, not a no-promo one",
       "scope": {
         "period": "full period 2026-03-02 to 2026-03-15",
         "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"

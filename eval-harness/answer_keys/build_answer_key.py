@@ -105,9 +105,9 @@ def jungle_market():
         ("ready_meals_share", share(df["category"] == "Ready Meals"), "Ready Meals category"),
         ("plant_based_share", share(df["category"] == "Plant-based"), "Plant-based category"),
     ]:
-        f.append(value(f"top_city_{id_}_pct", s.iloc[0] * 100, f"Share of {s.index[0]}'s revenue from the {what}", "percent", rel_tol=0.05, scope=clean,
+        f.append(value(f"top_city_{id_}_pct", s.iloc[0] * 100, f"Share of {s.index[0]}'s net revenue that comes from the {what}: SUM(line_total) of those rows in the city / SUM(line_total) of the city", "percent", rel_tol=0.05, scope=clean,
                        note=f"{s.index[0]} has the highest share among the 8 cities; next {s.index[1]} {s.iloc[1] * 100:.1f}%"))
-        f.append(ranking(f"city_{id_}_ranking", s.index, f"Cities ranked by the share of their revenue from the {what}, highest first", scope=clean))
+        f.append(ranking(f"city_{id_}_ranking", s.index, f"Cities ranked by the share of their own net revenue (line_total) that comes from the {what}, highest first", scope=clean))
     oc = orders.groupby("city")
     lines = oc["lines"].mean().sort_values()
     aov = oc["net"].mean().sort_values(ascending=False)
@@ -149,8 +149,8 @@ def jungle_market():
     per_city = pd.DataFrame({"save": save.groupby("city")["net"].mean(), "none": nopromo.groupby("city")["net"].mean()})
     assert (per_city["save"] > per_city["none"]).all(), "SAVE10 net AOV is no longer higher in every city: rewrite this fact"
     f += [
-        value("save10_net_aov_pooled", save["net"].mean(), "Net AOV of orders with promo_code SAVE10, all cities pooled", "USD", scope=clean),
-        value("no_promo_net_aov_pooled", nopromo["net"].mean(), "Net AOV of orders with no promo_code, all cities pooled", "USD", scope=clean),
+        value("save10_net_aov_pooled", save["net"].mean(), "Net AOV (mean of each order's SUM(line_total)) of orders with promo_code SAVE10, all cities pooled; an order has at most one code", "USD", scope=clean),
+        value("no_promo_net_aov_pooled", nopromo["net"].mean(), "Net AOV (mean of each order's SUM(line_total)) of orders with no promo_code on any of their rows, all cities pooled; an order whose Spaghetti row has PASTA30 is a PASTA30 order, not a no-promo one", "USD", scope=clean),
         relation("save10_vs_no_promo_aov_within_city", "above",
                  "Within each city, net AOV of SAVE10 orders compared with orders with no promo code", scope={**clean, "filter": clean["filter"] + "; per city"},
                  note="higher in all 8 cities, while the pooled SAVE10 AOV is lower (Simpson's paradox: SAVE10 is concentrated in low-AOV Tokyo and Seoul)"),
