@@ -77,6 +77,14 @@ def test_ratio_printed_as_percent():
     assert factcheck.compare(fact, statement("roas", "ROAS 3.46", "3.46", 3.46, "ratio"))[0] == "correct"
 
 
+def test_citation_marker_inside_a_number(facts):
+    """Reports put markers inside numbers ("111,065 [2].13달러"); code must still read 111,065.13 and call it wrong."""
+    st = statement("total_revenue", "총매출은 111,065 [2].13달러", "111,065.13달러", 111065.13, "USD")
+    assert factcheck.compare(facts["total_revenue"], st)[0] == "wrong"
+    st = statement("total_revenue", "총매출은 110,270 [2].26달러", "110,270.26달러", 110270.26, "USD")
+    assert factcheck.compare(facts["total_revenue"], st)[0] == "correct"
+
+
 def test_quote_must_occur_in_report():
     report = factcheck._norm("매출 1위 도시는 Singapore로 $16,645.52 [11](점유율 15.1% [12])를 기록")
     assert factcheck.quote_found("Singapore로 $16,645.52(점유율 15.1%)", report)     # markers and spaces ignored

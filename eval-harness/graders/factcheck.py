@@ -36,7 +36,7 @@ from graders.numbers import matches, parse_numbers
 
 # Bump when the prompts or the comparison rules change: cached results and
 # compare.py's "same evaluator" check key on it.
-PROMPT_VERSION = "factcheck-v3"
+PROMPT_VERSION = "factcheck-v4"
 
 SYSTEM = """You check analysis reports written by an automated data-analysis agent against definitions of facts computed from the same dataset.
 
@@ -164,7 +164,12 @@ def _paragraph(quote, paragraphs):
 
 
 def _printed(quote, number):
-    """(value, decimals) of the number in the quote that the model normalised, or None."""
+    """(value, decimals) of the number in the quote that the model normalised, or None.
+
+    Citation markers are removed first: reports carry them inside numbers too
+    ("111,065 [2].13달러"), which otherwise reads as 111,065 and 13.
+    """
+    quote = re.sub(r"\s*\[\d+\]", "", quote)
     for v, _, _, d in parse_numbers(quote):
         if v == number or (number and abs(v - number) <= abs(number) * 1e-9):
             return v, d

@@ -9,7 +9,7 @@
       "description": "Total revenue: SUM(line_total), net of discounts",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "USD",
       "value": 110270.26,
@@ -22,7 +22,7 @@
       "description": "Number of orders: distinct order_id",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "count",
       "value": 2987.0,
@@ -35,7 +35,7 @@
       "description": "Number of distinct customers",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "count",
       "value": 1847.0,
@@ -48,7 +48,7 @@
       "description": "Average order value (AOV): SUM(line_total) / distinct order_id",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "USD",
       "value": 36.916726,
@@ -61,7 +61,7 @@
       "description": "Average number of rows (product lines) per order",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "ratio",
       "value": 5.212253,
@@ -87,7 +87,7 @@
       "description": "Cities ranked by revenue, highest first",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "rank",
       "order": [
@@ -107,7 +107,7 @@
       "description": "Revenue of city Singapore",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "USD",
       "value": 16645.52,
@@ -120,7 +120,7 @@
       "description": "Revenue of city Sydney",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "USD",
       "value": 16258.8,
@@ -133,7 +133,7 @@
       "description": "Share of Paris's net revenue that comes from the Bakery category: SUM(line_total) of those rows in the city / SUM(line_total) of the city. Not the city's share of the category's revenue (\"Paris에서 발생한 비중\", category revenue in the city / all category revenue), a different quantity",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "percent",
       "value": 12.894395,
@@ -146,7 +146,7 @@
       "description": "Cities ranked by the share of their own net revenue (line_total) that comes from the Bakery category, highest first",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "rank",
       "order": [
@@ -166,7 +166,7 @@
       "description": "Share of Paris's net revenue that comes from the cheese products (Brie, Cheddar Cheese, Parmesan Cheese): SUM(line_total) of those rows in the city / SUM(line_total) of the city. Not the city's share of the category's revenue (\"Paris에서 발생한 비중\", category revenue in the city / all category revenue), a different quantity",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "percent",
       "value": 13.913292,
@@ -179,7 +179,7 @@
       "description": "Cities ranked by the share of their own net revenue (line_total) that comes from the cheese products (Brie, Cheddar Cheese, Parmesan Cheese), highest first",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "rank",
       "order": [
@@ -199,7 +199,7 @@
       "description": "Share of Tokyo's net revenue that comes from the Ready Meals category: SUM(line_total) of those rows in the city / SUM(line_total) of the city. Not the city's share of the category's revenue (\"Tokyo에서 발생한 비중\", category revenue in the city / all category revenue), a different quantity",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "percent",
       "value": 19.7751,
@@ -212,7 +212,7 @@
       "description": "Cities ranked by the share of their own net revenue (line_total) that comes from the Ready Meals category, highest first",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "rank",
       "order": [
@@ -232,7 +232,7 @@
       "description": "Share of Berlin's net revenue that comes from the Plant-based category: SUM(line_total) of those rows in the city / SUM(line_total) of the city. Not the city's share of the category's revenue (\"Berlin에서 발생한 비중\", category revenue in the city / all category revenue), a different quantity",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "percent",
       "value": 14.888552,
@@ -245,7 +245,7 @@
       "description": "Cities ranked by the share of their own net revenue (line_total) that comes from the Plant-based category, highest first",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "rank",
       "order": [
@@ -265,7 +265,7 @@
       "description": "Cities ranked by average rows (product lines) per order, FEWEST first",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "rank",
       "order": [
@@ -285,7 +285,7 @@
       "description": "Average rows per order in Tokyo",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "ratio",
       "value": 3.542056,
@@ -298,7 +298,7 @@
       "description": "Cities ranked by AOV (net), highest first",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "rank",
       "order": [
@@ -318,7 +318,7 @@
       "description": "AOV (net) of city New York",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "USD",
       "value": 50.782317,
@@ -331,7 +331,7 @@
       "description": "Cities ranked by the share of orders placed on the App channel, highest first",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "rank",
       "order": [
@@ -351,7 +351,7 @@
       "description": "Share of Seoul's orders placed on the App channel",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "percent",
       "value": 82.338308,
@@ -364,7 +364,7 @@
       "description": "Weekdays ranked by number of orders, most first",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "rank",
       "order": [
@@ -383,7 +383,7 @@
       "description": "Orders containing both Ground Coffee and Oat Milk",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "count",
       "value": 477.0,
@@ -396,7 +396,7 @@
       "description": "Orders containing both Spaghetti and Pasta Sauce",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "count",
       "value": 266.0,
@@ -409,7 +409,7 @@
       "description": "Lift of Spaghetti and Pasta Sauce at order level: P(A and B) / (P(A) P(B))",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "ratio",
       "value": 4.714152,
@@ -422,7 +422,7 @@
       "description": "Share of orders with Spaghetti and Pasta Sauce that also contain Parmesan Cheese (confidence)",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "percent",
       "value": 73.308271,
@@ -435,7 +435,7 @@
       "description": "Net AOV (mean of each order's SUM(line_total)) of orders with promo_code SAVE10, all cities pooled; an order has at most one code",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "USD",
       "value": 33.963207,
@@ -448,7 +448,7 @@
       "description": "Net AOV (mean of each order's SUM(line_total)) of orders with no promo_code on any of their rows, all cities pooled; an order whose Spaghetti row has PASTA30 is a PASTA30 order, not a no-promo one",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "USD",
       "value": 35.790792,
@@ -461,7 +461,7 @@
       "description": "Within each city, net AOV of SAVE10 orders compared with orders with no promo code",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset); per city"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file; per city"
       },
       "unit": "relation",
       "relation": "above",
@@ -473,7 +473,7 @@
       "description": "Share of Tokyo orders with SAVE10",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "percent",
       "value": 53.271028,
@@ -525,7 +525,7 @@
       "description": "New-customer orders with gross order value (unit_price x quantity) in [$50, $55)",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset); New customers' orders"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file; New customers' orders"
       },
       "unit": "count",
       "value": 110.0,
@@ -538,7 +538,7 @@
       "description": "Orders from New customers",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset); New customers' orders"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file; New customers' orders"
       },
       "unit": "count",
       "value": 390.0,
@@ -551,7 +551,7 @@
       "description": "Spaghetti units per day during PASTA30 divided by units per day in the week before",
       "scope": {
         "period": "PASTA30 2026-03-09 to 03-11 vs the week before (03-02 to 03-08)",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset); all rows of the product"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file; all rows of the product"
       },
       "unit": "ratio",
       "value": 4.201788,
@@ -564,7 +564,7 @@
       "description": "Pasta Sauce units per day during PASTA30 divided by units per day in the week before",
       "scope": {
         "period": "PASTA30 2026-03-09 to 03-11 vs the week before (03-02 to 03-08)",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset); all rows of the product"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file; all rows of the product"
       },
       "unit": "ratio",
       "value": 2.181395,
@@ -577,7 +577,7 @@
       "description": "Parmesan Cheese units per day during PASTA30 divided by units per day in the week before",
       "scope": {
         "period": "PASTA30 2026-03-09 to 03-11 vs the week before (03-02 to 03-08)",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset); all rows of the product"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file; all rows of the product"
       },
       "unit": "ratio",
       "value": 2.24,
@@ -590,7 +590,7 @@
       "description": "Spaghetti units per day in the 3 days after PASTA30 (03-12 to 03-14) divided by units per day in the week before",
       "scope": {
         "period": "2026-03-12 to 03-14 vs 2026-03-02 to 03-08",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset); all rows of the product"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file; all rows of the product"
       },
       "unit": "ratio",
       "value": 0.554278,
@@ -603,7 +603,7 @@
       "description": "Hour bands by order_hour (06-11, 12-17, 18-21, 22-05) ranked by net AOV, highest first",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "rank",
       "order": [
@@ -619,7 +619,7 @@
       "description": "Net AOV of orders placed 22:00-05:59 (order_hour 22-23 or 0-5)",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "USD",
       "value": 44.243506,
@@ -632,7 +632,7 @@
       "description": "Share of late-night (22-05) orders from customers aged 55+",
       "scope": {
         "period": "the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
-        "filter": "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+        "filter": "none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file"
       },
       "unit": "percent",
       "value": 41.234568,

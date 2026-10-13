@@ -67,7 +67,9 @@ def jungle_market():
     df = raw.drop_duplicates()
     # The duplicates are a loading error, not a subset a report may choose: a figure that
     # counts them twice is wrong in the same scope, never "about another subset".
-    once = "none; the file's exact duplicate rows are a loading error and count once (a figure that counts them twice is wrong, not another subset)"
+    once = ("none; the file's exact duplicate rows are a loading error and count once: a figure that counts them twice is wrong, "
+            "not another subset, even when the report says it kept them. Only a statement that presents the figure as the raw "
+            "file's value in contrast to the deduplicated one (\"before removing duplicates, Sydney looks first\") is about the raw file")
     # The file holds no other dates: a report that gives the whole data other dates mislabels
     # it (a report did: "2025-01-01 ~ 01-14"), which must not turn every figure into "another period".
     whole = ("the whole file, 2026-03-02 to 2026-03-15; the file has no other dates, so a report that labels "
