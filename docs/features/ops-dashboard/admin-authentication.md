@@ -168,9 +168,12 @@ This ensures:
 | `POST /admin/change-password` | No | Cognito RespondToAuthChallenge |
 | `POST /admin/logout` | No | Clear cookie |
 | `GET /admin/dashboard` | **Yes** | Serve jobs list page |
-| `GET /admin/dashboard/{job_id}` | **Yes** | Serve job detail page |
+| `GET /admin/dashboard/{job_id}` | **Yes** | Redirect to `/admin/dashboard?job={job_id}` (old job page URL; opens the side panel) |
 | `GET /admin/api/jobs` | **Yes** | Jobs list JSON |
 | `GET /admin/api/jobs/{job_id}` | **Yes** | Single job JSON |
+| `GET /admin/api/jobs/{job_id}/trace` | **Yes** | Agent trace (events.jsonl records) |
+| `GET /admin/api/jobs/{job_id}/files` | **Yes** | Artifacts and input files |
+| `GET /admin/api/jobs/{job_id}/files/{area}/{name}` | **Yes** | File proxy (images/text inline with CSP sandbox, else download) |
 
 Protected routes use FastAPI's dependency injection:
 

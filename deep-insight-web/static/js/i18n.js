@@ -117,6 +117,11 @@ const translations = {
         prompt_generating_hint: "AI가 샘플 프롬프트를 생성하고 있습니다...",
         prompt_gen_failed: "생성 실패: ",
         prompt_no_coldef: "컬럼 정의가 필요합니다. JSON 파일을 업로드하거나 자동 생성하세요.",
+        stream_lost: "[서버와의 연결이 끊겼습니다. 분석은 서버에서 계속 진행 중이며, 끝나면 여기에 결과가 표시됩니다.]",
+        stream_job_failed: "[분석이 실패했습니다. 관리자에게 작업 ID를 알려 주세요.]",
+        stream_job_recovered: "[분석이 결국 완료되었습니다. 앞의 실패 표시는 무시해 주세요.]",
+        stream_status_unavailable: "[서버와의 연결이 끊겼습니다. 분석 상태를 확인할 수 없으니 잠시 후 결과를 다시 확인해 주세요.]",
+        stream_status_timeout: "[분석이 예상보다 오래 걸립니다. 잠시 후 다시 확인해 주세요.]",
     },
     en: {
         hero_tagline_prefix: "A platform for building diverse agent applications including reporting — ",
@@ -235,6 +240,11 @@ const translations = {
         prompt_generating_hint: "AI is generating sample prompts...",
         prompt_gen_failed: "Generation failed: ",
         prompt_no_coldef: "Column definitions required. Upload a JSON file or auto-generate first.",
+        stream_lost: "[Connection to the server was lost. The analysis keeps running on the server; results will appear here when it finishes.]",
+        stream_job_failed: "[The analysis failed. Please share the job ID with an administrator.]",
+        stream_job_recovered: "[The analysis finished after all. Please ignore the failure above.]",
+        stream_status_unavailable: "[Connection to the server was lost and the analysis status can't be checked. Please check the results again later.]",
+        stream_status_timeout: "[The analysis is taking longer than expected. Please check again later.]",
     }
 };
 

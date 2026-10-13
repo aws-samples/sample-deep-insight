@@ -5,13 +5,17 @@ Provides authentication (Cognito) and job monitoring API for the admin dashboard
 All routes are prefixed with /admin. Protected routes use require_admin dependency.
 """
 
+import json
 import logging
 import os
+import re
 from pathlib import Path
+from urllib.parse import quote
 
 import boto3
+from botocore.exceptions import ClientError
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
 from pydantic import BaseModel
 
 from ops.auth import require_admin
@@ -22,6 +26,7 @@ AWS_REGION = os.environ.get("AWS_REGION", "us-west-2")
 COGNITO_USER_POOL_ID = os.environ.get("COGNITO_USER_POOL_ID", "")
 COGNITO_CLIENT_ID = os.environ.get("COGNITO_CLIENT_ID", "")
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME", "")
+S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME", "")
 
 OPS_STATIC_DIR = Path(__file__).resolve().parent / "static"
 
@@ -179,13 +184,12 @@ def dashboard_page(claims: dict = Depends(require_admin)):
     return HTMLResponse(html_path.read_text())
 
 
-@admin_router.get("/dashboard/{job_id}", response_class=HTMLResponse)
+@admin_router.get("/dashboard/{job_id}")
 def job_detail_page(job_id: str, claims: dict = Depends(require_admin)):
-    """Serve the job detail page."""
-    html_path = OPS_STATIC_DIR / "job.html"
-    if not html_path.exists():
-        return HTMLResponse("<h1>Job detail page not deployed yet</h1>", status_code=503)
-    return HTMLResponse(html_path.read_text())
+    """Old job page URL: the job list opens the job in its side panel."""
+    if not _SAFE_ID.match(job_id):
+        raise HTTPException(status_code=404)
+    return RedirectResponse(f"/admin/dashboard?job={job_id}")
 
 
 @admin_router.get("/api/jobs")
@@ -215,20 +219,7 @@ def list_jobs(status: str = "", claims: dict = Depends(require_admin)):
         # Sort by started_at descending (scan results are unsorted)
         items.sort(key=lambda x: x.get("started_at", 0), reverse=True)
 
-        # Convert Decimal to int/float for JSON serialization
-        jobs = []
-        for item in items:
-            job = {}
-            for k, v in item.items():
-                if hasattr(v, "as_integer_ratio"):
-                    job[k] = int(v) if v == int(v) else float(v)
-                elif isinstance(v, list):
-                    job[k] = [str(i) for i in v]
-                else:
-                    job[k] = str(v) if not isinstance(v, (str, bool)) else v
-            jobs.append(job)
-
-        return {"success": True, "jobs": jobs}
+        return {"success": True, "jobs": [_to_json(item) for item in items]}
 
     except Exception as e:
         logger.error(f"List jobs failed: {e}")
@@ -242,28 +233,178 @@ def get_job(job_id: str, claims: dict = Depends(require_admin)):
         return {"success": False, "error": "DYNAMODB_TABLE_NAME not configured"}
 
     try:
-        dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
-        table = dynamodb.Table(DYNAMODB_TABLE_NAME)
-        response = table.get_item(Key={"job_id": job_id})
-        item = response.get("Item")
-
-        if not item:
-            raise HTTPException(status_code=404, detail="Job not found")
-
-        # Convert Decimal to int/float for JSON serialization
-        job = {}
-        for k, v in item.items():
-            if hasattr(v, "as_integer_ratio"):
-                job[k] = int(v) if v == int(v) else float(v)
-            elif isinstance(v, list):
-                job[k] = [str(i) for i in v]
-            else:
-                job[k] = str(v) if not isinstance(v, (str, bool)) else v
-
-        return {"success": True, "job": job}
+        return {"success": True, "job": _to_json(_get_job_item(job_id))}
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Get job failed: {e}")
         return {"success": False, "error": "Failed to retrieve job"}
+
+
+# ---------- Job trace, artifacts and files ----------
+#
+#   deep-insight/traces/{job_id}/events.jsonl              agent trace, updated after
+#                                                          each agent invocation
+#   deep-insight/fargate_sessions/{session_id}/artifacts/  generated files (session_id
+#                                                          reaches the record at the end)
+#   uploads/{job_id}/                                      input data
+
+_SAFE_ID = re.compile(r"^[a-zA-Z0-9_-]+$")
+_SESSIONS_PREFIX = "deep-insight/fargate_sessions/"
+_TRACES_PREFIX = "deep-insight/traces/"
+
+# Served inline (previews); everything else downloads. Inline responses carry
+# CSP sandbox so an SVG or text file can't run script on the admin origin.
+_INLINE_TYPES = {
+    ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif",
+    ".webp": "image/webp", ".svg": "image/svg+xml",
+    ".txt": "text/plain; charset=utf-8", ".md": "text/plain; charset=utf-8",
+    ".csv": "text/plain; charset=utf-8", ".json": "text/plain; charset=utf-8",
+    ".py": "text/plain; charset=utf-8", ".log": "text/plain; charset=utf-8",
+    ".html": "text/plain; charset=utf-8",
+}
+
+
+def _to_json(item: dict) -> dict:
+    """Convert a DynamoDB item (Decimal numbers) to JSON-serializable values."""
+    job = {}
+    for k, v in item.items():
+        if hasattr(v, "as_integer_ratio"):
+            job[k] = int(v) if v == int(v) else float(v)
+        elif isinstance(v, list):
+            job[k] = [str(i) for i in v]
+        else:
+            job[k] = str(v) if not isinstance(v, (str, bool)) else v
+    return job
+
+
+def _get_job_item(job_id: str) -> dict:
+    """Get the job record, or raise 404."""
+    if not _SAFE_ID.match(job_id):
+        raise HTTPException(status_code=404, detail="Job not found")
+    table = boto3.resource("dynamodb", region_name=AWS_REGION).Table(DYNAMODB_TABLE_NAME)
+    item = table.get_item(Key={"job_id": job_id}).get("Item")
+    if not item:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return item
+
+
+def _job_prefix(item: dict, area: str) -> str:
+    """S3 prefix of one file area of the job; "" if artifacts have no session yet."""
+    if area == "input":
+        return f"uploads/{item['job_id']}/"
+    if area == "artifacts":
+        session_id = str(item.get("session_id", ""))
+        return f"{_SESSIONS_PREFIX}{session_id}/artifacts/" if _SAFE_ID.match(session_id) else ""
+    raise HTTPException(status_code=404)
+
+
+def _list_files(s3, prefix: str) -> list:
+    files = []
+    for page in s3.get_paginator("list_objects_v2").paginate(Bucket=S3_BUCKET_NAME, Prefix=prefix):
+        for obj in page.get("Contents", []):
+            name = obj["Key"].removeprefix(prefix)
+            if name:
+                files.append({"name": name, "size": obj["Size"]})
+    return files
+
+
+@admin_router.get("/api/jobs/{job_id}/trace")
+def get_job_trace(job_id: str, claims: dict = Depends(require_admin)):
+    """Agent trace recorded by the runtime (events.jsonl), one record per step.
+
+    A running job's trace covers the agents finished so far. available=False
+    for jobs that ran before the runtime recorded traces, or whose first agent
+    hasn't finished yet.
+    """
+    if not S3_BUCKET_NAME:
+        return {"success": False, "error": "S3_BUCKET_NAME not configured"}
+    try:
+        item = _get_job_item(job_id)
+        # trace_path is set when the job ends; until then the trace is at its job_id key
+        trace_path = str(item.get("trace_path", "")) or f"{_TRACES_PREFIX}{job_id}/events.jsonl"
+        if not trace_path.startswith((_TRACES_PREFIX, _SESSIONS_PREFIX)):
+            return {"success": True, "available": False, "records": []}
+
+        s3 = boto3.client("s3", region_name=AWS_REGION)
+        try:
+            body = s3.get_object(Bucket=S3_BUCKET_NAME, Key=trace_path)["Body"].read().decode("utf-8")
+        except ClientError as e:
+            # Without s3:ListBucket on output/, a missing key is AccessDenied, not NoSuchKey
+            if e.response["Error"]["Code"] not in ("NoSuchKey", "AccessDenied"):
+                raise
+            logger.info(f"No trace for job {job_id} at {trace_path} ({e.response['Error']['Code']})")
+            return {"success": True, "available": False, "records": []}
+
+        records = []
+        for line in body.splitlines():
+            try:
+                records.append(json.loads(line))
+            except ValueError:
+                continue
+        return {"success": True, "available": True, "records": records}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Get job trace failed: {e}")
+        return {"success": False, "error": "Failed to retrieve trace"}
+
+
+@admin_router.get("/api/jobs/{job_id}/files")
+def list_job_files(job_id: str, claims: dict = Depends(require_admin)):
+    """List the job's generated artifacts and input data files."""
+    if not S3_BUCKET_NAME:
+        return {"success": False, "error": "S3_BUCKET_NAME not configured"}
+    try:
+        item = _get_job_item(job_id)
+        s3 = boto3.client("s3", region_name=AWS_REGION)
+        result = {"success": True}
+        for area in ("artifacts", "input"):
+            prefix = _job_prefix(item, area)
+            result[area] = _list_files(s3, prefix) if prefix else []
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"List job files failed: {e}")
+        return {"success": False, "error": "Failed to list files"}
+
+
+@admin_router.get("/api/jobs/{job_id}/files/{area}/{filename:path}")
+def get_job_file(job_id: str, area: str, filename: str, download: bool = False,
+                 claims: dict = Depends(require_admin)):
+    """Proxy one job file: inline preview for images and text, else a download."""
+    if ".." in filename.split("/") or filename.startswith("/"):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    if not S3_BUCKET_NAME:
+        raise HTTPException(status_code=503, detail="S3_BUCKET_NAME not configured")
+    prefix = _job_prefix(_get_job_item(job_id), area)
+    if not prefix:
+        raise HTTPException(status_code=404, detail="File not found")
+    key = prefix + filename
+
+    try:
+        s3 = boto3.client("s3", region_name=AWS_REGION)
+        obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=key)
+    except Exception as e:
+        logger.error(f"Get job file failed: {key}: {e}")
+        raise HTTPException(status_code=404, detail="File not found")
+
+    # Streamed in chunks: a large input CSV must not be held in the web task's memory
+    body = obj["Body"].iter_chunks(chunk_size=1024 * 1024)
+    length = {"Content-Length": str(obj["ContentLength"])} if obj.get("ContentLength") is not None else {}
+    name = filename.rsplit("/", 1)[-1]
+    inline_type = _INLINE_TYPES.get(Path(name).suffix.lower())
+    if inline_type and not download:
+        return StreamingResponse(body, media_type=inline_type, headers={
+            "Content-Security-Policy": "sandbox",
+            "X-Content-Type-Options": "nosniff",
+            **length,
+        })
+
+    # RFC 5987: ASCII fallback + UTF-8 encoded filename for non-ASCII characters
+    ext = name.rsplit(".", 1)[-1] if "." in name else "bin"
+    disposition = f"attachment; filename=\"download.{ext}\"; filename*=UTF-8''{quote(name)}"
+    return StreamingResponse(body, media_type="application/octet-stream",
+                             headers={"Content-Disposition": disposition, **length})

@@ -13,8 +13,30 @@ Deep Insight Ops adds operational monitoring to the Web UI:
 - **Job Tracking** — DynamoDB records every analysis job (status, tokens, duration)
 - **Email Notifications** — SNS sends completion/failure emails to admins
 - **Admin Dashboard** — Web-based dashboard with Cognito authentication
+- **Agent Trace & Files** — per job: the order agents ran in, each agent's response, tool calls with their code and output, generated images and files, report re-download
 
 All Ops resources are optional — the Web UI works normally without them.
+
+### How a job's status and trace are recorded
+
+```
+Web UI /analyze ──► DynamoDB: Start
+     │ payload: prompt, data_directory, job_id
+     ▼
+AgentCore Runtime
+     ├─ after each agent invocation, and at the end:
+     │    s3://…/deep-insight/traces/{job_id}/events.jsonl  ◄── dashboard reads the trace
+     └─ at the end (success, error, client disconnect):
+          s3://…/fargate_sessions/{session_id}/output/token_usage.json, job_status.json
+                                                     │ S3 event
+                                                     ▼
+                         Lambda: update job by job_id ──► Success / Failed + SNS
+EventBridge (15 min) ──► Lambda: Start with no sign of life ──► Failed
+```
+
+- **Trace**: the runtime records every agent event before the response stream's event filter, so tool calls (generated code, execution output) are included even though they are never streamed to the browser. It is keyed by `job_id`, which the dashboard knows from the start, and re-uploaded after each agent invocation: a running job shows the agents finished so far, and a runtime that dies mid-run still leaves the trace up to its last finished agent. Plan reviews (HITL) are recorded with the plan shown and the user's answer (approved / revision requested with feedback / auto-approved).
+- **Status**: the runtime reports the final status itself, so a job settles even if the browser connection drops mid-run. Three writers record status (runtime via the Lambda, the web server on stream errors, the stale-job sweep); **Success is final**: none of them replaces a Success with Failed.
+- **Stale jobs**: the runtime re-uploads the trace at least every 5 minutes while it runs, so the trace's last-modified time is a heartbeat. The sweep marks a job Failed when its trace hasn't changed for 30 minutes (Lambda env `STALE_HEARTBEAT_MINUTES`), or, for jobs without a trace (older runtimes), 120 minutes after it started (`STALE_JOB_MINUTES`). Long runs with several plan revisions and HITL waits keep their heartbeat and stay running.
 
 **References**:
 - [Planning Documents](../../docs/features/ops-dashboard/plan/) — business requirements, research, technical approach, implementation plan
@@ -53,11 +75,12 @@ This creates:
 | SNS Subscriptions | One per admin email |
 | Lambda IAM Role | `deep-insight-ops-lambda-role` |
 | Lambda Function | `deep-insight-job-complete` (Python 3.12) |
-| S3 Event Notification | `token_usage.json` upload triggers Lambda |
+| S3 Event Notifications | `job_status.json` and `token_usage.json` uploads trigger Lambda |
+| EventBridge Rule | `deep-insight-stale-job-sweep` (every 15 min, marks unreported jobs Failed) |
 | Cognito User Pool | `deep-insight-ops-admins` (no self-signup, min 12 char password) |
 | Cognito App Client | `deep-insight-ops-web` (no client secret) |
 | Cognito Admin Users | One per admin email (temporary password sent via email) |
-| Web Task Role Policy | DynamoDB + SNS permissions added |
+| Web Task Role Policy | DynamoDB + SNS permissions, S3 read on `deep-insight/traces/*` (agent trace) |
 | ECS Task Definition | `DYNAMODB_TABLE_NAME`, `SNS_TOPIC_ARN`, `COGNITO_USER_POOL_ID`, `COGNITO_CLIENT_ID` env vars added |
 
 ### Step 2: Redeploy Web UI
@@ -68,6 +91,17 @@ bash deploy.sh
 ```
 
 > `deploy.sh` preserves env vars added by `deploy_ops.sh`.
+
+### Step 2b: Update the AgentCore Runtime
+
+The agent trace and the runtime-reported job status need the runtime from the same commit. Recommended order: `deploy_ops.sh` (Lambda), `deploy.sh` (web), then the runtime. Any other order is safe too: a failed run never writes `token_usage.json`, which Lambdas from before this change read as success, and a runtime from before this change is still handled through `token_usage.json`.
+
+```bash
+cd ../managed-agentcore
+uv run 01_create_agentcore_runtime_vpc.py  # updates the existing runtime
+```
+
+Until the runtime is updated, jobs are still tracked through `token_usage.json` as before, without a trace.
 
 ### Step 3: Wait for ECS service stability
 
@@ -92,7 +126,7 @@ aws lambda get-function --function-name deep-insight-job-complete \
 # Check S3 event notification
 aws s3api get-bucket-notification-configuration \
   --bucket <YOUR_BUCKET> --region us-west-2 \
-  --query "LambdaFunctionConfigurations[?Id=='deep-insight-job-complete']"
+  --query "LambdaFunctionConfigurations[?starts_with(Id, 'deep-insight-job-')].Id"  # job-complete, job-status
 
 # Check ECS task definition has Ops env vars
 aws ecs describe-task-definition --task-definition deep-insight-web-task \
@@ -134,9 +168,12 @@ After login, the dashboard shows all analysis jobs with status, duration, tokens
 
 <img src="img/admin_job_list_page.png" alt="Admin Jobs Dashboard" width="700"/>
 
-Click any job row to view full details including token breakdown and report download link.
+Click a row to open the job in a side panel (the URL gets `?job=<id>`, so the link opens it again; Esc closes it). Drag its left edge to resize it, and the divider between the tree and the detail to resize the halves. It has two tabs and a report download button:
 
-<img src="img/Job_detail_page.png" alt="Job Detail Page" width="700"/>
+- **Trace**: left half, the agents in run order: Coordinator, Planner, plan reviews (HITL, with the user's decision and feedback), and the Supervisor with each sub-agent it ran. The Supervisor's own work between agents shows as `Supervisor → Coder`, `Supervisor → Tracker`, … rows. Each row has a timeline bar, latency and tokens. Right half, the selected agent: its input, its output, then its process as a waterfall (one row per response or tool call: offset from the agent's start, status, duration and a bar on the agent's timeline; a filter for failed calls; the selected row opens below with input / output tabs), and metadata. A running job refreshes every 15 seconds and marks the running agents.
+- **Files**: input data, result documents (report first), generated images, and every generated file.
+
+Jobs that ran before the runtime recorded traces show files only; jobs from before agent inputs were recorded show "not recorded" as the input.
 
 ---
 
@@ -231,12 +268,20 @@ aws logs tail /aws/lambda/deep-insight-job-complete --region us-west-2 --since 1
 
 ### DynamoDB record stuck in "Start"
 
-The Lambda triggers on `token_usage.json` upload. If the analysis completed but no Success record:
+The runtime uploads `job_status.json` when the run ends, and the Lambda updates the job by `job_id`. A job left in `Start` means the runtime stopped without reporting, or runs an older version; the stale job sweep marks it Failed once its trace stops updating for `STALE_HEARTBEAT_MINUTES` (or `STALE_JOB_MINUTES` after start, without a trace).
 
 ```bash
-# Check if token_usage.json was uploaded
+# Check what the runtime uploaded (job_status.json, token_usage.json) and the trace
 aws s3 ls s3://<YOUR_BUCKET>/deep-insight/fargate_sessions/<SESSION_ID>/output/
+aws s3 ls s3://<YOUR_BUCKET>/deep-insight/traces/<JOB_ID>/
 
+# Check the sweep schedule exists
+aws events describe-rule --name deep-insight-stale-job-sweep --region us-west-2
+```
+
+Runtimes older than `job_status.json` report through `token_usage.json` and need the session_id linked by the web server, which only happens if the browser stayed connected until `workflow_complete`:
+
+```bash
 # Check if session_id was linked to job record
 aws dynamodb query --table-name deep-insight-jobs \
   --index-name SessionIdIndex \

@@ -4,9 +4,9 @@ version = "0.1.0"
 description = "Deep Insight AgentCore Runtime Scripts"
 requires-python = ">=3.12"
 dependencies = [
-    "boto3>=1.42.1",
+    "boto3>=1.43.31",
     "strands-agents>=1.18.0",
-    "bedrock-agentcore>=1.1.1",
+    "bedrock-agentcore>=1.18.1",
     "bedrock-agentcore-starter-toolkit>=0.2.2",
     "python-dotenv==1.2.2",
     "pyyaml>=6.0",
@@ -19,6 +19,6 @@ dependencies = [
     "langchain-core>=0.3.0",
     "fastapi>=0.129.0",
     "uvicorn>=0.38.0",
-    "python-multipart>=0.0.20",
+    "python-multipart>=0.0.31",
     "fastmcp>=2.10.0",
 ]

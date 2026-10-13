@@ -1,0 +1,82 @@
+/* Files view (files-view.js). Uses the admin pages' CSS variables. */
+
+.fv-title {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 1.2rem 0 0.6rem;
+}
+.fv-title:first-child { margin-top: 0; }
+.fv-empty { color: var(--text-muted); font-size: 0.85rem; }
+
+.fv-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+}
+.fv-row:last-child { border-bottom: none; }
+.fv-link { color: var(--accent); text-decoration: none; word-break: break-all; }
+.fv-link:hover { text-decoration: underline; }
+.fv-size { color: var(--text-muted); white-space: nowrap; font-size: 0.72rem; }
+
+.fv-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.6rem; }
+.fv-result {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.65rem 0.9rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: border-color 0.2s;
+}
+.fv-result:hover { border-color: var(--accent); }
+.fv-result.primary { border-color: rgba(74, 124, 255, 0.5); background: var(--accent-glow); }
+.fv-result-icon {
+    flex-shrink: 0;
+    width: 2.6rem;
+    padding: 0.45rem 0;
+    border-radius: var(--radius-xs);
+    background: #2b579a;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-align: center;
+}
+.fv-result-meta { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.fv-result-name { font-family: var(--font-mono); font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fv-download { color: var(--accent); font-weight: 700; }
+
+.fv-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.7rem; }
+.fv-image {
+    display: block;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--text-muted);
+    transition: border-color 0.2s;
+}
+.fv-image:hover { border-color: var(--accent); }
+.fv-image img { display: block; width: 100%; height: 130px; object-fit: contain; background: #fff; }
+.fv-image span {
+    display: block;
+    padding: 0.35rem 0.55rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+details.fv-all { margin-top: 0.4rem; }
+details.fv-all > summary { cursor: pointer; }

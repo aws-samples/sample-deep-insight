@@ -32,7 +32,7 @@ try:
 except (IndexError, OSError):
     pass
 
-from ops.job_tracker import track_job_start, track_job_link, track_job_failure
+from ops.job_tracker import track_job_start, track_job_link, track_job_failure, get_job_status
 from ops.admin_router import admin_router
 from chat_agent import (
     session_manager as chat_session_manager,
@@ -601,7 +601,9 @@ def agentcore_sse_generator(query: str, data_directory: str, upload_id: str = ""
         return
 
     client = get_agentcore_client()
-    payload = json.dumps({"prompt": query, "data_directory": data_directory})
+    # job_id lets the runtime report the job's final status to the ops Lambda
+    # itself, so the record settles even if this stream is cut off.
+    payload = json.dumps({"prompt": query, "data_directory": data_directory, "job_id": upload_id})
 
     logger.info(f"Invoking AgentCore: query={query[:80]}...")
 
@@ -681,6 +683,17 @@ def agentcore_sse_generator(query: str, data_directory: str, upload_id: str = ""
         logger.error(f"AgentCore invocation error: {e}", exc_info=True)
         yield format_sse({"type": "error", "text": "Analysis failed"})
         track_job_failure(upload_id, str(e))
+
+
+@app.get("/jobs/{upload_id}/status")
+def job_status(upload_id: str):
+    """Job status for a page that lost its /analyze stream (runtime keeps running)."""
+    if not _SAFE_ID.match(upload_id):
+        return {"success": False, "error": "Invalid upload_id"}
+    status = get_job_status(upload_id)
+    if status is None:
+        return {"success": False, "error": "Job status not available"}
+    return {"success": True, **status}
 
 
 @app.post("/analyze")

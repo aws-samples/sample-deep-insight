@@ -111,36 +111,101 @@ function initAnalyze() {
             elapsedEl.textContent = ` (${m}:${s.toString().padStart(2, "0")})`;
         }, 1000);
 
+        const uploadId = currentUploadId;
+        streamCompleted = false;
+        streamErrored = false;
         try {
-            const res = await fetch("/analyze", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ upload_id: currentUploadId, query }),
-            });
-            const reader = res.body.getReader();
-            const decoder = new TextDecoder();
-            let buffer = "";
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split("\n");
-                buffer = lines.pop();
-                for (const line of lines) {
-                    if (!line.startsWith("data: ")) continue;
-                    try { handleSSEEvent(JSON.parse(line.slice(6))); } catch (_) {}
+            let streamLost = false;
+            try {
+                const res = await fetch("/analyze", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ upload_id: uploadId, query }),
+                });
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = "";
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split("\n");
+                    buffer = lines.pop();
+                    for (const line of lines) {
+                        if (!line.startsWith("data: ")) continue;
+                        try { handleSSEEvent(JSON.parse(line.slice(6))); } catch (_) {}
+                    }
                 }
+            } catch (err) {
+                streamLost = true;
             }
-        } catch (err) {
-            stopElapsedTimer();
-            removeStreamingIndicator();
-            appendOutput("\nError: " + err.message + "\n", "event-error");
-            removeStreamingIndicator();
+            // Lost connection, or a stream that ended without completing: the
+            // analysis may still be running on the server
+            if (streamLost || (!streamCompleted && !streamErrored)) {
+                await followJobAfterDisconnect(uploadId);
+            }
         } finally {
             removeStreamingIndicator();
             analyzeBtn.disabled = false;
         }
     });
+}
+
+// ==================== Lost stream ====================
+// The runtime keeps running when this page loses the /analyze stream (network
+// drop, proxy timeout) and records the job's final status itself. Follow that
+// status instead of reporting the disconnect as a failed analysis.
+const JOB_POLL_MS = 15000;
+const JOB_POLL_MAX_MS = 3 * 60 * 60 * 1000;
+// Failed isn't always final: the stale-job sweep can mark a job that is only
+// slow, and its Success replaces that later. Keep checking for a while.
+const JOB_RECHECK_AFTER_FAILED_MS = 30 * 60 * 1000;
+const JOB_RECHECK_MS = 60000;
+let streamCompleted = false;
+let streamErrored = false;
+
+async function followJobAfterDisconnect(uploadId) {
+    const t = translations[currentLang];
+    appendOutput("\n" + t.stream_lost + "\n", "event-text");
+    const started = Date.now();
+    let failedAt = null;
+    while (Date.now() - started < JOB_POLL_MAX_MS) {
+        let data = null;
+        try {
+            const res = await fetch("/jobs/" + encodeURIComponent(uploadId) + "/status");
+            data = await res.json();
+        } catch (_) {
+            // still offline: try again next round
+        }
+        if (data && !data.success) {
+            // Job tracking not deployed: nothing to follow
+            stopElapsedTimer();
+            removeStreamingIndicator();
+            appendOutput(t.stream_status_unavailable + "\n", "event-error");
+            return;
+        }
+        if (data && data.status === "Success") {
+            stopElapsedTimer();
+            appendOutput("\n" + (failedAt ? t.stream_job_recovered : "[Analysis complete]") + "\n", "event-done");
+            currentSessionId = data.session_id || null;
+            if (currentSessionId) await fetchArtifactsWithRetry(currentSessionId);
+            removeStreamingIndicator();
+            return;
+        }
+        if (data && data.status === "Failed") {
+            if (!failedAt) {
+                failedAt = Date.now();
+                stopElapsedTimer();
+                removeStreamingIndicator();
+                appendOutput("\n" + t.stream_job_failed + " (" + uploadId + ")\n", "event-error");
+            }
+            if (Date.now() - failedAt >= JOB_RECHECK_AFTER_FAILED_MS) return;
+        }
+        await new Promise(r => setTimeout(r, failedAt ? JOB_RECHECK_MS : JOB_POLL_MS));
+    }
+    stopElapsedTimer();
+    removeStreamingIndicator();
+    appendOutput(t.stream_status_timeout + "\n", "event-error");
 }
 
 function handleSSEEvent(event) {
@@ -160,6 +225,7 @@ function handleSSEEvent(event) {
             break;
         case "agent_reasoning_stream": appendOutput(event.text, "event-reasoning"); break;
         case "workflow_complete":
+            streamCompleted = true;
             currentSessionId = event.session_id || null;
             stopElapsedTimer();
             removeStreamingIndicator();
@@ -168,6 +234,7 @@ function handleSSEEvent(event) {
             if (currentSessionId) fetchArtifactsWithRetry(currentSessionId);
             break;
         case "error":
+            streamErrored = true;
             stopElapsedTimer();
             removeStreamingIndicator();
             appendOutput("\nError: " + event.text + "\n", "event-error");
