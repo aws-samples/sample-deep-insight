@@ -482,7 +482,13 @@ def resolve_body_citations(doc):
                 except (TypeError, ValueError):
                     pass
     # number (+optional unit) (+optional existing [N]); aligned to Auditor regex (catches percentages)
-    num_re = re.compile(r'(-?\d{{1,3}}(?:[,]\d{{3}})+|-?\d+(?:\.\d+)?)\s*(%p|%|[^\s\d\[\].,()]{{1,3}})?\s*(\[\d+\])?')
+    # A match never starts or ends inside a number, so 111,065.13 is one value (not
+    # 111,065 + ".13"). ~ / : - · separate numbers and are never a unit.
+    unit_re = r'%p|%|[^\s\d\[\].,()~/:·–-]{{1,3}}'
+    num_re = re.compile(r'(?<![\d.,])(-?\d{{1,3}}(?:,\d{{3}})+(?:\.\d+)?|-?\d+(?:\.\d+)?)(?![.,]?\d)\s*(' + unit_re + r')?\s*(\[\d+\])?')
+    # one end of a range, date, ratio or time (10~15%, 3/9~3/15, 2024-2025, 14:30) — not a single value
+    range_l = re.compile(r'\d(?:' + unit_re + r')?(?:\s?[~–]\s?|[/:-])$')
+    range_r = re.compile(r'(?:' + unit_re + r')?(?:\s?[~–]\s?|[/:-])-?\d')
     inserted, unresolved, in_refs = 0, [], False
     targets = []
     for para in doc.paragraphs:  # body only (skip references section)
@@ -504,6 +510,8 @@ def resolve_body_citations(doc):
         for m in num_re.finditer(txt):
             if m.group(3):  # already cited
                 continue
+            if range_l.search(txt, 0, m.start(1)) or range_r.match(txt, m.end(1)):
+                continue  # a marker here would land between the two ends (10~[N]15%)
             try:
                 val = float(m.group(1).replace(',', ''))
             except ValueError:
@@ -514,6 +522,9 @@ def resolve_body_citations(doc):
             if any(t in unit for t in ('년', '월', '일', '시', '분', '초', '주')) or (not unit and 1900 <= int(val) <= 2100):
                 continue
             tol = max(abs(val) * 0.005, 0.05)
+            dec = len(m.group(1).partition('.')[2])
+            if dec:  # printed decimals must round from the citation value (110,270.26 ≠ 110,270.13)
+                tol = min(tol, 0.5 * 10 ** -dec + 1e-9)
             cands = [(cid, desc) for (v, cid, desc) in verified if abs(val - v) <= tol]
             if not cands:
                 unresolved.append((val, txt[max(0, m.start()-20):m.end()+20].strip()))

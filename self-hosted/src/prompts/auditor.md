@@ -266,7 +266,13 @@ write_and_execute_tool(
     content="""
 import json, re, zipfile
 
-_NUM_RE = re.compile(r'(-?\d{{1,3}}(?:[,]\d{{3}})+|-?\d+(?:\.\d+)?)\s*(%p|%|[^\s\d\[\].,()]{{1,3}})?\s*(?:\[(\d+)\])?')
+# A match never starts or ends inside a number, so 111,065.13 is one value (not
+# 111,065 + ".13"). ~ / : - · separate numbers and are never a unit.
+_UNIT = r'%p|%|[^\s\d\[\].,()~/:·–-]{{1,3}}'
+_NUM_RE = re.compile(r'(?<![\d.,])(-?\d{{1,3}}(?:,\d{{3}})+(?:\.\d+)?|-?\d+(?:\.\d+)?)(?![.,]?\d)\s*(' + _UNIT + r')?\s*(?:\[(\d+)\])?')
+# one end of a range, date, ratio or time (10~15%, 3/9~3/15, 2024-2025, 14:30) — not a single value
+_RANGE_L = re.compile(r'\d(?:' + _UNIT + r')?(?:\s?[~–]\s?|[/:-])$')
+_RANGE_R = re.compile(r'(?:' + _UNIT + r')?(?:\s?[~–]\s?|[/:-])-?\d')
 
 def extract_claims(docx_path):
     with zipfile.ZipFile(docx_path) as z:
@@ -301,6 +307,7 @@ def extract_claims(docx_path):
                 'paragraph': p_idx, 'text': para[:200],
                 'value': val, 'unit': unit or '', 'marker': marker,
                 'in_table': para_in_table, 'in_refs': in_refs,
+                'in_range': bool(_RANGE_L.search(para, 0, m.start(1)) or _RANGE_R.match(para, m.end(1))),
                 'span_start': m.start(), 'span_end': m.end()
             }})
     return claims
@@ -368,6 +375,9 @@ def classify(claims, citations, metadata, tol_rel=0.005, tol_abs=0.05):
             # references/citation section is QA apparatus (its formulas/values are
             # not prose claims) — skip both for Type A (Type B/C above still scan them).
             if cl.get('in_table') or cl.get('in_refs'):
+                continue
+            # Option 1b: one end of a range/date (10~15%, 3/9) is not a single-value claim.
+            if cl.get('in_range'):
                 continue
             # Option 2: dates/years are context, not analytical claims.
             # int() so YYYY.MM caption dates (e.g. 2025.05) are caught too.
