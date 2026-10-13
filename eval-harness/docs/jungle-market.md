@@ -1,6 +1,6 @@
 # Jungle Market: the evaluation dataset
 
-**→ Back to [Eval Harness README](README.md)**
+**→ Back to [Eval Harness README](../README.md)**
 
 Jungle Market is the dataset the eval harness runs on. It is a fictional
 online grocery delivery service in 8 cities, two weeks of orders, with
@@ -22,10 +22,10 @@ a test set (see the README).
 | `deep-insight-web/sample_data/jungle-market/column_definitions.json` | Column descriptions, including the exact promotion rules | Yes |
 | `deep-insight-web/sample_data/jungle-market/ground_truth.md` | Answer sheet for people: patterns, naive vs correct answers, Q1-Q18 | **No** |
 | `deep-insight-web/sample_data/jungle-market/ground_truth.json` | The same answers, machine-readable | **No** |
-| `eval-harness/answer_keys/jungle_market.json` | 44 facts the fact checker (`factcheck.py`) compares reports against | **No** |
+| `eval-harness/answer_keys/jungle_market.json` | 44 facts the fact checker (`graders/factcheck.py`) compares reports against | **No** |
 | `eval-harness/answer_keys/build_answer_key.py` | Builds the answer key from the CSV with pandas | No |
 
-`scenarios.yaml` lists only the CSV and `column_definitions.json` under
+`config/scenarios.yaml` lists only the CSV and `column_definitions.json` under
 `upload`, so the answers never reach the runtime. Keep it that way: do not put
 the `ground_truth` files or the answer key in an upload list, a prompt or a
 scenario `query`.
@@ -91,7 +91,7 @@ Full numbers, tables and the reasoning behind each answer are in
 
 | | `ground_truth.json` / `.md` | `answer_keys/jungle_market.json` |
 |---|---|---|
-| Used by | a person grading a report | `factcheck.py` (automated) |
+| Used by | a person grading a report | `graders/factcheck.py` (automated) |
 | Shape | 18 questions with a correct answer, a naive answer and a scoring rule | 44 facts: value, ranking or relation, each with a scope |
 | Answers | "did the report find the pattern and explain it" | "is each number the report states right" |
 
@@ -133,13 +133,19 @@ cd eval-harness
 The fact check reads every number the report states and labels it against
 the answer key. For this dataset it matters most in two places:
 
-- A statement about another scope is `out_of_scope`, not wrong. "Sydney is
-  the top city" is wrong for the deduplicated file but out of scope if the
-  report says it is about the raw file or 2026-03-10 only.
+- A statement about another period or subset is `out_of_scope`, not wrong.
+  "Paris is the top city" is wrong for the whole period (Paris is 4th) but
+  right for 2026-03-10 alone, so it is out of scope if the report says it is
+  about that day.
+- The duplicate rows are a loading error, not another scope. A figure that
+  counts them twice is wrong even when the report says it kept them (Sydney
+  first, $111,065.13 total revenue). Only a sentence that names the raw file
+  as a contrast to the deduplicated result ("before removing duplicates,
+  Sydney looks first") is true.
 - `wrong_confirmed` fails `core_pass`. So a report that states the naive
-  answer as a fact (Sydney first, after dedup) fails.
+  answer as its result fails.
 
-`core_pass` thresholds for each scenario are in `scenarios.yaml` under `pass:`.
+`core_pass` thresholds for each scenario are in `config/scenarios.yaml` under `pass:`.
 For the open scenarios only `total_revenue` is required for now. These are
 loose defaults and should be set from the first baseline runs.
 
@@ -151,7 +157,7 @@ that.
 ### 2. Manual: grade a report with Q1-Q18
 
 Use this when comparing versions by hand, or to build gold cases for
-`factcheck_sanity.py` (there is no jungle_market gold case yet).
+`sanity/factcheck_sanity.py` (the first one is `sanity/factcheck_cases/jungle_market.yaml`).
 
 1. Open the report and `ground_truth.md` side by side. Don't recompute anything:
    every answer is in the table at the end of `ground_truth.md`.
@@ -198,6 +204,6 @@ ever changes, all of these must change together:
 2. `answer_keys/jungle_market.json`: run `answer_keys/build_answer_key.py`, then check its values against `ground_truth.json` by hand.
 3. Hard-coded counts: "111 duplicate rows" and "15,680 rows" appear in
    `build_answer_key.py`, the README and this file.
-4. Re-run `factcheck_sanity.py` and `judge_sanity.py`, and re-grade the
+4. Re-run `sanity/factcheck_sanity.py` and `sanity/judge_sanity.py`, and re-grade the
    baseline runs. A new answer key changes `factcheck_version`, so old fact
    checks are not reused.

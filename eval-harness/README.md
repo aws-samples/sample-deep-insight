@@ -1,6 +1,6 @@
 # Deep Insight Eval Harness
 
-**→ Back to [Main README](../README.md)**
+**→ Back to [Main README](../README.md)** · **English** | [한국어](README.ko.md)
 
 An automatic scorecard for Deep Insight. When you change code, prompts or
 models, it answers two questions with numbers instead of "the report reads
@@ -16,8 +16,8 @@ better":
 | **Runner** `run_eval.py` | Sends a fixed analysis request to the deployed runtime, approves the plan review automatically (no human), and saves the report, citations, code-execution logs and token usage |
 | **Grader** `grade.py` | Scores one run: files produced, numbers correct, cost, time → `scores.json` with PASS / FAIL |
 | **Comparer** `compare.py` | Puts two versions side by side: mean ± std per metric and the difference |
-| **Fact checker** `factcheck.py` | A model reads the report against the answer key: which facts are stated right, which wrong, which are about another period or subset (paid, on by default) |
-| **LLM judge** `judge.py`, `pairwise.py` | Grades what numbers can't: did the report answer the request, and is it better than the baseline's? (paid, opt-in) |
+| **Fact checker** `graders/factcheck.py` | A model reads the report against the answer key: which facts are stated right, which wrong, which are about another period or subset (paid, on by default) |
+| **LLM judge** `graders/judge.py`, `pairwise.py` | Grades what numbers can't: did the report answer the request, and is it better than the baseline's? (paid, opt-in) |
 | **Static checks** `pytest` | Seconds, no AWS: prompt templates render, model request fields are valid, and the graders really catch planted defects |
 
 Example `compare.py` output:
@@ -30,6 +30,70 @@ cost                      $10.20        $8.50           -17% ▲ better
 duration                  1920s         1680s           -12% ▲ better
 ```
 
+## Folder layout
+
+```
+eval-harness/
+├── run_eval.py, grade.py, compare.py, pairwise.py    commands you run day to day
+├── eval_runtime.py, langfuse_sync.py, calibrate.py   eval runtime setup, publishing, calibration
+├── graders/       scoring modules: rule-based graders, factcheck.py, judge.py, cost.py
+├── sanity/        checks on the paid evaluators: factcheck_sanity.py, judge_sanity.py, factcheck_cases/
+├── config/        scenarios.yaml, judge.yaml, pricing.yaml, runtime_configs.yaml,
+│                  eval.env and langfuse.env (git-ignored, local only)
+├── answer_keys/   facts per dataset for the fact check, and the script that builds them
+├── docs/          jungle-market.md: the dataset, its planted patterns and answers
+├── tests/         pytest suite and fixtures
+└── eval_results/  every run, grade and comparison (git-ignored)
+```
+
+Run every command from `eval-harness/`. Paths in `config/scenarios.yaml` are
+relative to `eval-harness/`.
+
+## How it runs: steps and files
+
+```
+config/scenarios.yaml + jungle-market CSV
+        │
+        ▼  1. run_eval.py            invoke the eval runtime, auto-approve plan review
+eval_results/<tag>/<run>/            events.jsonl, run.json, usage.json, config.json, artifacts/
+        │
+        ▼  2. grade.py               (run_eval.py calls it after each run)
+        │     graders/*.py           files, citations, recompute, report, cost   → scores.json
+        │     graders/factcheck.py   report numbers vs answer_keys/              → factcheck.json
+        │     graders/judge.py       requirements and quality scores (--judge)   → judge.json
+        ▼
+scores.json  (core_pass: PASS / FAIL)
+        │
+        ├─▶ 3. pairwise.py           candidate vs baseline report  → pairwise_vs_<baseline>.json
+        ├─▶ 4. compare.py            tag vs tag table              → stdout or compare.md
+        └─▶ 5. langfuse_sync.py      traces, dataset runs, annotation queues in Langfuse
+                  │
+                  ▼  6. calibrate.py human labels vs judge scores
+```
+
+| Step | Command | Reads | Writes | Paid |
+|---|---|---|---|---|
+| 1. Run | `run_eval.py --scenario <s> --tag <t>` | `config/scenarios.yaml`, the scenario's `upload` files (sent to S3), `config/eval.env` | `eval_results/<t>/<s>-<time>-<n>/`: `events.jsonl`, `run.json`, `usage.json`, `config.json`, `s3/`, `artifacts/` | Yes: the runtime (agents, Fargate) |
+| 2. Grade | `grade.py <run_dir> --scenario <s>` (automatic after step 1) | `artifacts/`, the CSV, `config/pricing.yaml`, the scenario's `pass:` | `scores.json` | No |
+| 2a. Fact check | part of step 2, on by default (`--no-factcheck` skips) | the report, `answer_keys/<dataset>.json`, `config/judge.yaml` | `factcheck.json` | Yes: about $1 per report |
+| 2b. Judge | part of step 2 with `--judge` | the report, the scenario's `requirements`, `config/judge.yaml` | `judge.json` | Yes: about $0.1-0.3 per report |
+| 3. Pairwise | `pairwise.py <baseline_tag> <candidate_tag>` | reports of both tags | `<candidate_tag>/pairwise/`, `<candidate_tag>/pairwise_vs_<baseline>.json` | Yes |
+| 4. Compare | `compare.py <tag> <tag> [--out compare.md]` | `*/scores.json`, `run.json`, `config.json`, `pairwise_vs_*.json` | the table | No |
+| 5. Publish | `langfuse_sync.py <tag>... [--queue]` | `run.json`, `scores.json`, `judge.json`, `factcheck.json`, `config.json`, `config/langfuse.env` | Langfuse; `eval_results/langfuse_sync.json` | No model calls |
+| 6. Calibrate | `calibrate.py export` / `score` / `langfuse` | `judge.json`, human labels (CSV or Langfuse queue) | label sheet, agreement table | No |
+
+**Checks on the checkers.** Before trusting the paid evaluators, run them on
+inputs whose right answers are known:
+
+| Command | Checks | Reads | Writes | Paid |
+|---|---|---|---|---|
+| `sanity/factcheck_sanity.py` | the fact checker catches known errors and calls nothing else wrong | `sanity/factcheck_cases/*.yaml` (gold cases) | `eval_results/factcheck_sanity/<time>.json` | Yes: about $5 per repeat |
+| `sanity/judge_sanity.py <run>` | the judge fails what must fail | one run's report and variants built from it | `eval_results/judge_sanity/<time>.json` | Yes |
+| `pytest` | prompts render, request fields are valid, graders catch planted defects | the code and fixtures | nothing | No |
+
+Nothing reaches Langfuse until step 5 is run: runs and grades stay in
+`eval_results/` only.
+
 ## Datasets: one to develop on, two kept out
 
 The harness runs on **jungle_market** only (`deep-insight-web/sample_data/jungle-market/`):
@@ -37,7 +101,7 @@ two weeks of grocery orders in 8 cities with planted patterns a shallow
 analysis gets wrong (duplicate rows that change the top city, a Simpson's
 paradox on a coupon, a stockout, threshold bunching, a promotion halo). Its
 answer sheet (`ground_truth.json` / `.md`, Q1-Q18) lets a person grade a report
-without recomputing anything. [jungle_market.md](jungle_market.md) describes the
+without recomputing anything. [docs/jungle-market.md](docs/jungle-market.md) describes the
 data, the planted patterns, the answers and how to grade a report against them.
 
 **moon_market and yummy_food are test sets.** They have no scenarios, answer
@@ -70,9 +134,9 @@ model and region, before the first run.
 
 The answer key (`answer_keys/`) holds facts computed from the dataset with
 pandas: totals, city rankings, co-purchase counts, promotion effects. Checking
-a report against it needs reading, not pattern matching: "Sydney가 매출 1위" is
-wrong for the deduplicated file (Singapore is 1st) but right for 2026-03-10
-alone, and only the sentence around it says which. `factcheck.py` splits the work so the model
+a report against it needs reading, not pattern matching: "Paris가 매출 1위" is
+wrong for the whole period (Paris is 4th, Singapore 1st) but right for
+2026-03-10 alone, and only the sentence around it says which. `graders/factcheck.py` splits the work so the model
 reads and code does the arithmetic:
 
 1. **Extract** (model, answers hidden). The model gets each fact's definition
@@ -96,21 +160,26 @@ in `scores.json` details for a person to read. `71.73%p` for a growth rate is
 counted as `factcheck_unit_issues`, not as a wrong value.
 
 ```bash
-.venv/bin/python factcheck_sanity.py --repeat 3      # is the fact checker right? (paid, ~$5 per repeat)
+.venv/bin/python sanity/factcheck_sanity.py --repeat 3      # is the fact checker right? (paid, ~$5 per repeat)
 .venv/bin/python grade.py <run_dir> --scenario jungle_market   # fact check runs by default
 .venv/bin/python grade.py <run_dir> --scenario jungle_market --no-factcheck   # no model calls
 ```
 
-- **Trust, then use.** `factcheck_sanity.py` runs the checker on gold cases
-  in `factcheck_cases/`: a real report whose errors were found by hand, the
+- **Trust, then use.** `sanity/factcheck_sanity.py` runs the checker on gold cases
+  in `sanity/factcheck_cases/`: a real report whose errors were found by hand, the
   same report with the errors fixed, small planted errors, statements about
   another period or subset, and an instruction aimed at the evaluator. It
   reports wrong recall, false wrongs and stability over repeats, and fails
   below 100% recall or above 0 false wrongs. Re-run it whenever the prompts
-  (`factcheck.PROMPT_VERSION`), the model in `judge.yaml` or an answer key
-  change. **No jungle_market gold case exists yet**: it needs a real report
-  whose errors a person found by hand (#133), so factcheck-v3 is not yet
-  measured.
+  (`factcheck.PROMPT_VERSION`), the model in `config/judge.yaml` or an answer key
+  change. The jungle_market gold case (`sanity/factcheck_cases/jungle_market.yaml`)
+  is a baseline report that kept the duplicate rows; its labels were checked
+  against the CSV with pandas and still need a person's review (#133).
+  **First result (2026-10-13, factcheck-v3): wrong recall 58% (7/12), 0 false
+  wrongs.** Every miss is a number split by a citation marker
+  (`111,065 [2].13달러`): the adjudicator calls it wrong, but the code can't
+  read the number, so it ends as `needs_review`. The reporter writes such
+  numbers in 6 of the first 9 jungle_market reports.
 - **Same evaluator on both sides.** Results are cached in `factcheck.json`
   by report hash and `factcheck_version` (prompt version, model, effort,
   answer-key hash). `compare.py` warns when tags were checked by different
@@ -124,12 +193,12 @@ counted as `factcheck_unit_issues`, not as a wrong value.
 The graders above check that numbers are right. They can't see whether the
 report answers the request: a report that only states total revenue correctly
 passes all of them. The judge closes that gap. It runs on an **OpenAI model in
-Amazon Bedrock** (Converse API, `judge.yaml`), a different family from the
+Amazon Bedrock** (Converse API, `config/judge.yaml`), a different family from the
 Claude agents, so it isn't grading its own family's writing. The fact check
 uses the same model.
 
-**Region and model.** `judge.yaml` → `region: null` uses `JUDGE_REGION`, then
-`EVAL_REGION` (`eval.env`), then your AWS default region. Before the first
+**Region and model.** `config/judge.yaml` → `region: null` uses `JUDGE_REGION`, then
+`EVAL_REGION` (`config/eval.env`), then your AWS default region. Before the first
 call, the harness checks that the model can be called there (a free Bedrock
 control-plane call) and stops with a message if not. The default,
 `global.openai.gpt-6-astra`, is what we tested in us-west-2; in another region
@@ -140,11 +209,11 @@ aws bedrock list-inference-profiles --region <region> --query "inferenceProfileS
 ```
 
 A different model changes `judge_version`, so old verdicts are re-judged, not
-reused; run `judge_sanity.py` and `factcheck_sanity.py` on it before trusting
+reused; run `sanity/judge_sanity.py` and `sanity/factcheck_sanity.py` on it before trusting
 its scores.
 
 **Pointwise** (`grade.py --judge`, `run_eval.py --judge`) reads the request,
-the scenario's `requirements` (`scenarios.yaml`) and the report, and returns:
+the scenario's `requirements` (`config/scenarios.yaml`) and the report, and returns:
 
 - each requirement as met / partial / missing → `judge_requirement_coverage`,
   `judge_requirements_missing` (**a missing requirement fails `core_pass`**)
@@ -163,7 +232,7 @@ verdict that flips with the order counts as a tie. Results show in
 `compare.py`.
 
 ```bash
-.venv/bin/python judge_sanity.py eval_results/baseline/<run> --scenario jungle_market  # does the judge fail what must fail?
+.venv/bin/python sanity/judge_sanity.py eval_results/baseline/<run> --scenario jungle_market  # does the judge fail what must fail?
 .venv/bin/python grade.py eval_results/baseline/<run> --scenario jungle_market --judge
 .venv/bin/python pairwise.py eval_results/baseline eval_results/baseline   # noise floor, expect ~50%
 .venv/bin/python pairwise.py eval_results/baseline eval_results/my-change
@@ -172,7 +241,7 @@ verdict that flips with the order counts as a tie. Results show in
 - **Use enough pairs.** With 3 pairs a single pair moves the win rate by ±33
   points, so compare with `--pairs all` (3 × 3 = 9 pairs) or more before
   acting on it, and run baseline vs baseline first to see the noise.
-- **Trust, then use.** `judge_sanity.py` feeds the judge a real report and
+- **Trust, then use.** `sanity/judge_sanity.py` feeds the judge a real report and
   variants with known answers (numbers only, strategies removed, a different
   question, empty, a prompt injection) and fails if it scores them wrong. The
   baseline-vs-baseline pairwise run shows how far from 50% noise alone moves
@@ -214,7 +283,7 @@ would be replaced.
 | human labels | annotation queue `deep-insight-calibration-<scenario>` per scenario, showing only that scenario's requirements and the rubric criteria (same score configs as the judge) |
 
 ```bash
-# eval-harness/langfuse.env (git-ignored): LANGFUSE_HOST (or LANGFUSE_BASE_URL), LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY
+# eval-harness/config/langfuse.env (git-ignored): LANGFUSE_HOST (or LANGFUSE_BASE_URL), LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY
 .venv/bin/python langfuse_sync.py eval_results/baseline eval_results/my-change --dry-run   # count only
 .venv/bin/python langfuse_sync.py eval_results/baseline eval_results/my-change --queue
 .venv/bin/python calibrate.py langfuse     # judge vs labels entered in the annotation queue
@@ -252,7 +321,7 @@ marker gets removed with the fix.
 
 ## Scenarios
 
-`scenarios.yaml` defines dataset × query pairs, all on jungle_market:
+`config/scenarios.yaml` defines dataset × query pairs, all on jungle_market:
 
 | Scenario | Use |
 |---|---|
@@ -292,7 +361,7 @@ load never sits in the users' runtime.
 | | Users' runtime | Eval runtime |
 |---|---|---|
 | Who calls it | the web app (and `02_invoke_agentcore_runtime_vpc.py`) | `run_eval.py` only |
-| Models | `managed-agentcore/.env`, set at deploy | `eval_runtime.py set-models <preset>` (`runtime_configs.yaml`) |
+| Models | `managed-agentcore/.env`, set at deploy | `eval_runtime.py set-models <preset>` (`config/runtime_configs.yaml`) |
 | Image | `…deep_insight_runtime_vpc:latest`, moves with every deploy | pinned by digest; changes only with `set-image` |
 | Shared | role, VPC, ECS cluster, ALB, Fargate task definition, S3 bucket | same |
 
@@ -305,7 +374,7 @@ eval batches away from busy hours.
 **Set it up once** (needs the users' runtime deployed, `managed-agentcore/` phases 1-3):
 
 ```bash
-.venv/bin/python eval_runtime.py create    # copies the users' runtime; ARN → eval.env (git-ignored)
+.venv/bin/python eval_runtime.py create    # copies the users' runtime; ARN → config/eval.env (git-ignored)
 .venv/bin/python eval_runtime.py status    # both runtimes: version, image, models
 ```
 
@@ -326,7 +395,7 @@ eval batches away from busy hours.
 .venv/bin/python eval_runtime.py set-image <account>.dkr.ecr.<region>.amazonaws.com/<repo>:<candidate-tag>
 ```
 
-`run_eval.py` uses `EVAL_RUNTIME_ARN` from `eval.env` and refuses the users'
+`run_eval.py` uses `EVAL_RUNTIME_ARN` from `config/eval.env` and refuses the users'
 runtime (`RUNTIME_ARN` in `managed-agentcore/.env`) unless given
 `--allow-users-runtime`. Runtimes created after 2026-06-11 can't set
 `requireServiceS3Endpoint`, so the eval runtime keeps AgentCore's default
@@ -408,12 +477,12 @@ Also prints per-agent cost with the model each agent ran on.
 | `cited_value_match_rate`, `cited_value_checked` | the number printed right before `[n]` in the report equals citation n, and how many pairs were compared | `graders/report.py` |
 | `broken_citation_refs` | `[n]` in the body with no citation n | `graders/report.py` |
 | `citation_coverage` | share of significant numbers (amounts, %, decimals) in the body that carry a citation. Approximate | `graders/report.py` |
-| `required_facts_missing`, `other_facts_found` | answer-key facts stated correctly: the scenario's required ones, and how many of the rest | `factcheck.py` + `answer_keys/` |
-| `factcheck_wrong_confirmed`, `factcheck_wrong_ids` | statements that contradict the answer key in the same scope, confirmed by code and the adjudicating model | `factcheck.py` |
-| `factcheck_needs_review`, `factcheck_out_of_scope`, `factcheck_unit_issues`, `factcheck_unverified_quotes` | statements left for a person, about another period or subset, written with %p, or quoted wrongly by the model | `factcheck.py` |
+| `required_facts_missing`, `other_facts_found` | answer-key facts stated correctly: the scenario's required ones, and how many of the rest | `graders/factcheck.py` + `answer_keys/` |
+| `factcheck_wrong_confirmed`, `factcheck_wrong_ids` | statements that contradict the answer key in the same scope, confirmed by code and the adjudicating model | `graders/factcheck.py` |
+| `factcheck_needs_review`, `factcheck_out_of_scope`, `factcheck_unit_issues`, `factcheck_unverified_quotes` | statements left for a person, about another period or subset, written with %p, or quoted wrongly by the model | `graders/factcheck.py` |
 | `audit_pass`, `audit_block_findings` | the Auditor's own verdict, when the version has an Auditor | `graders/audit.py` |
 | `code_exec_failed`, `code_exec_fail_causes` | agent code that failed in the Fargate sandbox, bucketed by cause (missing file, AttributeError, …) | `graders/executions.py` |
-| `cost_usd`, `cache_hit_rate` | token usage × `pricing.yaml` | `cost.py` |
+| `cost_usd`, `cache_hit_rate` | token usage × `config/pricing.yaml` | `graders/cost.py` |
 
 `core_pass` is defined once, in `fail_reasons()` in `grade.py`. A check that
 produced no result fails instead of passing: a grader error, `judge_error` or
@@ -436,7 +505,7 @@ answer.
 
 ### Prices
 
-`pricing.yaml` holds Bedrock on-demand prices per model family. Entries marked
+`config/pricing.yaml` holds Bedrock on-demand prices per model family. Entries marked
 `verified: true` were read from the AWS Pricing API for us-west-2 global
 inference; `verified: false` entries are list prices not yet checked. `null`
 prices are reported as `unpriced_tokens` instead of guessed.
