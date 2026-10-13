@@ -6,8 +6,8 @@ factcheck_cases/: a real report with errors found by hand, the same report
 with the errors fixed, small planted errors, statements about another period
 or subset (true there, so never wrong), and an instruction to the evaluator.
 
-    python factcheck_sanity.py                         # all gold files, once
-    python factcheck_sanity.py --repeat 3              # + how stable the verdicts are
+    python sanity/factcheck_sanity.py                         # all gold files, once
+    python sanity/factcheck_sanity.py --repeat 3              # + how stable the verdicts are
 
 Reports per case which labels held, then:
   wrong recall    errors caught / errors expected            (want 100%)
@@ -30,10 +30,11 @@ from pathlib import Path
 import yaml
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE))
+ROOT = HERE.parent
+sys.path.insert(0, str(ROOT))
 
-import factcheck  # noqa: E402
-import judge  # noqa: E402
+from graders import factcheck  # noqa: E402
+from graders import judge  # noqa: E402
 
 CASES = HERE / "factcheck_cases"
 
@@ -171,7 +172,7 @@ def main():
         print(f"  stability         {stable}/{len(outcomes)} labels same in all {args.repeat} repeats")
     print(f"  cost              {'$%.2f' % cost if cost is not None else 'unpriced'}")
 
-    out = HERE / "eval_results" / "factcheck_sanity" / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}.json"
+    out = ROOT / "eval_results" / "factcheck_sanity" / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({"version": factcheck.PROMPT_VERSION, "model": cfg["model"], "effort": cfg.get("effort"),
                                "totals": dict(totals), "stable_labels": stable, "labels": len(outcomes), "cost_usd": cost,

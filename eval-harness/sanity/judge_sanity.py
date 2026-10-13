@@ -16,7 +16,7 @@ Takes one real report and derives variants with a known right answer:
 plus one pairwise check: full vs no_strategies, judged in both orders, must
 prefer full. Paid: about 6 pointwise + 2 pairwise calls (see judge.yaml).
 
-    python judge_sanity.py eval_results/baseline/<run> --scenario jungle_market
+    python sanity/judge_sanity.py eval_results/baseline/<run> --scenario jungle_market
 """
 import argparse
 import json
@@ -27,9 +27,10 @@ from datetime import datetime
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE))
+ROOT = HERE.parent
+sys.path.insert(0, str(ROOT))
 
-import judge  # noqa: E402
+from graders import judge  # noqa: E402
 from grade import artifacts_dir, load_scenario  # noqa: E402
 
 STRATEGY_RE = re.compile(r"전략|strateg", re.I)
@@ -156,7 +157,7 @@ def main():
     total_cost = judge.judge_cost(usages)
     print(f"\njudge cost: {'$%.2f' % total_cost if total_cost is not None else 'unpriced'}")
 
-    out = HERE / "eval_results" / "judge_sanity" / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}.json"
+    out = ROOT / "eval_results" / "judge_sanity" / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({"model": cfg["model"], "effort": cfg.get("effort"), "run_dir": str(args.run_dir),
                                "results": results, "pairwise": {"result": pw, "rounds": rounds},

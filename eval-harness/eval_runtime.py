@@ -19,7 +19,7 @@ session id and the code executor rejects a mismatch (403), the fix for the
 capacity (Fargate tasks, ALB, Bedrock quotas), so avoid long eval batches when
 users are busy.
 
-The runtime ARN is written to eval-harness/eval.env (git-ignored), which
+The runtime ARN is written to eval-harness/config/eval.env (git-ignored), which
 run_eval.py reads as EVAL_RUNTIME_ARN.
 """
 import argparse
@@ -32,8 +32,8 @@ import yaml
 from dotenv import dotenv_values
 
 HERE = Path(__file__).resolve().parent
-ENV_FILE = HERE / "eval.env"
-CONFIGS = HERE / "runtime_configs.yaml"
+ENV_FILE = HERE / "config" / "eval.env"
+CONFIGS = HERE / "config" / "runtime_configs.yaml"
 EVAL_NAME = "deep_insight_eval_runtime"
 USERS_NAME = "deep_insight_runtime_vpc"
 # Settings copied from the users' runtime as they are.

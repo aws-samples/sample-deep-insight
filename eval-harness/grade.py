@@ -28,7 +28,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 from graders import artifacts, audit, citations, executions, recompute, report  # noqa: E402
-import cost  # noqa: E402
+from graders import cost  # noqa: E402
 
 # Thresholds a scenario can override in scenarios.yaml under `pass:`.
 DEFAULT_PASS = {
@@ -78,7 +78,7 @@ def fail_reasons(scores, rules):
 
 
 def load_scenario(name):
-    data = yaml.safe_load((HERE / "scenarios.yaml").read_text(encoding="utf-8"))["scenarios"]
+    data = yaml.safe_load((HERE / "config" / "scenarios.yaml").read_text(encoding="utf-8"))["scenarios"]
     if name not in data:
         raise SystemExit(f"unknown scenario {name!r}; known: {', '.join(data)}")
     s = dict(data[name])
@@ -94,7 +94,7 @@ def artifacts_dir(run_dir):
 
 def run_judge(run_dir, adir, scenario, judge_ctx):
     """Pointwise LLM judge, cached in judge.json by report hash and judge version."""
-    import judge
+    from graders import judge
     client, cfg = judge_ctx
     text = judge.report_text(adir, cfg["max_report_chars"])
     digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
@@ -114,8 +114,8 @@ def run_judge(run_dir, adir, scenario, judge_ctx):
 
 def run_factcheck(run_dir, adir, answer_key_path, factcheck_ctx):
     """Answer-key fact check, cached in factcheck.json by report hash and evaluator version."""
-    import factcheck
-    import judge
+    from graders import factcheck
+    from graders import judge
     from graders.report import read_docx
     client, cfg = factcheck_ctx
     paragraphs = read_docx(Path(adir) / "final_report_with_citations.docx")
@@ -200,7 +200,7 @@ def grade_run(run_dir, csv_path=None, answer_key_path=None, scenario=None, judge
 
 def model_ctx():
     """(Bedrock client, judge.yaml settings), shared by the judge and the fact check."""
-    import judge
+    from graders import judge
     cfg = judge.load_config()
     judge.check_available(cfg)
     return judge.make_client(cfg), cfg

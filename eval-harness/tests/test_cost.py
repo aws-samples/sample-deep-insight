@@ -1,6 +1,6 @@
 import pytest
 
-import cost
+from graders import cost
 
 PRICING = [
     {"match": "claude-opus-5-5", "input": 4.0, "output": 20.0, "cache_read": 0.2, "cache_write": 5.0, "verified": True},

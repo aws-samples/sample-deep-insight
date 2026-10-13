@@ -55,6 +55,6 @@ eval-harness/eval_results/
 .pytest_cache/
 
 # Langfuse credentials for eval-harness/langfuse_sync.py
-eval-harness/langfuse.env
+eval-harness/config/langfuse.env
 # Eval runtime ARN written by eval-harness/eval_runtime.py
-eval-harness/eval.env
+eval-harness/config/eval.env

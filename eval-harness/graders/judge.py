@@ -29,14 +29,14 @@ from typing import Literal
 import yaml
 from pydantic import BaseModel, Field
 
-HERE = Path(__file__).resolve().parent
+CONFIG = Path(__file__).resolve().parents[1] / "config"
 
 # Bump when the judging approach changes. version() also fingerprints the
 # system prompt, rubric and prompt templates, so an edit there invalidates
 # cached verdicts even if this isn't bumped.
 PROMPT_VERSION = "judge-v1"
 
-import cost  # noqa: E402
+from graders import cost  # noqa: E402
 from graders.report import read_docx  # noqa: E402
 
 CRITERIA = {
@@ -108,13 +108,13 @@ class PairwiseVerdict(BaseModel):
 
 # --- config and client --------------------------------------------------------
 
-def load_config(path=HERE / "judge.yaml"):
+def load_config(path=CONFIG / "judge.yaml"):
     """judge.yaml, with `region: null` resolved from JUDGE_REGION, eval.env's EVAL_REGION or the AWS default."""
     import os
     cfg = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     if not cfg.get("region"):
         from dotenv import dotenv_values
-        env = {**dotenv_values(HERE / "eval.env"), **os.environ}
+        env = {**dotenv_values(CONFIG / "eval.env"), **os.environ}
         region = env.get("JUDGE_REGION") or env.get("EVAL_REGION") or env.get("AWS_REGION") or env.get("AWS_DEFAULT_REGION")
         if not region:
             import boto3

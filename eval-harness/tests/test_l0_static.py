@@ -11,9 +11,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-import cost
+from graders import cost
 
-AGENTCORE = Path(__file__).resolve().parents[1] / "managed-agentcore"
+AGENTCORE = Path(__file__).resolve().parents[2] / "managed-agentcore"
 PROMPTS = AGENTCORE / "src" / "prompts"
 
 # Context keys each prompt receives at its call site (src/graph/nodes.py,
@@ -145,8 +145,8 @@ def test_every_configured_model_has_a_pricing_entry():
 
 
 def test_scenarios_point_to_existing_files():
-    here = Path(__file__).resolve().parent
-    scenarios = yaml.safe_load((here / "scenarios.yaml").read_text(encoding="utf-8"))["scenarios"]
+    here = Path(__file__).resolve().parents[1]   # paths in scenarios.yaml are relative to eval-harness/
+    scenarios = yaml.safe_load((here / "config" / "scenarios.yaml").read_text(encoding="utf-8"))["scenarios"]
     for name, s in scenarios.items():
         assert (here / s["csv"]).is_file(), name
         assert (here / s["answer_key"]).is_file(), name

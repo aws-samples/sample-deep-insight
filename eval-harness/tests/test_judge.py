@@ -6,7 +6,7 @@ import random
 import pytest
 
 import calibrate
-import judge
+from graders import judge
 import pairwise
 from fixtures import make_run
 from fixtures.fake_bedrock import CFG, FakeConverse
@@ -194,7 +194,7 @@ def test_pairwise_cache_is_keyed_by_judge_version(tmp_path, scenario):
 def test_region_null_falls_back_to_env(tmp_path, monkeypatch):
     path = tmp_path / "judge.yaml"
     path.write_text("model: global.openai.gpt-6-astra\nregion: null\n")
-    monkeypatch.setattr(judge, "HERE", tmp_path)   # no eval.env here
+    monkeypatch.setattr(judge, "CONFIG", tmp_path)   # no eval.env here
     monkeypatch.delenv("JUDGE_REGION", raising=False)
     monkeypatch.setenv("AWS_REGION", "eu-west-1")
     assert judge.load_config(path)["region"] == "eu-west-1"

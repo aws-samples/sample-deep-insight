@@ -31,7 +31,7 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
-import judge
+from graders import judge
 from graders.numbers import matches, parse_numbers
 
 # Bump when the prompts or the comparison rules change: cached results and

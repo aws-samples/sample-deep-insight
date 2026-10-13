@@ -26,7 +26,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-import judge  # noqa: E402
+from graders import judge  # noqa: E402
 from grade import artifacts_dir, load_scenario  # noqa: E402
 from pairwise import make_pairs, runs_by_scenario  # noqa: E402
 

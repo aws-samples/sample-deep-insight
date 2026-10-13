@@ -3,8 +3,8 @@ import json
 
 import pytest
 
-import factcheck
-import judge
+from graders import factcheck
+from graders import judge
 from fixtures import make_run
 from fixtures.fake_bedrock import CFG, FakeConverse
 from fixtures.make_run import statement
@@ -235,7 +235,7 @@ cases:
 
 def test_gold_cases_build(tmp_path):
     """Every replacement in a gold file must apply; `base` and `expect: <case>` chain cases."""
-    import factcheck_sanity
+    from sanity import factcheck_sanity
     (tmp_path / "report.txt").write_text("총 매출은 $110,270.26입니다.\n3순위는 매출 1위 도시인 Sydney의 재구매 촉진이다.\n", encoding="utf-8")
     spec = tmp_path / "jungle_market.yaml"
     spec.write_text(GOLD.format(key=load_scenario("jungle_market")["answer_key"]), encoding="utf-8")
@@ -254,7 +254,7 @@ def test_gold_cases_build(tmp_path):
 
 
 def test_score_case():
-    import factcheck_sanity
+    from sanity import factcheck_sanity
     def rec(fact, status, subject="", unit_issue=False):
         return {"fact_id": fact, "status": status, "unit_issue": unit_issue, "statement": {"subject": subject}}
     expect = [{"fact": "a", "subject": "Sydney", "is": "wrong"}, {"fact": "b", "is": "correct", "unit_issue": True},

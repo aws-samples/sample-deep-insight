@@ -230,7 +230,7 @@ def run_once(args, scenario_name, scenario, run_dir, clients):
 def main():
     # eval.env (written by eval_runtime.py create) points at the eval runtime;
     # managed-agentcore/.env only has the users' runtime.
-    env = {**dotenv_values(REPO / "managed-agentcore" / ".env"), **dotenv_values(HERE / "eval.env"), **os.environ}
+    env = {**dotenv_values(REPO / "managed-agentcore" / ".env"), **dotenv_values(HERE / "config" / "eval.env"), **os.environ}
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--scenario", required=True, action="append", help="repeatable")
     ap.add_argument("--repeat", type=int, default=1)

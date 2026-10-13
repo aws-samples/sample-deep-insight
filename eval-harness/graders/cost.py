@@ -13,10 +13,10 @@ from pathlib import Path
 
 import yaml
 
-HERE = Path(__file__).resolve().parent
+CONFIG = Path(__file__).resolve().parents[1] / "config"
 
 
-def load_pricing(path=HERE / "pricing.yaml"):
+def load_pricing(path=CONFIG / "pricing.yaml"):
     return yaml.safe_load(Path(path).read_text(encoding="utf-8"))["models"]
 
 

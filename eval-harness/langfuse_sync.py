@@ -25,7 +25,7 @@ doesn't let a score's time change once written, so trace and score ids carry
 a hash of the run's content: syncing unchanged results is a no-op, and changed
 results get a new trace while the old one is deleted (kept, with a warning, if
 people already labeled it). Credentials: LANGFUSE_HOST (or LANGFUSE_BASE_URL), LANGFUSE_PUBLIC_KEY,
-LANGFUSE_SECRET_KEY from the environment or eval-harness/langfuse.env.
+LANGFUSE_SECRET_KEY from the environment or eval-harness/config/langfuse.env.
 
 The full report text and the request go to LANGFUSE_HOST. Use a self-hosted
 Langfuse in your own AWS account (e.g.
@@ -46,10 +46,10 @@ import yaml
 from dotenv import dotenv_values
 
 HERE = Path(__file__).resolve().parent
-SCENARIOS_FILE = HERE / "scenarios.yaml"
+SCENARIOS_FILE = HERE / "config" / "scenarios.yaml"
 sys.path.insert(0, str(HERE))
 
-import cost  # noqa: E402
+from graders import cost  # noqa: E402
 from grade import artifacts_dir, load_scenario  # noqa: E402
 
 DATASET = "deep-insight-eval"
@@ -154,7 +154,7 @@ def ensure_score_configs(lf, requirement_ids):
     wanted = [{"name": f"req.{r}", "dataType": "CATEGORICAL", "categories": REQ_CATEGORIES,
                "description": f"Requirement '{r}' addressed by the report: met / partial / missing"} for r in requirement_ids]
     wanted += [{"name": c, "dataType": "NUMERIC", "minValue": 1, "maxValue": 5,
-                "description": f"Rubric criterion {c} (1/3/5 anchors in eval-harness/judge.py)"} for c in CRITERIA]
+                "description": f"Rubric criterion {c} (1/3/5 anchors in eval-harness/graders/judge.py)"} for c in CRITERIA]
     for cfg in wanted:
         if cfg["name"] not in have:
             have[cfg["name"]] = lf.post("/api/public/score-configs", cfg)["id"]
@@ -166,7 +166,7 @@ def ensure_dataset_items(lf, scenarios, repeats):
     try:
         lf.get(f"/api/public/v2/datasets/{DATASET}")
     except RuntimeError:
-        lf.post("/api/public/v2/datasets", {"name": DATASET, "description": "Deep Insight eval scenarios (eval-harness/scenarios.yaml)"})
+        lf.post("/api/public/v2/datasets", {"name": DATASET, "description": "Deep Insight eval scenarios (eval-harness/config/scenarios.yaml)"})
     existing = {i["id"] for i in lf.pages("/api/public/dataset-items", datasetName=DATASET)}
     for name, s in scenarios.items():
         key = json.loads(Path(s["answer_key"]).read_text(encoding="utf-8"))
@@ -402,13 +402,13 @@ def is_cloud_host(host):
 
 
 def credentials(allow_cloud=False):
-    env = {**dotenv_values(HERE / "langfuse.env"), **os.environ}
+    env = {**dotenv_values(HERE / "config" / "langfuse.env"), **os.environ}
     # Langfuse SDK v3 names the host LANGFUSE_BASE_URL; LANGFUSE_HOST is the older name
     env["LANGFUSE_HOST"] = env.get("LANGFUSE_HOST") or env.get("LANGFUSE_BASE_URL")
     keys = ("LANGFUSE_HOST", "LANGFUSE_PUBLIC_KEY", "LANGFUSE_SECRET_KEY")
     missing = [k for k in keys if not env.get(k)]
     if missing:
-        raise SystemExit(f"missing {', '.join(missing)} (set them in the environment or eval-harness/langfuse.env)")
+        raise SystemExit(f"missing {', '.join(missing)} (set them in the environment or eval-harness/config/langfuse.env)")
     if is_cloud_host(env["LANGFUSE_HOST"]) and not allow_cloud:
         raise SystemExit(f"{env['LANGFUSE_HOST']} is Langfuse Cloud: report texts would leave your AWS account. "
                          "Self-host Langfuse (https://github.com/aws-samples/deploy-langfuse-on-ecs-with-fargate) "
