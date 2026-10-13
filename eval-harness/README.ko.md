@@ -169,10 +169,24 @@ Q1-Q18)로 아무것도 다시 계산하지 않고 사람이 보고서를 채점
   다시 돌리세요. jungle_market gold case(`sanity/factcheck_cases/jungle_market.yaml`)는
   중복 행을 지우지 않은 베이스라인 보고서로 만들었습니다. 레이블은 pandas로 CSV와
   대조했고, 사람의 최종 검토가 아직 필요합니다(#133).
-  **첫 결과(2026-10-13, factcheck-v3): wrong recall 58% (7/12), false wrong 0건.**
-  놓친 건 모두 인용 번호가 숫자를 가른 경우입니다(`111,065 [2].13달러`). 판정
-  모델은 틀렸다고 보지만 코드가 숫자를 읽지 못해 `needs_review`로 끝납니다.
-  리포터는 첫 jungle_market 보고서 9개 중 6개에 이런 숫자를 씁니다.
+  `sanity/factcheck_sanity.py --repeat 3`로 측정한 결과(2026-10-13,
+  `global.openai.gpt-6-astra`, effort high, 15회 $9.23):
+
+  | | factcheck-v3 | factcheck-v4 |
+  |---|---|---|
+  | wrong recall | 58% (21/36) | **100% (36/36)** |
+  | correct recall | 100% (60/60) | 100% (60/60) |
+  | not_wrong (범위 함정) | 92% (22/24) | 100% (24/24) |
+  | false wrong | 2 | **0** |
+  | 3회 반복에서 같은 레이블 | 38/40 | 40/40 |
+
+  v3는 인용 번호가 숫자를 가른 경우(`111,065 [2].13달러`)를 모두 놓쳤습니다. 판정
+  모델은 틀렸다고 봤지만 코드가 숫자를 읽지 못해 `needs_review`로 끝났고, v4는
+  숫자를 읽기 전에 인용 번호를 지웁니다. v3의 false wrong 2건은 원본 파일과 중복
+  제거 결과를 대비한 문장이었는데, 정답 키의 범위에 그 예외가 없었기 때문입니다.
+  지금은 예외가 들어 있습니다. 리포터는 첫 jungle_market 보고서 14개 중 10개에
+  이렇게 갈라진 숫자를 씁니다(`managed-agentcore/src/prompts/reporter.md`의
+  `resolve_body_citations`: 천 단위 쉼표 패턴에 소수부가 없음).
 - **양쪽을 같은 평가기로.** 결과는 보고서 해시와 `factcheck_version`(프롬프트 버전,
   모델, effort, 정답 키 해시) 기준으로 `factcheck.json`에 캐시됩니다. 태그끼리
   다른 버전으로 검사됐으면 `compare.py`가 경고합니다. 저장된 실행을 `grade.py`로

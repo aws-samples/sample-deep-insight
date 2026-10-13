@@ -175,11 +175,26 @@ counted as `factcheck_unit_issues`, not as a wrong value.
   change. The jungle_market gold case (`sanity/factcheck_cases/jungle_market.yaml`)
   is a baseline report that kept the duplicate rows; its labels were checked
   against the CSV with pandas and still need a person's review (#133).
-  **First result (2026-10-13, factcheck-v3): wrong recall 58% (7/12), 0 false
-  wrongs.** Every miss is a number split by a citation marker
-  (`111,065 [2].13달러`): the adjudicator calls it wrong, but the code can't
-  read the number, so it ends as `needs_review`. The reporter writes such
-  numbers in 6 of the first 9 jungle_market reports.
+  Measured with `sanity/factcheck_sanity.py --repeat 3` (2026-10-13,
+  `global.openai.gpt-6-astra`, effort high, $9.23 for 15 runs):
+
+  | | factcheck-v3 | factcheck-v4 |
+  |---|---|---|
+  | wrong recall | 58% (21/36) | **100% (36/36)** |
+  | correct recall | 100% (60/60) | 100% (60/60) |
+  | not_wrong (scope traps) | 92% (22/24) | 100% (24/24) |
+  | false wrongs | 2 | **0** |
+  | labels the same in all 3 repeats | 38/40 | 40/40 |
+
+  v3 missed every number split by a citation marker (`111,065 [2].13달러`):
+  the adjudicator called it wrong, but the code couldn't read the number, so
+  it ended as `needs_review`; v4 removes markers before reading numbers. v3's
+  two false wrongs were a sentence contrasting the raw file with the
+  deduplicated result, judged against an answer-key scope that had no
+  exception for it; the scope now has one. The reporter writes split numbers
+  in 10 of the first 14 jungle_market reports (`resolve_body_citations` in
+  `managed-agentcore/src/prompts/reporter.md`: its thousands-separator pattern
+  has no decimal part).
 - **Same evaluator on both sides.** Results are cached in `factcheck.json`
   by report hash and `factcheck_version` (prompt version, model, effort,
   answer-key hash). `compare.py` warns when tags were checked by different
