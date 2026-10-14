@@ -1,0 +1,515 @@
+{
+  "dataset": "yummy_food_kr",
+  "csv": "managed-agentcore/data/yummy_food/kr/yummy-food-market.csv",
+  "rows": 720,
+  "facts": [
+    {
+      "id": "total_revenue",
+      "kind": "value",
+      "description": "Total revenue: SUM(매출액)",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "KRW",
+      "value": 1316606500.0,
+      "rel_tol": 0.005,
+      "note": ""
+    },
+    {
+      "id": "total_ad_spend",
+      "kind": "value",
+      "description": "Total ad spend: SUM(광고비용)",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "KRW",
+      "value": 388296000.0,
+      "rel_tol": 0.005,
+      "note": ""
+    },
+    {
+      "id": "overall_roas",
+      "kind": "value",
+      "description": "Overall ROAS: SUM(매출액) / SUM(광고비용); may be printed as a ratio or a percent",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "ratio",
+      "value": 3.390729,
+      "rel_tol": 0.01,
+      "note": ""
+    },
+    {
+      "id": "overall_ctr_pct",
+      "kind": "value",
+      "description": "Overall CTR: SUM(클릭수) / SUM(노출수)",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "percent",
+      "value": 1.798257,
+      "rel_tol": 0.01,
+      "note": "aggregated from the summed counts; the mean of the row-level column is a different (wrong) quantity"
+    },
+    {
+      "id": "overall_cvr_pct",
+      "kind": "value",
+      "description": "Overall conversion rate: SUM(전환수) / SUM(클릭수)",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "percent",
+      "value": 4.672716,
+      "rel_tol": 0.01,
+      "note": "aggregated from the summed counts; the mean of the row-level column is a different (wrong) quantity"
+    },
+    {
+      "id": "total_conversions",
+      "kind": "value",
+      "description": "Total conversions: SUM(전환수)",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "count",
+      "value": 65509.0,
+      "rel_tol": 0.005,
+      "note": ""
+    },
+    {
+      "id": "total_clicks",
+      "kind": "value",
+      "description": "Total clicks: SUM(클릭수)",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "count",
+      "value": 1401947.0,
+      "rel_tol": 0.005,
+      "note": ""
+    },
+    {
+      "id": "total_impressions",
+      "kind": "value",
+      "description": "Total impressions: SUM(노출수)",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "count",
+      "value": 77961417.0,
+      "rel_tol": 0.005,
+      "note": ""
+    },
+    {
+      "id": "row_count",
+      "kind": "value",
+      "description": "Number of rows (records) in the file",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "count",
+      "value": 720.0,
+      "rel_tol": 0,
+      "note": ""
+    },
+    {
+      "id": "revenue_per_conversion",
+      "kind": "value",
+      "description": "Revenue per conversion: SUM(매출액) / SUM(전환수)",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "KRW",
+      "value": 20098.101024,
+      "rel_tol": 0.005,
+      "note": ""
+    },
+    {
+      "id": "media_revenue_ranking",
+      "kind": "ranking",
+      "description": "Media ranked by revenue (SUM(매출액)), highest first",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "rank",
+      "order": [
+        "쿠빵",
+        "네이바",
+        "아마존",
+        "컬삼"
+      ]
+    },
+    {
+      "id": "media_revenue_kuppang",
+      "kind": "value",
+      "description": "Revenue of media 쿠빵: SUM(매출액) of its rows",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "KRW",
+      "value": 669613700.0,
+      "rel_tol": 0.005,
+      "note": "rank 1 by revenue"
+    },
+    {
+      "id": "media_revenue_neiba",
+      "kind": "value",
+      "description": "Revenue of media 네이바: SUM(매출액) of its rows",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "KRW",
+      "value": 253662100.0,
+      "rel_tol": 0.005,
+      "note": "rank 2 by revenue"
+    },
+    {
+      "id": "media_revenue_amazon",
+      "kind": "value",
+      "description": "Revenue of media 아마존: SUM(매출액) of its rows",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "KRW",
+      "value": 216952800.0,
+      "rel_tol": 0.005,
+      "note": "rank 3 by revenue"
+    },
+    {
+      "id": "media_revenue_kulsam",
+      "kind": "value",
+      "description": "Revenue of media 컬삼: SUM(매출액) of its rows",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "KRW",
+      "value": 176377900.0,
+      "rel_tol": 0.005,
+      "note": "rank 4 by revenue"
+    },
+    {
+      "id": "media_roas_ranking",
+      "kind": "ranking",
+      "description": "Media ranked by ROAS = SUM(매출액) / SUM(광고비용) of the media's rows, highest first",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "rank",
+      "order": [
+        "쿠빵",
+        "컬삼",
+        "아마존",
+        "네이바"
+      ]
+    },
+    {
+      "id": "media_roas_kuppang",
+      "kind": "value",
+      "description": "ROAS of media 쿠빵: SUM(매출액) / SUM(광고비용) of its rows; may be printed as a ratio or a percent",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "ratio",
+      "value": 4.143265,
+      "rel_tol": 0.01,
+      "note": "rank 1 by ROAS; the mean of its ROAS column is 4.45, a different (wrong) quantity"
+    },
+    {
+      "id": "media_roas_kulsam",
+      "kind": "value",
+      "description": "ROAS of media 컬삼: SUM(매출액) / SUM(광고비용) of its rows; may be printed as a ratio or a percent",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "ratio",
+      "value": 3.506101,
+      "rel_tol": 0.01,
+      "note": "rank 2 by ROAS; the mean of its ROAS column is 3.10, a different (wrong) quantity"
+    },
+    {
+      "id": "media_roas_amazon",
+      "kind": "value",
+      "description": "ROAS of media 아마존: SUM(매출액) / SUM(광고비용) of its rows; may be printed as a ratio or a percent",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "ratio",
+      "value": 3.169508,
+      "rel_tol": 0.01,
+      "note": "rank 3 by ROAS; the mean of its ROAS column is 5.74, a different (wrong) quantity that wrongly ranks 아마존 first"
+    },
+    {
+      "id": "media_roas_neiba",
+      "kind": "value",
+      "description": "ROAS of media 네이바: SUM(매출액) / SUM(광고비용) of its rows; may be printed as a ratio or a percent",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "ratio",
+      "value": 2.350355,
+      "rel_tol": 0.01,
+      "note": "rank 4 by ROAS; the mean of its ROAS column is 2.35, a different (wrong) quantity"
+    },
+    {
+      "id": "media_ctr_ranking",
+      "kind": "ranking",
+      "description": "Media ranked by CTR = SUM(클릭수) / SUM(노출수), highest first",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "rank",
+      "order": [
+        "네이바",
+        "컬삼",
+        "쿠빵",
+        "아마존"
+      ]
+    },
+    {
+      "id": "media_cvr_ranking",
+      "kind": "ranking",
+      "description": "Media ranked by conversion rate = SUM(전환수) / SUM(클릭수), highest first",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "rank",
+      "order": [
+        "쿠빵",
+        "아마존",
+        "컬삼",
+        "네이바"
+      ]
+    },
+    {
+      "id": "media_ctr_pct_neiba",
+      "kind": "value",
+      "description": "CTR of media 네이바: SUM(클릭수) / SUM(노출수)",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "percent",
+      "value": 3.206526,
+      "rel_tol": 0.01,
+      "note": "the highest CTR among the media"
+    },
+    {
+      "id": "media_cvr_pct_neiba",
+      "kind": "value",
+      "description": "Conversion rate of media 네이바: SUM(전환수) / SUM(클릭수)",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "percent",
+      "value": 2.131578,
+      "rel_tol": 0.01,
+      "note": "the lowest conversion rate among the media, and its ROAS is the lowest too"
+    },
+    {
+      "id": "kuppang_daily_spend_before",
+      "kind": "value",
+      "description": "Average daily ad spend of 쿠빵 (all its products), 2025-09-01 to 09-15",
+      "scope": {
+        "period": "2025-09-01 to 2025-09-15",
+        "filter": "media 쿠빵"
+      },
+      "unit": "KRW",
+      "value": 3596866.666667,
+      "rel_tol": 0.01,
+      "note": ""
+    },
+    {
+      "id": "kuppang_daily_spend_after",
+      "kind": "value",
+      "description": "Average daily ad spend of 쿠빵 (all its products), 2025-09-16 to 09-30",
+      "scope": {
+        "period": "2025-09-16 to 2025-09-30",
+        "filter": "media 쿠빵"
+      },
+      "unit": "KRW",
+      "value": 7177466.666667,
+      "rel_tol": 0.01,
+      "note": "about twice the first half; the other media kept the same daily spend"
+    },
+    {
+      "id": "kuppang_roas_before",
+      "kind": "value",
+      "description": "ROAS of 쿠빵, 2025-09-01 to 09-15: SUM(매출액) / SUM(광고비용)",
+      "scope": {
+        "period": "2025-09-01 to 2025-09-15",
+        "filter": "media 쿠빵"
+      },
+      "unit": "ratio",
+      "value": 5.375529,
+      "rel_tol": 0.01,
+      "note": ""
+    },
+    {
+      "id": "kuppang_roas_after",
+      "kind": "value",
+      "description": "ROAS of 쿠빵, 2025-09-16 to 09-30: SUM(매출액) / SUM(광고비용)",
+      "scope": {
+        "period": "2025-09-16 to 2025-09-30",
+        "filter": "media 쿠빵"
+      },
+      "unit": "ratio",
+      "value": 3.525736,
+      "rel_tol": 0.01,
+      "note": ""
+    },
+    {
+      "id": "kuppang_incremental_roas",
+      "kind": "value",
+      "description": "Incremental ROAS of 쿠빵's extra spend: (revenue 09-16 to 09-30 - revenue 09-01 to 09-15) / (ad spend 09-16 to 09-30 - ad spend 09-01 to 09-15)",
+      "scope": {
+        "period": "2025-09-16 to 09-30 vs 2025-09-01 to 09-15",
+        "filter": "media 쿠빵"
+      },
+      "unit": "ratio",
+      "value": 1.66754,
+      "rel_tol": 0.02,
+      "note": "below the full-month ROAS of every other media (lowest 네이바 2.35)"
+    },
+    {
+      "id": "top_media_fresh_food_share_pct",
+      "kind": "value",
+      "description": "Share of 컬삼's revenue that comes from the 신선식품 category: SUM(매출액) of its 신선식품 rows / SUM(매출액) of its rows. Not 컬삼's share of all 신선식품 revenue, a different quantity",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "percent",
+      "value": 77.545203,
+      "rel_tol": 0.02,
+      "note": "the highest among the media; next 쿠빵 33.7%"
+    },
+    {
+      "id": "category_revenue_ranking",
+      "kind": "ranking",
+      "description": "Categories ranked by revenue (SUM(매출액)), highest first",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "rank",
+      "order": [
+        "신선식품",
+        "간편식",
+        "건강식품"
+      ]
+    },
+    {
+      "id": "category_revenue_share_pct_fresh_food",
+      "kind": "value",
+      "description": "Share of total revenue from category 신선식품: SUM(매출액) of its rows / SUM(매출액)",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "percent",
+      "value": 39.407165,
+      "rel_tol": 0.02,
+      "note": ""
+    },
+    {
+      "id": "category_revenue_share_pct_convenience_food",
+      "kind": "value",
+      "description": "Share of total revenue from category 간편식: SUM(매출액) of its rows / SUM(매출액)",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "percent",
+      "value": 35.005038,
+      "rel_tol": 0.02,
+      "note": ""
+    },
+    {
+      "id": "category_revenue_share_pct_health_food",
+      "kind": "value",
+      "description": "Share of total revenue from category 건강식품: SUM(매출액) of its rows / SUM(매출액)",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "percent",
+      "value": 25.587797,
+      "rel_tol": 0.02,
+      "note": ""
+    },
+    {
+      "id": "top_product_revenue_per_conversion",
+      "kind": "value",
+      "description": "Revenue per conversion of product 프리미엄과일: SUM(매출액) / SUM(전환수) of its rows",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "KRW",
+      "value": 44669.930444,
+      "rel_tol": 0.005,
+      "note": "the highest among the products"
+    },
+    {
+      "id": "top_product_roas",
+      "kind": "value",
+      "description": "ROAS of product 프리미엄과일: SUM(매출액) / SUM(광고비용) of its rows",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "ratio",
+      "value": 3.851815,
+      "rel_tol": 0.01,
+      "note": "the highest among the products; next 오메가3 3.53"
+    },
+    {
+      "id": "saturday_avg_daily_revenue",
+      "kind": "value",
+      "description": "Average daily revenue on Saturdays: SUM(매출액) per Saturday, averaged over the month's Saturdays",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "KRW",
+      "value": 53814175.0,
+      "rel_tol": 0.01,
+      "note": "the highest weekday; next Sunday"
+    },
+    {
+      "id": "weekend_vs_weekday_daily_revenue_x",
+      "kind": "value",
+      "description": "Average daily revenue on Saturdays and Sundays divided by that on Mondays to Fridays",
+      "scope": {
+        "period": "the whole file, 2025-09-01 to 2025-09-30; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "ratio",
+      "value": 1.260514,
+      "rel_tol": 0.02,
+      "note": ""
+    }
+  ]
+}

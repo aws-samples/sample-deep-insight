@@ -103,9 +103,12 @@ Q1-Q18)로 아무것도 다시 계산하지 않고 사람이 보고서를 채점
 [docs/jungle-market.md](docs/jungle-market.md)에 데이터, 심어둔 패턴, 정답, 보고서 채점
 방법을 정리해 뒀습니다.
 
-**moon_market과 yummy_food는 테스트셋입니다.** 이 두 데이터셋에는 시나리오,
-정답 키, gold case를 두지 않고, 프롬프트나 기준값도 이 데이터에 맞춰 조정하지
-않습니다. 그래서 jungle_market에만 맞춘 변경은 이 데이터로 확인할 때 드러납니다.
+**moon_market과 yummy_food는 테스트셋입니다.** 이 두 데이터셋에는 시나리오와
+gold case를 두지 않고, 프롬프트나 기준값도 이 데이터에 맞춰 조정하지 않습니다.
+그래서 jungle_market에만 맞춘 변경은 이 데이터로 확인할 때 드러납니다.
+yummy_food(국문 kr·영문 en, 숫자는 같음)는 정답지 `ground_truth/yummy_food/<lang>/`와
+정답 키 `answer_keys/yummy_food_kr.json` / `_en.json`이 있습니다. 정답지는 런타임
+이미지에 들어가는 `managed-agentcore/data/` 밖에 둡니다.
 
 ## 작업 흐름
 

@@ -104,9 +104,12 @@ answer sheet (`ground_truth.json` / `.md`, Q1-Q18) lets a person grade a report
 without recomputing anything. [docs/jungle-market.md](docs/jungle-market.md) describes the
 data, the planted patterns, the answers and how to grade a report against them.
 
-**moon_market and yummy_food are test sets.** They have no scenarios, answer
-keys or gold cases here, and no prompt or threshold is tuned against them, so
-a change that only fits jungle_market shows up when it is checked on them.
+**moon_market and yummy_food are test sets.** They have no scenarios or gold
+cases here, and no prompt or threshold is tuned against them, so a change that
+only fits jungle_market shows up when it is checked on them. yummy_food (kr and
+en editions, same numbers) has an answer sheet in `ground_truth/yummy_food/<lang>/`
+and answer keys `answer_keys/yummy_food_kr.json` / `_en.json`; the sheet is kept
+out of `managed-agentcore/data/`, which ships to the runtime.
 
 ## Workflow
 
