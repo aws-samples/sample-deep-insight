@@ -1,0 +1,341 @@
+{
+  "overview": {
+    "period": "2025-05-01 (Thu) to 2025-05-14 (Wed), 14 days",
+    "holidays": {
+      "2025-05-05": "Mon, 어린이날 and 부처님오신날",
+      "2025-05-06": "Tue, substitute holiday"
+    },
+    "rows": 1144,
+    "orders": 1144,
+    "grain": "one row = one order of one product; rows = orders (no order id)",
+    "revenue_krw": 22787840,
+    "aov_krw": 19919,
+    "units": 2166,
+    "units_per_order": 1.89,
+    "products": 24,
+    "categories": 8,
+    "districts": 10,
+    "weekend20_orders": 365,
+    "weekend20_order_share_pct": 31.91,
+    "metric_definitions": {
+      "revenue": "SUM(Amount), after the WEEKEND20 discount",
+      "aov": "SUM(Amount) / number of rows (orders)",
+      "gross": "list price x Qty = Amount / 0.8 for WEEKEND20 orders, = Amount otherwise",
+      "day types": "holiday = 2025-05-05 and 05-06; weekend = Saturday and Sunday; weekday = other Monday-Friday dates"
+    }
+  },
+  "expected_profiles": {
+    "top_category_by_revenue": "과일/견과/쌀",
+    "category_revenue_krw": {
+      "과일/견과/쌀": 5823180,
+      "건강식품": 5355980,
+      "간편식/밀키트/샐러드": 2803800,
+      "정육/가공육/달걀": 2626140,
+      "커피/차": 2038200,
+      "베이커리": 1959620,
+      "유제품": 1389120,
+      "채소": 791800
+    },
+    "category_revenue_share_pct": {
+      "과일/견과/쌀": 25.55,
+      "건강식품": 23.5,
+      "간편식/밀키트/샐러드": 12.3,
+      "정육/가공육/달걀": 11.52,
+      "커피/차": 8.94,
+      "베이커리": 8.6,
+      "유제품": 6.1,
+      "채소": 3.47
+    },
+    "most_orders_district": "송파구",
+    "district_orders": {
+      "송파구": 215,
+      "마포구": 132,
+      "강서구": 115,
+      "강남구": 114,
+      "노원구": 110,
+      "영등포구": 100,
+      "성동구": 97,
+      "서초구": 96,
+      "광진구": 86,
+      "용산구": 79
+    },
+    "top_revenue_district": "송파구",
+    "district_revenue_krw": {
+      "송파구": 4073680,
+      "서초구": 2860460,
+      "마포구": 2526320,
+      "강남구": 2302180,
+      "영등포구": 2132600,
+      "강서구": 1963140,
+      "노원구": 1877920,
+      "광진구": 1810860,
+      "용산구": 1636920,
+      "성동구": 1603760
+    },
+    "most_ordered_product": "김치찌개키트",
+    "product_orders_top5": {
+      "김치찌개키트": 74,
+      "백미": 62,
+      "샐러드키트": 60,
+      "크로와상": 59,
+      "사과": 58
+    },
+    "age_with_highest_ready_meal_share": "20대",
+    "ready_meal_share_by_age_pct": {
+      "20대": 27.34,
+      "30대": 12.05,
+      "50대": 9.9,
+      "40대": 9.72,
+      "60대": 6.06
+    },
+    "age_with_highest_health_share": "60대",
+    "health_share_by_age_pct": {
+      "60대": 49.58,
+      "30대": 21.54,
+      "50대": 20.61,
+      "20대": 16.76,
+      "40대": 10.85
+    },
+    "gender_revenue_share_pct": {
+      "F": 53.13,
+      "M": 46.87
+    },
+    "note_on_close_values": "only the top category, district, product and age group are used as answers; the rest of those rankings are close"
+  },
+  "r1_holidays": {
+    "naive_method": "average orders per day by weekday name over the whole period",
+    "naive_ranking": [
+      "Tuesday",
+      "Monday",
+      "Saturday",
+      "Sunday",
+      "Friday",
+      "Thursday",
+      "Wednesday"
+    ],
+    "naive_avg_orders_per_day": {
+      "Tuesday": 106.5,
+      "Monday": 104.0,
+      "Saturday": 91.5,
+      "Sunday": 91.0,
+      "Friday": 60.0,
+      "Thursday": 59.5,
+      "Wednesday": 59.5
+    },
+    "naive_conclusion": "Monday and Tuesday are the busiest weekdays",
+    "correct_conclusion": "the two busiest dates are the public holidays 2025-05-05 (Mon) and 05-06 (Tue); on the other dates Saturday and Sunday are the busiest",
+    "orders_by_date_top3": {
+      "2025-05-06": 150,
+      "2025-05-05": 149,
+      "2025-05-11": 93
+    },
+    "non_holiday_ranking": [
+      "Saturday",
+      "Sunday",
+      "Tuesday",
+      "Friday",
+      "Thursday",
+      "Wednesday",
+      "Monday"
+    ],
+    "non_holiday_avg_orders_per_day": {
+      "Saturday": 91.5,
+      "Sunday": 91.0,
+      "Tuesday": 63.0,
+      "Friday": 60.0,
+      "Thursday": 59.5,
+      "Wednesday": 59.5,
+      "Monday": 59.0
+    },
+    "avg_orders_per_day": {
+      "holiday": 149.5,
+      "weekend": 91.25,
+      "weekday": 60.0
+    },
+    "note": "Saturday (91.5) and Sunday (91.0) are tied, and the non-holiday Monday and Tuesday are one date each, so no single busiest weekday is asked for: the questions compare weekend days with weekdays and ask for the busiest dates."
+  },
+  "r2_seocho_aov": {
+    "naive_conclusion": "서초구 customers spend the most per order across the board",
+    "correct_conclusion": "서초구's top AOV comes from 3 한우선물세트 orders (Qty 3, 390,000원 each) placed on the holidays; they are the only 한우선물세트 sales. Without them 서초구's AOV ranks 7 of 10, and its median order (13,950원) is close to the other districts' (11,040원 to 13,800원)",
+    "district_aov_krw": {
+      "서초구": 29796,
+      "영등포구": 21326,
+      "광진구": 21057,
+      "용산구": 20721,
+      "강남구": 20195,
+      "마포구": 19139,
+      "송파구": 18947,
+      "노원구": 17072,
+      "강서구": 17071,
+      "성동구": 16534
+    },
+    "seocho": {
+      "orders": 96,
+      "revenue_krw": 2860460,
+      "aov_krw": 29796,
+      "median_krw": 13950,
+      "gift_orders": 3,
+      "gift_revenue_krw": 1170000,
+      "gift_share_of_revenue_pct": 40.9,
+      "aov_without_gift_orders_krw": 18177,
+      "aov_rank_without_gift_orders": 7
+    },
+    "gift_orders": [
+      {
+        "Date": "2025-05-05",
+        "Qty": 3,
+        "Amount": 390000,
+        "Gender": "M",
+        "Age Group": "50대"
+      },
+      {
+        "Date": "2025-05-05",
+        "Qty": 3,
+        "Amount": 390000,
+        "Gender": "F",
+        "Age Group": "40대"
+      },
+      {
+        "Date": "2025-05-06",
+        "Qty": 3,
+        "Amount": 390000,
+        "Gender": "F",
+        "Age Group": "50대"
+      }
+    ],
+    "overall_median_krw": 12900,
+    "second_aov_district": {
+      "district": "영등포구",
+      "aov_krw": 21326
+    }
+  },
+  "r3_weekend_discount": {
+    "comparison": "weekend (Sat-Sun) orders vs weekday (non-holiday Mon-Fri) orders",
+    "net_aov_krw": {
+      "weekend": 15915,
+      "weekday": 19986
+    },
+    "gross_aov_krw": {
+      "weekend": 19894,
+      "weekday": 19986
+    },
+    "units_per_order": {
+      "weekend": 1.9,
+      "weekday": 1.88
+    },
+    "category_mix_pct": {
+      "weekend": {
+        "간편식/밀키트/샐러드": 16.7,
+        "건강식품": 10.7,
+        "과일/견과/쌀": 14.0,
+        "베이커리": 14.8,
+        "유제품": 15.9,
+        "정육/가공육/달걀": 7.4,
+        "채소": 10.7,
+        "커피/차": 9.9
+      },
+      "weekday": {
+        "간편식/밀키트/샐러드": 14.4,
+        "건강식품": 8.8,
+        "과일/견과/쌀": 16.0,
+        "베이커리": 14.8,
+        "유제품": 11.9,
+        "정육/가공육/달걀": 10.4,
+        "채소": 10.8,
+        "커피/차": 12.9
+      }
+    },
+    "naive_conclusion": "weekend customers buy smaller baskets (lower AOV)",
+    "correct_conclusion": "weekend baskets are the same size (units per order and gross AOV match weekdays); the lower AOV is WEEKEND20's 20% discount on every weekend order",
+    "note": "Weekday here leaves out the 2 holidays. Counting the holidays as weekdays, units per order is still the same (1.89 vs 1.9), but gross AOV becomes 21,796원 vs 19,894원, because the 3 한우선물세트 orders fall on the holidays. That is why the question leaves the holidays out."
+  },
+  "evaluation_questions": [
+    {
+      "id": "Q1",
+      "section": "r1",
+      "question": "Leaving out the 2 public holidays (05-05, 05-06), do weekend days or weekdays have more orders per day?",
+      "correct_answer": "Weekend days: 91.25 orders per day vs 60.0 on weekdays (Saturday 91.5, Sunday 91.0)",
+      "naive_answer": "weekdays: Monday and Tuesday have the most orders per day when the holidays are left in",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q2",
+      "section": "r1",
+      "question": "Which two dates have the most orders, and what do they have in common?",
+      "correct_answer": "2025-05-06 (150) and 2025-05-05 (149), the two public holidays. They are why Monday and Tuesday look busiest when orders are averaged by weekday name over all dates",
+      "scoring": "full credit requires naming them as the public holidays"
+    },
+    {
+      "id": "Q3",
+      "section": "r2",
+      "question": "Which district has the highest AOV, and why?",
+      "correct_answer": "서초구 (29,796원), because of 3 한우선물세트 orders of 390,000원 each (the only 한우선물세트 sales, placed on the holidays) = 40.9% of its revenue; without them its AOV is 18,177원, rank 7 of 10",
+      "naive_answer": "서초구 customers spend more per order across the board",
+      "scoring": "full credit requires the 3 한우선물세트 orders as the reason"
+    },
+    {
+      "id": "Q4",
+      "section": "r3",
+      "question": "Leaving out the 2 public holidays, do weekend orders hold smaller baskets than weekday orders?",
+      "correct_answer": "No: units per order 1.9 vs 1.88 and gross AOV 19,894원 vs 19,986원 are the same; the lower net AOV (15,915원 vs 19,986원) is WEEKEND20's 20% discount",
+      "naive_answer": "Yes, weekend AOV is lower",
+      "scoring": "full credit requires the same basket size (units per order or gross AOV) and WEEKEND20's 20% discount as the reason for the lower net AOV"
+    },
+    {
+      "id": "Q5",
+      "section": "overview",
+      "question": "What are total revenue, number of orders and AOV?",
+      "correct_answer": "22,787,840원 / 1,144 / 19,919원",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q6",
+      "section": "overview",
+      "question": "What share of orders used a promotion code?",
+      "correct_answer": "31.91% (365 orders, all WEEKEND20 = every weekend order)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q7",
+      "section": "profiles",
+      "question": "Which category has the highest revenue?",
+      "correct_answer": "과일/견과/쌀 (5,823,180원, 25.55%)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q8",
+      "section": "profiles",
+      "question": "Which district has the most orders?",
+      "correct_answer": "송파구 (215 orders; next 마포구 132)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q9",
+      "section": "profiles",
+      "question": "Which product has the most orders?",
+      "correct_answer": "김치찌개키트 (74 orders; next 백미 62)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q10",
+      "section": "profiles",
+      "question": "Which age group spends the largest share of its revenue on 간편식/밀키트/샐러드?",
+      "correct_answer": "20대 (27.34%; next 30대 12.05%)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q11",
+      "section": "profiles",
+      "question": "Which age group spends the largest share of its revenue on 건강식품?",
+      "correct_answer": "60대 (49.58%; next 30대 21.54%)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q12",
+      "section": "profiles",
+      "question": "What share of revenue comes from female customers?",
+      "correct_answer": "53.13%",
+      "scoring": "exact match"
+    }
+  ]
+}

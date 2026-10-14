@@ -1,0 +1,496 @@
+{
+  "dataset": "moon_market_kr",
+  "csv": "managed-agentcore/data/moon_market/kr/moon-market-fresh-food-sales.csv",
+  "rows": 1144,
+  "facts": [
+    {
+      "id": "total_revenue",
+      "kind": "value",
+      "description": "Total revenue: SUM(Amount), after the WEEKEND20 discount",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "KRW",
+      "value": 22787840.0,
+      "rel_tol": 0.005,
+      "note": ""
+    },
+    {
+      "id": "order_count",
+      "kind": "value",
+      "description": "Number of orders: rows in the file (one row is one order; there is no order id)",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "count",
+      "value": 1144.0,
+      "rel_tol": 0,
+      "note": ""
+    },
+    {
+      "id": "avg_order_value",
+      "kind": "value",
+      "description": "Average order value (AOV, 객단가): SUM(Amount) / rows",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "KRW",
+      "value": 19919.440559,
+      "rel_tol": 0.005,
+      "note": ""
+    },
+    {
+      "id": "total_units",
+      "kind": "value",
+      "description": "Units sold: SUM(Qty)",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "count",
+      "value": 2166.0,
+      "rel_tol": 0,
+      "note": ""
+    },
+    {
+      "id": "units_per_order",
+      "kind": "value",
+      "description": "Average Qty per order",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "ratio",
+      "value": 1.893357,
+      "rel_tol": 0.01,
+      "note": ""
+    },
+    {
+      "id": "product_count",
+      "kind": "value",
+      "description": "Number of distinct products",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "count",
+      "value": 24.0,
+      "rel_tol": 0,
+      "note": ""
+    },
+    {
+      "id": "category_count",
+      "kind": "value",
+      "description": "Number of distinct categories",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "count",
+      "value": 8.0,
+      "rel_tol": 0,
+      "note": ""
+    },
+    {
+      "id": "promo_order_share_pct",
+      "kind": "value",
+      "description": "Share of orders with a promotion code (promotion-ids not empty)",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "percent",
+      "value": 31.905594,
+      "rel_tol": 0.01,
+      "note": "every one is WEEKEND20, i.e. every Saturday and Sunday order"
+    },
+    {
+      "id": "promo_order_count",
+      "kind": "value",
+      "description": "Orders with a promotion code",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "count",
+      "value": 365.0,
+      "rel_tol": 0,
+      "note": ""
+    },
+    {
+      "id": "category_revenue_ranking",
+      "kind": "ranking",
+      "description": "Categories ranked by revenue (SUM(Amount)), highest first",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "rank",
+      "order": [
+        "과일/견과/쌀",
+        "건강식품",
+        "간편식/밀키트/샐러드",
+        "정육/가공육/달걀",
+        "커피/차",
+        "베이커리",
+        "유제품",
+        "채소"
+      ]
+    },
+    {
+      "id": "top_category_revenue",
+      "kind": "value",
+      "description": "Revenue of category 과일/견과/쌀",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "KRW",
+      "value": 5823180.0,
+      "rel_tol": 0.005,
+      "note": "the top category by revenue"
+    },
+    {
+      "id": "top_category_share_pct",
+      "kind": "value",
+      "description": "Share of total revenue from category 과일/견과/쌀",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "percent",
+      "value": 25.553892,
+      "rel_tol": 0.02,
+      "note": ""
+    },
+    {
+      "id": "second_category_revenue",
+      "kind": "value",
+      "description": "Revenue of category 건강식품",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "KRW",
+      "value": 5355980.0,
+      "rel_tol": 0.005,
+      "note": "rank 2 by revenue"
+    },
+    {
+      "id": "district_order_ranking",
+      "kind": "ranking",
+      "description": "Districts (ship-city) ranked by number of orders, most first",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "rank",
+      "order": [
+        "송파구",
+        "마포구",
+        "강서구",
+        "강남구",
+        "노원구",
+        "영등포구",
+        "성동구",
+        "서초구",
+        "광진구",
+        "용산구"
+      ]
+    },
+    {
+      "id": "top_district_orders",
+      "kind": "value",
+      "description": "Orders from district 송파구",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "count",
+      "value": 215.0,
+      "rel_tol": 0,
+      "note": "the most orders among the districts"
+    },
+    {
+      "id": "district_revenue_ranking",
+      "kind": "ranking",
+      "description": "Districts (ship-city) ranked by revenue, highest first",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "rank",
+      "order": [
+        "송파구",
+        "서초구",
+        "마포구",
+        "강남구",
+        "영등포구",
+        "강서구",
+        "노원구",
+        "광진구",
+        "용산구",
+        "성동구"
+      ]
+    },
+    {
+      "id": "top_district_revenue",
+      "kind": "value",
+      "description": "Revenue of district 송파구",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "KRW",
+      "value": 4073680.0,
+      "rel_tol": 0.005,
+      "note": "the top district by revenue"
+    },
+    {
+      "id": "top_product_orders",
+      "kind": "value",
+      "description": "Orders of product 김치찌개키트",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "count",
+      "value": 74.0,
+      "rel_tol": 0,
+      "note": "the most ordered product; next 백미 62"
+    },
+    {
+      "id": "district_aov_ranking",
+      "kind": "ranking",
+      "description": "Districts (ship-city) ranked by AOV (SUM(Amount) / orders), highest first",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "rank",
+      "order": [
+        "서초구",
+        "영등포구",
+        "광진구",
+        "용산구",
+        "강남구",
+        "마포구",
+        "송파구",
+        "노원구",
+        "강서구",
+        "성동구"
+      ]
+    },
+    {
+      "id": "seocho_aov",
+      "kind": "value",
+      "description": "AOV of district 서초구",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "KRW",
+      "value": 29796.458333,
+      "rel_tol": 0.005,
+      "note": "the highest; next 영등포구 21,326"
+    },
+    {
+      "id": "gift_set_order_count",
+      "kind": "value",
+      "description": "Orders of 한우선물세트",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "count",
+      "value": 3.0,
+      "rel_tol": 0,
+      "note": "all from 서초구, on 2025-05-05 and 05-06, Qty 3 each"
+    },
+    {
+      "id": "seocho_gift_share_pct",
+      "kind": "value",
+      "description": "Share of 서초구's revenue from its 한우선물세트 orders",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "percent",
+      "value": 40.902512,
+      "rel_tol": 0.02,
+      "note": ""
+    },
+    {
+      "id": "seocho_aov_without_gift",
+      "kind": "value",
+      "description": "AOV of district 서초구 without its 한우선물세트 orders",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "district 서초구, 한우선물세트 orders excluded"
+      },
+      "unit": "KRW",
+      "value": 18176.989247,
+      "rel_tol": 0.005,
+      "note": "rank 7 of 10 districts on that basis"
+    },
+    {
+      "id": "holiday_0505_orders",
+      "kind": "value",
+      "description": "Orders on 2025-05-05 (Mon, public holiday)",
+      "scope": {
+        "period": "2025-05-05",
+        "filter": "none"
+      },
+      "unit": "count",
+      "value": 149.0,
+      "rel_tol": 0,
+      "note": ""
+    },
+    {
+      "id": "holiday_0506_orders",
+      "kind": "value",
+      "description": "Orders on 2025-05-06 (Tue, substitute holiday)",
+      "scope": {
+        "period": "2025-05-06",
+        "filter": "none"
+      },
+      "unit": "count",
+      "value": 150.0,
+      "rel_tol": 0,
+      "note": "05-05 and 05-06 are the two busiest dates"
+    },
+    {
+      "id": "weekend_orders_per_day",
+      "kind": "value",
+      "description": "Average orders per Saturday or Sunday",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "ratio",
+      "value": 91.25,
+      "rel_tol": 0.01,
+      "note": ""
+    },
+    {
+      "id": "weekday_orders_per_day",
+      "kind": "value",
+      "description": "Average orders per Monday-Friday date that is not a public holiday (05-05, 05-06 excluded)",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "Monday-Friday dates except 2025-05-05 and 05-06"
+      },
+      "unit": "ratio",
+      "value": 60.0,
+      "rel_tol": 0.01,
+      "note": ""
+    },
+    {
+      "id": "weekend_aov",
+      "kind": "value",
+      "description": "AOV of Saturday and Sunday orders (SUM(Amount) / orders, after the 20% WEEKEND20 discount)",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "Saturday and Sunday orders"
+      },
+      "unit": "KRW",
+      "value": 15915.178082,
+      "rel_tol": 0.005,
+      "note": ""
+    },
+    {
+      "id": "weekday_aov",
+      "kind": "value",
+      "description": "AOV of Monday-Friday orders that are not on a public holiday (05-05, 05-06 excluded)",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "Monday-Friday orders except 2025-05-05 and 05-06"
+      },
+      "unit": "KRW",
+      "value": 19986.041667,
+      "rel_tol": 0.005,
+      "note": ""
+    },
+    {
+      "id": "weekend_gross_aov",
+      "kind": "value",
+      "description": "AOV of Saturday and Sunday orders before the WEEKEND20 discount (Amount / 0.8)",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "Saturday and Sunday orders"
+      },
+      "unit": "KRW",
+      "value": 19893.972603,
+      "rel_tol": 0.005,
+      "note": "about the same as the weekday AOV: the lower weekend AOV is the discount"
+    },
+    {
+      "id": "weekend_units_per_order",
+      "kind": "value",
+      "description": "Average Qty per Saturday or Sunday order",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "Saturday and Sunday orders"
+      },
+      "unit": "ratio",
+      "value": 1.89863,
+      "rel_tol": 0.01,
+      "note": ""
+    },
+    {
+      "id": "weekday_units_per_order",
+      "kind": "value",
+      "description": "Average Qty per Monday-Friday order not on a public holiday",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "Monday-Friday orders except 2025-05-05 and 05-06"
+      },
+      "unit": "ratio",
+      "value": 1.877083,
+      "rel_tol": 0.01,
+      "note": ""
+    },
+    {
+      "id": "top_age_ready_meal_share_pct",
+      "kind": "value",
+      "description": "Share of age group 20대's revenue that comes from the 간편식/밀키트/샐러드 category: SUM(Amount) of those orders / SUM(Amount) of the age group. Not the age group's share of the category's revenue, a different quantity",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "percent",
+      "value": 27.344617,
+      "rel_tol": 0.02,
+      "note": "the highest among the age groups; next 30대 12.1%"
+    },
+    {
+      "id": "top_age_health_share_pct",
+      "kind": "value",
+      "description": "Share of age group 60대's revenue that comes from the 건강식품 category: SUM(Amount) of those orders / SUM(Amount) of the age group. Not the age group's share of the category's revenue, a different quantity",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "percent",
+      "value": 49.577863,
+      "rel_tol": 0.02,
+      "note": "the highest among the age groups; next 30대 21.5%"
+    },
+    {
+      "id": "female_revenue_share_pct",
+      "kind": "value",
+      "description": "Share of total revenue from female customers (Gender = F)",
+      "scope": {
+        "period": "the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels its whole data with other dates is mislabeling this same period, not describing another one",
+        "filter": "none"
+      },
+      "unit": "percent",
+      "value": 53.128949,
+      "rel_tol": 0.01,
+      "note": ""
+    }
+  ]
+}

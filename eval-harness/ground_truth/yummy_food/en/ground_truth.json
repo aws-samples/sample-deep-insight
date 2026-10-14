@@ -1,0 +1,494 @@
+{
+  "overview": {
+    "period": "2025-09-01 to 2025-09-30 (30 days)",
+    "rows": 720,
+    "grain": "one row per Date x Media x Product; every combination appears exactly once (4 media x 6 products x 30 days), no duplicates, no missing rows",
+    "impressions": 77961417,
+    "clicks": 1401947,
+    "conversions": 65509,
+    "ad_spend_krw": 388296000,
+    "revenue_krw": 1316606500,
+    "ctr_pct": 1.8,
+    "cvr_pct": 4.67,
+    "roas": 3.39,
+    "cpc_krw": 277,
+    "revenue_per_conversion_krw": 20098,
+    "metric_definitions": {
+      "ctr": "SUM(Clicks) / SUM(Impressions) x 100",
+      "cvr": "SUM(Conversions) / SUM(Clicks) x 100",
+      "roas": "SUM(Revenue) / SUM(Ad Cost), a ratio (4.14 = 414%)",
+      "cpc": "SUM(Ad Cost) / SUM(Clicks)",
+      "revenue_per_conversion": "SUM(Revenue) / SUM(Conversions)",
+      "row_ratios": "CTR, CVR and ROAS columns hold each row's own ratio, rounded to 2 decimals; a figure for several rows is recomputed from the summed counts, never averaged from the ratio columns"
+    }
+  },
+  "expected_media_profiles": {
+    "revenue_ranking": [
+      "Kuppang",
+      "Neiba",
+      "Amazon",
+      "Kulsam"
+    ],
+    "ad_spend_ranking": [
+      "Kuppang",
+      "Neiba",
+      "Amazon",
+      "Kulsam"
+    ],
+    "roas_ranking": [
+      "Kuppang",
+      "Kulsam",
+      "Amazon",
+      "Neiba"
+    ],
+    "ctr_ranking": [
+      "Neiba",
+      "Kulsam",
+      "Kuppang",
+      "Amazon"
+    ],
+    "cvr_ranking": [
+      "Kuppang",
+      "Amazon",
+      "Kulsam",
+      "Neiba"
+    ],
+    "highest_fresh_food_share": "Kulsam",
+    "by_media": {
+      "Kuppang": {
+        "impressions": 34748091,
+        "clicks": 472773,
+        "conversions": 32118,
+        "ad_spend_krw": 161615000,
+        "revenue_krw": 669613700,
+        "ctr_pct": 1.36,
+        "cvr_pct": 6.79,
+        "roas": 4.14,
+        "cpc_krw": 342,
+        "revenue_per_conversion_krw": 20849,
+        "fresh_food_revenue_share_pct": 33.72,
+        "mean_of_row_roas": 4.45
+      },
+      "Neiba": {
+        "impressions": 17799671,
+        "clicks": 570751,
+        "conversions": 12166,
+        "ad_spend_krw": 107925000,
+        "revenue_krw": 253662100,
+        "ctr_pct": 3.21,
+        "cvr_pct": 2.13,
+        "roas": 2.35,
+        "cpc_krw": 189,
+        "revenue_per_conversion_krw": 20850,
+        "fresh_food_revenue_share_pct": 33.63,
+        "mean_of_row_roas": 2.35
+      },
+      "Amazon": {
+        "impressions": 16464599,
+        "clicks": 197085,
+        "conversions": 12590,
+        "ad_spend_krw": 68450000,
+        "revenue_krw": 216952800,
+        "ctr_pct": 1.2,
+        "cvr_pct": 6.39,
+        "roas": 3.17,
+        "cpc_krw": 347,
+        "revenue_per_conversion_krw": 17232,
+        "fresh_food_revenue_share_pct": 32.72,
+        "mean_of_row_roas": 5.74
+      },
+      "Kulsam": {
+        "impressions": 8949056,
+        "clicks": 161338,
+        "conversions": 8635,
+        "ad_spend_krw": 50306000,
+        "revenue_krw": 176377900,
+        "ctr_pct": 1.8,
+        "cvr_pct": 5.35,
+        "roas": 3.51,
+        "cpc_krw": 312,
+        "revenue_per_conversion_krw": 20426,
+        "fresh_food_revenue_share_pct": 77.55,
+        "mean_of_row_roas": 3.1
+      }
+    }
+  },
+  "expected_category": {
+    "revenue_ranking": [
+      "Fresh Food",
+      "Convenience Food",
+      "Health Food"
+    ],
+    "by_category": {
+      "Convenience Food": {
+        "impressions": 33853730,
+        "clicks": 595881,
+        "conversions": 27907,
+        "ad_spend_krw": 139179000,
+        "revenue_krw": 460878600,
+        "ctr_pct": 1.76,
+        "cvr_pct": 4.68,
+        "roas": 3.31,
+        "cpc_krw": 234,
+        "revenue_per_conversion_krw": 16515,
+        "revenue_share_pct": 35.01
+      },
+      "Health Food": {
+        "impressions": 13538927,
+        "clicks": 255381,
+        "conversions": 11163,
+        "ad_spend_krw": 100462000,
+        "revenue_krw": 336890600,
+        "ctr_pct": 1.89,
+        "cvr_pct": 4.37,
+        "roas": 3.35,
+        "cpc_krw": 393,
+        "revenue_per_conversion_krw": 30179,
+        "revenue_share_pct": 25.59
+      },
+      "Fresh Food": {
+        "impressions": 30568760,
+        "clicks": 550685,
+        "conversions": 26439,
+        "ad_spend_krw": 148655000,
+        "revenue_krw": 518837300,
+        "ctr_pct": 1.8,
+        "cvr_pct": 4.8,
+        "roas": 3.49,
+        "cpc_krw": 270,
+        "revenue_per_conversion_krw": 19624,
+        "revenue_share_pct": 39.41
+      }
+    }
+  },
+  "expected_product": {
+    "highest_revenue_per_conversion": "Premium Fruit",
+    "highest_roas": "Premium Fruit",
+    "by_product": {
+      "Frozen Dumplings": {
+        "impressions": 18329405,
+        "clicks": 323887,
+        "conversions": 15198,
+        "ad_spend_krw": 69648000,
+        "revenue_krw": 220886500,
+        "ctr_pct": 1.77,
+        "cvr_pct": 4.69,
+        "roas": 3.17,
+        "cpc_krw": 215,
+        "revenue_per_conversion_krw": 14534
+      },
+      "Salad Kit": {
+        "impressions": 24109279,
+        "clicks": 429229,
+        "conversions": 20832,
+        "ad_spend_krw": 83630000,
+        "revenue_krw": 268373000,
+        "ctr_pct": 1.78,
+        "cvr_pct": 4.85,
+        "roas": 3.21,
+        "cpc_krw": 195,
+        "revenue_per_conversion_krw": 12883
+      },
+      "Omega-3": {
+        "impressions": 5500042,
+        "clicks": 104256,
+        "conversions": 4572,
+        "ad_spend_krw": 50211000,
+        "revenue_krw": 177071600,
+        "ctr_pct": 1.9,
+        "cvr_pct": 4.39,
+        "roas": 3.53,
+        "cpc_krw": 482,
+        "revenue_per_conversion_krw": 38730
+      },
+      "Instant Rice Set": {
+        "impressions": 15524325,
+        "clicks": 271994,
+        "conversions": 12709,
+        "ad_spend_krw": 69531000,
+        "revenue_krw": 239992100,
+        "ctr_pct": 1.75,
+        "cvr_pct": 4.67,
+        "roas": 3.45,
+        "cpc_krw": 256,
+        "revenue_per_conversion_krw": 18884
+      },
+      "Protein Bar": {
+        "impressions": 8038885,
+        "clicks": 151125,
+        "conversions": 6591,
+        "ad_spend_krw": 50251000,
+        "revenue_krw": 159819000,
+        "ctr_pct": 1.88,
+        "cvr_pct": 4.36,
+        "roas": 3.18,
+        "cpc_krw": 333,
+        "revenue_per_conversion_krw": 24248
+      },
+      "Premium Fruit": {
+        "impressions": 6459481,
+        "clicks": 121456,
+        "conversions": 5607,
+        "ad_spend_krw": 65025000,
+        "revenue_krw": 250464300,
+        "ctr_pct": 1.88,
+        "cvr_pct": 4.62,
+        "roas": 3.85,
+        "cpc_krw": 535,
+        "revenue_per_conversion_krw": 44670
+      }
+    }
+  },
+  "expected_segments": {
+    "note": "Main Age Group and Main Gender are fixed per product (the same in every row of the product)",
+    "by_product": {
+      "Frozen Dumplings": {
+        "age": "30s",
+        "gender": "Male"
+      },
+      "Salad Kit": {
+        "age": "30s",
+        "gender": "Female"
+      },
+      "Omega-3": {
+        "age": "50s",
+        "gender": "Female"
+      },
+      "Instant Rice Set": {
+        "age": "20s",
+        "gender": "Male"
+      },
+      "Protein Bar": {
+        "age": "30s",
+        "gender": "Female"
+      },
+      "Premium Fruit": {
+        "age": "40s",
+        "gender": "Female"
+      }
+    }
+  },
+  "expected_weekday": {
+    "avg_daily_revenue_by_weekday_krw": {
+      "Saturday": 53814175,
+      "Sunday": 49638950,
+      "Tuesday": 42067800,
+      "Wednesday": 41243575,
+      "Thursday": 40886425,
+      "Monday": 40494540,
+      "Friday": 40365575
+    },
+    "highest_weekday": "Saturday",
+    "second_weekday": "Sunday",
+    "weekend_vs_weekday_ratio": 1.26,
+    "note": "Average daily spend is about the same on every day of the week (Monday to Friday KRW 12,558,000 to KRW 13,259,800; Saturday KRW 12,943,000, Sunday KRW 12,944,000): the weekend lift comes from a higher conversion rate.",
+    "total_revenue_note": "September 2025 has 5 Mondays and 5 Tuesdays and 4 of every other weekday. Ranked by total revenue instead of the daily average, the order is Saturday > Tuesday > Monday > Sunday; the question asks for the average."
+  },
+  "r1_mean_of_row_roas": {
+    "naive_method": "mean of the ROAS column per media (every row weighted equally)",
+    "correct_method": "SUM(Revenue) / SUM(Ad Cost) per media",
+    "period_note": "The questions fix the period to the whole month. Over 2025-09-16 to 09-30 alone, Kuppang (3.53) and Kulsam (3.50) are nearly tied, so a ranking for the second half has no single answer and is not asked.",
+    "naive_ranking": [
+      "Amazon",
+      "Kuppang",
+      "Kulsam",
+      "Neiba"
+    ],
+    "correct_ranking": [
+      "Kuppang",
+      "Kulsam",
+      "Amazon",
+      "Neiba"
+    ],
+    "naive_top": {
+      "media": "Amazon",
+      "mean_of_row_roas": 5.74
+    },
+    "correct_top": {
+      "media": "Kuppang",
+      "roas": 4.14
+    },
+    "why": "Amazon runs Protein Bar, Omega-3 and Premium Fruit on a tiny budget (about KRW 60,000 a day) at a high ROAS; those rows count as much as its large rows in a plain mean, but carry little spend",
+    "amazon_small_budget_rows": {
+      "impressions": 1841776,
+      "clicks": 21985,
+      "conversions": 1394,
+      "ad_spend_krw": 5389000,
+      "revenue_krw": 47425100,
+      "ctr_pct": 1.19,
+      "cvr_pct": 6.34,
+      "roas": 8.8,
+      "cpc_krw": 245,
+      "revenue_per_conversion_krw": 34021
+    },
+    "amazon_large_budget_rows": {
+      "impressions": 14622823,
+      "clicks": 175100,
+      "conversions": 11196,
+      "ad_spend_krw": 63061000,
+      "revenue_krw": 169527700,
+      "ctr_pct": 1.2,
+      "cvr_pct": 6.39,
+      "roas": 2.69,
+      "cpc_krw": 360,
+      "revenue_per_conversion_krw": 15142
+    }
+  },
+  "r2_highest_ctr_lowest_roas": {
+    "highest_ctr_media": "Neiba",
+    "ctr_pct": 3.21,
+    "cvr_pct": 2.13,
+    "roas": 2.35,
+    "cpc_krw": 189,
+    "note": "Neiba also has the lowest CPC (KRW 189; the others KRW 312 to KRW 347): its clicks are cheap but convert least. Which media is \"most efficient\" depends on the metric, so the question asks for the ROAS rank.",
+    "naive_conclusion": "Neiba has the highest CTR, so it returns the most revenue per KRW spent; move budget to it",
+    "correct_conclusion": "Neiba has the highest CTR but the lowest conversion rate and the lowest ROAS of the 4 media"
+  },
+  "r3_kuppang_budget_increase": {
+    "change": "Kuppang daily ad spend doubled from 2025-09-16; the other media kept the same daily spend all month",
+    "windows": {
+      "before": "2025-09-01 to 2025-09-15",
+      "after": "2025-09-16 to 2025-09-30"
+    },
+    "kuppang_daily_spend_avg_krw": {
+      "before": 3596867,
+      "after": 7177467
+    },
+    "other_media_daily_spend_avg_krw": {
+      "before": 7542133,
+      "after": 7569933
+    },
+    "before": {
+      "impressions": 12364200,
+      "clicks": 186068,
+      "conversions": 13912,
+      "ad_spend_krw": 53953000,
+      "revenue_krw": 290025900,
+      "ctr_pct": 1.5,
+      "cvr_pct": 7.48,
+      "roas": 5.38,
+      "cpc_krw": 290,
+      "revenue_per_conversion_krw": 20847
+    },
+    "after": {
+      "impressions": 22383891,
+      "clicks": 286705,
+      "conversions": 18206,
+      "ad_spend_krw": 107662000,
+      "revenue_krw": 379587800,
+      "ctr_pct": 1.28,
+      "cvr_pct": 6.35,
+      "roas": 3.53,
+      "cpc_krw": 376,
+      "revenue_per_conversion_krw": 20850
+    },
+    "incremental_roas": 1.67,
+    "incremental_roas_definition": "(Kuppang revenue after - before) / (Kuppang ad spend after - before); both windows are 15 days with 2 Saturdays and 2 Sundays each",
+    "incremental_roas_by_split": "By product the increment ranges from 1.42 to 1.95, on weekdays only it is 1.57 and on weekends only 1.94; every split stays below Neiba's 2.35.",
+    "lowest_other_media_roas": {
+      "media": "Neiba",
+      "roas": 2.35
+    },
+    "naive_conclusion": "Kuppang has the highest ROAS (4.14), so the extra budget earns about that much",
+    "correct_conclusion": "the extra Kuppang spend returned only KRW 1.67 per KRW 1, below the full-month ROAS of every other media; Kuppang's ROAS fell from 5.38 to 3.53 after the increase",
+    "not_determined": "Not determined by the data, so not scored: whether more Kuppang budget pays off (1.67 is above 1, but the file has no margins), and what the other media would return on extra spend (their spend never changed)."
+  },
+  "evaluation_questions": [
+    {
+      "id": "Q1",
+      "section": "r1",
+      "question": "Which media has the highest ROAS over the whole month (2025-09-01 to 09-30)?",
+      "correct_answer": "Kuppang (4.14)",
+      "naive_answer": "Amazon (5.74, mean of the ROAS column)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q2",
+      "section": "r1",
+      "question": "Rank the 4 media by ROAS over the whole month (2025-09-01 to 09-30), highest first.",
+      "correct_answer": "Kuppang > Kulsam > Amazon > Neiba",
+      "naive_answer": "Amazon > Kuppang > Kulsam > Neiba (mean of the ROAS column)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q3",
+      "section": "r2",
+      "question": "Which media has the highest CTR, and where does it rank among the 4 media by ROAS?",
+      "correct_answer": "Neiba (CTR 3.21%); last of the 4 by ROAS (2.35), and also last by conversion rate (2.13%)",
+      "naive_answer": "first: the highest CTR taken as the best return",
+      "scoring": "exact match: Neiba, and 4th (last) by ROAS"
+    },
+    {
+      "id": "Q4",
+      "section": "r3",
+      "question": "Did any media change its ad spend during the month?",
+      "correct_answer": "Kuppang doubled its daily spend from 2025-09-16 (KRW 3,596,867 to KRW 7,177,467 a day on average)",
+      "naive_answer": "no change",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q5",
+      "section": "r3",
+      "question": "What did the extra Kuppang spend after 2025-09-16 return (incremental ROAS vs 09-01 to 09-15), and is it above or below each other media's full-month ROAS?",
+      "correct_answer": "1.67 = (revenue after - before) / (spend after - before); below every other media's full-month ROAS (lowest: Neiba 2.35). Kuppang ROAS fell from 5.38 to 3.53",
+      "naive_answer": "about 4.14 (Kuppang's full-month ROAS), above every other media",
+      "scoring": "full credit requires the incremental ROAS (about 1.67) and that it is below every other media's full-month ROAS. A split by product or by weekday/weekend (1.42 to 1.95) gets partial credit. A budget recommendation is not scored: the file has no margins, and the other media never changed their spend"
+    },
+    {
+      "id": "Q6",
+      "section": "overview",
+      "question": "What are total revenue, total ad spend and overall ROAS?",
+      "correct_answer": "KRW 1,316,606,500 / KRW 388,296,000 / 3.39",
+      "scoring": "exact match (ROAS may be written as a percent)"
+    },
+    {
+      "id": "Q7",
+      "section": "media",
+      "question": "Rank the media by revenue.",
+      "correct_answer": "Kuppang > Neiba > Amazon > Kulsam",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q8",
+      "section": "media",
+      "question": "Which media gets the largest share of its own revenue from Fresh Food?",
+      "correct_answer": "Kulsam (77.55%)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q9",
+      "section": "category",
+      "question": "Rank the categories by revenue share.",
+      "correct_answer": "Fresh Food (39.41%) > Convenience Food (35.01%) > Health Food (25.59%)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q10",
+      "section": "product",
+      "question": "Which product has the highest revenue per conversion?",
+      "correct_answer": "Premium Fruit (KRW 44,670)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q11",
+      "section": "product",
+      "question": "Which product has the highest ROAS?",
+      "correct_answer": "Premium Fruit (3.85)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q12",
+      "section": "weekday",
+      "question": "Which weekday has the highest average daily revenue (each date's SUM(Revenue), averaged over that weekday's dates)?",
+      "correct_answer": "Saturday (then Sunday); weekend days average 1.26x weekdays",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q13",
+      "section": "segments",
+      "question": "Who are the main buyers of Omega-3?",
+      "correct_answer": "50s Female",
+      "scoring": "exact match"
+    }
+  ]
+}
