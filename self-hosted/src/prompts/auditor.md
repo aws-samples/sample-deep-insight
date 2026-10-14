@@ -266,13 +266,26 @@ write_and_execute_tool(
     content="""
 import json, re, zipfile
 
-# A match never starts or ends inside a number, so 111,065.13 is one value (not
-# 111,065 + ".13"). ~ / : - · separate numbers and are never a unit.
-_UNIT = r'%p|%|[^\s\d\[\].,()~/:·–-]{{1,3}}'
-_NUM_RE = re.compile(r'(?<![\d.,])(-?\d{{1,3}}(?:,\d{{3}})+(?:\.\d+)?|-?\d+(?:\.\d+)?)(?![.,]?\d)\s*(' + _UNIT + r')?\s*(?:\[(\d+)\])?')
-# one end of a range, date, ratio or time (10~15%, 3/9~3/15, 2024-2025, 14:30) — not a single value
-_RANGE_L = re.compile(r'\d(?:' + _UNIT + r')?(?:\s?[~–]\s?|[/:-])$')
-_RANGE_R = re.compile(r'(?:' + _UNIT + r')?(?:\s?[~–]\s?|[/:-])-?\d')
+# Number claims, shared verbatim by the Reporter and the Auditor. A match never
+# starts or ends inside a number, so 1,234.56 is one value (not 1,234 + ".56"),
+# and the N of an [N] marker is not a number.
+_RANGE_SEP = '~～〜–—'  # range connectors, spaced or not ('-' is handled in _JOIN)
+_UNIT = r'%p|%|[^\s\d\[\].,()/:·' + _RANGE_SEP + r'-]{{1,3}}'
+_NUM_RE = re.compile(r'(?<![\d\[])(?<!\d[.,])(-?\d{{1,3}}(?:,\d{{3}})+(?:\.\d+)?|-?\d+(?:\.\d+)?)(?![.,]?\d)\s*(' + _UNIT + r')?\s*(?:\[(\d+)\])?')
+# One end of a range (10~15%, 10 - 15%, 1,000건-2,000건), or of a date, time or
+# ratio when / or : sits right between two digits (3/9, 14:30, 1:2). A spaced
+# '-' needs a space on both sides, so "100억 -5%" stays a negative number, and
+# 1,234건/5,678원 is two values.
+_JOIN = r'(?:\s?[' + _RANGE_SEP + r']\s?|\s-\s|-)'
+_RANGE_L = re.compile(r'\d(?:' + _UNIT + r')?' + _JOIN + r'$|\d[/:]$')
+_RANGE_R = re.compile(r'(?:' + _UNIT + r')?' + _JOIN + r'-?\d|[/:]\d')
+
+def _range_end(txt, m):  # -> (number text, is a range end) for a _NUM_RE match
+    # in 10%-15% the '-' joins the range, so the right end is 15, not -15
+    s, raw = m.start(1), m.group(1)
+    if raw.startswith('-') and _RANGE_L.search(txt, max(0, s - 8), s + 1):
+        return raw[1:], True
+    return raw, bool(_RANGE_L.search(txt, max(0, s - 8), s) or _RANGE_R.match(txt, m.end(1)))
 
 def extract_claims(docx_path):
     with zipfile.ZipFile(docx_path) as z:
@@ -298,7 +311,8 @@ def extract_claims(docx_path):
             in_refs = True
         para_in_table = _in_table(mp.start())
         for m in _NUM_RE.finditer(para):
-            raw, unit, marker = m.group(1), m.group(2), m.group(3)
+            unit, marker = m.group(2), m.group(3)
+            raw, in_range = _range_end(para, m)
             try:
                 val = float(raw.replace(',', ''))
             except ValueError:
@@ -307,7 +321,7 @@ def extract_claims(docx_path):
                 'paragraph': p_idx, 'text': para[:200],
                 'value': val, 'unit': unit or '', 'marker': marker,
                 'in_table': para_in_table, 'in_refs': in_refs,
-                'in_range': bool(_RANGE_L.search(para, 0, m.start(1)) or _RANGE_R.match(para, m.end(1))),
+                'in_range': in_range,
                 'span_start': m.start(), 'span_end': m.end()
             }})
     return claims
