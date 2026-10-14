@@ -27,7 +27,7 @@ AgentCore Runtime
      ├─ after each agent invocation, and at the end:
      │    s3://…/deep-insight/traces/{job_id}/events.jsonl  ◄── dashboard reads the trace
      └─ at the end (success, error, client disconnect):
-          s3://…/fargate_sessions/{session_id}/output/token_usage.json, job_status.json
+          s3://…/deep-insight/fargate_sessions/{session_id}/output/token_usage.json, job_status.json
                                                      │ S3 event
                                                      ▼
                          Lambda: update job by job_id ──► Success / Failed + SNS
