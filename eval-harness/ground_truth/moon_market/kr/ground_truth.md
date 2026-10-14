@@ -72,11 +72,12 @@ Each item lists the answer a shallow analysis gives (naive) and the correct one.
 
 - Average orders per day: holiday 149.5, weekend 91.25, weekday 60.0.
 - Busiest dates: 2025-05-06 (150), 2025-05-05 (149), 2025-05-11 (93).
+- Saturday (91.5) and Sunday (91.0) are tied, and the non-holiday Monday and Tuesday are one date each, so no single busiest weekday is asked for: the questions compare weekend days with weekdays and ask for the busiest dates.
 
 ### B2. 서초구's top AOV is three gift orders
 
 - Naive: 서초구 customers spend the most per order across the board.
-- Correct: 서초구's top AOV comes from 3 한우선물세트 orders (Qty 3, 390,000원 each) placed on the holidays for 어버이날 (05-08); they are the only 한우선물세트 sales. Without them 서초구's AOV ranks 7 of 10, and its median order is like the others.
+- Correct: 서초구's top AOV comes from 3 한우선물세트 orders (Qty 3, 390,000원 each) placed on the holidays; they are the only 한우선물세트 sales. Without them 서초구's AOV ranks 7 of 10, and its median order (13,950원) is close to the other districts' (11,040원 to 13,800원).
 - 서초구: 96 orders, revenue 2,860,460원, AOV 29,796원 (next 영등포구 21,326원), median 13,950원 (all orders: 12,900원).
 - The 3 한우선물세트 orders: 1,170,000원 = 40.9% of 서초구 revenue. Without them: AOV 18,177원, rank 7 of 10.
 
@@ -96,16 +97,18 @@ Each item lists the answer a shallow analysis gives (naive) and the correct one.
 | Weekend | 15,915원 | 19,894원 | 1.9 |
 | Weekday | 19,986원 | 19,986원 | 1.88 |
 
+- Weekday here leaves out the 2 holidays. Counting the holidays as weekdays, units per order is still the same (1.89 vs 1.9), but gross AOV becomes 21,796원 vs 19,894원, because the 3 한우선물세트 orders fall on the holidays. That is why the question leaves the holidays out.
+
 ## Evaluation questions
 
 Each question has exactly one correct answer. `Naive` is the wrong answer a shallow analysis gives.
 
 | ID | Question | Correct answer | Naive (wrong) answer | Scoring |
 |---|---|---|---|---|
-| Q1 | Which weekday has the most orders per day? | On the dates that are not holidays: Saturday and Sunday (91.5 and 91.0 orders/day vs about 60 on weekdays). Monday and Tuesday look busiest only because 2025-05-05 and 05-06 are public holidays, the two busiest dates (149 and 150 orders) | Monday / Tuesday (averaged over all dates) | full credit requires naming the holidays as the reason Monday and Tuesday look busiest |
-| Q2 | Which two dates have the most orders? | 2025-05-05 and 2025-05-06 (public holidays) |  | exact match |
+| Q1 | Leaving out the 2 public holidays (05-05, 05-06), do weekend days or weekdays have more orders per day? | Weekend days: 91.25 orders per day vs 60.0 on weekdays (Saturday 91.5, Sunday 91.0) | weekdays: Monday and Tuesday have the most orders per day when the holidays are left in | exact match |
+| Q2 | Which two dates have the most orders, and what do they have in common? | 2025-05-06 (150) and 2025-05-05 (149), the two public holidays. They are why Monday and Tuesday look busiest when orders are averaged by weekday name over all dates |  | full credit requires naming them as the public holidays |
 | Q3 | Which district has the highest AOV, and why? | 서초구 (29,796원), because of 3 한우선물세트 orders of 390,000원 each (the only 한우선물세트 sales, placed on the holidays) = 40.9% of its revenue; without them its AOV is 18,177원, rank 7 of 10 | 서초구 customers spend more per order across the board | full credit requires the 3 한우선물세트 orders as the reason |
-| Q4 | Do weekend orders hold smaller baskets than weekday orders? | No: units per order 1.9 vs 1.88 and gross AOV 19,894원 vs 19,986원 are the same; the lower net AOV (15,915원 vs 19,986원) is WEEKEND20's 20% discount | Yes, weekend AOV is lower | full credit requires the 20% WEEKEND20 discount as the reason |
+| Q4 | Leaving out the 2 public holidays, do weekend orders hold smaller baskets than weekday orders? | No: units per order 1.9 vs 1.88 and gross AOV 19,894원 vs 19,986원 are the same; the lower net AOV (15,915원 vs 19,986원) is WEEKEND20's 20% discount | Yes, weekend AOV is lower | full credit requires the same basket size (units per order or gross AOV) and WEEKEND20's 20% discount as the reason for the lower net AOV |
 | Q5 | What are total revenue, number of orders and AOV? | 22,787,840원 / 1,144 / 19,919원 |  | exact match |
 | Q6 | What share of orders used a promotion code? | 31.91% (365 orders, all WEEKEND20 = every weekend order) |  | exact match |
 | Q7 | Which category has the highest revenue? | 과일/견과/쌀 (5,823,180원, 25.55%) |  | exact match |

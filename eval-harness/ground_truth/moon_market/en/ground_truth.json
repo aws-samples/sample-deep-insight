@@ -151,11 +151,12 @@
       "holiday": 149.5,
       "weekend": 91.25,
       "weekday": 60.0
-    }
+    },
+    "note": "Saturday (91.5) and Sunday (91.0) are tied, and the non-holiday Monday and Tuesday are one date each, so no single busiest weekday is asked for: the questions compare weekend days with weekdays and ask for the busiest dates."
   },
   "r2_seocho_aov": {
     "naive_conclusion": "Seocho-gu customers spend the most per order across the board",
-    "correct_conclusion": "Seocho-gu's top AOV comes from 3 Hanwoo Beef Gift Set orders (Qty 3, KRW 390,000 each) placed on the holidays for Parents' Day (05-08); they are the only Hanwoo Beef Gift Set sales. Without them Seocho-gu's AOV ranks 7 of 10, and its median order is like the others",
+    "correct_conclusion": "Seocho-gu's top AOV comes from 3 Hanwoo Beef Gift Set orders (Qty 3, KRW 390,000 each) placed on the holidays; they are the only Hanwoo Beef Gift Set sales. Without them Seocho-gu's AOV ranks 7 of 10, and its median order (KRW 13,950) is close to the other districts' (KRW 11,040 to KRW 13,800)",
     "district_aov_krw": {
       "Seocho-gu": 29796,
       "Yeongdeungpo-gu": 21326,
@@ -245,23 +246,24 @@
       }
     },
     "naive_conclusion": "weekend customers buy smaller baskets (lower AOV)",
-    "correct_conclusion": "weekend baskets are the same size (units per order and gross AOV match weekdays); the lower AOV is WEEKEND20's 20% discount on every weekend order"
+    "correct_conclusion": "weekend baskets are the same size (units per order and gross AOV match weekdays); the lower AOV is WEEKEND20's 20% discount on every weekend order",
+    "note": "Weekday here leaves out the 2 holidays. Counting the holidays as weekdays, units per order is still the same (1.89 vs 1.9), but gross AOV becomes KRW 21,796 vs KRW 19,894, because the 3 Hanwoo Beef Gift Set orders fall on the holidays. That is why the question leaves the holidays out."
   },
   "evaluation_questions": [
     {
       "id": "Q1",
       "section": "r1",
-      "question": "Which weekday has the most orders per day?",
-      "correct_answer": "On the dates that are not holidays: Saturday and Sunday (91.5 and 91.0 orders/day vs about 60 on weekdays). Monday and Tuesday look busiest only because 2025-05-05 and 05-06 are public holidays, the two busiest dates (149 and 150 orders)",
-      "naive_answer": "Monday / Tuesday (averaged over all dates)",
-      "scoring": "full credit requires naming the holidays as the reason Monday and Tuesday look busiest"
+      "question": "Leaving out the 2 public holidays (05-05, 05-06), do weekend days or weekdays have more orders per day?",
+      "correct_answer": "Weekend days: 91.25 orders per day vs 60.0 on weekdays (Saturday 91.5, Sunday 91.0)",
+      "naive_answer": "weekdays: Monday and Tuesday have the most orders per day when the holidays are left in",
+      "scoring": "exact match"
     },
     {
       "id": "Q2",
       "section": "r1",
-      "question": "Which two dates have the most orders?",
-      "correct_answer": "2025-05-05 and 2025-05-06 (public holidays)",
-      "scoring": "exact match"
+      "question": "Which two dates have the most orders, and what do they have in common?",
+      "correct_answer": "2025-05-06 (150) and 2025-05-05 (149), the two public holidays. They are why Monday and Tuesday look busiest when orders are averaged by weekday name over all dates",
+      "scoring": "full credit requires naming them as the public holidays"
     },
     {
       "id": "Q3",
@@ -274,10 +276,10 @@
     {
       "id": "Q4",
       "section": "r3",
-      "question": "Do weekend orders hold smaller baskets than weekday orders?",
+      "question": "Leaving out the 2 public holidays, do weekend orders hold smaller baskets than weekday orders?",
       "correct_answer": "No: units per order 1.9 vs 1.88 and gross AOV KRW 19,894 vs KRW 19,986 are the same; the lower net AOV (KRW 15,915 vs KRW 19,986) is WEEKEND20's 20% discount",
       "naive_answer": "Yes, weekend AOV is lower",
-      "scoring": "full credit requires the 20% WEEKEND20 discount as the reason"
+      "scoring": "full credit requires the same basket size (units per order or gross AOV) and WEEKEND20's 20% discount as the reason for the lower net AOV"
     },
     {
       "id": "Q5",

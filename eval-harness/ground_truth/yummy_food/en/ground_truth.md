@@ -77,7 +77,8 @@ Category ROAS values are close to each other; only the revenue share ranking is 
 | Monday | KRW 40,494,540 |
 | Friday | KRW 40,365,575 |
 
-- Saturday is highest, then Sunday; weekend days average 1.26x weekdays. Spend is flat across weekdays: the lift comes from a higher conversion rate. The five weekdays are close to each other and are not ranked.
+- Saturday is highest, then Sunday; weekend days average 1.26x weekdays. Average daily spend is about the same on every day of the week (Monday to Friday KRW 12,558,000 to KRW 13,259,800; Saturday KRW 12,943,000, Sunday KRW 12,944,000): the weekend lift comes from a higher conversion rate. The five weekdays are close to each other and are not ranked.
+- September 2025 has 5 Mondays and 5 Tuesdays and 4 of every other weekday. Ranked by total revenue instead of the daily average, the order is Saturday > Tuesday > Monday > Sunday; the question asks for the average.
 
 ## Part B. Patterns that need real analysis
 
@@ -96,16 +97,19 @@ Each item lists the answer a shallow analysis gives (naive) and the correct one.
 | Amazon | 3.17 | 5.74 |
 | Neiba | 2.35 | 2.35 |
 
-### B2. The highest CTR is the least efficient media
+- The questions fix the period to the whole month. Over 2025-09-16 to 09-30 alone, Kuppang (3.53) and Kulsam (3.50) are nearly tied, so a ranking for the second half has no single answer and is not asked.
 
-- Naive: Neiba is the most efficient media (highest CTR), so move budget to it.
+### B2. The highest CTR has the lowest ROAS
+
+- Naive: Neiba has the highest CTR, so it returns the most revenue per KRW spent; move budget to it.
 - Correct: Neiba has the highest CTR but the lowest conversion rate and the lowest ROAS of the 4 media: CTR 3.21%, conversion rate 2.13%, ROAS 2.35.
 - CTR ranking: Neiba > Kulsam > Kuppang > Amazon. Conversion rate ranking: Kuppang > Amazon > Kulsam > Neiba.
+- Neiba also has the lowest CPC (KRW 189; the others KRW 312 to KRW 347): its clicks are cheap but convert least. Which media is "most efficient" depends on the metric, so the question asks for the ROAS rank.
 
 ### B3. Kuppang budget increase: diminishing returns
 
 - Kuppang daily ad spend doubled from 2025-09-16; the other media kept the same daily spend all month.
-- Naive: Kuppang has the highest ROAS, so add more budget to Kuppang.
+- Naive: Kuppang has the highest ROAS (4.14), so the extra budget earns about that much.
 - Correct: the extra Kuppang spend returned only KRW 1.67 per KRW 1, below the full-month ROAS of every other media; Kuppang's ROAS fell from 5.38 to 3.53 after the increase.
 - Incremental ROAS = (Kuppang revenue after - before) / (Kuppang ad spend after - before); both windows are 15 days with 2 Saturdays and 2 Sundays each.
 
@@ -116,7 +120,8 @@ Each item lists the answer a shallow analysis gives (naive) and the correct one.
 | Increment | | KRW 53,709,000 | KRW 89,561,900 | **1.67** | | |
 
 - Average daily spend: Kuppang KRW 3,596,867 → KRW 7,177,467; the other 3 media together KRW 7,542,133 → KRW 7,569,933 (unchanged).
-- The lowest other-media ROAS is Neiba 2.35, still above 1.67.
+- The lowest other-media ROAS is Neiba 2.35, still above 1.67. By product the increment ranges from 1.42 to 1.95, on weekdays only it is 1.57 and on weekends only 1.94; every split stays below Neiba's 2.35.
+- Not determined by the data, so not scored: whether more Kuppang budget pays off (1.67 is above 1, but the file has no margins), and what the other media would return on extra spend (their spend never changed).
 
 ## Evaluation questions
 
@@ -124,16 +129,16 @@ Each question has exactly one correct answer. `Naive` is the wrong answer a shal
 
 | ID | Question | Correct answer | Naive (wrong) answer | Scoring |
 |---|---|---|---|---|
-| Q1 | Which media has the highest ROAS? | Kuppang (4.14) | Amazon (5.74, mean of the ROAS column) | exact match |
-| Q2 | Rank the 4 media by ROAS, highest first. | Kuppang > Kulsam > Amazon > Neiba | Amazon > Kuppang > Kulsam > Neiba (mean of the ROAS column) | exact match |
-| Q3 | Which media has the highest CTR, and is it the most efficient media? | Neiba (3.21%), but it has the lowest conversion rate (2.13%) and the lowest ROAS (2.35) | Neiba is the most efficient | full credit requires the lowest ROAS (or the lowest conversion rate) together with the highest CTR |
+| Q1 | Which media has the highest ROAS over the whole month (2025-09-01 to 09-30)? | Kuppang (4.14) | Amazon (5.74, mean of the ROAS column) | exact match |
+| Q2 | Rank the 4 media by ROAS over the whole month (2025-09-01 to 09-30), highest first. | Kuppang > Kulsam > Amazon > Neiba | Amazon > Kuppang > Kulsam > Neiba (mean of the ROAS column) | exact match |
+| Q3 | Which media has the highest CTR, and where does it rank among the 4 media by ROAS? | Neiba (CTR 3.21%); last of the 4 by ROAS (2.35), and also last by conversion rate (2.13%) | first: the highest CTR taken as the best return | exact match: Neiba, and 4th (last) by ROAS |
 | Q4 | Did any media change its ad spend during the month? | Kuppang doubled its daily spend from 2025-09-16 (KRW 3,596,867 to KRW 7,177,467 a day on average) | no change | exact match |
-| Q5 | What did the extra Kuppang spend after 2025-09-16 return (incremental ROAS vs 09-01 to 09-15)? | 1.67: (revenue after - before) / (spend after - before); below every other media's ROAS (lowest: Neiba 2.35). Kuppang ROAS fell from 5.38 to 3.53 | add more budget to Kuppang because its ROAS (4.14) is the highest | full credit requires the incremental return (about 1.67) or the fall in Kuppang ROAS after the increase, and that more Kuppang budget is not the best use |
+| Q5 | What did the extra Kuppang spend after 2025-09-16 return (incremental ROAS vs 09-01 to 09-15), and is it above or below each other media's full-month ROAS? | 1.67 = (revenue after - before) / (spend after - before); below every other media's full-month ROAS (lowest: Neiba 2.35). Kuppang ROAS fell from 5.38 to 3.53 | about 4.14 (Kuppang's full-month ROAS), above every other media | full credit requires the incremental ROAS (about 1.67) and that it is below every other media's full-month ROAS. A split by product or by weekday/weekend (1.42 to 1.95) gets partial credit. A budget recommendation is not scored: the file has no margins, and the other media never changed their spend |
 | Q6 | What are total revenue, total ad spend and overall ROAS? | KRW 1,316,606,500 / KRW 388,296,000 / 3.39 |  | exact match (ROAS may be written as a percent) |
 | Q7 | Rank the media by revenue. | Kuppang > Neiba > Amazon > Kulsam |  | exact match |
 | Q8 | Which media gets the largest share of its own revenue from Fresh Food? | Kulsam (77.55%) |  | exact match |
 | Q9 | Rank the categories by revenue share. | Fresh Food (39.41%) > Convenience Food (35.01%) > Health Food (25.59%) |  | exact match |
 | Q10 | Which product has the highest revenue per conversion? | Premium Fruit (KRW 44,670) |  | exact match |
 | Q11 | Which product has the highest ROAS? | Premium Fruit (3.85) |  | exact match |
-| Q12 | Which weekday has the highest average daily revenue? | Saturday (then Sunday); weekend days average 1.26x weekdays |  | exact match |
+| Q12 | Which weekday has the highest average daily revenue (each date's SUM(Revenue), averaged over that weekday's dates)? | Saturday (then Sunday); weekend days average 1.26x weekdays |  | exact match |
 | Q13 | Who are the main buyers of Omega-3? | 50s Female |  | exact match |
