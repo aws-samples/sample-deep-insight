@@ -106,10 +106,10 @@ data, the planted patterns, the answers and how to grade a report against them.
 
 **moon_market and yummy_food are test sets.** They have no scenarios or gold
 cases here, and no prompt or threshold is tuned against them, so a change that
-only fits jungle_market shows up when it is checked on them. yummy_food (kr and
-en editions, same numbers) has an answer sheet in `ground_truth/yummy_food/<lang>/`
-and answer keys `answer_keys/yummy_food_kr.json` / `_en.json`; the sheet is kept
-out of `managed-agentcore/data/`, which ships to the runtime.
+only fits jungle_market shows up when it is checked on them. Both have kr and
+en editions with the same numbers, an answer sheet in `ground_truth/<dataset>/<lang>/`
+and answer keys `answer_keys/<dataset>_kr.json` / `_en.json`. The sheets are kept
+out of the data directories, which reach the agents.
 
 ## Workflow
 

@@ -26,7 +26,7 @@ Usage:
     python answer_keys/build_answer_key.py          # writes answer_keys/*.json
 Review the generated values once by hand before trusting them.
 jungle_market agrees with the dataset's own ground_truth.json (checked 2026-10-12), yummy_food_kr/_en
-with eval-harness/ground_truth/yummy_food/<lang>/ground_truth.json (checked 2026-10-14).
+and moon_market_kr/_en with eval-harness/ground_truth/<dataset>/<lang>/ground_truth.json (checked 2026-10-14).
 """
 import json
 from pathlib import Path
@@ -373,8 +373,153 @@ def yummy_food(lang):
     return {"dataset": f"yummy_food_{lang}", "csv": str(csv.relative_to(REPO)), "rows": len(df), "facts": f}
 
 
+# moon_market en is the kr file with English names (same numbers).
+MOON_EN = {"간편식/밀키트/샐러드": "Ready Meal/Meal Kit/Salad", "과일/견과/쌀": "Fruit/Nuts/Rice", "채소": "Vegetables",
+           "정육/가공육/달걀": "Meat/Processed Meat/Egg", "유제품": "Dairy", "커피/차": "Coffee/Tea", "베이커리": "Bakery", "건강식품": "Health Supplements",
+           "샐러드키트": "Salad Kit", "김치찌개키트": "Kimchi Stew Kit", "우동키트": "Udon Kit", "사과": "Apple", "견과류믹스": "Mixed Nuts",
+           "백미": "White Rice", "상추": "Lettuce", "브로콜리": "Broccoli", "양파": "Onion", "돼지고기": "Pork", "달걀": "Egg",
+           "한우선물세트": "Hanwoo Beef Gift Set", "우유": "Milk", "그릭요거트": "Greek Yogurt", "체다치즈": "Cheddar Cheese",
+           "드립커피": "Drip Coffee", "생강차": "Ginger Tea", "녹차": "Green Tea", "식빵": "White Bread", "베이글": "Bagel",
+           "크로와상": "Croissant", "홍삼": "Red Ginseng", "오메가3": "Omega-3", "유산균": "Probiotics",
+           "2개입": "2-pack", "10개입": "10-pack", "20개입": "20-pack", "4개입": "4-pack", "30개입": "30-pack", "1개": "1 pc",
+           "60정": "60 tablets", "30정": "30 tablets",
+           "송파구": "Songpa-gu", "강남구": "Gangnam-gu", "서초구": "Seocho-gu", "마포구": "Mapo-gu", "강서구": "Gangseo-gu",
+           "노원구": "Nowon-gu", "영등포구": "Yeongdeungpo-gu", "광진구": "Gwangjin-gu", "성동구": "Seongdong-gu", "용산구": "Yongsan-gu",
+           "서울": "Seoul", "20대": "20s", "30대": "30s", "40대": "40s", "50대": "50s", "60대": "60s"}
+
+
+def moon_market(lang):
+    """Moon Market: two weeks of single-product grocery orders in 10 Seoul districts, May 2025.
+
+    One row = one order (no order id), each product with one fixed size and
+    price, and WEEKEND20 (20% off every Saturday and Sunday order) the only
+    code, so Amount has one reading. Planted: the 05-05 / 05-06 public holidays
+    make Monday and Tuesday look busiest; 서초구's top AOV is 3 한우선물세트 gift
+    orders; weekend AOV is lower only by the discount. The answer sheet is
+    eval-harness/ground_truth/moon_market/<lang>/ (Q1-Q12), kept out of the data
+    directories; these facts must agree with it.
+    """
+    csv = REPO / "managed-agentcore" / "data" / "moon_market" / lang / "moon-market-fresh-food-sales.csv"
+    df = pd.read_csv(csv, dtype={"ship-postal-code": str}, keep_default_na=False)
+    if lang == "en":
+        back = {v: k for k, v in MOON_EN.items()}
+        df = df.replace(back)
+    whole = ("the whole file, 2025-05-01 to 2025-05-14; the file has no other dates, so a report that labels "
+             "its whole data with other dates is mislabeling this same period, not describing another one")
+    full = {"period": whole, "filter": "none"}
+    hol = df["Date"].isin(["2025-05-05", "2025-05-06"])
+    wkend = pd.to_datetime(df["Date"]).dt.weekday >= 5
+    wkday = ~hol & ~wkend
+    promo = df["promotion-ids"] == "WEEKEND20"
+    assert (promo == wkend).all(), "WEEKEND20 is no longer exactly the weekend orders: rewrite these facts"
+    gross = df["Amount"] / promo.map({True: 0.8, False: 1.0})
+    rev = df["Amount"].sum()
+    f = [
+        value("total_revenue", rev, "Total revenue: SUM(Amount), after the WEEKEND20 discount", "KRW", scope=full),
+        value("order_count", len(df), "Number of orders: rows in the file (one row is one order; there is no order id)", "count", rel_tol=0, scope=full),
+        value("avg_order_value", rev / len(df), "Average order value (AOV, 객단가): SUM(Amount) / rows", "KRW", scope=full),
+        value("total_units", df["Qty"].sum(), "Units sold: SUM(Qty)", "count", rel_tol=0, scope=full),
+        value("units_per_order", df["Qty"].mean(), "Average Qty per order", "ratio", rel_tol=0.01, scope=full),
+        value("product_count", df["Product"].nunique(), "Number of distinct products", "count", rel_tol=0, scope=full),
+        value("category_count", df["Category"].nunique(), "Number of distinct categories", "count", rel_tol=0, scope=full),
+        value("promo_order_share_pct", promo.mean() * 100, "Share of orders with a promotion code (promotion-ids not empty)", "percent", rel_tol=0.01, scope=full,
+              note="every one is WEEKEND20, i.e. every Saturday and Sunday order"),
+        value("promo_order_count", promo.sum(), "Orders with a promotion code", "count", rel_tol=0, scope=full),
+    ]
+
+    # Q7: categories
+    cat = df.groupby("Category")["Amount"].sum().sort_values(ascending=False)
+    f += [
+        ranking("category_revenue_ranking", cat.index, "Categories ranked by revenue (SUM(Amount)), highest first", scope=full),
+        value("top_category_revenue", cat.iloc[0], f"Revenue of category {cat.index[0]}", "KRW", scope=full, note="the top category by revenue"),
+        value("top_category_share_pct", cat.iloc[0] / rev * 100, f"Share of total revenue from category {cat.index[0]}", "percent", rel_tol=0.02, scope=full),
+        value("second_category_revenue", cat.iloc[1], f"Revenue of category {cat.index[1]}", "KRW", scope=full, note="rank 2 by revenue"),
+    ]
+
+    # Q8-Q9: districts and products
+    orders = df.groupby("ship-city").size().sort_values(ascending=False)
+    drev = df.groupby("ship-city")["Amount"].sum().sort_values(ascending=False)
+    prod = df.groupby("Product").size().sort_values(ascending=False)
+    f += [
+        ranking("district_order_ranking", orders.index, "Districts (ship-city) ranked by number of orders, most first", scope=full),
+        value("top_district_orders", orders.iloc[0], f"Orders from district {orders.index[0]}", "count", rel_tol=0, scope=full, note="the most orders among the districts"),
+        ranking("district_revenue_ranking", drev.index, "Districts (ship-city) ranked by revenue, highest first", scope=full),
+        value("top_district_revenue", drev.iloc[0], f"Revenue of district {drev.index[0]}", "KRW", scope=full, note="the top district by revenue"),
+        value("top_product_orders", prod.iloc[0], f"Orders of product {prod.index[0]}", "count", rel_tol=0, scope=full, note=f"the most ordered product; next {prod.index[1]} {prod.iloc[1]}"),
+    ]
+
+    # Q3: 서초구's AOV is 3 gift orders
+    aov = df.groupby("ship-city")["Amount"].mean().sort_values(ascending=False)
+    gift = df[df["Product"] == "한우선물세트"]
+    assert aov.index[0] == "서초구" and set(gift["ship-city"]) == {"서초구"}
+    seocho = df[df["ship-city"] == "서초구"]
+    wo = df.drop(gift.index).groupby("ship-city")["Amount"].mean().sort_values(ascending=False)
+    f += [
+        ranking("district_aov_ranking", aov.index, "Districts (ship-city) ranked by AOV (SUM(Amount) / orders), highest first", scope=full),
+        value("seocho_aov", aov["서초구"], "AOV of district 서초구", "KRW", scope=full, note=f"the highest; next {aov.index[1]} {aov.iloc[1]:,.0f}"),
+        value("gift_set_order_count", len(gift), "Orders of 한우선물세트", "count", rel_tol=0, scope=full, note="all from 서초구, on 2025-05-05 and 05-06, Qty 3 each"),
+        value("seocho_gift_share_pct", gift["Amount"].sum() / seocho["Amount"].sum() * 100, "Share of 서초구's revenue from its 한우선물세트 orders", "percent", rel_tol=0.02, scope=full),
+        value("seocho_aov_without_gift", wo["서초구"], "AOV of district 서초구 without its 한우선물세트 orders", "KRW", scope={"period": whole, "filter": "district 서초구, 한우선물세트 orders excluded"},
+              note=f"rank {list(wo.index).index('서초구') + 1} of 10 districts on that basis"),
+    ]
+
+    # Q1-Q2: holidays
+    daily = df.groupby("Date").size()
+    per_day = lambda m: df[m].groupby("Date").size().mean()
+    f += [
+        value("holiday_0505_orders", daily["2025-05-05"], "Orders on 2025-05-05 (Mon, public holiday)", "count", rel_tol=0, scope={"period": "2025-05-05", "filter": "none"}),
+        value("holiday_0506_orders", daily["2025-05-06"], "Orders on 2025-05-06 (Tue, substitute holiday)", "count", rel_tol=0, scope={"period": "2025-05-06", "filter": "none"},
+              note="05-05 and 05-06 are the two busiest dates"),
+        value("weekend_orders_per_day", per_day(wkend), "Average orders per Saturday or Sunday", "ratio", rel_tol=0.01, scope=full),
+        value("weekday_orders_per_day", per_day(wkday), "Average orders per Monday-Friday date that is not a public holiday (05-05, 05-06 excluded)", "ratio", rel_tol=0.01,
+              scope={"period": whole, "filter": "Monday-Friday dates except 2025-05-05 and 05-06"}),
+    ]
+
+    # Q4: weekend AOV is lower only by WEEKEND20
+    wscope = {"period": whole, "filter": "Saturday and Sunday orders"}
+    dscope = {"period": whole, "filter": "Monday-Friday orders except 2025-05-05 and 05-06"}
+    f += [
+        value("weekend_aov", df[wkend]["Amount"].mean(), "AOV of Saturday and Sunday orders (SUM(Amount) / orders, after the 20% WEEKEND20 discount)", "KRW", scope=wscope),
+        value("weekday_aov", df[wkday]["Amount"].mean(), "AOV of Monday-Friday orders that are not on a public holiday (05-05, 05-06 excluded)", "KRW", scope=dscope),
+        value("weekend_gross_aov", gross[wkend].mean(), "AOV of Saturday and Sunday orders before the WEEKEND20 discount (Amount / 0.8)", "KRW", scope=wscope,
+              note="about the same as the weekday AOV: the lower weekend AOV is the discount"),
+        value("weekend_units_per_order", df[wkend]["Qty"].mean(), "Average Qty per Saturday or Sunday order", "ratio", rel_tol=0.01, scope=wscope),
+        value("weekday_units_per_order", df[wkday]["Qty"].mean(), "Average Qty per Monday-Friday order not on a public holiday", "ratio", rel_tol=0.01, scope=dscope),
+    ]
+
+    # Q10-Q12: segments
+    ac = df.groupby(["Age Group", "Category"])["Amount"].sum().unstack(fill_value=0)
+    share = ac.div(ac.sum(axis=1), axis=0) * 100
+    for c, id_ in [("간편식/밀키트/샐러드", "ready_meal"), ("건강식품", "health")]:
+        s_ = share[c].sort_values(ascending=False)
+        f.append(value(f"top_age_{id_}_share_pct", s_.iloc[0], f"Share of age group {s_.index[0]}'s revenue that comes from the {c} category: SUM(Amount) of those orders / SUM(Amount) of the age group. "
+                       f"Not the age group's share of the category's revenue, a different quantity", "percent", rel_tol=0.02, scope=full,
+                       note=f"the highest among the age groups; next {s_.index[1]} {s_.iloc[1]:.1f}%"))
+    f.append(value("female_revenue_share_pct", df[df["Gender"] == "F"]["Amount"].sum() / rev * 100, "Share of total revenue from female customers (Gender = F)", "percent", rel_tol=0.01, scope=full))
+
+    slug = {"서초구": "seocho"}
+    for x in f:
+        for k, v in slug.items():
+            x["id"] = x["id"].replace(k, v)
+        assert x["id"].isascii(), x["id"]
+    if lang == "en":
+        def tr(t):
+            t = t.replace("(AOV, 객단가)", "(AOV)")
+            for k in sorted(MOON_EN, key=len, reverse=True):
+                t = t.replace(k, MOON_EN[k])
+            return t
+        for x in f:
+            for key in ("description", "note"):
+                if key in x:
+                    x[key] = tr(x[key])
+            x["scope"] = {k: tr(v) for k, v in x["scope"].items()}
+            if "order" in x:
+                x["order"] = [tr(n) for n in x["order"]]
+    return {"dataset": f"moon_market_{lang}", "csv": str(csv.relative_to(REPO)), "rows": len(df), "facts": f}
+
+
 if __name__ == "__main__":
-    for key in (jungle_market(), yummy_food("kr"), yummy_food("en")):
+    for key in (jungle_market(), yummy_food("kr"), yummy_food("en"), moon_market("kr"), moon_market("en")):
         path = OUT / f"{key['dataset']}.json"
         path.write_text(json.dumps(key, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         print(f"{path.name}: {len(key['facts'])} facts")

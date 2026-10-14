@@ -1,0 +1,339 @@
+{
+  "overview": {
+    "period": "2025-05-01 (Thu) to 2025-05-14 (Wed), 14 days",
+    "holidays": {
+      "2025-05-05": "Mon, Children's Day and Buddha's Birthday",
+      "2025-05-06": "Tue, substitute holiday"
+    },
+    "rows": 1144,
+    "orders": 1144,
+    "grain": "one row = one order of one product; rows = orders (no order id)",
+    "revenue_krw": 22787840,
+    "aov_krw": 19919,
+    "units": 2166,
+    "units_per_order": 1.89,
+    "products": 24,
+    "categories": 8,
+    "districts": 10,
+    "weekend20_orders": 365,
+    "weekend20_order_share_pct": 31.91,
+    "metric_definitions": {
+      "revenue": "SUM(Amount), after the WEEKEND20 discount",
+      "aov": "SUM(Amount) / number of rows (orders)",
+      "gross": "list price x Qty = Amount / 0.8 for WEEKEND20 orders, = Amount otherwise",
+      "day types": "holiday = 2025-05-05 and 05-06; weekend = Saturday and Sunday; weekday = other Monday-Friday dates"
+    }
+  },
+  "expected_profiles": {
+    "top_category_by_revenue": "Fruit/Nuts/Rice",
+    "category_revenue_krw": {
+      "Fruit/Nuts/Rice": 5823180,
+      "Health Supplements": 5355980,
+      "Ready Meal/Meal Kit/Salad": 2803800,
+      "Meat/Processed Meat/Egg": 2626140,
+      "Coffee/Tea": 2038200,
+      "Bakery": 1959620,
+      "Dairy": 1389120,
+      "Vegetables": 791800
+    },
+    "category_revenue_share_pct": {
+      "Fruit/Nuts/Rice": 25.55,
+      "Health Supplements": 23.5,
+      "Ready Meal/Meal Kit/Salad": 12.3,
+      "Meat/Processed Meat/Egg": 11.52,
+      "Coffee/Tea": 8.94,
+      "Bakery": 8.6,
+      "Dairy": 6.1,
+      "Vegetables": 3.47
+    },
+    "most_orders_district": "Songpa-gu",
+    "district_orders": {
+      "Songpa-gu": 215,
+      "Mapo-gu": 132,
+      "Gangseo-gu": 115,
+      "Gangnam-gu": 114,
+      "Nowon-gu": 110,
+      "Yeongdeungpo-gu": 100,
+      "Seongdong-gu": 97,
+      "Seocho-gu": 96,
+      "Gwangjin-gu": 86,
+      "Yongsan-gu": 79
+    },
+    "top_revenue_district": "Songpa-gu",
+    "district_revenue_krw": {
+      "Songpa-gu": 4073680,
+      "Seocho-gu": 2860460,
+      "Mapo-gu": 2526320,
+      "Gangnam-gu": 2302180,
+      "Yeongdeungpo-gu": 2132600,
+      "Gangseo-gu": 1963140,
+      "Nowon-gu": 1877920,
+      "Gwangjin-gu": 1810860,
+      "Yongsan-gu": 1636920,
+      "Seongdong-gu": 1603760
+    },
+    "most_ordered_product": "Kimchi Stew Kit",
+    "product_orders_top5": {
+      "Kimchi Stew Kit": 74,
+      "White Rice": 62,
+      "Salad Kit": 60,
+      "Croissant": 59,
+      "Apple": 58
+    },
+    "age_with_highest_ready_meal_share": "20s",
+    "ready_meal_share_by_age_pct": {
+      "20s": 27.34,
+      "30s": 12.05,
+      "50s": 9.9,
+      "40s": 9.72,
+      "60s": 6.06
+    },
+    "age_with_highest_health_share": "60s",
+    "health_share_by_age_pct": {
+      "60s": 49.58,
+      "30s": 21.54,
+      "50s": 20.61,
+      "20s": 16.76,
+      "40s": 10.85
+    },
+    "gender_revenue_share_pct": {
+      "F": 53.13,
+      "M": 46.87
+    },
+    "note_on_close_values": "only the top category, district, product and age group are used as answers; the rest of those rankings are close"
+  },
+  "r1_holidays": {
+    "naive_method": "average orders per day by weekday name over the whole period",
+    "naive_ranking": [
+      "Tuesday",
+      "Monday",
+      "Saturday",
+      "Sunday",
+      "Friday",
+      "Thursday",
+      "Wednesday"
+    ],
+    "naive_avg_orders_per_day": {
+      "Tuesday": 106.5,
+      "Monday": 104.0,
+      "Saturday": 91.5,
+      "Sunday": 91.0,
+      "Friday": 60.0,
+      "Thursday": 59.5,
+      "Wednesday": 59.5
+    },
+    "naive_conclusion": "Monday and Tuesday are the busiest weekdays",
+    "correct_conclusion": "the two busiest dates are the public holidays 2025-05-05 (Mon) and 05-06 (Tue); on the other dates Saturday and Sunday are the busiest",
+    "orders_by_date_top3": {
+      "2025-05-06": 150,
+      "2025-05-05": 149,
+      "2025-05-11": 93
+    },
+    "non_holiday_ranking": [
+      "Saturday",
+      "Sunday",
+      "Tuesday",
+      "Friday",
+      "Thursday",
+      "Wednesday",
+      "Monday"
+    ],
+    "non_holiday_avg_orders_per_day": {
+      "Saturday": 91.5,
+      "Sunday": 91.0,
+      "Tuesday": 63.0,
+      "Friday": 60.0,
+      "Thursday": 59.5,
+      "Wednesday": 59.5,
+      "Monday": 59.0
+    },
+    "avg_orders_per_day": {
+      "holiday": 149.5,
+      "weekend": 91.25,
+      "weekday": 60.0
+    }
+  },
+  "r2_seocho_aov": {
+    "naive_conclusion": "Seocho-gu customers spend the most per order across the board",
+    "correct_conclusion": "Seocho-gu's top AOV comes from 3 Hanwoo Beef Gift Set orders (Qty 3, KRW 390,000 each) placed on the holidays for Parents' Day (05-08); they are the only Hanwoo Beef Gift Set sales. Without them Seocho-gu's AOV ranks 7 of 10, and its median order is like the others",
+    "district_aov_krw": {
+      "Seocho-gu": 29796,
+      "Yeongdeungpo-gu": 21326,
+      "Gwangjin-gu": 21057,
+      "Yongsan-gu": 20721,
+      "Gangnam-gu": 20195,
+      "Mapo-gu": 19139,
+      "Songpa-gu": 18947,
+      "Nowon-gu": 17072,
+      "Gangseo-gu": 17071,
+      "Seongdong-gu": 16534
+    },
+    "seocho": {
+      "orders": 96,
+      "revenue_krw": 2860460,
+      "aov_krw": 29796,
+      "median_krw": 13950,
+      "gift_orders": 3,
+      "gift_revenue_krw": 1170000,
+      "gift_share_of_revenue_pct": 40.9,
+      "aov_without_gift_orders_krw": 18177,
+      "aov_rank_without_gift_orders": 7
+    },
+    "gift_orders": [
+      {
+        "Date": "2025-05-05",
+        "Qty": 3,
+        "Amount": 390000,
+        "Gender": "M",
+        "Age Group": "50s"
+      },
+      {
+        "Date": "2025-05-05",
+        "Qty": 3,
+        "Amount": 390000,
+        "Gender": "F",
+        "Age Group": "40s"
+      },
+      {
+        "Date": "2025-05-06",
+        "Qty": 3,
+        "Amount": 390000,
+        "Gender": "F",
+        "Age Group": "50s"
+      }
+    ],
+    "overall_median_krw": 12900,
+    "second_aov_district": {
+      "district": "Yeongdeungpo-gu",
+      "aov_krw": 21326
+    }
+  },
+  "r3_weekend_discount": {
+    "comparison": "weekend (Sat-Sun) orders vs weekday (non-holiday Mon-Fri) orders",
+    "net_aov_krw": {
+      "weekend": 15915,
+      "weekday": 19986
+    },
+    "gross_aov_krw": {
+      "weekend": 19894,
+      "weekday": 19986
+    },
+    "units_per_order": {
+      "weekend": 1.9,
+      "weekday": 1.88
+    },
+    "category_mix_pct": {
+      "weekend": {
+        "Ready Meal/Meal Kit/Salad": 16.7,
+        "Health Supplements": 10.7,
+        "Fruit/Nuts/Rice": 14.0,
+        "Bakery": 14.8,
+        "Dairy": 15.9,
+        "Meat/Processed Meat/Egg": 7.4,
+        "Vegetables": 10.7,
+        "Coffee/Tea": 9.9
+      },
+      "weekday": {
+        "Ready Meal/Meal Kit/Salad": 14.4,
+        "Health Supplements": 8.8,
+        "Fruit/Nuts/Rice": 16.0,
+        "Bakery": 14.8,
+        "Dairy": 11.9,
+        "Meat/Processed Meat/Egg": 10.4,
+        "Vegetables": 10.8,
+        "Coffee/Tea": 12.9
+      }
+    },
+    "naive_conclusion": "weekend customers buy smaller baskets (lower AOV)",
+    "correct_conclusion": "weekend baskets are the same size (units per order and gross AOV match weekdays); the lower AOV is WEEKEND20's 20% discount on every weekend order"
+  },
+  "evaluation_questions": [
+    {
+      "id": "Q1",
+      "section": "r1",
+      "question": "Which weekday has the most orders per day?",
+      "correct_answer": "On the dates that are not holidays: Saturday and Sunday (91.5 and 91.0 orders/day vs about 60 on weekdays). Monday and Tuesday look busiest only because 2025-05-05 and 05-06 are public holidays, the two busiest dates (149 and 150 orders)",
+      "naive_answer": "Monday / Tuesday (averaged over all dates)",
+      "scoring": "full credit requires naming the holidays as the reason Monday and Tuesday look busiest"
+    },
+    {
+      "id": "Q2",
+      "section": "r1",
+      "question": "Which two dates have the most orders?",
+      "correct_answer": "2025-05-05 and 2025-05-06 (public holidays)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q3",
+      "section": "r2",
+      "question": "Which district has the highest AOV, and why?",
+      "correct_answer": "Seocho-gu (KRW 29,796), because of 3 Hanwoo Beef Gift Set orders of KRW 390,000 each (the only Hanwoo Beef Gift Set sales, placed on the holidays) = 40.9% of its revenue; without them its AOV is KRW 18,177, rank 7 of 10",
+      "naive_answer": "Seocho-gu customers spend more per order across the board",
+      "scoring": "full credit requires the 3 Hanwoo Beef Gift Set orders as the reason"
+    },
+    {
+      "id": "Q4",
+      "section": "r3",
+      "question": "Do weekend orders hold smaller baskets than weekday orders?",
+      "correct_answer": "No: units per order 1.9 vs 1.88 and gross AOV KRW 19,894 vs KRW 19,986 are the same; the lower net AOV (KRW 15,915 vs KRW 19,986) is WEEKEND20's 20% discount",
+      "naive_answer": "Yes, weekend AOV is lower",
+      "scoring": "full credit requires the 20% WEEKEND20 discount as the reason"
+    },
+    {
+      "id": "Q5",
+      "section": "overview",
+      "question": "What are total revenue, number of orders and AOV?",
+      "correct_answer": "KRW 22,787,840 / 1,144 / KRW 19,919",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q6",
+      "section": "overview",
+      "question": "What share of orders used a promotion code?",
+      "correct_answer": "31.91% (365 orders, all WEEKEND20 = every weekend order)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q7",
+      "section": "profiles",
+      "question": "Which category has the highest revenue?",
+      "correct_answer": "Fruit/Nuts/Rice (KRW 5,823,180, 25.55%)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q8",
+      "section": "profiles",
+      "question": "Which district has the most orders?",
+      "correct_answer": "Songpa-gu (215 orders; next Mapo-gu 132)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q9",
+      "section": "profiles",
+      "question": "Which product has the most orders?",
+      "correct_answer": "Kimchi Stew Kit (74 orders; next White Rice 62)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q10",
+      "section": "profiles",
+      "question": "Which age group spends the largest share of its revenue on Ready Meal/Meal Kit/Salad?",
+      "correct_answer": "20s (27.34%; next 30s 12.05%)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q11",
+      "section": "profiles",
+      "question": "Which age group spends the largest share of its revenue on Health Supplements?",
+      "correct_answer": "60s (49.58%; next 30s 21.54%)",
+      "scoring": "exact match"
+    },
+    {
+      "id": "Q12",
+      "section": "profiles",
+      "question": "What share of revenue comes from female customers?",
+      "correct_answer": "53.13%",
+      "scoring": "exact match"
+    }
+  ]
+}
