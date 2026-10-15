@@ -25,8 +25,9 @@ answer, and the recompute and citation graders already check them.
 Usage:
     python answer_keys/build_answer_key.py          # writes answer_keys/*.json
 Review the generated values once by hand before trusting them.
-jungle_market agrees with the dataset's own ground_truth.json (checked 2026-10-12), yummy_food_kr/_en
-and moon_market_kr/_en with eval-harness/ground_truth/<dataset>/<lang>/ground_truth.json (checked 2026-10-14).
+Each key agrees with its answer sheet: jungle_market with eval-harness/ground_truth/jungle_market/ground_truth.json
+(checked 2026-10-12), yummy_food_kr/_en and moon_market_kr/_en with eval-harness/ground_truth/<dataset>/<lang>/ground_truth.json
+(checked 2026-10-14).
 """
 import json
 from pathlib import Path
@@ -57,9 +58,9 @@ def relation(id_, rel, description, scope=None, note=""):
 def jungle_market():
     """Jungle Market: planted patterns a shallow analysis gets wrong.
 
-    The dataset ships with its own answer sheet (ground_truth.json / .md next
-    to the CSV, Q1-Q18); these facts are recomputed from the CSV and must
-    agree with it. Every value is after removing the 111 exact duplicate rows
+    The answer sheet is eval-harness/ground_truth/jungle_market/ (Q1-Q18), kept
+    out of the data directory because the web app lists and serves every file
+    in it; these facts are recomputed from the CSV and must agree with it. Every value is after removing the 111 exact duplicate rows
     (Sydney, 2026-03-10) unless its scope says raw; the scope tells the fact checker that counting them
     twice is an error, not another subset.
     """

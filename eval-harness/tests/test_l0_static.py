@@ -152,3 +152,32 @@ def test_scenarios_point_to_existing_files():
         assert (here / s["answer_key"]).is_file(), name
         assert s["upload"] and all((here / f).is_file() for f in s["upload"]), name
         assert not any("ground_truth" in f for f in s["upload"]), f"{name}: the answer sheet must not reach the agents"
+
+
+def test_every_scenario_has_a_split():
+    """dev or test decides what run_eval.py runs by default, how compare.py groups it and whether Langfuse queues it."""
+    from grade import SPLITS, load_scenario, load_scenarios
+    scenarios = load_scenarios()
+    for name, s in scenarios.items():
+        assert s.get("split") in SPLITS, f"{name}: split must be one of {SPLITS}"
+        assert load_scenario(name)["split"] == s["split"]
+    # moon_market is the held-out test set; the dev sets are tuned on
+    assert {n for n, s in scenarios.items() if s["split"] == "test"} == {n for n in scenarios if n.startswith("moon_market")}
+
+
+def test_test_sets_have_no_gold_case():
+    """Gold cases tune the fact checker; one on a test set would tune it to that set."""
+    from grade import load_scenarios
+    test_keys = {Path(s["answer_key"]).name for s in load_scenarios().values() if s["split"] == "test"}
+    gold = Path(__file__).resolve().parents[1] / "sanity" / "factcheck_cases"
+    for path in gold.glob("*.yaml"):
+        key = Path(yaml.safe_load(path.read_text(encoding="utf-8"))["answer_key"]).name
+        assert key not in test_keys, f"{path.name} is a gold case on a test set"
+
+
+def test_no_answer_sheet_in_a_data_directory():
+    """These directories reach the agents or, through the web app's /sample-data, the users."""
+    repo = Path(__file__).resolve().parents[2]
+    shipped = [repo / "deep-insight-web" / "sample_data", repo / "managed-agentcore" / "data", repo / "self-hosted" / "data"]
+    leaked = [str(p.relative_to(repo)) for d in shipped for p in d.rglob("*ground_truth*")]
+    assert not leaked, f"answer sheets belong in eval-harness/ground_truth/: {leaked}"

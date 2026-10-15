@@ -2,7 +2,7 @@
 
 **→ Back to [Eval Harness README](../README.md)**
 
-Jungle Market is the dataset the eval harness runs on. It is a fictional
+Jungle Market is the main development dataset of the eval harness. It is a fictional
 online grocery delivery service in 8 cities, two weeks of orders, with
 patterns planted on purpose. Some are familiar and a report should simply find
 them. Others give a wrong answer to a shallow analysis and the right one only
@@ -11,8 +11,10 @@ so a report can be graded without recomputing anything.
 
 It replaced moon_market as the development set because moon_market had three
 gaps: it was Korea-specific, every transaction held a single product (no
-basket analysis), and there was no answer key. moon_market is now kept out as
-a test set (see the README).
+basket analysis), and there was no answer key. Prompts, the judge, the rubric
+and pass thresholds are tuned on jungle_market and on yummy_food (the second
+dev set, [yummy-food.md](yummy-food.md)); moon_market is the test set they are
+never tuned on (see the README).
 
 ## Files
 
@@ -20,15 +22,18 @@ a test set (see the README).
 |---|---|---|
 | `deep-insight-web/sample_data/jungle-market/jungle-market-sales.csv` | The data: 15,680 rows | Yes |
 | `deep-insight-web/sample_data/jungle-market/column_definitions.json` | Column descriptions, including the exact promotion rules | Yes |
-| `deep-insight-web/sample_data/jungle-market/ground_truth.md` | Answer sheet for people: patterns, naive vs correct answers, Q1-Q18 | **No** |
-| `deep-insight-web/sample_data/jungle-market/ground_truth.json` | The same answers, machine-readable | **No** |
+| `eval-harness/ground_truth/jungle_market/ground_truth.md` | Answer sheet for people: patterns, naive vs correct answers, Q1-Q18 | **No** |
+| `eval-harness/ground_truth/jungle_market/ground_truth.json` | The same answers, machine-readable | **No** |
 | `eval-harness/answer_keys/jungle_market.json` | 44 facts the fact checker (`graders/factcheck.py`) compares reports against | **No** |
 | `eval-harness/answer_keys/build_answer_key.py` | Builds the answer key from the CSV with pandas | No |
 
 `config/scenarios.yaml` lists only the CSV and `column_definitions.json` under
-`upload`, so the answers never reach the runtime. Keep it that way: do not put
-the `ground_truth` files or the answer key in an upload list, a prompt or a
-scenario `query`.
+`upload`, so the answers never reach the runtime. The answer sheet is not in
+the data directory either: the web app lists and serves every file there as
+sample data, so a user could download it or upload it with the CSV. Keep it
+that way: do not put the `ground_truth` files or the answer key in a data
+directory, an upload list, a prompt or a scenario `query`
+(`tests/test_l0_static.py` checks the first two).
 
 ## The data
 

@@ -40,7 +40,7 @@ class FakeLangfuse:
 
     def _delete(self, path):
         self.deleted.append(path)
-        if path.startswith(f"/api/public/datasets/{ls.DATASET}/runs/"):
+        if path.startswith("/api/public/datasets/") and "/runs/" in path:
             self.runs.discard(path.rsplit("/", 1)[1])
             self.run_items = [r for r in self.run_items if r["runName"] != path.rsplit("/", 1)[1]]
         if "/annotation-queues/" in path and "/items/" in path:
@@ -55,11 +55,11 @@ class FakeLangfuse:
             return self._page([{"id": i, "name": n} for n, i in self.configs.items()])
         if path.startswith("/api/public/v2/datasets/"):
             return Resp(200, {"name": path.rsplit("/", 1)[1]}) if path.rsplit("/", 1)[1] in self.datasets else Resp(404, {"message": "not found"})
-        if path.startswith(f"/api/public/datasets/{ls.DATASET}/runs/"):
+        if path.startswith("/api/public/datasets/") and "/runs/" in path:
             name = path.rsplit("/", 1)[1]
             return Resp(200, {"id": "run-" + name}) if name in self.runs else Resp(404, {"message": "not found"})
         if path == "/api/public/dataset-items":
-            return self._page(list(self.items.values()))
+            return self._page([i for i in self.items.values() if i["datasetName"] == params.get("datasetName")])
         if path == "/api/public/annotation-queues":
             return self._page(list(self.queues.values()))
         if path.endswith("/items") and "annotation-queues" in path:
@@ -146,7 +146,7 @@ def test_trace_has_report_scores_and_agents(tag_dir):
     _, trace_id, _ = sync(tag, fake)
     trace = next(e["body"] for e in fake.events if e["type"] == "trace-create")
     assert trace["id"] == trace_id and "$110,270.26" in trace["output"]       # the report is readable in the UI
-    assert trace["tags"] == ["baseline", "jungle_market_simple", "PASS"] and trace["release"] == "abcdef123456"
+    assert trace["tags"] == ["baseline", "jungle_market_simple", "dev", "PASS"] and trace["release"] == "abcdef123456"
     gen = next(e["body"] for e in fake.events if e["type"] == "generation-create")
     assert gen["name"] == "coder" and gen["usageDetails"]["input"] == 1000 and gen["costDetails"]["total"] > 0
     scores = {e["body"]["name"]: e["body"] for e in fake.events if e["type"] == "score-create"}
@@ -283,3 +283,30 @@ def test_cloud_host_refused_unless_allowed(monkeypatch):
     with pytest.raises(SystemExit, match="Langfuse Cloud"):
         ls.credentials()
     assert ls.credentials(allow_cloud=True)[0] == "https://us.cloud.langfuse.com"
+
+
+def test_test_scenarios_get_their_own_dataset_and_no_queue(tag_dir):
+    """Labels on test-set reports would tune the judge to them, so they are never queued."""
+    tag, run = tag_dir
+    test_run = run.parent / "moon_market_kr-20261002-000000-1"
+    shutil.copytree(run, test_run)
+    (test_run / "run.json").write_text((run / "run.json").read_text().replace("jungle_market_simple", "moon_market_kr"))
+    fake = FakeLangfuse()
+    lf = ls.Langfuse("http://lf", "pk", "sk", session=fake)
+    scenarios = {n: load_scenario(n) for n in ("jungle_market_simple", "moon_market_kr")}
+    configs = ls.ensure_score_configs(lf, sorted({r["id"] for s in scenarios.values() for r in s["requirements"]}))
+    ls.ensure_dataset_items(lf, scenarios, {"jungle_market_simple": 1, "moon_market_kr": 1})
+    assert fake.datasets == {"deep-insight-eval", "deep-insight-eval-test"}
+    dev_item, test_item = fake.items[ls.item_id("jungle_market_simple", 1)], fake.items[ls.item_id("moon_market_kr", 1, "test")]
+    assert dev_item["datasetName"] == "deep-insight-eval" and test_item["datasetName"] == "deep-insight-eval-test"
+    assert ls.item_id("moon_market_kr", 1, "test") != ls.item_id("moon_market_kr", 1)  # the old dev-dataset item keeps its id
+    traces = []
+    for r in (run, test_run):
+        events, trace_id, scenario, _, started = ls.run_events(r, "baseline", configs)
+        traces.append((trace_id, scenario))
+        ls.link_run_items(lf, "baseline", [(trace_id, scenario, 1, started)], "", scenarios)
+    assert "test" in next(e["body"]["tags"] for e in events if e["type"] == "trace-create")
+    assert {i["datasetItemId"] for i in fake.run_items} == {dev_item["id"], test_item["id"]}
+    added = ls.queue_traces(lf, traces, configs, scenarios)
+    assert added == {"deep-insight-calibration-jungle_market_simple": 1}
+    assert [q["name"] for q in fake.queues.values()] == ["deep-insight-calibration-jungle_market_simple"]

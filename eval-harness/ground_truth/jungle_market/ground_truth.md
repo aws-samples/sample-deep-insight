@@ -1,6 +1,6 @@
 # Jungle Market: Ground Truth
 
-Answer key for `jungle-market-sales.csv`. Every number below is recomputed from the CSV. Revenue figures use `line_total` after removing exact duplicate rows unless stated otherwise.
+Answer key for `jungle-market-sales.csv` (in `deep-insight-web/sample_data/jungle-market/`). Every number below is recomputed from the CSV. The sheet is kept out of that directory on purpose: the web app lists and serves every file in it as sample data, and the agents must never read this sheet. Revenue figures use `line_total` after removing exact duplicate rows unless stated otherwise.
 
 ## Overview
 

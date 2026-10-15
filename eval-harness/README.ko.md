@@ -40,7 +40,8 @@ eval-harness/
 ├── config/        scenarios.yaml, judge.yaml, pricing.yaml, runtime_configs.yaml,
 │                  eval.env, langfuse.env (git 제외, 로컬 전용)
 ├── answer_keys/   fact check용 데이터셋별 정답과 이를 만드는 스크립트
-├── docs/          jungle-market.md: 데이터셋, 심어둔 패턴, 정답
+├── ground_truth/  사람용 데이터셋별 답안지 (데이터 디렉토리에는 두지 않음)
+├── docs/          jungle-market.md, yummy-food.md: 개발용 데이터셋, 심어둔 패턴, 정답
 ├── tests/         pytest 테스트와 fixture
 └── eval_results/  모든 실행, 채점, 비교 결과 (git 제외)
 ```
@@ -93,22 +94,42 @@ scores.json  (core_pass: PASS / FAIL)
 5단계를 실행하기 전에는 Langfuse에 아무것도 올라가지 않습니다. 실행과 채점
 결과는 `eval_results/`에만 남습니다.
 
-## 데이터셋: 개발용 하나, 따로 떼어둔 둘
+## 데이터셋: 개발용 둘, 따로 떼어둔 하나
 
-하네스는 **jungle_market**만 사용합니다 (`deep-insight-web/sample_data/jungle-market/`).
-8개 도시의 2주치 식료품 주문 데이터로, 얕은 분석이 틀리게 되는 패턴을 일부러
-심어뒀습니다 (매출 1위 도시를 바꾸는 중복 행, 쿠폰의 심슨의 역설, 품절, 할인
-문턱 몰림, 프로모션 후광 효과). 함께 있는 답안지(`ground_truth.json` / `.md`,
-Q1-Q18)로 아무것도 다시 계산하지 않고 사람이 보고서를 채점할 수 있습니다.
-[docs/jungle-market.md](docs/jungle-market.md)에 데이터, 심어둔 패턴, 정답, 보고서 채점
-방법을 정리해 뒀습니다.
+`config/scenarios.yaml`의 시나리오마다 `split`이 있습니다.
 
-**moon_market과 yummy_food는 테스트셋입니다.** 이 두 데이터셋에는 시나리오와
-gold case를 두지 않고, 프롬프트나 기준값도 이 데이터에 맞춰 조정하지 않습니다.
-그래서 jungle_market에만 맞춘 변경은 이 데이터로 확인할 때 드러납니다.
-두 데이터셋 모두 국문(kr)·영문(en)판이 있고 숫자는 같습니다. 정답지는
-`ground_truth/<dataset>/<lang>/`, 정답 키는 `answer_keys/<dataset>_kr.json` / `_en.json`에
-있습니다. 정답지는 에이전트가 읽을 수 있는 데이터 디렉토리 밖에 둡니다.
+| Split | 데이터셋 | 용도 |
+|---|---|---|
+| `dev` | jungle_market, yummy_food | 프롬프트, judge, 루브릭, 통과 기준을 이 데이터에 맞춰 조정합니다. gold case와 보정용 레이블도 여기서 나옵니다 |
+| `test` | moon_market | 릴리스 전에만 확인합니다. 이 데이터에 맞춰 조정하는 것이 없으므로, 개발셋에만 맞춘 변경은 여기서 드러납니다 |
+
+- **jungle_market** (`deep-insight-web/sample_data/jungle-market/`): 8개 도시의
+  2주치 식료품 주문 데이터로, 얕은 분석이 틀리게 되는 패턴을 일부러 심어뒀습니다
+  (매출 1위 도시를 바꾸는 중복 행, 쿠폰의 심슨의 역설, 품절, 할인 문턱 몰림,
+  프로모션 후광 효과). [docs/jungle-market.md](docs/jungle-market.md)에 데이터,
+  패턴, 정답, 보고서 채점 방법을 정리해 뒀습니다.
+- **yummy_food** (`managed-agentcore/data/yummy_food/<lang>/`): 4개 매체 × 6개
+  상품의 한 달치 일별 광고 성과입니다. 정제할 것은 없고, 함정은 광고 지표를 집계하는
+  방식에 있습니다 (ROAS 컬럼을 평균하면 1위 매체가 바뀌고, CTR이 가장 높은 매체가
+  ROAS는 가장 낮고, 두 배로 늘린 예산의 한계 수익은 훨씬 낮음).
+  [docs/yummy-food.md](docs/yummy-food.md)를 보세요.
+- **moon_market** (`managed-agentcore/data/moon_market/<lang>/`): 서울 10개 구의
+  2주치 단일 상품 주문 데이터입니다. 시나리오의 통과 기준은 개발셋 값을 그대로 쓰고,
+  다시 정할 때도 개발셋 결과로만 정합니다. gold case와 보정 queue는 두지 않습니다.
+  둘 다 평가기를 이 데이터에 맞추게 되기 때문입니다.
+
+데이터셋마다 사람용 답안지(`ground_truth/<dataset>/`, 국문(kr)·영문(en)판이 있고
+숫자가 같은 yummy_food와 moon_market은 그 아래 `<lang>/`)와 fact checker용 정답
+키(`answer_keys/`, 판마다 하나)가 있습니다. 답안지는 CSV 옆이 아니라 여기에 둡니다.
+데이터 디렉토리는 에이전트에 닿고, 웹 앱은 `deep-insight-web/sample_data/`의 모든
+파일을 사용자에게 목록으로 보여주고 내려주기 때문입니다. 다시 그쪽에 두면
+`tests/test_l0_static.py`가 실패합니다.
+
+테스트 시나리오는 `run_eval.py`에서 `--allow-test`가 있어야 돌고, `compare.py`는
+dev와 test를 다른 섹션으로 보고하고, `langfuse_sync.py`는 test 실행을 별도 dataset에
+올리고 보정 queue에는 넣지 않습니다. 테스트 결과는 릴리스 여부를 정할 때 보고, 다음
+변경을 고를 때는 보지 마세요. 그 결과에 맞춰 조정하기 시작하면 세 번째 개발셋이 될
+뿐입니다.
 
 ## 작업 흐름
 
@@ -120,6 +141,13 @@ gold case를 두지 않고, 프롬프트나 기준값도 이 데이터에 맞춰
 .venv/bin/python run_eval.py --scenario jungle_market --repeat 3 --tag my-change
 # 3. 비교
 .venv/bin/python compare.py eval_results/baseline eval_results/my-change
+```
+
+릴리스 전에는 같은 버전을 테스트셋으로도 돌립니다.
+
+```bash
+.venv/bin/python run_eval.py --scenario moon_market_kr --repeat 3 --tag my-change-test --allow-test
+.venv/bin/python compare.py eval_results/baseline-test eval_results/my-change-test --split test
 ```
 
 실행마다 실제 비용이 들고(`jungle_market_simple`은 몇 달러, 전체 요청은 그 이상)
@@ -169,9 +197,14 @@ gold case를 두지 않고, 프롬프트나 기준값도 이 데이터에 맞춰
   평가자를 겨냥한 지시문으로 구성됩니다. wrong recall, false wrong, 반복 간
   안정성을 보고하고, recall이 100% 미만이거나 false wrong이 1건 이상이면 실패합니다.
   프롬프트(`factcheck.PROMPT_VERSION`), `config/judge.yaml`의 모델, 정답 키가 바뀔 때마다
-  다시 돌리세요. jungle_market gold case(`sanity/factcheck_cases/jungle_market.yaml`)는
-  중복 행을 지우지 않은 베이스라인 보고서로 만들었습니다. 레이블은 pandas로 CSV와
-  대조했고, 사람의 최종 검토가 아직 필요합니다(#133).
+  다시 돌리세요. gold case는 개발셋에만 둡니다. jungle_market gold case
+  (`sanity/factcheck_cases/jungle_market.yaml`)는 중복 행을 지우지 않은 베이스라인
+  보고서로 만들었습니다. 레이블은 pandas로 CSV와 대조했고, 사람의 최종 검토가 아직
+  필요합니다(#133). yummy_food gold case(`sanity/factcheck_cases/yummy_food.yaml`)는
+  답안지를 보고 손으로 쓴 보고서로, 이 데이터의 얕은 분석 실수(ROAS 컬럼 평균, 늘린
+  예산도 한 달 ROAS만큼 번다는 가정)를 그대로 담았습니다. `deep-insight-web/sample_reports/`의
+  yummy_food 보고서는 지금 데이터 이전 버전으로 만든 것이라, `real` 케이스는 첫
+  yummy_food_kr 베이스라인 실행에서 만듭니다.
   `sanity/factcheck_sanity.py --repeat 3`로 측정한 결과(2026-10-13,
   `global.openai.gpt-6-astra`, effort high, 15회 $9.23):
 
@@ -272,18 +305,18 @@ ECS Fargate에 self-hosted Langfuse를 배포할 수 있습니다. Langfuse Clou
 
 하네스 전용 **Langfuse 프로젝트를 따로** 두세요. 다시 sync하면 같은 실행에 대해 이
 도구가 예전에 만든 것을 지웁니다: 대체된 trace(사람 레이블이 없는 경우)와
-`deep-insight-eval`에서 sync한 각 태그의 dataset run(새로 만듦). 공유 프로젝트에서는
+`deep-insight-eval`과 `deep-insight-eval-test`에서 sync한 각 태그의 dataset run(새로 만듦). 공유 프로젝트에서는
 같은 이름의 dataset이나 run이 바뀔 수 있습니다.
 
 | Eval harness | Langfuse |
 |---|---|
-| 시나리오 (요청, 요구사항, 정답 키, 통과 기준) | dataset `deep-insight-eval`의 item |
-| 태그 (`baseline`, `my-change`) | 같은 이름의 dataset run |
+| 시나리오 (요청, 요구사항, 정답 키, 통과 기준) | dataset `deep-insight-eval`(dev) 또는 `deep-insight-eval-test`(test)의 item |
+| 태그 (`baseline`, `my-change`) | 같은 이름의 dataset run. 태그에 실행이 있는 dataset마다 하나 |
 | 실행 하나 | trace: input = 요청, output = 보고서 텍스트, metadata = git SHA, 런타임 버전, 모델 ID |
 | 에이전트별 토큰, 비용, 시간 | 에이전트마다 generation 하나 |
 | `scores.json`, `judge.json` | trace score. judge 점수에는 판단 근거가 comment로 붙음 |
 | pairwise 승률 | 후보 dataset run의 score |
-| 사람 레이블 | 시나리오별 annotation queue `deep-insight-calibration-<scenario>`. 그 시나리오의 요구사항과 루브릭 기준만 보여줌 (judge와 같은 score config) |
+| 사람 레이블 | dev 시나리오별 annotation queue `deep-insight-calibration-<scenario>`. 그 시나리오의 요구사항과 루브릭 기준만 보여줌 (judge와 같은 score config). test 시나리오에는 queue를 만들지 않음: 그 레이블로 judge나 루브릭을 고치게 되기 때문 |
 
 ```bash
 # eval-harness/config/langfuse.env (git 제외): LANGFUSE_HOST (또는 LANGFUSE_BASE_URL), LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY
@@ -322,19 +355,23 @@ strict)입니다. 버그가 고쳐지면 오류로 바뀌므로, 고칠 때 마�
 
 ## 시나리오
 
-`config/scenarios.yaml`은 데이터셋 × 요청 쌍을 정의하며, 모두 jungle_market을 씁니다.
+`config/scenarios.yaml`은 데이터셋 × 요청 쌍을 정의합니다.
 
-| 시나리오 | 용도 |
-|---|---|
-| `jungle_market` | 메인 벤치마크: 열린 성장 기회 요청 (한국어) |
-| `jungle_market_en` | 같은 요청을 영어로 |
-| `jungle_market_simple` | 저렴한 스모크 테스트: 합계, 객단가, 카테고리 비중 |
-| `jungle_market_revision` | simple과 같지만 먼저 계획 수정을 한 번 요청 (`planner_revise` 검사) |
+| 시나리오 | Split | 용도 |
+|---|---|---|
+| `jungle_market` | dev | 메인 벤치마크: 열린 성장 기회 요청 (한국어) |
+| `jungle_market_en` | dev | 같은 요청을 영어로 |
+| `jungle_market_simple` | dev | 저렴한 스모크 테스트: 합계, 객단가, 카테고리 비중 |
+| `jungle_market_revision` | dev | simple과 같지만 먼저 계획 수정을 한 번 요청 (`planner_revise` 검사) |
+| `yummy_food_kr` | dev | 매체·카테고리·상품별 광고 성과와 광고비를 더 잘 쓰는 전략 3가지 |
+| `yummy_food_en` | dev | 같은 요청을 영문판 데이터로 |
+| `moon_market_kr` | test | moon_market에 대한 열린 성장 기회 요청 (`--allow-test` 필요) |
+| `moon_market_en` | test | 같은 요청을 영어로 (`--allow-test` 필요) |
 
 Runner는 시나리오의 `upload` 파일(CSV와 `column_definitions.json`)을 웹 앱이 업로드를
 두는 `s3://<bucket>/uploads/eval-<scenario>/`에 올리고, 그 경로를 데이터 디렉터리로
-넘깁니다. 그래서 데이터셋이 런타임 이미지에 들어 있을 필요가 없습니다. CSV 옆의
-답안지는 업로드 목록에 넣지 않으므로 에이전트에 닿지 않습니다.
+넘깁니다. 그래서 데이터셋이 런타임 이미지에 들어 있을 필요가 없습니다. 답안지는 업로드
+목록에 넣지 않으므로(`tests/test_l0_static.py`가 검사) 에이전트에 닿지 않습니다.
 
 시나리오마다 `pass:` 블록이 core_pass 기준을 정합니다.
 
@@ -482,11 +519,11 @@ LLM judge, `--no-factcheck`의 fact check)만 건너뜁니다.
 ### 정답 키
 
 `answer_keys/build_answer_key.py`가 데이터셋에서 pandas로 사실을 계산합니다. 데이터셋이
-바뀌면 다시 만들고 값을 직접 검토하세요. jungle_market의 사실은 데이터셋 자체의
-`ground_truth.json`과 일치합니다(2026-10-12 확인). 각 사실에는 `kind`(value, ranking,
+바뀌면 다시 만들고 값을 직접 검토하세요. 각 정답 키는 `ground_truth/`의 답안지와
+일치합니다(jungle_market 2026-10-12, yummy_food와 moon_market 2026-10-14 확인). 각 사실에는 `kind`(value, ranking,
 relation), fact checker가 정답 없이 읽는 `description`과 `scope`, `unit`, 정답 자체,
-판정할 때만 보여주는 `note`가 있습니다. `scope`에 따로 적지 않았으면 값은 파일의 완전
-중복 행 111개를 뺀 기준입니다. 보고서 자체 수식에 달린 숫자(기회 점수, 시나리오 상승폭)는
+판정할 때만 보여주는 `note`가 있습니다. jungle_market 값은 `scope`에 따로 적지 않았으면
+파일의 완전 중복 행 111개를 뺀 기준입니다. 보고서 자체 수식에 달린 숫자(기회 점수, 시나리오 상승폭)는
 데이터셋 정답이 없어서 넣지 않았습니다.
 
 ### 가격

@@ -1,9 +1,12 @@
 """Compare eval results between tags (e.g. baseline vs a candidate change).
 
-    python compare.py eval_results/baseline eval_results/opus55 [--scenario jungle_market] [--out compare.md]
+    python compare.py eval_results/baseline eval_results/opus55 [--scenario jungle_market] [--split dev] [--out compare.md]
 
 Each tag folder holds run folders with scores.json (from run_eval.py or
-grade.py). Prints one markdown table per scenario:
+grade.py). Dev and test scenarios (`split` in scenarios.yaml) are reported in
+separate sections, each opening with the core pass rate pooled over its
+scenarios, so a test result never blends into the dev numbers being tuned.
+Then one markdown table per scenario:
 
   pass/fail metrics  rate with a 95% Wilson interval, e.g. 67% [21–94%] (2/3)
   other metrics      mean ± std (n)
@@ -25,6 +28,8 @@ import statistics
 import sys
 from collections import defaultdict
 from pathlib import Path
+
+from grade import load_scenarios
 
 # (metric, label, direction, kind) — direction +1 = higher is better, -1 = lower is better.
 # kind: "binary" pass/fail per run (Wilson interval), "rate" prints as %, "num"
@@ -67,14 +72,22 @@ METRICS = [
 ]
 
 
+def split_of(scenario, run_meta, listed):
+    """The split recorded at run time, else the one in scenarios.yaml; None for a scenario no longer listed."""
+    return run_meta.get("split") or (listed.get(scenario) or {}).get("split")
+
+
 def load_runs(tag_dir):
+    listed = load_scenarios()
     runs = []
     for scores_path in sorted(Path(tag_dir).glob("*/scores.json")):
         data = json.loads(scores_path.read_text(encoding="utf-8"))
         s = data["scores"]
         run_meta = scores_path.parent / "run.json"
         scenario = json.loads(run_meta.read_text())["scenario"] if run_meta.is_file() else scores_path.parent.name.rsplit("-", 3)[0]
-        s["_agent_calls"] = json.loads(run_meta.read_text()).get("agent_calls", {}) if run_meta.is_file() else {}
+        meta = json.loads(run_meta.read_text()) if run_meta.is_file() else {}
+        s["_agent_calls"] = meta.get("agent_calls", {})
+        s["_split"] = split_of(scenario, meta, listed)
         s["_cost_by_agent"] = data.get("details", {}).get("cost_by_agent", {})
         cfg_path = scores_path.parent / "config.json"
         s["_config"] = json.loads(cfg_path.read_text(encoding="utf-8")) if cfg_path.is_file() else {}
@@ -250,25 +263,49 @@ def table(scenario, tags, runs_by_tag):
     return "\n".join(lines)
 
 
+# Section order and headings; None = a scenario no longer in scenarios.yaml.
+SECTIONS = [("dev", "Dev scenarios"), ("test", "Test scenarios (release check: don't tune on these)"),
+            (None, "Scenarios not in scenarios.yaml")]
+
+
+def pooled(scenarios, tags, by_scenario):
+    """Core pass rate per tag over all runs of these scenarios, so dev and test each get one headline number."""
+    lines = ["| pooled over " + ", ".join(scenarios) + " | " + " | ".join(Path(t).name for t in tags) + " |",
+             "|" + "---|" * (len(tags) + 1)]
+    cells = [fmt_stat(summarize(values([s for sc in scenarios for s in by_scenario[sc][t]], "core_pass")), "binary") for t in tags]
+    return lines + ["| core pass rate | " + " | ".join(cells) + " |"]
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("tags", nargs="+", help="tag folders; the first is the baseline")
     ap.add_argument("--scenario", action="append")
+    ap.add_argument("--split", choices=["dev", "test"], help="only this split")
     ap.add_argument("--out")
     args = ap.parse_args()
 
     by_scenario = defaultdict(lambda: defaultdict(list))
+    split = {}
     for t in args.tags:
         if not Path(t).is_dir():
             ap.error(f"no such tag folder: {t}")
         for scenario, s in load_runs(t):
             by_scenario[scenario][t].append(s)
+            split.setdefault(scenario, s["_split"])
 
     scenarios = args.scenario or sorted(by_scenario)
+    listed = load_scenarios()
+    for sc in scenarios:  # a --scenario with no runs yet
+        split.setdefault(sc, (listed.get(sc) or {}).get("split"))
     parts = [f"## Eval comparison: {' vs '.join(Path(t).name for t in args.tags)}", "",
              "Δ is vs the first tag, with a 95% bootstrap interval in brackets. ▲/▼ only when that interval excludes 0.", ""]
-    for sc in scenarios:
-        parts += [table(sc, args.tags, by_scenario[sc]), ""]
+    for key, heading in SECTIONS:
+        group = [sc for sc in scenarios if split.get(sc) == key and (args.split is None or key == args.split)]
+        if not group:
+            continue
+        parts += [f"## {heading}", ""] + pooled(group, args.tags, by_scenario) + [""]
+        for sc in group:
+            parts += [table(sc, args.tags, by_scenario[sc]), ""]
     # Pairwise LLM judge results written by pairwise.py, if any.
     import pairwise
     for t in args.tags[1:]:

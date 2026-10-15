@@ -4,8 +4,9 @@
 
 What goes where:
 
-  scenario (request, requirements,     Dataset `deep-insight-eval`, one item per scenario
-    answer key, pass thresholds)
+  scenario (request, requirements,     Dataset `deep-insight-eval` for dev scenarios,
+    answer key, pass thresholds)         `deep-insight-eval-test` for test ones (split in
+                                         scenarios.yaml); one item per scenario
   tag (baseline, my-change)            Dataset run of the same name (an experiment)
   one run of a scenario                Trace: input = request, output = the report text,
                                        metadata = git SHA, runtime version, model IDs
@@ -13,9 +14,12 @@ What goes where:
   grading (scores.json, judge.json)    trace scores; judge scores carry the judge's
                                        justification as the comment
   pairwise win rate (pairwise.py)      a score on the candidate's dataset run
-  --queue                              adds the traces to the annotation queue
-                                       `deep-insight-calibration` for human labels that
-                                       use the same score configs as the judge
+  --queue                              adds the traces of dev scenarios to the annotation
+                                       queue `deep-insight-calibration-<scenario>` for human
+                                       labels that use the same score configs as the judge.
+                                       Test scenarios get no queue: labels on them would
+                                       feed back into the judge and rubric, which are
+                                       tuned on the dev sets only
 
 Langfuse keeps one trace per dataset item per run, so each repeat of a
 scenario is its own item ("jungle_market #1", "#2", ...). Every timestamp is
@@ -52,7 +56,8 @@ sys.path.insert(0, str(HERE))
 from graders import cost  # noqa: E402
 from grade import artifacts_dir, load_scenario  # noqa: E402
 
-DATASET = "deep-insight-eval"
+DATASETS = {"dev": "deep-insight-eval", "test": "deep-insight-eval-test"}  # by scenario split
+DATASET = DATASETS["dev"]
 QUEUE = "deep-insight-calibration"
 NS = uuid.UUID("5b6d1c1e-8f0a-4d39-9e0b-3c7a0e0d1a11")  # namespace for deterministic ids
 CRITERIA = ["evidence_linkage", "strategy_specificity", "insight_depth", "reasoning_soundness"]
@@ -130,8 +135,10 @@ def repeat_of(run_dir):
     return int(tail) if tail.isdigit() else 1
 
 
-def item_id(scenario, repeat):
-    return sid("item", scenario, str(repeat))
+def item_id(scenario, repeat, split="dev"):
+    # Test items get ids of their own: moon_market was synced into the dev dataset
+    # before it became a test set, and an item id can't move to another dataset.
+    return sid("item", scenario, str(repeat)) if split == "dev" else sid("item", split, scenario, str(repeat))
 
 
 def content_rev(run_dir):
@@ -161,25 +168,33 @@ def ensure_score_configs(lf, requirement_ids):
     return have
 
 
+def dataset_of(scenario):
+    return DATASETS[scenario["split"]]
+
+
 def ensure_dataset_items(lf, scenarios, repeats):
-    """One item per (scenario, repeat); repeats maps scenario → highest repeat number seen."""
-    try:
-        lf.get(f"/api/public/v2/datasets/{DATASET}")
-    except RuntimeError:
-        lf.post("/api/public/v2/datasets", {"name": DATASET, "description": "Deep Insight eval scenarios (eval-harness/config/scenarios.yaml)"})
-    existing = {i["id"] for i in lf.pages("/api/public/dataset-items", datasetName=DATASET)}
+    """One item per (scenario, repeat), in its split's dataset; repeats maps scenario → highest repeat number seen."""
+    existing = set()
+    for split in sorted({s["split"] for s in scenarios.values()}):
+        dataset = DATASETS[split]
+        try:
+            lf.get(f"/api/public/v2/datasets/{dataset}")
+        except RuntimeError:
+            lf.post("/api/public/v2/datasets", {"name": dataset, "description": f"Deep Insight eval scenarios, {split} split "
+                                                                                "(eval-harness/config/scenarios.yaml)"})
+        existing |= {i["id"] for i in lf.pages("/api/public/dataset-items", datasetName=dataset)}
     for name, s in scenarios.items():
         key = json.loads(Path(s["answer_key"]).read_text(encoding="utf-8"))
-        base = {"datasetName": DATASET,
+        base = {"datasetName": dataset_of(s),
                 "input": {"scenario": name, "query": s["query"].strip(), "data_files": [Path(f).name for f in s.get("upload") or []]},
                 "expectedOutput": {"requirements": s.get("requirements", []), "pass": s.get("pass", {}),
                                    "answer_key": [_answer(f) for f in key["facts"]]},
-                "metadata": {"hitl": s.get("hitl") or []}}
+                "metadata": {"hitl": s.get("hitl") or [], "split": s["split"]}}
         for k in range(1, max(repeats.get(name, 1), 1) + 1):
-            lf.post("/api/public/dataset-items", {**base, "id": item_id(name, k), "input": {**base["input"], "repeat": k}})
-        legacy = sid("item", name)  # one item per scenario, before repeats were split
+            lf.post("/api/public/dataset-items", {**base, "id": item_id(name, k, s["split"]), "input": {**base["input"], "repeat": k}})
+        legacy = sid("item", name)  # one item per scenario, before repeats were split; always in the dev dataset
         if legacy in existing:
-            lf.post("/api/public/dataset-items", {**base, "id": legacy, "status": "ARCHIVED"})
+            lf.post("/api/public/dataset-items", {**base, "datasetName": DATASET, "id": legacy, "status": "ARCHIVED"})
 
 
 def _answer(fact):
@@ -201,6 +216,7 @@ def run_events(run_dir, tag, configs):
     scores, details = scores_doc["scores"], scores_doc.get("details", {})
     config = json.loads((run_dir / "config.json").read_text(encoding="utf-8")) if (run_dir / "config.json").is_file() else {}
     scenario = meta["scenario"]
+    spec = load_scenario(scenario)
     trace_id = sid("trace", tag, run_dir.name, content_rev(run_dir))
     started = datetime.fromisoformat(meta["started_at"]) if meta.get("started_at") else datetime.now(timezone.utc)
     ended = started + timedelta(seconds=float(meta.get("duration_s") or 1))
@@ -215,12 +231,12 @@ def run_events(run_dir, tag, configs):
     status = "PASS" if scores.get("core_pass") else "FAIL"
     events = [_event("trace-create", {
         "id": trace_id, "name": f"eval/{scenario}", "timestamp": _iso(started),
-        "input": {"query": load_scenario(scenario)["query"].strip()},
+        "input": {"query": spec["query"].strip()},
         "output": report or {"status": meta.get("status"), "note": "no report produced"},
         "sessionId": f"eval/{tag}", "release": str(config.get("git_sha", ""))[:12] or None,
         "version": f"runtime-v{config.get('runtime_version')}" if config.get("runtime_version") else None,
-        "tags": [tag, scenario, status],
-        "metadata": {"run_dir": f"{tag}/{run_dir.name}", "status": meta.get("status"), "core_fail_reasons": scores.get("core_fail_reasons"),
+        "tags": [tag, scenario, spec["split"], status],
+        "metadata": {"run_dir": f"{tag}/{run_dir.name}", "split": spec["split"], "status": meta.get("status"), "core_fail_reasons": scores.get("core_fail_reasons"),
                      "models": config.get("models"), "runtime_version": config.get("runtime_version"), "git_sha": config.get("git_sha"),
                      "session_id": meta.get("session_id"), "agent_calls": meta.get("agent_calls"), "warning": meta.get("warning"),
                      "judge_summary": (judge or {}).get("verdict", {}).get("summary"),
@@ -289,10 +305,10 @@ def _agent_first_seen(run_dir):
 
 # --- dataset runs, pairwise, annotation queue ---------------------------------------
 
-def reset_dataset_run(lf, tag, pairwise_names):
+def reset_dataset_run(lf, tag, pairwise_names, dataset=DATASET):
     """Delete the dataset run (and its pairwise scores) so it can be rebuilt from the current traces."""
     try:
-        run = lf.get(f"/api/public/datasets/{DATASET}/runs/{tag}")
+        run = lf.get(f"/api/public/datasets/{dataset}/runs/{tag}")
     except RuntimeError:
         return
     for name in pairwise_names:
@@ -300,14 +316,15 @@ def reset_dataset_run(lf, tag, pairwise_names):
             lf.delete(f"/api/public/scores/{sid('score', run['id'], name)}")
         except RuntimeError:
             pass
-    lf.delete(f"/api/public/datasets/{DATASET}/runs/{tag}")
+    lf.delete(f"/api/public/datasets/{dataset}/runs/{tag}")
 
 
-def link_run_items(lf, tag, linked, description):
-    """linked: (trace_id, scenario, repeat, started) per run."""
+def link_run_items(lf, tag, linked, description, scenarios=None):
+    """linked: (trace_id, scenario, repeat, started) per run; the item decides which dataset's run it joins."""
     for trace_id, scenario, repeat, started in linked:
+        split = scenarios[scenario]["split"] if scenarios else "dev"
         lf.post("/api/public/dataset-run-items", {"runName": tag, "runDescription": description,
-                                                 "datasetItemId": item_id(scenario, repeat), "traceId": trace_id,
+                                                 "datasetItemId": item_id(scenario, repeat, split), "traceId": trace_id,
                                                  "createdAt": _iso(started)})
 
 
@@ -348,14 +365,16 @@ def pairwise_names(tag_dir):
     return names
 
 
-def pairwise_scores(lf, tag_dir):
+def pairwise_scores(lf, tag_dir, scenarios=None):
+    """Pairwise win rates as scores on the candidate's dataset run (the scenario's split decides which dataset)."""
     events = []
     for f in Path(tag_dir).glob("pairwise_vs_*.json"):
         summary = json.loads(f.read_text(encoding="utf-8"))
-        run = lf.get(f"/api/public/datasets/{DATASET}/runs/{summary['candidate']}")
         for scenario, s in summary["scenarios"].items():
             if not s.get("pairs"):
                 continue
+            dataset = dataset_of(scenarios[scenario]) if scenarios and scenario in scenarios else DATASET
+            run = lf.get(f"/api/public/datasets/{dataset}/runs/{summary['candidate']}")
             name = f"pairwise_win_rate_vs_{summary['baseline']}.{scenario}"
             comment = (f"{s['pairs']} pairs · W/T/L/both_bad {s['wins']}/{s['ties']}/{s['losses']}/{s['both_bad']} · "
                        f"position-consistent {s['position_consistency']:.0%} · judge {summary['judge_model']}")
@@ -372,13 +391,15 @@ def queue_name(scenario):
 
 
 def queue_traces(lf, traces, configs, scenarios):
-    """Add (trace_id, scenario) pairs to one queue per scenario, showing only that scenario's requirements.
+    """Add (trace_id, scenario) pairs of dev scenarios to one queue per scenario, showing only its requirements.
 
+    Test scenarios are left out: human labels on them would be used to adjust
+    the judge or the rubric, which tunes to the test set.
     Returns {queue name: traces added}.
     """
     existing = {q["name"]: q for q in lf.pages("/api/public/annotation-queues")}
     added = {}
-    for scenario in sorted({sc for _, sc in traces}):
+    for scenario in sorted({sc for _, sc in traces if scenarios[sc]["split"] == "dev"}):
         name = queue_name(scenario)
         queue = existing.get(name)
         if queue is None:
@@ -419,7 +440,7 @@ def credentials(allow_cloud=False):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("tags", nargs="+", help="tag folders under eval_results/")
-    ap.add_argument("--queue", action="store_true", help=f"add the traces to the annotation queue {QUEUE}-<scenario>")
+    ap.add_argument("--queue", action="store_true", help=f"add the dev scenarios' traces to the annotation queue {QUEUE}-<scenario>")
     ap.add_argument("--dry-run", action="store_true", help="build the events and print counts; send nothing")
     ap.add_argument("--allow-cloud", action="store_true", help="allow a Langfuse Cloud host (report texts leave your account)")
     args = ap.parse_args()
@@ -458,14 +479,16 @@ def main():
             configs_seen.add((str(config.get("git_sha", ""))[:7], str(config.get("runtime_version"))))
             current[trace_id] = {"run_dir": os.path.relpath(os.path.abspath(r), HERE), "tag": tag, "scenario": scenario}
         lf.ingest(events)
-        reset_dataset_run(lf, tag, pairwise_names(tag_dir))
+        for dataset in sorted({dataset_of(scenarios[sc]) for _, sc, *_ in linked}):
+            reset_dataset_run(lf, tag, pairwise_names(tag_dir), dataset)
         desc = "; ".join(f"git {g} runtime v{v}" for g, v in sorted(configs_seen))
-        link_run_items(lf, tag, linked, desc)
-        n_pw = pairwise_scores(lf, tag_dir)
+        link_run_items(lf, tag, linked, desc, scenarios)
+        n_pw = pairwise_scores(lf, tag_dir, scenarios)
         deleted, kept = retire_traces(lf, manifest, current)
         manifest.update(current)
         all_traces += [(t, sc) for t, sc, *_ in linked]
-        print(f"{tag}: {len(tag_runs[tag])} runs, {len(events)} events, {n_pw} pairwise scores → dataset run '{tag}'"
+        datasets = ", ".join(sorted({dataset_of(scenarios[sc]) for _, sc, *_ in linked}))
+        print(f"{tag}: {len(tag_runs[tag])} runs, {len(events)} events, {n_pw} pairwise scores → dataset run '{tag}' in {datasets or 'no dataset'}"
               + (f" · replaced {deleted} outdated trace(s)" if deleted else ""))
         for t in kept:
             print(f"  ⚠ kept outdated trace {t}: it has human labels; re-label its replacement {manifest[t]['superseded_by']}")
@@ -473,7 +496,10 @@ def main():
     if args.queue:
         for name, n in queue_traces(lf, all_traces, configs, scenarios).items():
             print(f"annotation queue '{name}': {n} trace(s) added")
-    print(f"→ {lf.host}  (Datasets → {DATASET})")
+        test = sorted({sc for _, sc in all_traces if scenarios[sc]["split"] == "test"})
+        if test:
+            print(f"not queued (test split, no calibration on it): {', '.join(test)}")
+    print(f"→ {lf.host}  (Datasets → {', '.join(DATASETS.values())})")
     return 0
 
 

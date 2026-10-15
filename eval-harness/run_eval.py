@@ -17,6 +17,10 @@ Usage:
     python run_eval.py --scenario jungle_market --repeat 5 --tag baseline \\
         --runtime-arn arn:aws:bedrock-agentcore:... [--region us-west-2]
 
+Test-split scenarios (moon_market, see scenarios.yaml) run only with
+--allow-test: they are for a release check, and looking at their results
+while tuning makes them a second dev set.
+
 The invoke and feedback logic mirrors managed-agentcore/02_invoke_agentcore_runtime_vpc.py,
 which can't be imported (it parses CLI args and loads .env at import time).
 """
@@ -146,7 +150,7 @@ def run_once(args, scenario_name, scenario, run_dir, clients):
     usage = defaultdict(lambda: {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0, "model_id": None})
     agent_first, agent_last = {}, {}
     calls = Counter()
-    meta = {"scenario": scenario_name, "tag": args.tag, "status": "incomplete", "plan_revisions": 0}
+    meta = {"scenario": scenario_name, "split": scenario["split"], "tag": args.tag, "status": "incomplete", "plan_revisions": 0}
 
     start = time.monotonic()
     started_at = datetime.now(timezone.utc)
@@ -227,6 +231,15 @@ def run_once(args, scenario_name, scenario, run_dir, clients):
     return meta, result["scores"]
 
 
+def refuse_test_split(scenarios, allow_test):
+    """Why the run is refused, or None: test scenarios need --allow-test."""
+    test = [n for n, s in scenarios.items() if s["split"] == "test"]
+    if test and not allow_test:
+        return (f"{', '.join(test)} {'is a test scenario' if len(test) == 1 else 'are test scenarios'}: "
+                "tune on the dev scenarios and run these before a release. Pass --allow-test to run them.")
+    return None
+
+
 def main():
     # eval.env (written by eval_runtime.py create) points at the eval runtime;
     # managed-agentcore/.env only has the users' runtime.
@@ -239,6 +252,8 @@ def main():
     ap.add_argument("--tag", required=True, help="results go to eval_results/<tag>/")
     ap.add_argument("--runtime-arn", default=env.get("EVAL_RUNTIME_ARN") or env.get("RUNTIME_ARN"))
     ap.add_argument("--region", default=env.get("EVAL_REGION") or env.get("AWS_REGION") or "us-west-2")
+    ap.add_argument("--allow-test", action="store_true",
+                    help="allow test-split scenarios (moon_market); run them before a release, not while tuning")
     ap.add_argument("--allow-users-runtime", action="store_true",
                     help="run against the runtime the web app uses (model or image changes there reach users)")
     ap.add_argument("--bucket", default=env.get("S3_BUCKET_NAME"), help="defaults to the runtime's S3_BUCKET_NAME")
@@ -248,6 +263,9 @@ def main():
     ap.add_argument("--judge", action="store_true", help="also run the LLM judge on each run (paid, see judge.yaml)")
     ap.add_argument("--no-factcheck", action="store_true", help="skip the answer-key fact check (it calls a model; on by default)")
     args = ap.parse_args()
+    scenarios = {name: load_scenario(name) for name in args.scenario}
+    if (refused := refuse_test_split(scenarios, args.allow_test)):
+        ap.error(refused)
     args.judge_ctx = model_ctx() if args.judge else None
     args.factcheck_ctx = None if args.no_factcheck else (args.judge_ctx or model_ctx())
     announce(args.factcheck_ctx, args.judge_ctx)
@@ -272,8 +290,7 @@ def main():
     out_root = HERE / "eval_results" / args.tag
 
     failures = 0
-    for name in args.scenario:
-        scenario = load_scenario(name)
+    for name, scenario in scenarios.items():
         if scenario.get("upload"):
             scenario["data_directory"] = upload_data(s3, args.bucket, name, scenario["upload"])
             log(f"{name}: data uploaded to {scenario['data_directory']}")

@@ -41,7 +41,8 @@ eval-harness/
 ├── config/        scenarios.yaml, judge.yaml, pricing.yaml, runtime_configs.yaml,
 │                  eval.env and langfuse.env (git-ignored, local only)
 ├── answer_keys/   facts per dataset for the fact check, and the script that builds them
-├── docs/          jungle-market.md: the dataset, its planted patterns and answers
+├── ground_truth/  answer sheets for people, per dataset (never in a data directory)
+├── docs/          jungle-market.md, yummy-food.md: the dev datasets, their planted patterns and answers
 ├── tests/         pytest suite and fixtures
 └── eval_results/  every run, grade and comparison (git-ignored)
 ```
@@ -94,22 +95,44 @@ inputs whose right answers are known:
 Nothing reaches Langfuse until step 5 is run: runs and grades stay in
 `eval_results/` only.
 
-## Datasets: one to develop on, two kept out
+## Datasets: two to develop on, one kept out
 
-The harness runs on **jungle_market** only (`deep-insight-web/sample_data/jungle-market/`):
-two weeks of grocery orders in 8 cities with planted patterns a shallow
-analysis gets wrong (duplicate rows that change the top city, a Simpson's
-paradox on a coupon, a stockout, threshold bunching, a promotion halo). Its
-answer sheet (`ground_truth.json` / `.md`, Q1-Q18) lets a person grade a report
-without recomputing anything. [docs/jungle-market.md](docs/jungle-market.md) describes the
-data, the planted patterns, the answers and how to grade a report against them.
+Every scenario in `config/scenarios.yaml` has a `split`:
 
-**moon_market and yummy_food are test sets.** They have no scenarios or gold
-cases here, and no prompt or threshold is tuned against them, so a change that
-only fits jungle_market shows up when it is checked on them. Both have kr and
-en editions with the same numbers, an answer sheet in `ground_truth/<dataset>/<lang>/`
-and answer keys `answer_keys/<dataset>_kr.json` / `_en.json`. The sheets are kept
-out of the data directories, which reach the agents.
+| Split | Datasets | What it is for |
+|---|---|---|
+| `dev` | jungle_market, yummy_food | Prompts, the judge, the rubric and pass thresholds are tuned on these. Gold cases and calibration labels come from them |
+| `test` | moon_market | Checked before a release only. Nothing is tuned against it, so a change that only fits the dev sets shows up here |
+
+- **jungle_market** (`deep-insight-web/sample_data/jungle-market/`): two weeks
+  of grocery orders in 8 cities with planted patterns a shallow analysis gets
+  wrong (duplicate rows that change the top city, a Simpson's paradox on a
+  coupon, a stockout, threshold bunching, a promotion halo).
+  [docs/jungle-market.md](docs/jungle-market.md) describes the data, the
+  patterns, the answers and how to grade a report against them.
+- **yummy_food** (`managed-agentcore/data/yummy_food/<lang>/`): one month of
+  daily ad performance, 4 media × 6 products. Nothing to clean; the traps are
+  in aggregating ad metrics (a mean of the ROAS column picks the wrong top
+  media, the highest-CTR media has the lowest ROAS, a doubled budget returns
+  far less at the margin). See [docs/yummy-food.md](docs/yummy-food.md).
+- **moon_market** (`managed-agentcore/data/moon_market/<lang>/`): two weeks of
+  single-product grocery orders in 10 Seoul districts. Its scenarios copy the
+  dev pass thresholds and are only ever re-set from dev results. It has no gold
+  case and no calibration queue: either would tune the evaluators to it.
+
+Each dataset has an answer sheet for people (`ground_truth/<dataset>/`, plus
+`<lang>/` for yummy_food and moon_market, which have kr and en editions with
+the same numbers) and an answer key per edition for the fact checker
+(`answer_keys/`). The sheets live here, not next to the CSVs: the data
+directories reach the agents, and the web app lists and serves every file in
+`deep-insight-web/sample_data/` to users. `tests/test_l0_static.py` fails if
+one is put back.
+
+Test scenarios need `--allow-test` in `run_eval.py`, `compare.py` reports dev
+and test in separate sections, and `langfuse_sync.py` puts test runs in their
+own dataset and never in a calibration queue. Look at test results to decide
+a release, not to pick the next change: once you tune on them, they are a
+third dev set.
 
 ## Workflow
 
@@ -121,6 +144,13 @@ out of the data directories, which reach the agents.
 .venv/bin/python run_eval.py --scenario jungle_market --repeat 3 --tag my-change
 # 3. compare
 .venv/bin/python compare.py eval_results/baseline eval_results/my-change
+```
+
+Before a release, run the same versions on the test set as well:
+
+```bash
+.venv/bin/python run_eval.py --scenario moon_market_kr --repeat 3 --tag my-change-test --allow-test
+.venv/bin/python compare.py eval_results/baseline-test eval_results/my-change-test --split test
 ```
 
 Each run costs real money (a few dollars for `jungle_market_simple`, more for
@@ -175,9 +205,16 @@ counted as `factcheck_unit_issues`, not as a wrong value.
   reports wrong recall, false wrongs and stability over repeats, and fails
   below 100% recall or above 0 false wrongs. Re-run it whenever the prompts
   (`factcheck.PROMPT_VERSION`), the model in `config/judge.yaml` or an answer key
-  change. The jungle_market gold case (`sanity/factcheck_cases/jungle_market.yaml`)
-  is a baseline report that kept the duplicate rows; its labels were checked
-  against the CSV with pandas and still need a person's review (#133).
+  change. Gold cases exist for the dev sets only. The jungle_market gold case
+  (`sanity/factcheck_cases/jungle_market.yaml`) is a baseline report that kept
+  the duplicate rows; its labels were checked against the CSV with pandas and
+  still need a person's review (#133). The yummy_food gold case
+  (`sanity/factcheck_cases/yummy_food.yaml`) is written by hand from the answer
+  sheet and makes the dataset's naive mistakes (mean of the ROAS column, the
+  doubled budget assumed to earn the full-month ROAS): the one Deep Insight
+  report on yummy_food in `deep-insight-web/sample_reports/` predates the
+  current data, so a `real` case comes from the first yummy_food_kr baseline
+  run.
   Measured with `sanity/factcheck_sanity.py --repeat 3` (2026-10-13,
   `global.openai.gpt-6-astra`, effort high, $9.23 for 15 runs):
 
@@ -286,19 +323,19 @@ deploys a self-hosted Langfuse on ECS Fargate. A Langfuse Cloud host
 
 Give the harness **a Langfuse project of its own**. A re-sync deletes what the
 tool created earlier for the same runs: superseded traces (unless they have
-human labels) and the dataset run of each synced tag in `deep-insight-eval`,
-which is rebuilt. In a shared project, a dataset or run with the same name
+human labels) and the dataset run of each synced tag in `deep-insight-eval`
+and `deep-insight-eval-test`, which is rebuilt. In a shared project, a dataset or run with the same name
 would be replaced.
 
 | Eval harness | Langfuse |
 |---|---|
-| scenario (request, requirements, answer key, pass thresholds) | item in dataset `deep-insight-eval` |
-| tag (`baseline`, `my-change`) | dataset run of the same name |
+| scenario (request, requirements, answer key, pass thresholds) | item in dataset `deep-insight-eval` (dev) or `deep-insight-eval-test` (test) |
+| tag (`baseline`, `my-change`) | dataset run of the same name, in each dataset the tag has runs in |
 | one run | trace: input = request, output = the report text, metadata = git SHA, runtime version, model IDs |
 | per-agent tokens, cost, time span | one generation per agent |
 | `scores.json`, `judge.json` | trace scores; judge scores carry the judge's justification as the comment |
 | pairwise win rate | score on the candidate's dataset run |
-| human labels | annotation queue `deep-insight-calibration-<scenario>` per scenario, showing only that scenario's requirements and the rubric criteria (same score configs as the judge) |
+| human labels | annotation queue `deep-insight-calibration-<scenario>` per dev scenario, showing only that scenario's requirements and the rubric criteria (same score configs as the judge). Test scenarios get no queue: labels on them would be used to adjust the judge or the rubric |
 
 ```bash
 # eval-harness/config/langfuse.env (git-ignored): LANGFUSE_HOST (or LANGFUSE_BASE_URL), LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY
@@ -339,20 +376,24 @@ marker gets removed with the fix.
 
 ## Scenarios
 
-`config/scenarios.yaml` defines dataset × query pairs, all on jungle_market:
+`config/scenarios.yaml` defines dataset × query pairs:
 
-| Scenario | Use |
-|---|---|
-| `jungle_market` | Main benchmark: open growth-opportunity request (Korean) |
-| `jungle_market_en` | The same request in English |
-| `jungle_market_simple` | Cheap smoke test: totals, AOV, category share |
-| `jungle_market_revision` | Same as simple, but requests one plan revision first (tests `planner_revise`) |
+| Scenario | Split | Use |
+|---|---|---|
+| `jungle_market` | dev | Main benchmark: open growth-opportunity request (Korean) |
+| `jungle_market_en` | dev | The same request in English |
+| `jungle_market_simple` | dev | Cheap smoke test: totals, AOV, category share |
+| `jungle_market_revision` | dev | Same as simple, but requests one plan revision first (tests `planner_revise`) |
+| `yummy_food_kr` | dev | Ad performance by media, category and product, and 3 strategies to spend the ad budget better |
+| `yummy_food_en` | dev | The same request on the English edition |
+| `moon_market_kr` | test | The open growth-opportunity request on moon_market (needs `--allow-test`) |
+| `moon_market_en` | test | The same in English (needs `--allow-test`) |
 
 The runner uploads each scenario's `upload` files (the CSV and
 `column_definitions.json`) to `s3://<bucket>/uploads/eval-<scenario>/`, where
 the web app puts uploads, and passes that as the data directory, so the
-dataset doesn't have to be in the runtime image. The answer sheet next to the
-CSV is never listed, so it can't reach the agents.
+dataset doesn't have to be in the runtime image. Answer sheets are never in an
+upload list (`tests/test_l0_static.py` checks), so they can't reach the agents.
 
 Each scenario's `pass:` block sets its core_pass thresholds:
 
@@ -512,11 +553,11 @@ compared. Only checks that were deliberately not run (the LLM judge without
 
 `answer_keys/build_answer_key.py` computes facts from the dataset with
 pandas. Regenerate after the dataset changes and review the values by hand;
-jungle_market's facts agree with the dataset's own `ground_truth.json`
-(checked 2026-10-12). Each fact has a `kind` (value, ranking or relation), a
+each key agrees with its answer sheet in `ground_truth/` (jungle_market
+checked 2026-10-12, yummy_food and moon_market 2026-10-14). Each fact has a `kind` (value, ranking or relation), a
 `description` and a `scope` the fact checker reads without the answer, a
 `unit`, the answer itself, and a `note` shown only when a statement is
-adjudicated. Values are after removing the file's 111 exact duplicate rows
+adjudicated. jungle_market values are after removing the file's 111 exact duplicate rows
 unless `scope` says otherwise. Numbers that depend on a report's own formulas
 (opportunity scores, scenario uplifts) are left out: they have no dataset
 answer.

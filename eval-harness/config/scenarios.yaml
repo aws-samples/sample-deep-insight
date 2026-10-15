@@ -1,7 +1,15 @@
-# Eval scenarios: dataset × query. The harness runs on jungle_market only:
-# moon_market and yummy_food are kept out of it as test sets, so prompts and
-# thresholds are never tuned against them.
+# Eval scenarios: dataset × query.
 #
+#   dev:   jungle_market, yummy_food   prompts, judge, rubric and pass thresholds
+#                                      are tuned on these
+#   test:  moon_market                 checked before a release only; nothing is
+#                                      tuned against it, so a change that only fits
+#                                      the dev sets shows up here
+#
+# split:         → dev or test (required). run_eval.py runs a test scenario only
+#                  with --allow-test; compare.py reports the two apart;
+#                  langfuse_sync.py puts test runs in their own dataset and never
+#                  in a calibration queue.
 # `upload` lists the local files run_eval.py puts in S3 (where the web app puts
 # uploads) for the runtime to read; the answer sheet next to the CSV is never
 # listed, so it can't reach the agents. `csv` and `answer_key` are local paths
@@ -22,8 +30,9 @@
 scenarios:
   # Main benchmark: open growth request. The data has planted patterns a
   # shallow analysis gets wrong (duplicate rows, Simpson's paradox, a stockout,
-  # threshold bunching, a promotion halo); see ground_truth.md.
+  # threshold bunching, a promotion halo); see ground_truth/jungle_market/ground_truth.md.
   jungle_market:
+    split: dev
     upload: &jungle_files
       - ../deep-insight-web/sample_data/jungle-market/jungle-market-sales.csv
       - ../deep-insight-web/sample_data/jungle-market/column_definitions.json
@@ -59,6 +68,7 @@ scenarios:
 
   # Cheaper run for smoke-testing the harness itself.
   jungle_market_simple:
+    split: dev
     upload: *jungle_files
     csv: ../deep-insight-web/sample_data/jungle-market/jungle-market-sales.csv
     answer_key: answer_keys/jungle_market.json
@@ -84,6 +94,7 @@ scenarios:
 
   # Exercises the plan-revision path (planner_revise) once before approving.
   jungle_market_revision:
+    split: dev
     upload: *jungle_files
     csv: ../deep-insight-web/sample_data/jungle-market/jungle-market-sales.csv
     answer_key: answer_keys/jungle_market.json
@@ -107,6 +118,7 @@ scenarios:
 
   # The growth request in English (the data is English).
   jungle_market_en:
+    split: dev
     upload: *jungle_files
     csv: ../deep-insight-web/sample_data/jungle-market/jungle-market-sales.csv
     answer_key: answer_keys/jungle_market.json
@@ -136,3 +148,140 @@ scenarios:
       min_other_facts: 0
       min_recompute: 10
       min_cited_checked: 5
+
+  # Second dev set: one month of daily ad performance, 4 media × 6 products.
+  # Nothing to clean; the planted patterns are about aggregating ad metrics
+  # (a mean of the ROAS column picks the wrong top media, the highest-CTR media
+  # has the lowest ROAS, 쿠빵's doubled budget returns far less at the margin);
+  # see ground_truth/yummy_food/kr/ground_truth.md.
+  yummy_food_kr:
+    split: dev
+    upload:
+      - ../managed-agentcore/data/yummy_food/kr/yummy-food-market.csv
+      - ../managed-agentcore/data/yummy_food/kr/column_definitions.json
+    csv: ../managed-agentcore/data/yummy_food/kr/yummy-food-market.csv
+    answer_key: answer_keys/yummy_food_kr.json
+    query: |
+      yummy-food-market.csv 는 분석 파일이고, column_definitions.json은 컬럼에 대한 설명입니다.
+      매체별·카테고리별·상품별 광고 성과(CTR, 전환율, ROAS)를 분석해서 광고비가 어디서 효율적으로 쓰이고
+      어디서 낭비되는지 찾아주고, 광고비 효율을 높일 수 있는 실행 가능한 전략 3가지를
+      우선순위와 기대 효과를 포함해서 제안해줘. 결과는 DOCX로 저장해줘.
+    hitl: []
+    requirements:
+      - id: media_performance
+        text: 매체별 광고 성과(CTR, 전환율, ROAS)를 수치와 함께 비교한다
+      - id: category_product
+        text: 카테고리별 또는 상품별 광고 성과를 수치와 함께 제시한다
+      - id: spend_efficiency
+        text: 광고비가 효율적으로 쓰이는 곳과 낭비되는 곳을 근거와 함께 짚는다
+      - id: three_strategies
+        text: 광고비 효율을 높일 실행 가능한 전략을 3가지 제시한다
+      - id: priority
+        text: 각 전략에 우선순위와 그 이유가 있다
+      - id: expected_effect
+        text: 각 전략에 기대 효과가 있고, 가능하면 수치와 산출 근거가 있다
+    pass: &yummy_pass
+      # not calibrated on real runs yet: re-set from the first baseline runs
+      required_facts: [total_revenue]
+      min_other_facts: 0
+      min_recompute: 10
+      min_cited_checked: 5
+
+  # The same request on the English edition (same numbers, English names).
+  yummy_food_en:
+    split: dev
+    upload:
+      - ../managed-agentcore/data/yummy_food/en/yummy-food-market.csv
+      - ../managed-agentcore/data/yummy_food/en/column_definitions.json
+    csv: ../managed-agentcore/data/yummy_food/en/yummy-food-market.csv
+    answer_key: answer_keys/yummy_food_en.json
+    query: |
+      yummy-food-market.csv is the data file and column_definitions.json describes the columns.
+      Analyze ad performance (CTR, conversion rate, ROAS) by media, category and product, find where
+      ad spend is used efficiently and where it is wasted, and propose 3 actionable strategies to improve
+      ad spend efficiency, with priority and expected impact. Save the result as DOCX.
+    hitl: []
+    requirements:
+      - id: media_performance
+        text: Compares ad performance by media (CTR, conversion rate, ROAS), with numbers
+      - id: category_product
+        text: Presents ad performance by category or product, with numbers
+      - id: spend_efficiency
+        text: Points out, with evidence, where ad spend is efficient and where it is wasted
+      - id: three_strategies
+        text: Proposes 3 actionable strategies to improve ad spend efficiency
+      - id: priority
+        text: Each strategy has a priority and a reason for it
+      - id: expected_effect
+        text: Each strategy has an expected impact, quantified with its basis where possible
+    pass: *yummy_pass
+
+  # Test set: two weeks of single-product grocery orders in 10 Seoul districts
+  # (holidays that make Monday/Tuesday look busiest, a gift-set AOV outlier, a
+  # weekend discount); see ground_truth/moon_market/kr/ground_truth.md.
+  # Its pass thresholds are copied from the dev scenarios' and only ever re-set
+  # from dev results: setting them from moon_market runs would tune to the test set.
+  # It has no gold case and no calibration queue for the same reason.
+  moon_market_kr:
+    split: test
+    upload:
+      - ../managed-agentcore/data/moon_market/kr/moon-market-fresh-food-sales.csv
+      - ../managed-agentcore/data/moon_market/kr/column_definitions.json
+    csv: ../managed-agentcore/data/moon_market/kr/moon-market-fresh-food-sales.csv
+    answer_key: answer_keys/moon_market_kr.json
+    query: |
+      moon-market-fresh-food-sales.csv 는 분석 파일이고, column_definitions.json은 컬럼에 대한 설명입니다.
+      데이터에서 비즈니스 성장 기회를 발굴해줘:
+      숨겨진 고객 패턴과 세그먼트를 발견하고, 수익 최적화 방안을 제시하며,
+      마케팅과 운영 효율성을 높일 수 있는 개선점을 찾고,
+      다음 달 매출을 크게 늘릴 수 있는 실행 가능한 전략 3가지를 우선순위와 기대 효과를 포함해서 제안해줘.
+      결과는 DOCX로 저장해줘.
+    hitl: []
+    requirements:
+      - id: segments
+        text: 데이터에서 찾은 고객 패턴이나 세그먼트를 수치 근거와 함께 제시한다
+      - id: revenue_optimization
+        text: 수익(매출·객단가·마진) 최적화 방안을 제시한다
+      - id: marketing_ops
+        text: 마케팅 또는 운영 효율성 개선점을 제시한다
+      - id: three_strategies
+        text: 다음 달 매출을 늘릴 실행 가능한 전략을 3가지 제시한다
+      - id: priority
+        text: 각 전략에 우선순위와 그 이유가 있다
+      - id: expected_effect
+        text: 각 전략에 기대 효과가 있고, 가능하면 수치와 산출 근거가 있다
+    pass: &moon_pass
+      # = jungle_market's; re-set only from dev results, never from these runs
+      required_facts: [total_revenue]
+      min_other_facts: 0
+      min_recompute: 10
+      min_cited_checked: 5
+
+  moon_market_en:
+    split: test
+    upload:
+      - ../managed-agentcore/data/moon_market/en/moon-market-fresh-food-sales.csv
+      - ../managed-agentcore/data/moon_market/en/column_definitions.json
+    csv: ../managed-agentcore/data/moon_market/en/moon-market-fresh-food-sales.csv
+    answer_key: answer_keys/moon_market_en.json
+    query: |
+      moon-market-fresh-food-sales.csv is the data file and column_definitions.json describes the columns.
+      Find business growth opportunities in the data: discover hidden customer patterns and segments,
+      propose revenue optimization, find improvements for marketing and operational efficiency,
+      and propose 3 actionable strategies to significantly grow next month's revenue, with priority and expected impact.
+      Save the result as DOCX.
+    hitl: []
+    requirements:
+      - id: segments
+        text: Presents customer patterns or segments found in the data, with numbers
+      - id: revenue_optimization
+        text: Proposes ways to optimize revenue (sales, order value, margin)
+      - id: marketing_ops
+        text: Identifies marketing or operational efficiency improvements
+      - id: three_strategies
+        text: Proposes 3 actionable strategies to grow next month's revenue
+      - id: priority
+        text: Each strategy has a priority and a reason for it
+      - id: expected_effect
+        text: Each strategy has an expected impact, quantified with its basis where possible
+    pass: *moon_pass

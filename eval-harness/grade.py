@@ -77,11 +77,21 @@ def fail_reasons(scores, rules):
     return out
 
 
+# dev: tuned against (prompts, judge, rubric, thresholds). test: checked before a release only.
+SPLITS = ("dev", "test")
+
+
+def load_scenarios():
+    return yaml.safe_load((HERE / "config" / "scenarios.yaml").read_text(encoding="utf-8"))["scenarios"]
+
+
 def load_scenario(name):
-    data = yaml.safe_load((HERE / "config" / "scenarios.yaml").read_text(encoding="utf-8"))["scenarios"]
+    data = load_scenarios()
     if name not in data:
         raise SystemExit(f"unknown scenario {name!r}; known: {', '.join(data)}")
     s = dict(data[name])
+    if s.get("split") not in SPLITS:
+        raise SystemExit(f"scenario {name!r}: split must be one of {', '.join(SPLITS)}, not {s.get('split')!r}")
     s["csv"] = str((HERE / s["csv"]).resolve())
     s["answer_key"] = str((HERE / s["answer_key"]).resolve())
     return s

@@ -205,3 +205,28 @@ def test_mixed_judge_versions_are_flagged(tmp_path):
     assert "The LLM judge ran with 2 evaluator versions" in _table(tmp_path, [base, cand])
     old = _tag(tmp_path, "o", [{"judge_score_mean": 3.0}] * 2)          # graded before versions existed
     assert "unversioned (older cache)" in _table(tmp_path, [base, old])
+
+
+def test_test_scenarios_need_allow_test():
+    scenarios = {n: load_scenario(n) for n in ("jungle_market_simple", "moon_market_kr")}
+    assert "moon_market_kr is a test scenario" in run_eval.refuse_test_split(scenarios, allow_test=False)
+    assert run_eval.refuse_test_split(scenarios, allow_test=True) is None
+    assert run_eval.refuse_test_split({"yummy_food_kr": load_scenario("yummy_food_kr")}, allow_test=False) is None
+
+
+def test_compare_reports_dev_and_test_apart(tmp_path, monkeypatch, capsys):
+    tag = tmp_path / "t"
+    for i, (sc, ok) in enumerate([("jungle_market", True), ("yummy_food_kr", False), ("moon_market_kr", True)]):
+        d = tag / f"{sc}-x-{i}"
+        d.mkdir(parents=True)
+        (d / "run.json").write_text(json.dumps({"scenario": sc}))       # no split recorded: taken from scenarios.yaml
+        (d / "scores.json").write_text(json.dumps({"scores": {"core_pass": ok}}))
+    monkeypatch.setattr("sys.argv", ["compare.py", str(tag)])
+    compare.main()
+    out = capsys.readouterr().out
+    dev, test = out.split("## Test scenarios")
+    assert "pooled over jungle_market, yummy_food_kr" in dev and "50% [" in dev and "moon_market_kr" not in dev
+    assert "### moon_market_kr" in test and "100% [" in test and "jungle_market" not in test
+    monkeypatch.setattr("sys.argv", ["compare.py", str(tag), "--split", "dev"])
+    compare.main()
+    assert "Test scenarios" not in capsys.readouterr().out
