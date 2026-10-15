@@ -19,6 +19,7 @@
 
 ## *Latest News* 🔥
 
+- **[2026/10]** Ops Dashboard agent trace — see what each job did: agents in run order (Supervisor turns, plan reviews with the user's decision), every tool call with its generated code and output as a waterfall, and the generated files, in a Langfuse-style side panel. The runtime now reports each job's final status itself, so jobs settle as Success / Failed even when the browser drops the stream. ([details](./docs/features/ops-dashboard/agent-trace.md))
 - **[2026/07]** Claude Opus 5 / Sonnet 5 upgrade — Planner on Opus 5 with adaptive thinking, Coordinator on Haiku 4.5, all other agents on Sonnet 5. Sampling parameters now go only to the older families that still accept them.
 - **[2026/06]** Data Q&A — the **inner loop** to analysis's outer loop: natural-language chat over the uploaded CSV with DuckDB Text2SQL, sandboxed in-process (no data leaves your AWS account), Bedrock prompt caching for ~90% input-token savings on multi-turn dialogue, and an inline SQL editor so analysts can inspect, edit, and re-run the generated SQL without another LLM call. ([details](./deep-insight-web/DATA_QA.md))
 - **[2026/05]** Citation integrity validation — every number cited in a report is re-verified and linked to its calculation via `[N]` markers, with an independent Auditor (DeepTRACE A/B/C/D) blocking unverified or hallucinated figures (self-hosted + managed) ([details](./docs/features/data-validation/citation-validation-explained.md))
@@ -100,7 +101,7 @@ Browser-based interface for non-technical users:
 - ✅ Two workflows: **outer loop** (long-form multi-agent analysis) + **inner loop** ([Data Q&A](./deep-insight-web/DATA_QA.md) — fast Text2SQL chat on the same CSV)
 - ✅ Korean/English language support
 - ✅ Two deployment options: VPN CIDR (internal) or CloudFront + Cognito (external)
-- ✅ Optional: Ops dashboard for job tracking and email notifications
+- ✅ Optional: [Ops dashboard](./deep-insight-web/ops/README.md) for job tracking, email notifications, and per-job agent trace
 
 **Get Started**: [`./deep-insight-web/`](./deep-insight-web/)
 

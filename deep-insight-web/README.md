@@ -110,6 +110,7 @@ Both scripts handle all infrastructure in a single run:
 | Static page | `GET /` | Serves `static/index.html` |
 | File upload | `POST /upload` | Upload data file + optional column definitions to S3 |
 | Analysis | `POST /analyze` | Invoke AgentCore Runtime, stream SSE events to browser |
+| Job status | `GET /jobs/{upload_id}/status` | Status and session ID of a job whose `/analyze` stream was lost (the page polls it until the job settles) |
 | HITL review | `POST /feedback` | Submit plan approval/rejection (uploaded to S3) |
 | Artifacts | `GET /artifacts/{session_id}` | List generated report files |
 | Download | `GET /download/{session_id}/{filename}` | Download a report file |
@@ -123,7 +124,7 @@ Both scripts handle all infrastructure in a single run:
 
 > For detailed feature specifications, see the [Development Plan](../docs/features/web-ui/03-development-plan.md).
 >
-> For Ops Admin (job tracking, notifications, dashboard), see the [Ops Deployment Guide](ops/README.md).
+> For Ops Admin (job tracking, notifications, dashboard with per-job agent trace), see the [Ops Deployment Guide](ops/README.md).
 
 ---
 
