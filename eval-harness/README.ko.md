@@ -378,6 +378,29 @@ Planner는 데이터를 보지 않고 요청만 보며, 이후 모든 에이전�
 메시지가 실행에서는 Coordinator의 인계 문장이고, 여기서는 요청 자체입니다. 테스트
 시나리오는 `--allow-test`가 필요하고, `--no-judge`는 규칙 검사만 합니다.
 
+## 컴포넌트 실행: 에이전트 하나, 심어둔 오류
+
+전체 실행은 에이전트를 한꺼번에 채점합니다. Validator가 틀린 계산을 잡는지 보려면
+틀린 계산이 있어야 하는데, 보통 실행에서는 Coder의 숫자가 맞습니다.
+`component_eval.py`는 저장된 실행의 결과물에 오류를 심고 Validator만 돌립니다.
+
+```bash
+.venv/bin/python eval_runtime.py enable-components        # 최초 1회, eval 런타임에만
+.venv/bin/python component_eval.py validator --from eval_results/baseline/<run> --plant 6 --tag comp-validator
+```
+
+중요도 high인 계산 최대 `--plant`개의 값을 10% 바꿉니다. 절반은 원본 CSV 기반이면서
+재계산으로 맞다고 확인된 것, 절반은 Coder가 만든 파생 파일 기반입니다. 결과물을
+Validator 시작 시점 상태로 올리고 eval 런타임을 `component: validator`로
+호출합니다(`managed-agentcore/src/graph/component.py`). Validator가 쓴
+`citations.json`에서 심은 오류마다 잡음(needs_review), 놓침(verified), 검사 안 함을
+세고, 맞는 값을 needs_review로 표시한 오경보와 심은 값을 바꾼 경우(표시만 해야 하고
+고치면 안 됨)도 셉니다.
+
+런타임은 환경변수에 `EVAL_COMPONENT_MODE=1`이 없으면 컴포넌트 실행을 거부합니다.
+두 런타임은 같은 이미지를 쓰고, 이 변수는 `eval_runtime.py`가 eval 런타임에만
+넣습니다. 런타임은 `component: reporter`도 받지만, 그 하네스는 아직 없습니다.
+
 ## 시나리오
 
 `config/scenarios.yaml`은 데이터셋 × 요청 쌍을 정의합니다.

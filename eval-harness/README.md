@@ -399,6 +399,32 @@ instead of full runs. The one difference from a full run: its user message is
 the request, where a run passes the Coordinator's hand-off text. Test
 scenarios need `--allow-test`. `--no-judge` runs the rules only.
 
+## Component runs: one agent, planted errors
+
+A full run grades the agents together. To see whether the Validator catches a
+wrong calculation, it needs a wrong calculation to look at, and in a normal
+run the Coder's numbers are right. `component_eval.py` runs the Validator
+alone on a saved run's artifacts with errors planted:
+
+```bash
+.venv/bin/python eval_runtime.py enable-components        # once; eval runtime only
+.venv/bin/python component_eval.py validator --from eval_results/baseline/<run> --plant 6 --tag comp-validator
+```
+
+It changes 10% of the value of up to `--plant` high-importance calculations
+(half on the raw CSV and confirmed right by the recomputation, half on files
+the Coder derived), stages the artifacts as they were before the Validator,
+and invokes the eval runtime with `component: validator`
+(`managed-agentcore/src/graph/component.py`). From the Validator's
+`citations.json` it counts each planted error as caught (needs_review),
+missed (verified) or not checked, plus false alarms on right values and
+planted values it changed (it must mark, not correct).
+
+The runtime refuses component runs unless `EVAL_COMPONENT_MODE=1` is in its
+environment. Both runtimes run the same image; only `eval_runtime.py` sets
+that variable, on the eval runtime. The runtime also accepts
+`component: reporter`; the harness for it is not written yet.
+
 ## Scenarios
 
 `config/scenarios.yaml` defines dataset × query pairs:
