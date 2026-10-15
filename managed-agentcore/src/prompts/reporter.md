@@ -402,6 +402,27 @@ def load_citation_statuses():
             return {{c["calculation_id"]: c.get("verification_status", "verified") for c in json.load(f).get("citations", [])}}
     return {{}}
 
+# Number claims, shared verbatim by the Reporter and the Auditor. A match never
+# starts or ends inside a number, so 1,234.56 is one value (not 1,234 + ".56"),
+# and the N of an [N] marker is not a number.
+_RANGE_SEP = '~～〜–—'  # range connectors, spaced or not ('-' is handled in _JOIN)
+_UNIT = r'%p|%|[^\s\d\[\].,()/:·' + _RANGE_SEP + r'-]{{1,3}}'
+_NUM_RE = re.compile(r'(?<![\d\[])(?<!\d[.,])(-?\d{{1,3}}(?:,\d{{3}})+(?:\.\d+)?|-?\d+(?:\.\d+)?)(?![.,]?\d)\s*(' + _UNIT + r')?\s*(?:\[(\d+)\])?')
+# One end of a range (10~15%, 10 - 15%, 1,000건-2,000건), or of a date, time or
+# ratio when / or : sits right between two digits (3/9, 14:30, 1:2). A spaced
+# '-' needs a space on both sides, so "100억 -5%" stays a negative number, and
+# 1,234건/5,678원 is two values.
+_JOIN = r'(?:\s?[' + _RANGE_SEP + r']\s?|\s-\s|-)'
+_RANGE_L = re.compile(r'\d(?:' + _UNIT + r')?' + _JOIN + r'$|\d[/:]$')
+_RANGE_R = re.compile(r'(?:' + _UNIT + r')?' + _JOIN + r'-?\d|[/:]\d')
+
+def _range_end(txt, m):  # -> (number text, is a range end) for a _NUM_RE match
+    # in 10%-15% the '-' joins the range, so the right end is 15, not -15
+    s, raw = m.start(1), m.group(1)
+    if raw.startswith('-') and _RANGE_L.search(txt, max(0, s - 8), s + 1):
+        return raw[1:], True
+    return raw, bool(_RANGE_L.search(txt, max(0, s - 8), s) or _RANGE_R.match(txt, m.end(1)))
+
 def resolve_body_citations(doc):
     """🚨 WRITE VERBATIM — do NOT rewrite the run-offset insertion or the
     disambiguation logic. Deterministic post-hoc citation resolver, called from
@@ -422,8 +443,6 @@ def resolve_body_citations(doc):
                     verified.append((float(c.get("value")), c["citation_id"], c.get("description", "")))
                 except (TypeError, ValueError):
                     pass
-    # number (+optional unit) (+optional existing [N]); catches percentages + units
-    num_re = re.compile(r'(-?\d{{1,3}}(?:[,]\d{{3}})+|-?\d+(?:\.\d+)?)\s*(%p|%|[^\s\d\[\].,()]{{1,3}})?\s*(\[\d+\])?')
     inserted, unresolved, in_refs = 0, [], False
     targets = []
     for para in doc.paragraphs:  # body only (skip references section)
@@ -442,11 +461,14 @@ def resolve_body_citations(doc):
         if not txt:
             continue
         edits = []
-        for m in num_re.finditer(txt):
+        for m in _NUM_RE.finditer(txt):
             if m.group(3):  # already cited
                 continue
+            raw, in_range = _range_end(txt, m)
+            if in_range:
+                continue  # a marker here would land between the two ends (10~[N]15%)
             try:
-                val = float(m.group(1).replace(',', ''))
+                val = float(raw.replace(',', ''))
             except ValueError:
                 continue
             unit = m.group(2) or ''
@@ -455,6 +477,10 @@ def resolve_body_citations(doc):
             if any(t in unit for t in ('년', '월', '일', '시', '분', '초', '주')) or (not unit and 1900 <= int(val) <= 2100):
                 continue
             tol = max(abs(val) * 0.005, 0.05)
+            dec = len(raw.partition('.')[2])
+            if dec:  # printed decimals must round from the citation value (1,234.56 ≠ 1,234.51);
+                     # either half-way rounding is fine, + float error at large magnitudes
+                tol = min(tol, 0.5 * 10 ** -dec + abs(val) * 1e-13)
             cands = [(cid, desc) for (v, cid, desc) in verified if abs(val - v) <= tol]
             if not cands:
                 unresolved.append((val, txt[max(0, m.start()-20):m.end()+20].strip()))
