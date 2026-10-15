@@ -204,6 +204,14 @@ def grade_run(run_dir, csv_path=None, answer_key_path=None, scenario=None, judge
         scores["required_facts_missing"] = [f for f in rules["required_facts"] if f not in found]
         scores["other_facts_found"] = sum(f not in rules["required_facts"] for f in found)
     failed = fail_reasons(scores, rules)
+    # The Auditor passed a report the rule graders find a defect in: the defects
+    # its engine exists to block (wrong cited value, broken [n], [n] inside a number).
+    if scores.get("audit_present"):
+        missed = [k for k, bad in (("cited_value", (scores.get("cited_value_match_rate") or 1) < 1),
+                                   ("broken_ref", (scores.get("broken_citation_refs") or 0) > 0),
+                                   ("inside_number", (scores.get("citation_inside_number") or 0) > 0)) if bad]
+        scores["audit_missed"] = scores.get("audit_verdict") == "pass" and bool(missed)
+        scores["audit_missed_kinds"] = missed if scores.get("audit_verdict") == "pass" else []
     scores["core_pass"] = not failed
     scores["core_fail_reasons"] = failed
     return {"scores": scores, "details": details}

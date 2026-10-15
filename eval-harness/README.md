@@ -90,7 +90,8 @@ inputs whose right answers are known:
 |---|---|---|---|---|
 | `sanity/factcheck_sanity.py` | the fact checker catches known errors and calls nothing else wrong | `sanity/factcheck_cases/*.yaml` (gold cases) | `eval_results/factcheck_sanity/<time>.json` | Yes: about $5 per repeat |
 | `sanity/judge_sanity.py <run>` | the judge fails what must fail | one run's report and variants built from it | `eval_results/judge_sanity/<time>.json` | Yes |
-| `pytest` | prompts render, request fields are valid, graders catch planted defects | the code and fixtures | nothing | No |
+| `pytest` | prompts render, request fields are valid, graders catch planted defects, the code the prompts give the Auditor and Validator blocks what it must (`tests/test_prompt_code.py`) | the code and fixtures | nothing | No |
+| `planner_eval.py runs <tag>` / `generate --scenario <s>` | the Planner's plan covers the request (below) | `events.jsonl`, or a Planner call | `plan_eval.json` | Yes: the judge per plan; `generate` adds about $0.10 per plan |
 
 Nothing reaches Langfuse until step 5 is run: runs and grades stay in
 `eval_results/` only.
@@ -373,6 +374,31 @@ The runner reads `RUNTIME_ARN`, `AWS_REGION` and `S3_BUCKET_NAME` from
 documenting a known bug; it turns into an error once the bug is fixed, so the
 marker gets removed with the fix.
 
+## Planner: is the plan right before anything runs
+
+The Planner sees only the request, not the data, and every later agent works
+from its plan, so a requirement missing from the plan is usually missing from
+the report. `planner_eval.py` grades plans on what the Planner can know:
+
+| Check | How |
+|---|---|
+| `plan_requirements_met`, `plan_requirements_missing`, `_partial` | the judge marks each scenario requirement met / partial / missing by the plan's steps |
+| `plan_data_quality` | the judge: some step checks the data first (missing values, duplicates, types, ranges) |
+| `plan_workflow_ok`, `plan_auditor_planned` | rules: Coder → Validator → Reporter, and the Auditor after the Reporter |
+| `plan_format_ok`, `plan_language_ok` | rules: the format the request names (DOCX, PDF) is planned; the plan is in the request's language |
+
+```bash
+.venv/bin/python planner_eval.py runs eval_results/baseline              # the plans in saved runs
+.venv/bin/python planner_eval.py generate --scenario yummy_food_kr --repeat 5 --tag planner-my-change
+```
+
+`generate` calls the Planner alone with the deployed prompt, the eval
+runtime's `PLANNER_MODEL_ID` and the request fields the runtime builds, so a
+`planner.md` change can be checked over many samples for about $0.10 a plan
+instead of full runs. The one difference from a full run: its user message is
+the request, where a run passes the Coordinator's hand-off text. Test
+scenarios need `--allow-test`. `--no-judge` runs the rules only.
+
 ## Scenarios
 
 `config/scenarios.yaml` defines dataset × query pairs:
@@ -531,14 +557,17 @@ Also prints per-agent cost with the model each agent ran on.
 |---|---|---|
 | `all_required_ok` | report docx, citations.json, calculation_metadata.json, validation_report.txt exist and parse | `graders/artifacts.py` |
 | `citation_value_match_rate` | citations.json value == calculation_metadata value | `graders/citations.py` |
-| `recompute_match_rate`, `recompute_supported`, `recompute_unverified` | metadata values re-derived from the raw CSV with pandas. Formulas are read as arithmetic over aggregates (SUM/AVG/MEAN/MEDIAN/MIN/MAX/COUNT/STD/TOTAL) with filters (`=`, `==`, `!=`, `IS NULL`, `NOT NULL`, inside or after the aggregate), grouping (`GROUP BY`, `grouped by`, `col\|key`, weekday) and placeholders (`cat`, `X`, `'{}'`) resolved from the calculation's description. Names the agent made up (`cat_sales`, `daily_sum`) stay unsupported. When the description names no group, the value only has to match some group (`recompute_lenient`); if none matches, it is `recompute_unverified`, not wrong. A file with exact duplicate rows is also recomputed without them, since removing them is the correct analysis (`recompute_dedup`) | `graders/recompute.py` |
+| `recompute_match_rate`, `recompute_supported`, `recompute_unverified` | metadata values re-derived from the raw CSV with pandas. Formulas are read as arithmetic over aggregates (SUM/AVG/MEAN/MEDIAN/MIN/MAX/COUNT/STD/TOTAL) with filters (`=`, `==`, `!=`, `IS NULL`, `NOT NULL`, inside or after the aggregate), grouping (`GROUP BY`, `grouped by`, `by`, `col\|key`, weekday) and placeholders (`cat`, `X`, `'{}'`) resolved from the calculation's description. Names the agent made up (`cat_sales`, `daily_sum`) stay unsupported. A subset named only in the description, by one to three column values ("아마존×건강식품 조합 ROAS"), is tried too. When the description names no group, the value only has to match some group (`recompute_lenient`); if none matches, it is `recompute_unverified`, not wrong. A file with exact duplicate rows is also recomputed without them, since removing them is the correct analysis (`recompute_dedup`) | `graders/recompute.py` |
 | `cited_value_match_rate`, `cited_value_checked` | the number printed right before `[n]` in the report equals citation n, and how many pairs were compared | `graders/report.py` |
 | `broken_citation_refs` | `[n]` in the body with no citation n | `graders/report.py` |
+| `citation_inside_number` | `[n]` inside a number, range or time (`$111,065 [2].13`, `10 [1]~15%`). The value check reads only the part before the marker, so this is checked on its own; fails core_pass (#141) | `graders/report.py` |
+| `validator_false_verified`, `validator_false_alarm` | citations the Validator marked verified that the recomputation finds wrong, and needs_review ones it finds right (the Reporter leaves needs_review numbers out), over `validator_verified_checked` / `validator_needs_review_checked` | `graders/recompute.py` |
 | `citation_coverage` | share of significant numbers (amounts, %, decimals) in the body that carry a citation. Approximate | `graders/report.py` |
 | `required_facts_missing`, `other_facts_found` | answer-key facts stated correctly: the scenario's required ones, and how many of the rest | `graders/factcheck.py` + `answer_keys/` |
 | `factcheck_wrong_confirmed`, `factcheck_wrong_ids` | statements that contradict the answer key in the same scope, confirmed by code and the adjudicating model | `graders/factcheck.py` |
 | `factcheck_needs_review`, `factcheck_out_of_scope`, `factcheck_unit_issues`, `factcheck_unverified_quotes` | statements left for a person, about another period or subset, written with %p, or quoted wrongly by the model | `graders/factcheck.py` |
 | `audit_pass`, `audit_block_findings` | the Auditor's own verdict, when the version has an Auditor | `graders/audit.py` |
+| `audit_missed`, `audit_missed_kinds` | the Auditor passed a report in which the graders above find what it exists to block: a cited value that differs, a broken `[n]`, `[n]` inside a number | `grade.py` |
 | `code_exec_failed`, `code_exec_fail_causes` | agent code that failed in the Fargate sandbox, bucketed by cause (missing file, AttributeError, …) | `graders/executions.py` |
 | `cost_usd`, `cache_hit_rate` | token usage × `config/pricing.yaml` | `graders/cost.py` |
 

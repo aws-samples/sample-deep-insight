@@ -89,7 +89,8 @@ scores.json  (core_pass: PASS / FAIL)
 |---|---|---|---|---|
 | `sanity/factcheck_sanity.py` | fact checker가 알려진 오류를 잡고, 그 밖의 것은 틀렸다고 하지 않는지 | `sanity/factcheck_cases/*.yaml` (gold case) | `eval_results/factcheck_sanity/<time>.json` | 예: 반복당 약 $5 |
 | `sanity/judge_sanity.py <run>` | judge가 떨어뜨려야 할 것을 떨어뜨리는지 | 실행 하나의 보고서와 그로부터 만든 변형 | `eval_results/judge_sanity/<time>.json` | 예 |
-| `pytest` | 프롬프트 렌더링, 요청 필드 유효성, 채점기가 심어둔 결함을 잡는지 | 코드와 fixture | 없음 | 아니요 |
+| `pytest` | 프롬프트 렌더링, 요청 필드 유효성, 채점기가 심어둔 결함을 잡는지, 프롬프트가 Auditor·Validator에게 주는 코드가 막아야 할 것을 막는지(`tests/test_prompt_code.py`) | 코드와 fixture | 없음 | 아니요 |
+| `planner_eval.py runs <tag>` / `generate --scenario <s>` | Planner의 계획이 요청을 다루는지(아래) | `events.jsonl` 또는 Planner 호출 | `plan_eval.json` | 예: 계획당 judge, `generate`는 계획당 약 $0.10 추가 |
 
 5단계를 실행하기 전에는 Langfuse에 아무것도 올라가지 않습니다. 실행과 채점
 결과는 `eval_results/`에만 남습니다.
@@ -353,6 +354,30 @@ Runner는 `managed-agentcore/.env`(배포 스크립트가 작성)에서 `RUNTIME
 `test_no_legacy_human_stop_sequence`는 알려진 버그를 기록하는 예상된 실패(`xfail`,
 strict)입니다. 버그가 고쳐지면 오류로 바뀌므로, 고칠 때 마커도 함께 지웁니다.
 
+## Planner: 실행 전에 계획이 맞는지
+
+Planner는 데이터를 보지 않고 요청만 보며, 이후 모든 에이전트가 그 계획대로
+일합니다. 그래서 계획에서 빠진 요구사항은 대개 보고서에서도 빠집니다.
+`planner_eval.py`는 Planner가 알 수 있는 것만으로 계획을 채점합니다.
+
+| 검사 | 방법 |
+|---|---|
+| `plan_requirements_met`, `plan_requirements_missing`, `_partial` | judge가 시나리오 요구사항마다 계획 단계로 met / partial / missing을 판정 |
+| `plan_data_quality` | judge: 분석 전에 데이터를 점검하는 단계(결측치, 중복, 타입, 범위)가 있는지 |
+| `plan_workflow_ok`, `plan_auditor_planned` | 규칙: Coder → Validator → Reporter, Reporter 뒤에 Auditor |
+| `plan_format_ok`, `plan_language_ok` | 규칙: 요청이 지정한 형식(DOCX, PDF)이 계획에 있는지, 계획이 요청과 같은 언어인지 |
+
+```bash
+.venv/bin/python planner_eval.py runs eval_results/baseline              # 저장된 실행의 계획
+.venv/bin/python planner_eval.py generate --scenario yummy_food_kr --repeat 5 --tag planner-my-change
+```
+
+`generate`는 배포된 프롬프트, eval 런타임의 `PLANNER_MODEL_ID`, 런타임이 만드는
+요청 필드로 Planner만 호출합니다. 그래서 `planner.md` 변경을 전체 실행 대신 계획당
+약 $0.10로 여러 번 확인할 수 있습니다. 전체 실행과 다른 점은 하나입니다. 사용자
+메시지가 실행에서는 Coordinator의 인계 문장이고, 여기서는 요청 자체입니다. 테스트
+시나리오는 `--allow-test`가 필요하고, `--no-judge`는 규칙 검사만 합니다.
+
 ## 시나리오
 
 `config/scenarios.yaml`은 데이터셋 × 요청 쌍을 정의합니다.
@@ -500,14 +525,17 @@ Bedrock 할당량)이므로, 긴 평가 배치는 사용이 많은 시간을 피
 |---|---|---|
 | `all_required_ok` | 보고서 docx, citations.json, calculation_metadata.json, validation_report.txt가 있고 파싱됨 | `graders/artifacts.py` |
 | `citation_value_match_rate` | citations.json 값 == calculation_metadata 값 | `graders/citations.py` |
-| `recompute_match_rate`, `recompute_supported`, `recompute_unverified` | metadata 값을 원본 CSV에서 pandas로 다시 계산. 수식은 집계(SUM/AVG/MEAN/MEDIAN/MIN/MAX/COUNT/STD/TOTAL) 위의 산술로 읽고, 필터(`=`, `==`, `!=`, `IS NULL`, `NOT NULL`, 집계 안이나 뒤), 그룹(`GROUP BY`, `grouped by`, `col\|key`, 요일), 자리표시자(`cat`, `X`, `'{}'`)는 계산 설명에서 풉니다. 에이전트가 지어낸 이름(`cat_sales`, `daily_sum`)은 지원하지 않습니다. 설명에 그룹이 없으면 어떤 그룹과 맞기만 하면 되고(`recompute_lenient`), 하나도 안 맞으면 틀림이 아니라 `recompute_unverified`입니다. 완전 중복 행이 있는 파일은 중복을 뺀 상태로도 다시 계산합니다. 중복 제거가 올바른 분석이기 때문입니다(`recompute_dedup`) | `graders/recompute.py` |
+| `recompute_match_rate`, `recompute_supported`, `recompute_unverified` | metadata 값을 원본 CSV에서 pandas로 다시 계산. 수식은 집계(SUM/AVG/MEAN/MEDIAN/MIN/MAX/COUNT/STD/TOTAL) 위의 산술로 읽고, 필터(`=`, `==`, `!=`, `IS NULL`, `NOT NULL`, 집계 안이나 뒤), 그룹(`GROUP BY`, `grouped by`, `by`, `col\|key`, 요일), 자리표시자(`cat`, `X`, `'{}'`)는 계산 설명에서 풉니다. 에이전트가 지어낸 이름(`cat_sales`, `daily_sum`)은 지원하지 않습니다. 설명에만 적힌 부분집합(열 값 1~3개, "아마존×건강식품 조합 ROAS")도 시도합니다. 설명에 그룹이 없으면 어떤 그룹과 맞기만 하면 되고(`recompute_lenient`), 하나도 안 맞으면 틀림이 아니라 `recompute_unverified`입니다. 완전 중복 행이 있는 파일은 중복을 뺀 상태로도 다시 계산합니다. 중복 제거가 올바른 분석이기 때문입니다(`recompute_dedup`) | `graders/recompute.py` |
 | `cited_value_match_rate`, `cited_value_checked` | 보고서에서 `[n]` 바로 앞에 쓴 숫자가 인용 n과 같은지, 비교한 쌍의 개수 | `graders/report.py` |
 | `broken_citation_refs` | 본문의 `[n]` 중 인용 n이 없는 것 | `graders/report.py` |
+| `citation_inside_number` | 숫자, 범위, 시각 안에 들어간 `[n]`(`$111,065 [2].13`, `10 [1]~15%`). 값 검사는 마커 앞부분만 읽기 때문에 따로 셉니다. core_pass 실패 사유(#141) | `graders/report.py` |
+| `validator_false_verified`, `validator_false_alarm` | Validator가 verified라 했는데 재계산이 틀렸다고 보는 인용, needs_review라 했는데 재계산이 맞다고 보는 인용(Reporter는 needs_review 숫자를 보고서에서 뺌). 분모는 `validator_verified_checked` / `validator_needs_review_checked` | `graders/recompute.py` |
 | `citation_coverage` | 본문의 유의미한 숫자(금액, %, 소수) 중 인용이 붙은 비율. 근사치 | `graders/report.py` |
 | `required_facts_missing`, `other_facts_found` | 정확히 진술된 정답 키 항목: 시나리오의 필수 항목, 나머지 중 몇 개 | `graders/factcheck.py` + `answer_keys/` |
 | `factcheck_wrong_confirmed`, `factcheck_wrong_ids` | 같은 범위에서 정답 키와 어긋나는 진술. 코드와 판정 모델이 모두 확인 | `graders/factcheck.py` |
 | `factcheck_needs_review`, `factcheck_out_of_scope`, `factcheck_unit_issues`, `factcheck_unverified_quotes` | 사람이 볼 진술, 다른 기간이나 부분집합에 대한 진술, %p로 쓴 진술, 모델이 잘못 인용한 진술 | `graders/factcheck.py` |
 | `audit_pass`, `audit_block_findings` | 버전에 Auditor가 있으면 그 판정 | `graders/audit.py` |
+| `audit_missed`, `audit_missed_kinds` | Auditor가 pass라 했는데 위 채점기가 Auditor가 막아야 할 결함(인용값 불일치, 깨진 `[n]`, 숫자 안 `[n]`)을 찾은 경우 | `grade.py` |
 | `code_exec_failed`, `code_exec_fail_causes` | Fargate 샌드박스에서 실패한 에이전트 코드, 원인별 분류(파일 없음, AttributeError 등) | `graders/executions.py` |
 | `cost_usd`, `cache_hit_rate` | 토큰 사용량 × `config/pricing.yaml` | `graders/cost.py` |
 

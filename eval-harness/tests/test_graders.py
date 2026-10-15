@@ -39,6 +39,7 @@ def test_clean_run_passes(clean, scenario):
     assert s["audit_pass"] is True
     assert s["citation_inside_number"] == 0
     assert s["validator_verified_checked"] == 5 and s["validator_false_verified"] == 0
+    assert s["validator_false_alarm"] == 0 and s["audit_missed"] is False
 
 
 @pytest.mark.parametrize("corrupt, metric, expected", [
@@ -342,3 +343,18 @@ def test_bare_by_groups():
     r = recompute.recompute("SUM(매출액)/SUM(광고비용) by 매체", df, "쿠빵 ROAS")
     assert r["value"] == pytest.approx(4.143265, rel=1e-5)
     assert recompute.recompute("SUM(매출액) by 없는컬럼", df, "") is None
+
+
+
+def test_audit_missed(clean, scenario):
+    """The fixture's Auditor says pass; a wrong number next to [4] is exactly what it should have blocked."""
+    make_run.corrupt_report_number(clean)
+    s = grade(clean, scenario)
+    assert s["audit_pass"] is True and s["audit_missed"] is True and s["audit_missed_kinds"] == ["cited_value"]
+
+
+def test_validator_false_alarm(clean, scenario):
+    """A right value marked needs_review: the Reporter would leave it out for nothing."""
+    make_run._edit_json(clean / "artifacts" / "citations.json", lambda d: d["citations"][1].update(verification_status="needs_review"))
+    s = grade(clean, scenario)
+    assert s["validator_needs_review_checked"] == 1 and s["validator_false_alarm"] == 1

@@ -39,7 +39,10 @@ The Validator marks each citation verified or needs_review with code the
 agents wrote; for SUM-free formulas its example code compares a value with
 itself. `validator_false_verified` counts cited calculations the Validator
 called verified that this recomputation finds wrong, out of
-`validator_verified_checked` verified ones it could recompute strictly.
+`validator_verified_checked` verified ones it could recompute strictly, and
+`validator_false_alarm` the needs_review ones it finds right (the Reporter
+leaves needs_review numbers out of the report), out of
+`validator_needs_review_checked`.
 """
 import re
 from pathlib import Path
@@ -550,6 +553,11 @@ def grade(artifacts_dir, csv_path):
     false_verified = sorted(cid for cid in verified if not strict[cid])
     if false_verified:
         details.append(f"Validator marked verified but recomputed differently: {false_verified}")
+    flagged = {c.get("calculation_id") for c in cites.values()
+               if str(c.get("verification_status", "")).lower() == "needs_review"} & set(strict)
+    false_alarm = sorted(cid for cid in flagged if strict[cid])
+    if false_alarm:
+        details.append(f"Validator marked needs_review but recomputed the same: {false_alarm}")
     return {
         "recompute_supported": supported,
         "recompute_total": len(calcs),
@@ -561,5 +569,7 @@ def grade(artifacts_dir, csv_path):
         "recompute_match_rate": ok / supported if supported else None,
         "validator_verified_checked": len(verified),
         "validator_false_verified": len(false_verified),
+        "validator_needs_review_checked": len(flagged),
+        "validator_false_alarm": len(false_alarm),
         "details": details,
     }
