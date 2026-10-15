@@ -115,6 +115,8 @@ def test_validator_example_never_verifies_what_it_did_not_recompute(tmp_path, mo
         {"id": "rev_wrong", "value": 410.0, "formula": "SUM(매출액)", "source_file": "data.csv"},
         {"id": "roas", "value": 4.0, "formula": "SUM(매출액) / SUM(광고비용)", "source_file": "data.csv"},
         {"id": "avg", "value": 200.0, "formula": "AVG(매출액)", "source_file": "data.csv"},
+        {"id": "roas_10pct_off", "value": 4.4, "formula": "SUM(매출액)/SUM(광고비용)", "source_file": "data.csv"},   # a fixed 0.5 would pass it
+        {"id": "roas_rounded", "value": 4.0004, "formula": "SUM(매출액)/SUM(광고비용)", "source_file": "data.csv"},  # 4 decimals: 4.0004 ≠ 4.0
         {"id": "by_media", "value": 999.0, "formula": "SUM(매출액)/SUM(광고비용) GROUP BY 매체", "source_file": "data.csv"},
     ]
     with open("artifacts/cache/priority_calcs.pkl", "wb") as f:
@@ -122,4 +124,5 @@ def test_validator_example_never_verifies_what_it_did_not_recompute(tmp_path, mo
     exec(_validator_step2(), {})
     with open("artifacts/cache/verified.pkl", "rb") as f:
         v = pickle.load(f)
-    assert {k: r["match"] for k, r in v.items()} == {"rev": True, "rev_wrong": False, "roas": True, "avg": True, "by_media": None}
+    assert {k: r["match"] for k, r in v.items()} == {"rev": True, "rev_wrong": False, "roas": True, "avg": True, "by_media": None,
+                                                          "roas_10pct_off": False, "roas_rounded": False}

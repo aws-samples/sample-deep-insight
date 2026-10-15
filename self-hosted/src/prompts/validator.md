@@ -91,16 +91,28 @@ df = pd.read_csv(source_file)
 print(f"Columns: {{list(df.columns)}}")  # Print to verify column names
 ```
 
-**Type-Safe Comparison**
+**Type-Safe Comparison — at the stored value's own precision**
+
+A value matches when it equals the recomputation rounded to the decimals the
+stored value has: 3.17 stored allows ±0.005, 2987 stored allows ±0.5, 45.42%
+allows ±0.005. NEVER use a fixed absolute tolerance (`< 0.5`, `< 0.01`) or a
+percent tolerance (`1%`): ROAS, CTR and shares are small numbers, and a fixed
+0.5 accepts a ROAS of 3.49 for 3.17 — a 10% error marked verified.
 ```python
 # ✅ CORRECT
-try:
-    match = abs(float(expected) - float(actual)) < 0.01
-except (ValueError, TypeError):
-    match = str(expected) == str(actual)
+def same_value(expected, actual):
+    try:
+        e, a = float(expected), float(actual)
+    except (ValueError, TypeError):
+        return str(expected) == str(actual)
+    text = repr(float(e)) if isinstance(expected, float) else str(expected)
+    decimals = len(text.split('.')[1]) if '.' in text and 'e' not in text else 0
+    return abs(e - a) <= max(0.5 * 10 ** -decimals, abs(a) * 1e-9)
 
 # ❌ WRONG - Direct comparison fails for float vs int
 match = expected == actual
+# ❌ WRONG - A fixed tolerance hides errors in small values (ROAS 3.17 vs 3.49)
+match = abs(float(expected) - float(actual)) <= 0.5
 ```
 
 **JSON Serialization - Convert numpy types**
@@ -390,6 +402,15 @@ write_and_execute_tool(
     content="""
 import pickle, re, pandas as pd
 
+def same_value(expected, actual):  # equal at the stored value's precision (see Type-Safe Comparison)
+    try:
+        e, a = float(expected), float(actual)
+    except (ValueError, TypeError):
+        return str(expected) == str(actual)
+    text = repr(float(e)) if isinstance(expected, float) else str(expected)
+    decimals = len(text.split('.')[1]) if '.' in text and 'e' not in text else 0
+    return abs(e - a) <= max(0.5 * 10 ** -decimals, abs(a) * 1e-9)
+
 with open('./artifacts/cache/priority_calcs.pkl', 'rb') as f:
     priority_calcs = pickle.load(f)
 print(f"✅ Loaded {{len(priority_calcs)}} calculations")
@@ -419,10 +440,7 @@ for calc in priority_calcs:
                                     'note': f"not re-derived: {{calc.get('formula')}}"}}
             continue
 
-        try:
-            match = abs(float(expected) - float(actual)) <= max(abs(float(actual)) * 1e-6, 0.01)
-        except (TypeError, ValueError):
-            match = str(expected) == str(actual)
+        match = same_value(expected, actual)
 
         verified[calc['id']] = {{'match': match, 'expected': expected, 'actual': actual}}
 
