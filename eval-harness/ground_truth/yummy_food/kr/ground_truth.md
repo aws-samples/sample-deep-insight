@@ -1,6 +1,6 @@
 # Yummy Food (kr): Ground Truth
 
-Answer key for `yummy-food-market.csv` (in `managed-agentcore/data/yummy_food/kr/` and `self-hosted/data/yummy_food/kr/`). Every number below is recomputed from the CSV. The file is kept out of those data directories on purpose: they ship to the runtime, and the agents must never read this sheet.
+Answer key for `yummy-food-market.csv` (in `managed-agentcore/data/yummy_food/kr/`; the same file is in `self-hosted/data/yummy_food/kr/` and `deep-insight-web/sample_data/yummyfood-kr/kr-yummy-food-market.csv`). Every number below is recomputed from the CSV. The file is kept out of those data directories on purpose: they ship to the runtime, and the agents must never read this sheet.
 
 ## Overview
 

@@ -28,7 +28,7 @@ them. moon_market is the test set (see the README).
 | `eval-harness/answer_keys/build_answer_key.py` | Builds the answer keys from the CSV with pandas (`yummy_food()`) | No |
 | `eval-harness/sanity/factcheck_cases/yummy_food.yaml` | Gold cases for the fact checker (kr) | No |
 
-The same CSVs are in `self-hosted/data/yummy_food/<lang>/`. Only the CSV and
+The same files are in `self-hosted/data/yummy_food/<lang>/` and, for the web app's sample list, in `deep-insight-web/sample_data/yummyfood-<lang>/` (named `<lang>-yummy-food-market.csv`, `<lang>-yummy-food-column_definitions.json`). Only the CSV and
 `column_definitions.json` are in the scenarios' `upload` lists.
 
 ## The data
