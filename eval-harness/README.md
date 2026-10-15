@@ -211,10 +211,9 @@ counted as `factcheck_unit_issues`, not as a wrong value.
   still need a person's review (#133). The yummy_food gold case
   (`sanity/factcheck_cases/yummy_food.yaml`) is written by hand from the answer
   sheet and makes the dataset's naive mistakes (mean of the ROAS column, the
-  doubled budget assumed to earn the full-month ROAS): the one Deep Insight
-  report on yummy_food in `deep-insight-web/sample_reports/` predates the
-  current data, so a `real` case comes from the first yummy_food_kr baseline
-  run.
+  doubled budget assumed to earn the full-month ROAS). No Deep Insight
+  report on the current data existed when it was written; a `real` case comes
+  from the first yummy_food_kr baseline run.
   Measured with `sanity/factcheck_sanity.py --repeat 3` (2026-10-13,
   `global.openai.gpt-6-astra`, effort high, $9.23 for 15 runs):
 

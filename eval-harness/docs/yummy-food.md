@@ -134,9 +134,8 @@ by weekday/weekend (1.42 to 1.95).
 data. Its report (`yummy_food_report_a.txt`) is written by hand from the
 answer sheet and makes the B1 and B3 mistakes (`naive`); `corrected`,
 `planted`, `scope_traps` and `injection` are built from it as for
-jungle_market. It is not a real run: the Yummy Food report in
-`deep-insight-web/sample_reports/` was made before the dataset was rebuilt and
-none of its numbers match the current file. Add a `real` case from the first
+jungle_market. It is not a real run: no Deep Insight report on the current
+data existed when it was written. Add a `real` case from the first
 `yummy_food_kr` baseline run, with its labels checked against the CSV.
 
 ### What counts as falling into a trap

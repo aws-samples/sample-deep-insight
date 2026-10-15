@@ -202,9 +202,9 @@ dev와 test를 다른 섹션으로 보고하고, `langfuse_sync.py`는 test 실�
   보고서로 만들었습니다. 레이블은 pandas로 CSV와 대조했고, 사람의 최종 검토가 아직
   필요합니다(#133). yummy_food gold case(`sanity/factcheck_cases/yummy_food.yaml`)는
   답안지를 보고 손으로 쓴 보고서로, 이 데이터의 얕은 분석 실수(ROAS 컬럼 평균, 늘린
-  예산도 한 달 ROAS만큼 번다는 가정)를 그대로 담았습니다. `deep-insight-web/sample_reports/`의
-  yummy_food 보고서는 지금 데이터 이전 버전으로 만든 것이라, `real` 케이스는 첫
-  yummy_food_kr 베이스라인 실행에서 만듭니다.
+  예산도 한 달 ROAS만큼 번다는 가정)를 그대로 담았습니다. 작성할 때 지금 데이터로 만든
+  Deep Insight 보고서가 없었기 때문이며, `real` 케이스는 첫 yummy_food_kr 베이스라인
+  실행에서 만듭니다.
   `sanity/factcheck_sanity.py --repeat 3`로 측정한 결과(2026-10-13,
   `global.openai.gpt-6-astra`, effort high, 15회 $9.23):
 

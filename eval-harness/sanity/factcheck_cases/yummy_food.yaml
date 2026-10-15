@@ -3,10 +3,8 @@
 #
 # yummy_food_report_a.txt is written by hand from the answer sheet
 # (eval-harness/ground_truth/yummy_food/kr/ground_truth.md), not taken from a
-# run: the only Deep Insight report on this data
-# (deep-insight-web/sample_reports/261010_ko_yummyfood_final_report_with_citations.docx)
-# was made before the dataset was rebuilt, and none of its numbers belong to
-# the current file. The report makes the shallow-analysis mistakes the data is
+# run: no Deep Insight report on the current data existed when it was
+# written. The report makes the shallow-analysis mistakes the data is
 # built to catch, so `naive` stands where jungle_market has `real`. Add a
 # `real` case from the first yummy_food_kr baseline run, with its labels
 # checked against the CSV with pandas.
