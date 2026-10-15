@@ -379,11 +379,16 @@ print("📦 Cached: priority_calcs.pkl")
 ```
 
 **Step 2: Validate (print column names first)**
+
+This example re-derives only the simplest shapes (one SUM or AVG, a ratio of two
+SUMs). For any other formula it records `match: None`: write a check for that
+shape (GROUP BY, a filter, a derived source_file) before Step 3. Never compare a
+value with itself — a calculation nobody re-derived must not be marked verified.
 ```python
 write_and_execute_tool(
     file_path="./artifacts/code/validator_step2_validate.py",
     content="""
-import pickle, pandas as pd
+import pickle, re, pandas as pd
 
 with open('./artifacts/cache/priority_calcs.pkl', 'rb') as f:
     priority_calcs = pickle.load(f)
@@ -400,17 +405,30 @@ for calc in priority_calcs:
     df = data_cache.get(src)
     if df is not None:
         expected = calc['value']
-        actual = df[calc.get('source_columns', ['Amount'])[0]].sum() if 'SUM' in calc.get('formula', '') else expected
+        f = calc.get('formula', '').replace(' ', '')
+        sums = re.findall(r'SUM\(([^()]+)\)', f)
+        actual = None  # None = not re-derived by this example
+        if re.fullmatch(r'SUM\([^()]+\)', f):
+            actual = df[sums[0]].sum()
+        elif re.fullmatch(r'(AVG|MEAN)\([^()]+\)', f):
+            actual = df[f[f.index('(') + 1:-1]].mean()
+        elif re.fullmatch(r'SUM\([^()]+\)/SUM\([^()]+\)(\*100)?', f):
+            actual = df[sums[0]].sum() / df[sums[1]].sum() * (100 if f.endswith('*100') else 1)
+        if actual is None:
+            verified[calc['id']] = {{'match': None, 'expected': expected, 'actual': None,
+                                    'note': f"not re-derived: {{calc.get('formula')}}"}}
+            continue
 
         try:
-            match = abs(float(expected) - float(actual)) < 0.01
-        except:
+            match = abs(float(expected) - float(actual)) <= max(abs(float(actual)) * 1e-6, 0.01)
+        except (TypeError, ValueError):
             match = str(expected) == str(actual)
 
         verified[calc['id']] = {{'match': match, 'expected': expected, 'actual': actual}}
 
 match_count = sum(1 for v in verified.values() if v['match'])
-print(f"Verified: {{match_count}}/{{len(verified)}}")
+todo = [k for k, v in verified.items() if v['match'] is None]
+print(f"Verified: {{match_count}}/{{len(verified)}} · not re-derived yet: {{len(todo)}} {{todo[:10]}}")
 
 with open('./artifacts/cache/verified.pkl', 'wb') as f:
     pickle.dump(verified, f)
