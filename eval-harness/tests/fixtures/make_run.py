@@ -128,5 +128,14 @@ def corrupt_broken_ref(run_dir):
     write_docx(Path(run_dir) / "artifacts" / "final_report_with_citations.docx", body, [])
 
 
+def corrupt_marker_inside_number(run_dir):
+    """The citation marker lands inside the total ("$110,270 [1].26", #141)."""
+    calcs, top_name = _calcs()
+    body = _body(calcs, top_name)
+    total = f"{calcs[0]['value']:,.2f}"
+    body[1] = body[1].replace(f"${total} [1]", f"${total[:-3]} [1]{total[-3:]}")
+    write_docx(Path(run_dir) / "artifacts" / "final_report_with_citations.docx", body, [])
+
+
 def corrupt_missing_file(run_dir):
     (Path(run_dir) / "artifacts" / "validation_report.txt").unlink()

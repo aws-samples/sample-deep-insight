@@ -3,6 +3,9 @@
 Checks, in order of how much they say about correctness:
   * every [n] in the body resolves to a citation, and the number printed right
     before it equals that citation's value
+  * no [n] sits inside a number, a range or a time ("111,065 [2].13",
+    "10 [1]~15%", "14 [3]:30"): the reader sees a broken number, and the
+    value check above would read only the fragment before the marker (#141)
   * share of significant numbers in the body that carry a citation
 Whether the report's numbers match the dataset's answer key is judged by
 factcheck.py: it has to read periods and filters, which rules can't.
@@ -18,6 +21,12 @@ MARKER_RE = re.compile(r"\[(\d+)\]")
 REFERENCES_RE = re.compile(r"^\s*(\d+[.)]?\s*)?(참고\s*문헌|참고자료|데이터\s*출처|인용|references?\b|citations?\b|data\s+citations)", re.I)
 # How far before a marker to look for the number it supports.
 CLAIM_WINDOW = 40
+# A marker between a digit and the rest of the same number, range or time.
+# Inside a number or time: digit, marker, digit ("111,065 [2].13", "14 [3]:30").
+# Range: the left end, with or without its unit, then a dash or tilde and a digit.
+_UNIT = "%건원명개배점일회$"
+INSIDE_NUMBER_RE = re.compile(r"(?<=\d)\s?\[\d+\]\s?(?=[.,:]?\d)"
+                              r"|(?:(?<=\d)|(?<=\d[" + _UNIT + r"]))\s?\[\d+\]\s?(?=[~～〜–—-]\s?[$₩]?\d)")
 
 
 def read_docx(path):
@@ -106,6 +115,10 @@ def grade(artifacts_dir):
         else:
             details.append(f"[{n}] printed {[v for v, *_ in nums]} but citation value is {c.get('value')!r}")
 
+    inside = [body_text[max(0, m.start() - 12):m.end() + 6] for m in INSIDE_NUMBER_RE.finditer(body_text)]
+    if inside:
+        details.append(f"{len(inside)} marker(s) inside a number, range or time, e.g. {inside[:3]}")
+
     # --- citation coverage over significant numbers --------------------------
     plain = MARKER_RE.sub(lambda m: "\x00" * len(m.group(0)), body_text)
     significant = cited = 0
@@ -128,6 +141,7 @@ def grade(artifacts_dir):
         "unused_citations": len(unused),
         "cited_value_checked": checked,
         "cited_value_match_rate": ok / checked if checked else None,
+        "citation_inside_number": len(inside),
         "significant_numbers": significant,
         "citation_coverage": cited / significant if significant else None,
     }

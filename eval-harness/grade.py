@@ -65,6 +65,7 @@ def fail_reasons(scores, rules):
     need("broken_citation_refs", scores.get("broken_citation_refs") == 0)
     need("cited_value_checked", (scores.get("cited_value_checked") or 0) >= rules["min_cited_checked"])
     need("cited_value_match_rate", (scores.get("cited_value_match_rate") or 0) >= 0.95)
+    need("citation_inside_number", scores.get("citation_inside_number", 0) == 0)
     need("recompute_supported", (scores.get("recompute_supported") or 0) >= rules["min_recompute"])
     need("recompute_match_rate", scores.get("recompute_match_rate") == 1.0)
     if not scores.get("factcheck_skipped"):

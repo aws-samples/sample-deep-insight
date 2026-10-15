@@ -37,6 +37,8 @@ def test_clean_run_passes(clean, scenario):
     assert s["recompute_match_rate"] == 1.0 and s["recompute_dedup"] == 2  # revenue and AOV only match after dedup
     assert s["required_facts_missing"] == []
     assert s["audit_pass"] is True
+    assert s["citation_inside_number"] == 0
+    assert s["validator_verified_checked"] == 5 and s["validator_false_verified"] == 0
 
 
 @pytest.mark.parametrize("corrupt, metric, expected", [
@@ -45,6 +47,7 @@ def test_clean_run_passes(clean, scenario):
     (make_run.corrupt_report_number, "cited_value_match_rate", 0.8),
     (make_run.corrupt_broken_ref, "broken_citation_refs", 1),
     (make_run.corrupt_missing_file, "all_required_ok", False),
+    (make_run.corrupt_marker_inside_number, "citation_inside_number", 1),
 ])
 def test_each_defect_is_caught(clean, scenario, corrupt, metric, expected):
     corrupt(clean)
@@ -305,3 +308,37 @@ def test_unnamed_group_that_matches_nothing_is_unverified_not_wrong(clean, scena
     path.write_text(json.dumps(data, ensure_ascii=False))
     s = grade(clean, scenario)
     assert s["recompute_match_rate"] == 1.0 and s["recompute_unverified"] == 1
+
+
+def test_marker_inside_a_number_passes_the_value_check_but_fails_core(clean, scenario):
+    """The value check reads "110,270" before [1] and accepts it; only the inside-number check sees the split."""
+    make_run.corrupt_marker_inside_number(clean)
+    s = grade(clean, scenario)
+    assert s["cited_value_match_rate"] == 1.0
+    assert s["citation_inside_number"] == 1 and "citation_inside_number" in s["core_fail_reasons"]
+
+
+def test_validator_false_verified(clean, scenario):
+    """The Coder's total is wrong, the Validator still says verified: recompute disagrees."""
+    make_run.corrupt_metadata_value(clean)
+    s = grade(clean, scenario)
+    assert s["validator_verified_checked"] == 5 and s["validator_false_verified"] == 1
+
+
+def test_subset_named_by_two_columns():
+    """"아마존×건강식품 조합 ROAS" with the overall formula: the cell is two named values, from two columns."""
+    from pathlib import Path
+    df = recompute.load_csv(Path(__file__).resolve().parents[2] / "managed-agentcore/data/yummy_food/kr/yummy-food-market.csv")
+    f = "SUM(매출액)/SUM(광고비용)"
+    assert recompute._named_subset(f, df, "아마존×건강식품 조합 ROAS", 8.41) == pytest.approx(8.41, abs=0.005)
+    assert recompute._named_subset(f, df, "아마존×건강식품 조합 ROAS", 3.39) is None   # the whole-file value is not this cell
+    assert recompute._named_subset(f, df, "아마존 ROAS", 3.17) == pytest.approx(3.17, abs=0.005)  # one column still works
+
+
+def test_bare_by_groups():
+    """Coders write "SUM(매출액)/SUM(광고비용) by 매체" as often as GROUP BY."""
+    from pathlib import Path
+    df = recompute.load_csv(Path(__file__).resolve().parents[2] / "managed-agentcore/data/yummy_food/kr/yummy-food-market.csv")
+    r = recompute.recompute("SUM(매출액)/SUM(광고비용) by 매체", df, "쿠빵 ROAS")
+    assert r["value"] == pytest.approx(4.143265, rel=1e-5)
+    assert recompute.recompute("SUM(매출액) by 없는컬럼", df, "") is None

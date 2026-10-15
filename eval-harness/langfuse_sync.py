@@ -67,7 +67,7 @@ REQ_CATEGORIES = [{"label": "met", "value": 1}, {"label": "partial", "value": 0.
 NUMERIC_SCORES = [
     "cited_value_match_rate", "cited_value_checked", "citation_value_match_rate", "recompute_match_rate",
     "recompute_supported", "recompute_lenient", "citation_coverage", "facts_found", "other_facts_found",
-    "broken_citation_refs", "audit_block_findings", "cost_usd", "cache_hit_rate", "duration_s",
+    "broken_citation_refs", "citation_inside_number", "validator_false_verified", "validator_verified_checked", "audit_block_findings", "cost_usd", "cache_hit_rate", "duration_s",
     "time_to_first_plan_s", "code_exec_failed", "code_executions", "judge_requirement_coverage",
     "judge_score_mean", "judge_cost_usd",
     # LLM fact check against the answer key (factcheck.py)

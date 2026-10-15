@@ -8,7 +8,7 @@ everything else is counted as unsupported rather than guessed:
     AGG(col)                              SUM / AVG / MEAN / MEDIAN / MIN / MAX / COUNT
     COUNT(*), COUNT(DISTINCT col)
     SUM(a) / COUNT(*), SUM(a) / COUNT(DISTINCT b)
-    AGG(col) GROUP BY key[+key2]          also "grouped by"; key may be `weekday`
+    AGG(col) GROUP BY key[+key2]          also "grouped by" and "by"; key may be `weekday`
     AGG(col) WHERE c1=v1 AND c2=v2        literal values filter; placeholders act like GROUP BY
     MAX(AGG(col) GROUP BY key)            min / max over the groups
     SUM(col)/TOTAL(col)*100 GROUP BY key  each group's share in percent
@@ -34,11 +34,17 @@ CSV (and its deduplicated copy) when its formula only names CSV columns. A
 match counts (`recompute_derived`); a mismatch is not counted as wrong, since
 the cleaning may have filtered rows the grader can't know about
 (`recompute_derived_unmatched`).
+
+The Validator marks each citation verified or needs_review with code the
+agents wrote; for SUM-free formulas its example code compares a value with
+itself. `validator_false_verified` counts cited calculations the Validator
+called verified that this recomputation finds wrong, out of
+`validator_verified_checked` verified ones it could recompute strictly.
 """
 import re
 from pathlib import Path
 
-from .citations import load_calculations
+from .citations import load_calculations, load_citations
 
 AGGS = {
     "SUM": lambda s: s.sum(), "AVG": lambda s: s.mean(), "MEAN": lambda s: s.mean(),
@@ -170,7 +176,7 @@ def _grouped(df, keys, inner, description, outer=None, share=False):
 # columns, so such formulas stay unsupported.
 
 AGG_NAMES = "SUM|AVG|MEAN|MEDIAN|MIN|MAX|COUNT|STD|STDDEV|TOTAL"
-CLAUSE_RE = re.compile(r"\s+(GROUP(?:ED)?\s+BY|WHERE)\s+", re.I)
+CLAUSE_RE = re.compile(r"\s+(GROUP(?:ED)?\s+BY|BY|WHERE)\s+", re.I)
 
 
 def _top_level_split(f, rx):
@@ -423,24 +429,31 @@ def _keys(key_text):
 
 
 def _named_subset(formula, df, description, stored):
-    """The formula over the one subset its description names ("PASTA30 할인율"), when that matches.
+    """The formula over the subset its description names ("PASTA30 할인율", "아마존×건강식품 ROAS"), when that matches.
 
     Agents often write the overall formula and put the group only in the
-    description. Each column value the description names is tried alone;
-    the matching value, if any, is returned.
+    description. Each column value the description names is tried alone, then
+    every combination of named values from different columns (a 매체 × 카테고리
+    cell); the matching value, if any, is returned.
     """
+    import itertools
     import pandas as pd
     text = (description or "").lower()
+    named = []  # (column, value) the description mentions
     for col in df.columns:
         values = df[col].unique()
         if len(values) > 50:
             continue
-        for v in values:
-            if not any(_mentions(text, lbl) for lbl in _labels(col, v)):
-                continue
-            sub = df[df[col].isna()] if pd.isna(v) else df[df[col] == v]
+        named += [(col, v) for v in values if any(_mentions(text, lbl) for lbl in _labels(col, v))]
+    for size in range(1, min(len({c for c, _ in named}), 3) + 1):
+        for combo in itertools.combinations(named, size):
+            if len({c for c, _ in combo}) < size:
+                continue  # two values of one column never hold together
+            mask = pd.Series(True, index=df.index)
+            for col, v in combo:
+                mask &= df[col].isna() if pd.isna(v) else df[col] == v
             try:
-                r = recompute(formula, sub, description)
+                r = recompute(formula, df[mask], description)
             except Exception:
                 r = None
             if r is not None and "value" in r and same_value(stored, r["value"]):
@@ -473,6 +486,7 @@ def grade(artifacts_dir, csv_path):
     source_name = Path(csv_path).name
     details = []
     supported = ok = lenient = unverified = dedup_ok = derived = derived_unmatched = 0
+    strict = {}  # calculation id → recomputed value matches, for strict checks on the raw file
 
     def matches(stored, r):
         return same_value(stored, r["value"]) if "value" in r else any(same_value(stored, v) for v in r["candidates"])
@@ -517,7 +531,8 @@ def grade(artifacts_dir, csv_path):
             continue
         if "value" in r:
             supported += 1
-            if same_value(stored, r["value"]):
+            strict[cid] = same_value(stored, r["value"])
+            if strict[cid]:
                 ok += 1
             else:
                 details.append(f"{cid}: {c.get('formula')} [{c.get('description', '')[:40]}] stored {stored} but recomputed {r['value']}")
@@ -529,6 +544,12 @@ def grade(artifacts_dir, csv_path):
             # The description didn't say which group, and no group matches: the formula may mean
             # something else ("weekdays" vs per weekday), so this is unverified, not wrong.
             unverified += 1
+    cites = load_citations(artifacts_dir) or {}
+    verified = {c.get("calculation_id") for c in cites.values()
+                if str(c.get("verification_status", "")).lower() == "verified"} & set(strict)
+    false_verified = sorted(cid for cid in verified if not strict[cid])
+    if false_verified:
+        details.append(f"Validator marked verified but recomputed differently: {false_verified}")
     return {
         "recompute_supported": supported,
         "recompute_total": len(calcs),
@@ -538,5 +559,7 @@ def grade(artifacts_dir, csv_path):
         "recompute_derived": derived,
         "recompute_derived_unmatched": derived_unmatched,
         "recompute_match_rate": ok / supported if supported else None,
+        "validator_verified_checked": len(verified),
+        "validator_false_verified": len(false_verified),
         "details": details,
     }
