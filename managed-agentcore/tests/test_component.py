@@ -55,7 +55,7 @@ class Run(unittest.TestCase):
     def setUp(self):
         clear_queue()
 
-    def _run(self, result="done", events=()):
+    def _run(self, result="done", events=(), payload=PAYLOAD):
         session = FakeSession()
         seen = {}
 
@@ -71,7 +71,7 @@ class Run(unittest.TestCase):
                 mock.patch.object(component, "_handler", return_value=handler):
             task = {"request": "분석해줘", "request_prompt": "AgentCore Request: 분석해줘", "data_directory": PAYLOAD["data_directory"],
                     "request_id": "r1"}
-            out = asyncio.run(_collect(component.ComponentRunner(PAYLOAD), task))
+            out = asyncio.run(_collect(component.ComponentRunner(payload), task))
         return out, session, seen
 
     def test_stages_then_runs_the_agent_and_streams_its_events(self):
@@ -83,6 +83,19 @@ class Run(unittest.TestCase):
         self.assertEqual(seen["shared"]["full_plan"], "# Plan")
         self.assertEqual(seen["text"], component.DEFAULT_TASK["validator"])
         self.assertEqual(seen["shared"]["messages"][0]["content"][0]["text"], seen["text"])
+
+    def test_reporter_gets_its_own_task_on_the_same_path(self):
+        payload = {**PAYLOAD, "component": "reporter"}
+        with mock.patch.dict(os.environ, {"EVAL_COMPONENT_MODE": "1"}):
+            self.assertIsNone(component.check_component_payload(payload))
+        out, session, seen = self._run(payload=payload)
+        self.assertEqual(session.calls, [("data", PAYLOAD["data_directory"]), ("artifacts", PAYLOAD["artifacts_directory"])])
+        self.assertEqual(seen["text"], component.DEFAULT_TASK["reporter"])
+        self.assertEqual(out[-1], {"type": "workflow_complete", "message": "component run: reporter"})
+
+    def test_each_component_resolves_to_its_tool_handler(self):
+        self.assertEqual(component._handler("validator").__name__, "_handle_validator_agent_custom_interpreter_tool")
+        self.assertEqual(component._handler("reporter").__name__, "_handle_reporter_agent_custom_interpreter_tool")
 
     def test_agent_error_raises_and_does_not_complete(self):
         with self.assertRaises(RuntimeError):

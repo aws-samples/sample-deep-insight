@@ -38,7 +38,7 @@ duration                  1920s           1680s           -12% ▲ better
 eval-harness/
 ├── run_eval.py, grade.py, compare.py    commands you run day to day
 ├── eval_runtime.py                      eval runtime setup
-├── component_eval.py                    component runs: the Validator alone, errors planted
+├── component_eval.py                    component runs: the Validator or the Reporter alone, errors planted
 ├── graders/       rule-based scoring modules and cost.py
 ├── config/        scenarios.yaml, pricing.yaml, runtime_configs.yaml,
 │                  eval.env (git-ignored, local only)
@@ -57,7 +57,7 @@ they differ in what is invoked and what is graded.
 | Run | Command | What runs | Graded by | Cost |
 |---|---|---|---|---|
 | **Full run** | `run_eval.py` | the whole workflow on a scenario's request (Coordinator → Planner → Coder → Validator → Reporter → Auditor) | `grade.py` rule graders; then `compare.py` | $4–6 per run |
-| **Component run** | `component_eval.py validator` | the Validator alone, on a saved full run's artifacts with errors planted ([below](#component-runs-one-agent-planted-errors)) | rule checks: each planted error caught / missed / not checked, false alarms, values changed | about $1.3–2 per run |
+| **Component run** | `component_eval.py validator` / `reporter` | one agent alone, on a saved full run's artifacts with errors planted ([below](#component-runs-one-agent-planted-errors)) | rule checks: Validator: each planted error caught / missed / not checked; Reporter: each needs_review value left out / cited / quoted, plus the full-run report graders | Validator about $1.3–2 per run |
 
 The rest of this section is about full runs.
 
@@ -173,10 +173,36 @@ and invokes the eval runtime with `component: validator`
 missed (verified) or not checked, plus false alarms on right values and
 planted values it changed (it must mark, not correct).
 
+**Reporter.** A needs_review value must not reach the report: no value,
+marker or reference (`reporter.md`, `value_status_resolution`). In a normal
+run the Validator marks few or none, so the rule is rarely exercised:
+
+```bash
+.venv/bin/python component_eval.py reporter --from eval_results/baseline/<run> --plant 4 --tag comp-reporter
+```
+
+It picks up to `--plant` verified values the saved report cites, marks them
+needs_review in `citations.json`, stages the artifacts as they were before the
+Reporter (its drafts, code and the Auditor's files removed) and invokes the
+eval runtime with `component: reporter`. In the new report each marked value
+is **left out** (right), **cited** (a body `[n]` points to it) or **quoted**
+(printed without its marker, in the body, a table or the references). Only
+values more than 1% from every other citation's value are marked, and
+integers under 100 are skipped, so a number in the report can't be another
+citation's. A value counts as quoted only when it rounds to a number printed
+with at least 3 significant digits at that number's own precision: 6,879.45
+is not "$6,891", and 3.69 is not "3.7". The new report also gets the
+full-run report graders (printed value = citation, broken `[n]`, `[n]`
+inside a number, coverage, citations = metadata).
+
+A component run gets the agent's own inputs, not what earlier agents said in
+a full run (the Supervisor's message, the `clues` the Coder and Validator
+left): the Reporter starts from `./artifacts/` and `all_results.txt`, as its
+prompt tells it to.
+
 The runtime refuses component runs unless `EVAL_COMPONENT_MODE=1` is in its
 environment. Both runtimes run the same image; only `eval_runtime.py` sets
-that variable, on the eval runtime. The runtime also accepts
-`component: reporter`; the harness for it is not written yet.
+that variable, on the eval runtime.
 
 ## Scenarios
 

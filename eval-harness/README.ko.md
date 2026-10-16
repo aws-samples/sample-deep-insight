@@ -37,7 +37,7 @@ duration                  1920s           1680s           -12% ▲ better
 eval-harness/
 ├── run_eval.py, grade.py, compare.py    평소에 쓰는 명령
 ├── eval_runtime.py                      평가 런타임 설정
-├── component_eval.py                    컴포넌트 실행: 오류를 심고 Validator만 실행
+├── component_eval.py                    컴포넌트 실행: 오류를 심고 Validator나 Reporter만 실행
 ├── graders/       규칙 기반 채점 모듈과 cost.py
 ├── config/        scenarios.yaml, pricing.yaml, runtime_configs.yaml,
 │                  eval.env (git 제외, 로컬 전용)
@@ -56,7 +56,7 @@ eval-harness/
 | 실행 | 명령 | 무엇이 도는가 | 채점 | 비용 |
 |---|---|---|---|---|
 | **전체 실행** | `run_eval.py` | 시나리오 요청에 대한 전체 워크플로(Coordinator → Planner → Coder → Validator → Reporter → Auditor) | `grade.py` 규칙 채점기. 이어서 `compare.py` | 실행당 $4~6 |
-| **컴포넌트 실행** | `component_eval.py validator` | 저장된 전체 실행의 결과물에 오류를 심고 Validator만 실행([아래](#컴포넌트-실행-에이전트-하나-심어둔-오류)) | 규칙 검사: 심은 오류마다 잡음/놓침/검사 안 함, 오경보, 값 변경 | 실행당 약 $1.3~2 |
+| **컴포넌트 실행** | `component_eval.py validator` / `reporter` | 저장된 전체 실행의 결과물에 오류를 심고 에이전트 하나만 실행([아래](#컴포넌트-실행-에이전트-하나-심어둔-오류)) | 규칙 검사: Validator는 심은 오류마다 잡음/놓침/검사 안 함, Reporter는 needs_review 값마다 제외/인용/값 노출 + 전체 실행의 보고서 채점기 | Validator 실행당 약 $1.3~2 |
 
 이 절의 나머지는 전체 실행에 대한 설명입니다.
 
@@ -168,9 +168,32 @@ Validator 시작 시점 상태로 올리고 eval 런타임을 `component: valida
 세고, 맞는 값을 needs_review로 표시한 오경보와 심은 값을 바꾼 경우(표시만 해야 하고
 고치면 안 됨)도 셉니다.
 
+**Reporter.** needs_review 값은 보고서에 나오면 안 됩니다. 값도, 마커도, 참고문헌도
+안 됩니다(`reporter.md`의 `value_status_resolution`). 보통 실행에서는 Validator가
+needs_review를 거의 표시하지 않아서 이 규칙이 실제로 시험되는 일이 드뭅니다.
+
+```bash
+.venv/bin/python component_eval.py reporter --from eval_results/baseline/<run> --plant 4 --tag comp-reporter
+```
+
+저장된 보고서가 인용한 verified 값 최대 `--plant`개를 `citations.json`에서
+needs_review로 바꾸고, 결과물을 Reporter 시작 시점 상태(Reporter의 초안·코드와
+Auditor 파일 제거)로 올린 뒤 eval 런타임을 `component: reporter`로 호출합니다. 새
+보고서에서 바꾼 값마다 **제외**(올바름), **인용**(본문 `[n]`이 그 값을 가리킴),
+**값 노출**(마커 없이 본문·표·참고문헌에 숫자가 나옴)으로 셉니다. 다른 모든 인용값과
+1% 넘게 차이 나는 값만 고르고 100 미만 정수는 건너뛰므로, 보고서의 숫자가 다른 인용의
+값일 수 없습니다. 값 노출은 유효숫자 3자리 이상으로 쓰인 숫자가 그 숫자의 자릿수에서
+반올림으로 일치할 때만 셉니다. 6,879.45는 "$6,891"이 아니고, 3.69는 "3.7"이
+아닙니다. 새 보고서는 전체 실행의 보고서 채점기(`[n]` 앞 숫자 = 인용값, 깨진 `[n]`,
+숫자 안 `[n]`, 인용 비율, 인용 = 메타데이터)로도 채점합니다.
+
+컴포넌트 실행은 에이전트 자신의 입력만 받고, 전체 실행에서 앞 에이전트가 남긴 말
+(Supervisor의 메시지, Coder·Validator가 남긴 `clues`)은 받지 않습니다. Reporter는
+프롬프트대로 `./artifacts/`와 `all_results.txt`에서 시작합니다.
+
 런타임은 환경변수에 `EVAL_COMPONENT_MODE=1`이 없으면 컴포넌트 실행을 거부합니다.
 두 런타임은 같은 이미지를 쓰고, 이 변수는 `eval_runtime.py`가 eval 런타임에만
-넣습니다. 런타임은 `component: reporter`도 받지만, 그 하네스는 아직 없습니다.
+넣습니다.
 
 ## 시나리오
 
