@@ -37,6 +37,7 @@ duration                  1920s           1680s           -12% ▲ better
 eval-harness/
 ├── run_eval.py, grade.py, compare.py    평소에 쓰는 명령
 ├── eval_runtime.py                      평가 런타임 설정
+├── component_eval.py                    컴포넌트 실행: 오류를 심고 Validator만 실행
 ├── graders/       규칙 기반 채점 모듈과 cost.py
 ├── config/        scenarios.yaml, pricing.yaml, runtime_configs.yaml,
 │                  eval.env (git 제외, 로컬 전용)
@@ -48,6 +49,16 @@ eval-harness/
 `eval-harness/` 기준입니다.
 
 ## 동작 방식: 단계와 파일
+
+실행은 두 종류입니다. 둘 다 eval 런타임과 같은 시나리오를 쓰고, 무엇을 호출하고 무엇을
+채점하는지가 다릅니다.
+
+| 실행 | 명령 | 무엇이 도는가 | 채점 | 비용 |
+|---|---|---|---|---|
+| **전체 실행** | `run_eval.py` | 시나리오 요청에 대한 전체 워크플로(Coordinator → Planner → Coder → Validator → Reporter → Auditor) | `grade.py` 규칙 채점기. 이어서 `compare.py` | 실행당 $4~6 |
+| **컴포넌트 실행** | `component_eval.py validator` | 저장된 전체 실행의 결과물에 오류를 심고 Validator만 실행([아래](#컴포넌트-실행-에이전트-하나-심어둔-오류)) | 규칙 검사: 심은 오류마다 잡음/놓침/검사 안 함, 오경보, 값 변경 | 실행당 약 $1.3~2 |
+
+이 절의 나머지는 전체 실행에 대한 설명입니다.
 
 ```
 config/scenarios.yaml + jungle-market CSV
@@ -137,6 +148,29 @@ Runner는 `managed-agentcore/.env`(배포 스크립트가 작성)에서 `RUNTIME
 
 `test_no_legacy_human_stop_sequence`는 알려진 버그를 기록하는 예상된 실패(`xfail`,
 strict)입니다. 버그가 고쳐지면 오류로 바뀌므로, 고칠 때 마커도 함께 지웁니다.
+
+## 컴포넌트 실행: 에이전트 하나, 심어둔 오류
+
+전체 실행은 에이전트를 한꺼번에 채점합니다. Validator가 틀린 계산을 잡는지 보려면
+틀린 계산이 있어야 하는데, 보통 실행에서는 Coder의 숫자가 맞습니다.
+`component_eval.py`는 저장된 실행의 결과물에 오류를 심고 Validator만 돌립니다.
+
+```bash
+.venv/bin/python eval_runtime.py enable-components        # 최초 1회, eval 런타임에만
+.venv/bin/python component_eval.py validator --from eval_results/baseline/<run> --plant 6 --tag comp-validator
+```
+
+중요도 high인 계산 최대 `--plant`개의 값을 10% 바꿉니다. 절반은 원본 CSV 기반이면서
+재계산으로 맞다고 확인된 것, 절반은 Coder가 만든 파생 파일 기반입니다. 결과물을
+Validator 시작 시점 상태로 올리고 eval 런타임을 `component: validator`로
+호출합니다(`managed-agentcore/src/graph/component.py`). Validator가 쓴
+`citations.json`에서 심은 오류마다 잡음(needs_review), 놓침(verified), 검사 안 함을
+세고, 맞는 값을 needs_review로 표시한 오경보와 심은 값을 바꾼 경우(표시만 해야 하고
+고치면 안 됨)도 셉니다.
+
+런타임은 환경변수에 `EVAL_COMPONENT_MODE=1`이 없으면 컴포넌트 실행을 거부합니다.
+두 런타임은 같은 이미지를 쓰고, 이 변수는 `eval_runtime.py`가 eval 런타임에만
+넣습니다. 런타임은 `component: reporter`도 받지만, 그 하네스는 아직 없습니다.
 
 ## 시나리오
 

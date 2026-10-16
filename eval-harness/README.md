@@ -38,6 +38,7 @@ duration                  1920s           1680s           -12% ▲ better
 eval-harness/
 ├── run_eval.py, grade.py, compare.py    commands you run day to day
 ├── eval_runtime.py                      eval runtime setup
+├── component_eval.py                    component runs: the Validator alone, errors planted
 ├── graders/       rule-based scoring modules and cost.py
 ├── config/        scenarios.yaml, pricing.yaml, runtime_configs.yaml,
 │                  eval.env (git-ignored, local only)
@@ -49,6 +50,16 @@ Run every command from `eval-harness/`. Paths in `config/scenarios.yaml` are
 relative to `eval-harness/`.
 
 ## How it runs: steps and files
+
+There are two kinds of run. Both use the eval runtime and the same scenarios;
+they differ in what is invoked and what is graded.
+
+| Run | Command | What runs | Graded by | Cost |
+|---|---|---|---|---|
+| **Full run** | `run_eval.py` | the whole workflow on a scenario's request (Coordinator → Planner → Coder → Validator → Reporter → Auditor) | `grade.py` rule graders; then `compare.py` | $4–6 per run |
+| **Component run** | `component_eval.py validator` | the Validator alone, on a saved full run's artifacts with errors planted ([below](#component-runs-one-agent-planted-errors)) | rule checks: each planted error caught / missed / not checked, false alarms, values changed | about $1.3–2 per run |
+
+The rest of this section is about full runs.
 
 ```
 config/scenarios.yaml + jungle-market CSV
@@ -140,6 +151,32 @@ The runner reads `RUNTIME_ARN`, `AWS_REGION` and `S3_BUCKET_NAME` from
 `test_no_legacy_human_stop_sequence` is an expected failure (`xfail`, strict)
 documenting a known bug; it turns into an error once the bug is fixed, so the
 marker gets removed with the fix.
+
+## Component runs: one agent, planted errors
+
+A full run grades the agents together. To see whether the Validator catches a
+wrong calculation, it needs a wrong calculation to look at, and in a normal
+run the Coder's numbers are right. `component_eval.py` runs the Validator
+alone on a saved run's artifacts with errors planted:
+
+```bash
+.venv/bin/python eval_runtime.py enable-components        # once; eval runtime only
+.venv/bin/python component_eval.py validator --from eval_results/baseline/<run> --plant 6 --tag comp-validator
+```
+
+It changes 10% of the value of up to `--plant` high-importance calculations
+(half on the raw CSV and confirmed right by the recomputation, half on files
+the Coder derived), stages the artifacts as they were before the Validator,
+and invokes the eval runtime with `component: validator`
+(`managed-agentcore/src/graph/component.py`). From the Validator's
+`citations.json` it counts each planted error as caught (needs_review),
+missed (verified) or not checked, plus false alarms on right values and
+planted values it changed (it must mark, not correct).
+
+The runtime refuses component runs unless `EVAL_COMPONENT_MODE=1` is in its
+environment. Both runtimes run the same image; only `eval_runtime.py` sets
+that variable, on the eval runtime. The runtime also accepts
+`component: reporter`; the harness for it is not written yet.
 
 ## Scenarios
 
