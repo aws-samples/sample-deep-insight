@@ -1,0 +1,1145 @@
+Date,Product,Category,Size,Qty,Amount,ship-city,ship-state,ship-postal-code,promotion-ids,Gender,Age Group
+2025-05-01,Apple,Fruit/Nuts/Rice,1kg,1,12900,Seocho-gu,Seoul,06778,,F,30s
+2025-05-01,Milk,Dairy,1L,1,2900,Gangseo-gu,Seoul,07721,,M,60s
+2025-05-01,Greek Yogurt,Dairy,400g,1,5900,Seocho-gu,Seoul,06632,,M,30s
+2025-05-01,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,13800,Seongdong-gu,Seoul,04763,,F,30s
+2025-05-01,Green Tea,Coffee/Tea,20-pack,1,5900,Gangnam-gu,Seoul,06021,,M,20s
+2025-05-01,Mixed Nuts,Fruit/Nuts/Rice,500g,2,31800,Seongdong-gu,Seoul,04709,,F,40s
+2025-05-01,Mixed Nuts,Fruit/Nuts/Rice,500g,4,63600,Yeongdeungpo-gu,Seoul,07239,,M,40s
+2025-05-01,Green Tea,Coffee/Tea,20-pack,3,17700,Seongdong-gu,Seoul,04810,,M,60s
+2025-05-01,White Bread,Bakery,1 pc,1,4500,Gangseo-gu,Seoul,07825,,F,30s
+2025-05-01,Mixed Nuts,Fruit/Nuts/Rice,500g,3,47700,Yongsan-gu,Seoul,04343,,F,30s
+2025-05-01,Apple,Fruit/Nuts/Rice,1kg,1,12900,Yeongdeungpo-gu,Seoul,07393,,F,50s
+2025-05-01,Lettuce,Vegetables,200g,1,2900,Yeongdeungpo-gu,Seoul,07230,,F,30s
+2025-05-01,Red Ginseng,Health Supplements,30-pack,2,78000,Mapo-gu,Seoul,03915,,F,30s
+2025-05-01,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Songpa-gu,Seoul,05501,,M,40s
+2025-05-01,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Mapo-gu,Seoul,04172,,F,40s
+2025-05-01,Mixed Nuts,Fruit/Nuts/Rice,500g,2,31800,Nowon-gu,Seoul,01697,,M,20s
+2025-05-01,Mixed Nuts,Fruit/Nuts/Rice,500g,2,31800,Songpa-gu,Seoul,05835,,M,50s
+2025-05-01,Pork,Meat/Processed Meat/Egg,500g,1,11900,Gangnam-gu,Seoul,06387,,F,40s
+2025-05-01,Onion,Vegetables,1kg,1,3500,Seongdong-gu,Seoul,04765,,F,60s
+2025-05-01,Bagel,Bakery,4-pack,3,20700,Songpa-gu,Seoul,05880,,M,30s
+2025-05-01,Lettuce,Vegetables,200g,1,2900,Songpa-gu,Seoul,05861,,M,30s
+2025-05-01,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,4,31600,Seocho-gu,Seoul,06631,,F,20s
+2025-05-01,Onion,Vegetables,1kg,4,14000,Seocho-gu,Seoul,06708,,M,40s
+2025-05-01,Lettuce,Vegetables,200g,2,5800,Songpa-gu,Seoul,05638,,F,50s
+2025-05-01,Drip Coffee,Coffee/Tea,200g,3,41700,Seocho-gu,Seoul,06794,,F,30s
+2025-05-01,Greek Yogurt,Dairy,400g,1,5900,Songpa-gu,Seoul,05591,,F,60s
+2025-05-01,Egg,Meat/Processed Meat/Egg,10-pack,2,9800,Gangseo-gu,Seoul,07558,,F,40s
+2025-05-01,Mixed Nuts,Fruit/Nuts/Rice,500g,3,47700,Gangseo-gu,Seoul,07559,,M,30s
+2025-05-01,Pork,Meat/Processed Meat/Egg,500g,2,23800,Mapo-gu,Seoul,04070,,F,50s
+2025-05-01,White Bread,Bakery,1 pc,2,9000,Seongdong-gu,Seoul,04791,,F,60s
+2025-05-01,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,7900,Gangnam-gu,Seoul,06207,,F,50s
+2025-05-01,Ginger Tea,Coffee/Tea,500ml,1,8900,Yeongdeungpo-gu,Seoul,07487,,F,50s
+2025-05-01,Green Tea,Coffee/Tea,20-pack,1,5900,Seocho-gu,Seoul,06630,,M,30s
+2025-05-01,Broccoli,Vegetables,500g,1,3900,Mapo-gu,Seoul,04168,,M,40s
+2025-05-01,Bagel,Bakery,4-pack,4,27600,Gangnam-gu,Seoul,06139,,M,30s
+2025-05-01,Greek Yogurt,Dairy,400g,2,11800,Seongdong-gu,Seoul,04709,,F,40s
+2025-05-01,Apple,Fruit/Nuts/Rice,1kg,1,12900,Nowon-gu,Seoul,01839,,F,30s
+2025-05-01,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,6900,Mapo-gu,Seoul,04089,,F,20s
+2025-05-01,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,6900,Songpa-gu,Seoul,05524,,M,20s
+2025-05-01,Egg,Meat/Processed Meat/Egg,10-pack,3,14700,Mapo-gu,Seoul,03943,,F,50s
+2025-05-01,Pork,Meat/Processed Meat/Egg,500g,1,11900,Yongsan-gu,Seoul,04381,,F,60s
+2025-05-01,White Bread,Bakery,1 pc,2,9000,Yongsan-gu,Seoul,04334,,M,20s
+2025-05-01,Bagel,Bakery,4-pack,1,6900,Nowon-gu,Seoul,01830,,F,60s
+2025-05-01,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,3,23700,Nowon-gu,Seoul,01791,,F,60s
+2025-05-01,Red Ginseng,Health Supplements,30-pack,2,78000,Mapo-gu,Seoul,04052,,F,50s
+2025-05-01,Probiotics,Health Supplements,30 tablets,2,49800,Yeongdeungpo-gu,Seoul,07435,,F,30s
+2025-05-01,Probiotics,Health Supplements,30 tablets,1,24900,Yeongdeungpo-gu,Seoul,07278,,F,60s
+2025-05-01,Croissant,Bakery,4-pack,4,35600,Nowon-gu,Seoul,01788,,M,20s
+2025-05-01,Cheddar Cheese,Dairy,200g,3,19500,Mapo-gu,Seoul,04149,,M,60s
+2025-05-01,Ginger Tea,Coffee/Tea,500ml,1,8900,Songpa-gu,Seoul,05817,,F,50s
+2025-05-01,Drip Coffee,Coffee/Tea,200g,2,27800,Mapo-gu,Seoul,03981,,M,40s
+2025-05-01,Pork,Meat/Processed Meat/Egg,500g,1,11900,Songpa-gu,Seoul,05745,,F,40s
+2025-05-01,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Songpa-gu,Seoul,05550,,F,60s
+2025-05-01,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,3,23700,Seongdong-gu,Seoul,04738,,M,50s
+2025-05-01,Apple,Fruit/Nuts/Rice,1kg,1,12900,Mapo-gu,Seoul,04065,,F,30s
+2025-05-01,Lettuce,Vegetables,200g,2,5800,Gangseo-gu,Seoul,07694,,M,30s
+2025-05-01,Pork,Meat/Processed Meat/Egg,500g,2,23800,Mapo-gu,Seoul,04016,,F,40s
+2025-05-01,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Nowon-gu,Seoul,01659,,M,20s
+2025-05-01,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,2,15800,Gangnam-gu,Seoul,06186,,M,50s
+2025-05-02,Cheddar Cheese,Dairy,200g,2,13000,Nowon-gu,Seoul,01772,,F,30s
+2025-05-02,White Rice,Fruit/Nuts/Rice,5kg,2,49800,Gwangjin-gu,Seoul,05094,,F,60s
+2025-05-02,Green Tea,Coffee/Tea,20-pack,1,5900,Seocho-gu,Seoul,06661,,M,50s
+2025-05-02,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Gangseo-gu,Seoul,07661,,F,30s
+2025-05-02,White Bread,Bakery,1 pc,2,9000,Mapo-gu,Seoul,04058,,M,30s
+2025-05-02,Onion,Vegetables,1kg,1,3500,Gangnam-gu,Seoul,06062,,F,60s
+2025-05-02,Milk,Dairy,1L,1,2900,Gwangjin-gu,Seoul,04936,,M,30s
+2025-05-02,Croissant,Bakery,4-pack,1,8900,Mapo-gu,Seoul,04136,,M,60s
+2025-05-02,Drip Coffee,Coffee/Tea,200g,4,55600,Yeongdeungpo-gu,Seoul,07367,,F,30s
+2025-05-02,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Songpa-gu,Seoul,05748,,M,40s
+2025-05-02,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,7900,Gangnam-gu,Seoul,06384,,M,50s
+2025-05-02,Broccoli,Vegetables,500g,2,7800,Gangseo-gu,Seoul,07741,,M,40s
+2025-05-02,Croissant,Bakery,4-pack,1,8900,Gangnam-gu,Seoul,06141,,F,30s
+2025-05-02,Bagel,Bakery,4-pack,4,27600,Gangseo-gu,Seoul,07509,,F,40s
+2025-05-02,Mixed Nuts,Fruit/Nuts/Rice,500g,1,15900,Gangnam-gu,Seoul,06293,,F,40s
+2025-05-02,Broccoli,Vegetables,500g,1,3900,Songpa-gu,Seoul,05511,,F,50s
+2025-05-02,White Bread,Bakery,1 pc,1,4500,Gwangjin-gu,Seoul,04979,,M,20s
+2025-05-02,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Songpa-gu,Seoul,05633,,F,50s
+2025-05-02,Milk,Dairy,1L,1,2900,Gwangjin-gu,Seoul,05072,,F,30s
+2025-05-02,Bagel,Bakery,4-pack,3,20700,Songpa-gu,Seoul,05787,,F,60s
+2025-05-02,Probiotics,Health Supplements,30 tablets,3,74700,Gangnam-gu,Seoul,06359,,F,60s
+2025-05-02,Red Ginseng,Health Supplements,30-pack,2,78000,Gangnam-gu,Seoul,06302,,F,30s
+2025-05-02,White Rice,Fruit/Nuts/Rice,5kg,3,74700,Seongdong-gu,Seoul,04818,,M,50s
+2025-05-02,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Songpa-gu,Seoul,05664,,M,20s
+2025-05-02,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,4,39600,Seocho-gu,Seoul,06626,,M,30s
+2025-05-02,Cheddar Cheese,Dairy,200g,3,19500,Nowon-gu,Seoul,01804,,F,60s
+2025-05-02,Cheddar Cheese,Dairy,200g,1,6500,Gwangjin-gu,Seoul,05091,,F,60s
+2025-05-02,Drip Coffee,Coffee/Tea,200g,1,13900,Seocho-gu,Seoul,06503,,M,50s
+2025-05-02,Drip Coffee,Coffee/Tea,200g,2,27800,Seongdong-gu,Seoul,04749,,F,20s
+2025-05-02,Greek Yogurt,Dairy,400g,2,11800,Seongdong-gu,Seoul,04780,,M,30s
+2025-05-02,Mixed Nuts,Fruit/Nuts/Rice,500g,1,15900,Gwangjin-gu,Seoul,04975,,F,40s
+2025-05-02,Broccoli,Vegetables,500g,2,7800,Songpa-gu,Seoul,05781,,M,60s
+2025-05-02,Milk,Dairy,1L,1,2900,Gangnam-gu,Seoul,06123,,F,60s
+2025-05-02,Egg,Meat/Processed Meat/Egg,10-pack,2,9800,Mapo-gu,Seoul,04109,,F,50s
+2025-05-02,Omega-3,Health Supplements,60 tablets,2,39800,Mapo-gu,Seoul,04022,,M,60s
+2025-05-02,Cheddar Cheese,Dairy,200g,1,6500,Songpa-gu,Seoul,05501,,F,30s
+2025-05-02,Probiotics,Health Supplements,30 tablets,1,24900,Nowon-gu,Seoul,01801,,M,30s
+2025-05-02,Mixed Nuts,Fruit/Nuts/Rice,500g,1,15900,Nowon-gu,Seoul,01811,,M,60s
+2025-05-02,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Seongdong-gu,Seoul,04806,,M,50s
+2025-05-02,Onion,Vegetables,1kg,3,10500,Mapo-gu,Seoul,04099,,M,40s
+2025-05-02,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Gwangjin-gu,Seoul,04950,,M,30s
+2025-05-02,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,2,15800,Nowon-gu,Seoul,01622,,F,30s
+2025-05-02,Ginger Tea,Coffee/Tea,500ml,1,8900,Mapo-gu,Seoul,04064,,M,40s
+2025-05-02,Mixed Nuts,Fruit/Nuts/Rice,500g,1,15900,Yeongdeungpo-gu,Seoul,07459,,F,50s
+2025-05-02,Pork,Meat/Processed Meat/Egg,500g,1,11900,Gangseo-gu,Seoul,07523,,M,30s
+2025-05-02,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Seongdong-gu,Seoul,04789,,F,50s
+2025-05-02,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Seocho-gu,Seoul,06549,,F,30s
+2025-05-02,Pork,Meat/Processed Meat/Egg,500g,2,23800,Songpa-gu,Seoul,05523,,M,50s
+2025-05-02,Drip Coffee,Coffee/Tea,200g,1,13900,Yongsan-gu,Seoul,04368,,M,20s
+2025-05-02,Bagel,Bakery,4-pack,3,20700,Songpa-gu,Seoul,05563,,M,30s
+2025-05-02,Omega-3,Health Supplements,60 tablets,2,39800,Gangnam-gu,Seoul,06099,,F,60s
+2025-05-02,White Bread,Bakery,1 pc,3,13500,Yeongdeungpo-gu,Seoul,07365,,F,60s
+2025-05-02,Lettuce,Vegetables,200g,3,8700,Seocho-gu,Seoul,06575,,M,60s
+2025-05-02,White Rice,Fruit/Nuts/Rice,5kg,4,99600,Songpa-gu,Seoul,05651,,M,40s
+2025-05-02,Ginger Tea,Coffee/Tea,500ml,4,35600,Mapo-gu,Seoul,04067,,M,40s
+2025-05-02,Apple,Fruit/Nuts/Rice,1kg,3,38700,Gangnam-gu,Seoul,06148,,F,40s
+2025-05-02,Probiotics,Health Supplements,30 tablets,2,49800,Seongdong-gu,Seoul,04803,,M,20s
+2025-05-02,White Bread,Bakery,1 pc,2,9000,Yongsan-gu,Seoul,04416,,M,40s
+2025-05-02,Egg,Meat/Processed Meat/Egg,10-pack,4,19600,Nowon-gu,Seoul,01852,,M,40s
+2025-05-02,Bagel,Bakery,4-pack,2,13800,Seongdong-gu,Seoul,04770,,F,30s
+2025-05-02,Milk,Dairy,1L,1,2900,Gangseo-gu,Seoul,07835,,M,60s
+2025-05-03,Croissant,Bakery,4-pack,1,7120,Yongsan-gu,Seoul,04354,WEEKEND20,M,40s
+2025-05-03,Broccoli,Vegetables,500g,2,6240,Mapo-gu,Seoul,03901,WEEKEND20,F,50s
+2025-05-03,Croissant,Bakery,4-pack,1,7120,Yeongdeungpo-gu,Seoul,07359,WEEKEND20,M,50s
+2025-05-03,Cheddar Cheese,Dairy,200g,1,5200,Gangseo-gu,Seoul,07877,WEEKEND20,M,40s
+2025-05-03,Probiotics,Health Supplements,30 tablets,4,79680,Gwangjin-gu,Seoul,04935,WEEKEND20,F,50s
+2025-05-03,White Rice,Fruit/Nuts/Rice,5kg,1,19920,Gangnam-gu,Seoul,06356,WEEKEND20,M,60s
+2025-05-03,White Bread,Bakery,1 pc,3,10800,Nowon-gu,Seoul,01602,WEEKEND20,M,30s
+2025-05-03,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,3,23760,Gangnam-gu,Seoul,06034,WEEKEND20,M,60s
+2025-05-03,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,2,12640,Songpa-gu,Seoul,05869,WEEKEND20,M,50s
+2025-05-03,Red Ginseng,Health Supplements,30-pack,1,31200,Gangnam-gu,Seoul,06080,WEEKEND20,F,30s
+2025-05-03,Bagel,Bakery,4-pack,2,11040,Gwangjin-gu,Seoul,05095,WEEKEND20,F,20s
+2025-05-03,Probiotics,Health Supplements,30 tablets,3,59760,Songpa-gu,Seoul,05543,WEEKEND20,F,50s
+2025-05-03,White Bread,Bakery,1 pc,2,7200,Mapo-gu,Seoul,03900,WEEKEND20,M,60s
+2025-05-03,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,11040,Yongsan-gu,Seoul,04343,WEEKEND20,F,50s
+2025-05-03,Cheddar Cheese,Dairy,200g,1,5200,Gwangjin-gu,Seoul,04973,WEEKEND20,F,30s
+2025-05-03,Ginger Tea,Coffee/Tea,500ml,1,7120,Songpa-gu,Seoul,05653,WEEKEND20,F,20s
+2025-05-03,Apple,Fruit/Nuts/Rice,1kg,1,10320,Nowon-gu,Seoul,01797,WEEKEND20,F,60s
+2025-05-03,Croissant,Bakery,4-pack,1,7120,Mapo-gu,Seoul,04182,WEEKEND20,F,50s
+2025-05-03,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,6320,Yeongdeungpo-gu,Seoul,07257,WEEKEND20,F,50s
+2025-05-03,Omega-3,Health Supplements,60 tablets,1,15920,Gangseo-gu,Seoul,07714,WEEKEND20,M,20s
+2025-05-03,Apple,Fruit/Nuts/Rice,1kg,1,10320,Yongsan-gu,Seoul,04307,WEEKEND20,F,60s
+2025-05-03,Egg,Meat/Processed Meat/Egg,10-pack,2,7840,Seocho-gu,Seoul,06561,WEEKEND20,F,40s
+2025-05-03,Apple,Fruit/Nuts/Rice,1kg,2,20640,Gangnam-gu,Seoul,06208,WEEKEND20,M,30s
+2025-05-03,Green Tea,Coffee/Tea,20-pack,2,9440,Gangseo-gu,Seoul,07743,WEEKEND20,M,30s
+2025-05-03,Broccoli,Vegetables,500g,1,3120,Songpa-gu,Seoul,05886,WEEKEND20,M,30s
+2025-05-03,Drip Coffee,Coffee/Tea,200g,1,11120,Mapo-gu,Seoul,04087,WEEKEND20,M,40s
+2025-05-03,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,6320,Gangnam-gu,Seoul,06091,WEEKEND20,M,60s
+2025-05-03,Croissant,Bakery,4-pack,1,7120,Mapo-gu,Seoul,03982,WEEKEND20,M,40s
+2025-05-03,Croissant,Bakery,4-pack,1,7120,Mapo-gu,Seoul,03950,WEEKEND20,F,40s
+2025-05-03,Probiotics,Health Supplements,30 tablets,1,19920,Gangseo-gu,Seoul,07501,WEEKEND20,M,60s
+2025-05-03,Onion,Vegetables,1kg,4,11200,Songpa-gu,Seoul,05538,WEEKEND20,M,40s
+2025-05-03,Drip Coffee,Coffee/Tea,200g,2,22240,Seocho-gu,Seoul,06709,WEEKEND20,F,50s
+2025-05-03,Omega-3,Health Supplements,60 tablets,1,15920,Yeongdeungpo-gu,Seoul,07439,WEEKEND20,F,30s
+2025-05-03,Mixed Nuts,Fruit/Nuts/Rice,500g,3,38160,Yongsan-gu,Seoul,04339,WEEKEND20,F,30s
+2025-05-03,Lettuce,Vegetables,200g,1,2320,Mapo-gu,Seoul,04150,WEEKEND20,M,40s
+2025-05-03,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,7920,Gangnam-gu,Seoul,06053,WEEKEND20,F,40s
+2025-05-03,Bagel,Bakery,4-pack,3,16560,Songpa-gu,Seoul,05822,WEEKEND20,F,30s
+2025-05-03,Probiotics,Health Supplements,30 tablets,1,19920,Seongdong-gu,Seoul,04809,WEEKEND20,F,30s
+2025-05-03,Milk,Dairy,1L,1,2320,Gangnam-gu,Seoul,06381,WEEKEND20,F,60s
+2025-05-03,Red Ginseng,Health Supplements,30-pack,2,62400,Yongsan-gu,Seoul,04328,WEEKEND20,F,60s
+2025-05-03,Ginger Tea,Coffee/Tea,500ml,1,7120,Songpa-gu,Seoul,05737,WEEKEND20,M,60s
+2025-05-03,Red Ginseng,Health Supplements,30-pack,1,31200,Gangseo-gu,Seoul,07627,WEEKEND20,M,50s
+2025-05-03,Bagel,Bakery,4-pack,1,5520,Yongsan-gu,Seoul,04348,WEEKEND20,F,50s
+2025-05-03,Milk,Dairy,1L,3,6960,Yongsan-gu,Seoul,04382,WEEKEND20,M,30s
+2025-05-03,Bagel,Bakery,4-pack,2,11040,Gangnam-gu,Seoul,06366,WEEKEND20,F,20s
+2025-05-03,White Rice,Fruit/Nuts/Rice,5kg,4,79680,Mapo-gu,Seoul,04017,WEEKEND20,F,20s
+2025-05-03,Mixed Nuts,Fruit/Nuts/Rice,500g,1,12720,Seocho-gu,Seoul,06532,WEEKEND20,M,30s
+2025-05-03,Probiotics,Health Supplements,30 tablets,1,19920,Gangnam-gu,Seoul,06359,WEEKEND20,M,40s
+2025-05-03,Croissant,Bakery,4-pack,2,14240,Seongdong-gu,Seoul,04702,WEEKEND20,F,40s
+2025-05-03,Apple,Fruit/Nuts/Rice,1kg,1,10320,Gangnam-gu,Seoul,06221,WEEKEND20,M,40s
+2025-05-03,Cheddar Cheese,Dairy,200g,4,20800,Nowon-gu,Seoul,01633,WEEKEND20,M,30s
+2025-05-03,Apple,Fruit/Nuts/Rice,1kg,1,10320,Mapo-gu,Seoul,04031,WEEKEND20,F,60s
+2025-05-03,Green Tea,Coffee/Tea,20-pack,1,4720,Gangseo-gu,Seoul,07660,WEEKEND20,F,30s
+2025-05-03,Egg,Meat/Processed Meat/Egg,10-pack,1,3920,Songpa-gu,Seoul,05569,WEEKEND20,F,40s
+2025-05-03,Greek Yogurt,Dairy,400g,1,4720,Yongsan-gu,Seoul,04350,WEEKEND20,F,30s
+2025-05-03,Mixed Nuts,Fruit/Nuts/Rice,500g,1,12720,Seocho-gu,Seoul,06643,WEEKEND20,M,40s
+2025-05-03,Drip Coffee,Coffee/Tea,200g,1,11120,Yeongdeungpo-gu,Seoul,07239,WEEKEND20,M,20s
+2025-05-03,Croissant,Bakery,4-pack,4,28480,Gangnam-gu,Seoul,06015,WEEKEND20,F,20s
+2025-05-03,Egg,Meat/Processed Meat/Egg,10-pack,3,11760,Gangnam-gu,Seoul,06050,WEEKEND20,F,30s
+2025-05-03,Red Ginseng,Health Supplements,30-pack,3,93600,Gangnam-gu,Seoul,06075,WEEKEND20,F,20s
+2025-05-03,Green Tea,Coffee/Tea,20-pack,3,14160,Gangnam-gu,Seoul,06041,WEEKEND20,M,60s
+2025-05-03,Broccoli,Vegetables,500g,1,3120,Gwangjin-gu,Seoul,05032,WEEKEND20,F,50s
+2025-05-03,Apple,Fruit/Nuts/Rice,1kg,1,10320,Seongdong-gu,Seoul,04721,WEEKEND20,M,50s
+2025-05-03,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,2,12640,Yeongdeungpo-gu,Seoul,07287,WEEKEND20,F,20s
+2025-05-03,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,4,31680,Mapo-gu,Seoul,04118,WEEKEND20,M,20s
+2025-05-03,Cheddar Cheese,Dairy,200g,2,10400,Seocho-gu,Seoul,06606,WEEKEND20,F,30s
+2025-05-03,Cheddar Cheese,Dairy,200g,2,10400,Nowon-gu,Seoul,01763,WEEKEND20,F,20s
+2025-05-03,Greek Yogurt,Dairy,400g,1,4720,Gangnam-gu,Seoul,06202,WEEKEND20,F,30s
+2025-05-03,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,15840,Yongsan-gu,Seoul,04396,WEEKEND20,M,20s
+2025-05-03,White Rice,Fruit/Nuts/Rice,5kg,2,39840,Yeongdeungpo-gu,Seoul,07308,WEEKEND20,M,50s
+2025-05-03,White Bread,Bakery,1 pc,4,14400,Seocho-gu,Seoul,06722,WEEKEND20,M,30s
+2025-05-03,White Rice,Fruit/Nuts/Rice,5kg,3,59760,Gangnam-gu,Seoul,06031,WEEKEND20,F,40s
+2025-05-03,Pork,Meat/Processed Meat/Egg,500g,4,38080,Gwangjin-gu,Seoul,04920,WEEKEND20,M,30s
+2025-05-03,Pork,Meat/Processed Meat/Egg,500g,2,19040,Gwangjin-gu,Seoul,04942,WEEKEND20,F,60s
+2025-05-03,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,11040,Songpa-gu,Seoul,05785,WEEKEND20,F,20s
+2025-05-03,White Bread,Bakery,1 pc,1,3600,Yongsan-gu,Seoul,04362,WEEKEND20,M,60s
+2025-05-03,Broccoli,Vegetables,500g,2,6240,Songpa-gu,Seoul,05625,WEEKEND20,F,40s
+2025-05-03,Croissant,Bakery,4-pack,2,14240,Songpa-gu,Seoul,05542,WEEKEND20,M,30s
+2025-05-03,White Rice,Fruit/Nuts/Rice,5kg,4,79680,Gangseo-gu,Seoul,07663,WEEKEND20,M,40s
+2025-05-03,Greek Yogurt,Dairy,400g,3,14160,Gwangjin-gu,Seoul,04904,WEEKEND20,F,50s
+2025-05-03,Milk,Dairy,1L,3,6960,Seongdong-gu,Seoul,04818,WEEKEND20,M,50s
+2025-05-03,White Bread,Bakery,1 pc,3,10800,Songpa-gu,Seoul,05879,WEEKEND20,M,50s
+2025-05-03,White Rice,Fruit/Nuts/Rice,5kg,1,19920,Nowon-gu,Seoul,01705,WEEKEND20,M,40s
+2025-05-03,Lettuce,Vegetables,200g,2,4640,Gangnam-gu,Seoul,06158,WEEKEND20,M,50s
+2025-05-03,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,5520,Seocho-gu,Seoul,06505,WEEKEND20,M,40s
+2025-05-03,Apple,Fruit/Nuts/Rice,1kg,3,30960,Gwangjin-gu,Seoul,04994,WEEKEND20,M,60s
+2025-05-03,Onion,Vegetables,1kg,2,5600,Songpa-gu,Seoul,05712,WEEKEND20,M,20s
+2025-05-03,Apple,Fruit/Nuts/Rice,1kg,2,20640,Songpa-gu,Seoul,05600,WEEKEND20,M,30s
+2025-05-03,Broccoli,Vegetables,500g,2,6240,Mapo-gu,Seoul,04007,WEEKEND20,M,30s
+2025-05-03,White Bread,Bakery,1 pc,2,7200,Seocho-gu,Seoul,06620,WEEKEND20,M,60s
+2025-05-03,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,11040,Gangnam-gu,Seoul,06372,WEEKEND20,M,30s
+2025-05-04,Cheddar Cheese,Dairy,200g,1,5200,Songpa-gu,Seoul,05744,WEEKEND20,M,20s
+2025-05-04,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,5520,Yongsan-gu,Seoul,04358,WEEKEND20,F,30s
+2025-05-04,Green Tea,Coffee/Tea,20-pack,1,4720,Gangseo-gu,Seoul,07548,WEEKEND20,F,30s
+2025-05-04,Cheddar Cheese,Dairy,200g,2,10400,Nowon-gu,Seoul,01626,WEEKEND20,F,40s
+2025-05-04,Pork,Meat/Processed Meat/Egg,500g,1,9520,Seongdong-gu,Seoul,04787,WEEKEND20,F,30s
+2025-05-04,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,7920,Gangseo-gu,Seoul,07781,WEEKEND20,M,20s
+2025-05-04,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,7920,Songpa-gu,Seoul,05540,WEEKEND20,F,30s
+2025-05-04,Cheddar Cheese,Dairy,200g,1,5200,Seongdong-gu,Seoul,04788,WEEKEND20,M,30s
+2025-05-04,Pork,Meat/Processed Meat/Egg,500g,1,9520,Gangnam-gu,Seoul,06148,WEEKEND20,M,30s
+2025-05-04,White Bread,Bakery,1 pc,1,3600,Mapo-gu,Seoul,04115,WEEKEND20,M,30s
+2025-05-04,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,11040,Gangnam-gu,Seoul,06025,WEEKEND20,F,30s
+2025-05-04,White Bread,Bakery,1 pc,2,7200,Seongdong-gu,Seoul,04726,WEEKEND20,F,20s
+2025-05-04,White Rice,Fruit/Nuts/Rice,5kg,2,39840,Yeongdeungpo-gu,Seoul,07483,WEEKEND20,F,40s
+2025-05-04,Apple,Fruit/Nuts/Rice,1kg,2,20640,Mapo-gu,Seoul,04008,WEEKEND20,F,30s
+2025-05-04,Salad Kit,Ready Meal/Meal Kit/Salad,300g,4,22080,Songpa-gu,Seoul,05792,WEEKEND20,M,50s
+2025-05-04,Croissant,Bakery,4-pack,3,21360,Seocho-gu,Seoul,06525,WEEKEND20,M,30s
+2025-05-04,Salad Kit,Ready Meal/Meal Kit/Salad,300g,4,22080,Mapo-gu,Seoul,04068,WEEKEND20,F,50s
+2025-05-04,Lettuce,Vegetables,200g,1,2320,Songpa-gu,Seoul,05829,WEEKEND20,F,50s
+2025-05-04,Egg,Meat/Processed Meat/Egg,10-pack,4,15680,Songpa-gu,Seoul,05786,WEEKEND20,F,30s
+2025-05-04,Onion,Vegetables,1kg,1,2800,Yongsan-gu,Seoul,04306,WEEKEND20,F,30s
+2025-05-04,White Bread,Bakery,1 pc,1,3600,Gangseo-gu,Seoul,07835,WEEKEND20,F,60s
+2025-05-04,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,2,12640,Gangseo-gu,Seoul,07623,WEEKEND20,F,20s
+2025-05-04,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,6320,Seocho-gu,Seoul,06682,WEEKEND20,F,20s
+2025-05-04,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,3,18960,Mapo-gu,Seoul,03962,WEEKEND20,M,40s
+2025-05-04,Croissant,Bakery,4-pack,3,21360,Gangseo-gu,Seoul,07721,WEEKEND20,F,30s
+2025-05-04,Ginger Tea,Coffee/Tea,500ml,1,7120,Seocho-gu,Seoul,06558,WEEKEND20,F,50s
+2025-05-04,Milk,Dairy,1L,2,4640,Gwangjin-gu,Seoul,05073,WEEKEND20,F,30s
+2025-05-04,Mixed Nuts,Fruit/Nuts/Rice,500g,2,25440,Yeongdeungpo-gu,Seoul,07270,WEEKEND20,F,20s
+2025-05-04,White Rice,Fruit/Nuts/Rice,5kg,4,79680,Seongdong-gu,Seoul,04737,WEEKEND20,M,50s
+2025-05-04,Red Ginseng,Health Supplements,30-pack,4,124800,Yeongdeungpo-gu,Seoul,07465,WEEKEND20,F,50s
+2025-05-04,Omega-3,Health Supplements,60 tablets,1,15920,Nowon-gu,Seoul,01738,WEEKEND20,F,30s
+2025-05-04,Red Ginseng,Health Supplements,30-pack,1,31200,Yeongdeungpo-gu,Seoul,07342,WEEKEND20,M,50s
+2025-05-04,Cheddar Cheese,Dairy,200g,1,5200,Songpa-gu,Seoul,05817,WEEKEND20,F,50s
+2025-05-04,Cheddar Cheese,Dairy,200g,1,5200,Mapo-gu,Seoul,04126,WEEKEND20,M,20s
+2025-05-04,Milk,Dairy,1L,1,2320,Nowon-gu,Seoul,01895,WEEKEND20,M,30s
+2025-05-04,Probiotics,Health Supplements,30 tablets,1,19920,Gangseo-gu,Seoul,07726,WEEKEND20,F,40s
+2025-05-04,Drip Coffee,Coffee/Tea,200g,3,33360,Gangseo-gu,Seoul,07769,WEEKEND20,M,20s
+2025-05-04,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,5520,Gangseo-gu,Seoul,07718,WEEKEND20,F,60s
+2025-05-04,Ginger Tea,Coffee/Tea,500ml,2,14240,Nowon-gu,Seoul,01797,WEEKEND20,M,40s
+2025-05-04,Drip Coffee,Coffee/Tea,200g,3,33360,Nowon-gu,Seoul,01754,WEEKEND20,M,30s
+2025-05-04,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,7920,Mapo-gu,Seoul,04010,WEEKEND20,F,40s
+2025-05-04,Broccoli,Vegetables,500g,3,9360,Nowon-gu,Seoul,01832,WEEKEND20,F,50s
+2025-05-04,Probiotics,Health Supplements,30 tablets,3,59760,Gangseo-gu,Seoul,07556,WEEKEND20,M,20s
+2025-05-04,Egg,Meat/Processed Meat/Egg,10-pack,1,3920,Gangseo-gu,Seoul,07809,WEEKEND20,F,60s
+2025-05-04,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,3,18960,Gangseo-gu,Seoul,07636,WEEKEND20,F,20s
+2025-05-04,Cheddar Cheese,Dairy,200g,3,15600,Gangseo-gu,Seoul,07822,WEEKEND20,M,40s
+2025-05-04,Omega-3,Health Supplements,60 tablets,2,31840,Songpa-gu,Seoul,05690,WEEKEND20,M,20s
+2025-05-04,Probiotics,Health Supplements,30 tablets,2,39840,Mapo-gu,Seoul,04185,WEEKEND20,F,40s
+2025-05-04,Apple,Fruit/Nuts/Rice,1kg,1,10320,Gangnam-gu,Seoul,06035,WEEKEND20,M,30s
+2025-05-04,Pork,Meat/Processed Meat/Egg,500g,2,19040,Songpa-gu,Seoul,05785,WEEKEND20,M,50s
+2025-05-04,Probiotics,Health Supplements,30 tablets,2,39840,Songpa-gu,Seoul,05589,WEEKEND20,M,40s
+2025-05-04,Milk,Dairy,1L,4,9280,Nowon-gu,Seoul,01683,WEEKEND20,M,20s
+2025-05-04,Green Tea,Coffee/Tea,20-pack,1,4720,Songpa-gu,Seoul,05548,WEEKEND20,F,30s
+2025-05-04,White Bread,Bakery,1 pc,1,3600,Seocho-gu,Seoul,06763,WEEKEND20,F,50s
+2025-05-04,White Bread,Bakery,1 pc,1,3600,Gangnam-gu,Seoul,06162,WEEKEND20,M,50s
+2025-05-04,Green Tea,Coffee/Tea,20-pack,2,9440,Gangnam-gu,Seoul,06043,WEEKEND20,F,40s
+2025-05-04,White Rice,Fruit/Nuts/Rice,5kg,1,19920,Nowon-gu,Seoul,01775,WEEKEND20,F,20s
+2025-05-04,Egg,Meat/Processed Meat/Egg,10-pack,1,3920,Songpa-gu,Seoul,05555,WEEKEND20,F,30s
+2025-05-04,Red Ginseng,Health Supplements,30-pack,1,31200,Mapo-gu,Seoul,04121,WEEKEND20,M,20s
+2025-05-04,Ginger Tea,Coffee/Tea,500ml,4,28480,Nowon-gu,Seoul,01718,WEEKEND20,M,30s
+2025-05-04,White Bread,Bakery,1 pc,1,3600,Songpa-gu,Seoul,05694,WEEKEND20,M,50s
+2025-05-04,Milk,Dairy,1L,2,4640,Gangseo-gu,Seoul,07723,WEEKEND20,F,30s
+2025-05-04,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,7920,Songpa-gu,Seoul,05637,WEEKEND20,M,60s
+2025-05-04,Cheddar Cheese,Dairy,200g,1,5200,Seongdong-gu,Seoul,04776,WEEKEND20,F,40s
+2025-05-04,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,15840,Yongsan-gu,Seoul,04302,WEEKEND20,M,20s
+2025-05-04,Greek Yogurt,Dairy,400g,2,9440,Gangseo-gu,Seoul,07593,WEEKEND20,M,30s
+2025-05-04,Bagel,Bakery,4-pack,1,5520,Gangnam-gu,Seoul,06014,WEEKEND20,F,30s
+2025-05-04,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,6320,Gangseo-gu,Seoul,07664,WEEKEND20,F,20s
+2025-05-04,White Rice,Fruit/Nuts/Rice,5kg,1,19920,Gwangjin-gu,Seoul,04936,WEEKEND20,M,40s
+2025-05-04,Lettuce,Vegetables,200g,1,2320,Songpa-gu,Seoul,05742,WEEKEND20,F,40s
+2025-05-04,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,4,25280,Seocho-gu,Seoul,06707,WEEKEND20,F,20s
+2025-05-04,Greek Yogurt,Dairy,400g,2,9440,Nowon-gu,Seoul,01750,WEEKEND20,M,30s
+2025-05-04,Ginger Tea,Coffee/Tea,500ml,2,14240,Seongdong-gu,Seoul,04813,WEEKEND20,M,50s
+2025-05-04,Apple,Fruit/Nuts/Rice,1kg,4,41280,Nowon-gu,Seoul,01702,WEEKEND20,F,40s
+2025-05-04,Onion,Vegetables,1kg,1,2800,Gangseo-gu,Seoul,07890,WEEKEND20,M,60s
+2025-05-04,Broccoli,Vegetables,500g,3,9360,Yeongdeungpo-gu,Seoul,07341,WEEKEND20,F,60s
+2025-05-04,Probiotics,Health Supplements,30 tablets,2,39840,Songpa-gu,Seoul,05750,WEEKEND20,F,40s
+2025-05-04,Drip Coffee,Coffee/Tea,200g,2,22240,Gangnam-gu,Seoul,06164,WEEKEND20,M,50s
+2025-05-04,Onion,Vegetables,1kg,3,8400,Mapo-gu,Seoul,04058,WEEKEND20,M,30s
+2025-05-04,White Bread,Bakery,1 pc,2,7200,Gangnam-gu,Seoul,06310,WEEKEND20,F,50s
+2025-05-04,Croissant,Bakery,4-pack,2,14240,Yongsan-gu,Seoul,04323,WEEKEND20,F,50s
+2025-05-04,White Rice,Fruit/Nuts/Rice,5kg,3,59760,Gangseo-gu,Seoul,07813,WEEKEND20,M,50s
+2025-05-04,Milk,Dairy,1L,3,6960,Yongsan-gu,Seoul,04381,WEEKEND20,M,30s
+2025-05-04,Milk,Dairy,1L,2,4640,Yeongdeungpo-gu,Seoul,07402,WEEKEND20,F,40s
+2025-05-04,Probiotics,Health Supplements,30 tablets,1,19920,Gwangjin-gu,Seoul,05046,WEEKEND20,M,60s
+2025-05-04,Lettuce,Vegetables,200g,2,4640,Mapo-gu,Seoul,04153,WEEKEND20,F,30s
+2025-05-04,Broccoli,Vegetables,500g,2,6240,Nowon-gu,Seoul,01824,WEEKEND20,M,50s
+2025-05-04,Cheddar Cheese,Dairy,200g,2,10400,Seongdong-gu,Seoul,04712,WEEKEND20,M,40s
+2025-05-04,White Rice,Fruit/Nuts/Rice,5kg,1,19920,Gwangjin-gu,Seoul,04908,WEEKEND20,F,50s
+2025-05-05,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,13800,Yeongdeungpo-gu,Seoul,07252,,M,50s
+2025-05-05,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Gwangjin-gu,Seoul,05066,,M,20s
+2025-05-05,Croissant,Bakery,4-pack,1,8900,Songpa-gu,Seoul,05757,,F,60s
+2025-05-05,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Songpa-gu,Seoul,05603,,F,30s
+2025-05-05,Apple,Fruit/Nuts/Rice,1kg,3,38700,Gangseo-gu,Seoul,07550,,M,50s
+2025-05-05,Pork,Meat/Processed Meat/Egg,500g,2,23800,Songpa-gu,Seoul,05571,,F,30s
+2025-05-05,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,13800,Yeongdeungpo-gu,Seoul,07222,,M,20s
+2025-05-05,Green Tea,Coffee/Tea,20-pack,1,5900,Seongdong-gu,Seoul,04760,,M,40s
+2025-05-05,Croissant,Bakery,4-pack,2,17800,Seocho-gu,Seoul,06632,,F,60s
+2025-05-05,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Yongsan-gu,Seoul,04302,,M,30s
+2025-05-05,White Bread,Bakery,1 pc,1,4500,Mapo-gu,Seoul,04170,,M,20s
+2025-05-05,Apple,Fruit/Nuts/Rice,1kg,1,12900,Seocho-gu,Seoul,06598,,F,60s
+2025-05-05,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Yeongdeungpo-gu,Seoul,07333,,F,40s
+2025-05-05,Mixed Nuts,Fruit/Nuts/Rice,500g,4,63600,Songpa-gu,Seoul,05800,,M,60s
+2025-05-05,Onion,Vegetables,1kg,1,3500,Songpa-gu,Seoul,05502,,M,30s
+2025-05-05,Croissant,Bakery,4-pack,2,17800,Nowon-gu,Seoul,01681,,F,60s
+2025-05-05,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Gangnam-gu,Seoul,06129,,F,30s
+2025-05-05,Green Tea,Coffee/Tea,20-pack,1,5900,Mapo-gu,Seoul,04183,,F,20s
+2025-05-05,Probiotics,Health Supplements,30 tablets,1,24900,Seocho-gu,Seoul,06713,,M,30s
+2025-05-05,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Yeongdeungpo-gu,Seoul,07268,,F,50s
+2025-05-05,Red Ginseng,Health Supplements,30-pack,1,39000,Songpa-gu,Seoul,05536,,M,60s
+2025-05-05,Greek Yogurt,Dairy,400g,3,17700,Yongsan-gu,Seoul,04309,,M,30s
+2025-05-05,White Rice,Fruit/Nuts/Rice,5kg,2,49800,Songpa-gu,Seoul,05828,,F,20s
+2025-05-05,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Gangnam-gu,Seoul,06319,,M,40s
+2025-05-05,Apple,Fruit/Nuts/Rice,1kg,2,25800,Songpa-gu,Seoul,05779,,F,50s
+2025-05-05,Bagel,Bakery,4-pack,2,13800,Nowon-gu,Seoul,01755,,F,30s
+2025-05-05,Pork,Meat/Processed Meat/Egg,500g,3,35700,Yeongdeungpo-gu,Seoul,07237,,M,40s
+2025-05-05,Apple,Fruit/Nuts/Rice,1kg,1,12900,Songpa-gu,Seoul,05747,,F,20s
+2025-05-05,Green Tea,Coffee/Tea,20-pack,1,5900,Yeongdeungpo-gu,Seoul,07224,,M,30s
+2025-05-05,Omega-3,Health Supplements,60 tablets,2,39800,Seongdong-gu,Seoul,04789,,M,50s
+2025-05-05,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,13800,Yongsan-gu,Seoul,04375,,M,30s
+2025-05-05,Probiotics,Health Supplements,30 tablets,4,99600,Mapo-gu,Seoul,03938,,M,60s
+2025-05-05,Croissant,Bakery,4-pack,1,8900,Seongdong-gu,Seoul,04717,,M,20s
+2025-05-05,White Bread,Bakery,1 pc,2,9000,Songpa-gu,Seoul,05882,,F,40s
+2025-05-05,Omega-3,Health Supplements,60 tablets,1,19900,Yongsan-gu,Seoul,04388,,M,40s
+2025-05-05,Red Ginseng,Health Supplements,30-pack,1,39000,Yeongdeungpo-gu,Seoul,07366,,F,40s
+2025-05-05,Ginger Tea,Coffee/Tea,500ml,1,8900,Yeongdeungpo-gu,Seoul,07468,,F,20s
+2025-05-05,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,6900,Gangseo-gu,Seoul,07734,,F,40s
+2025-05-05,Onion,Vegetables,1kg,4,14000,Seocho-gu,Seoul,06798,,F,40s
+2025-05-05,Probiotics,Health Supplements,30 tablets,1,24900,Gwangjin-gu,Seoul,04907,,F,60s
+2025-05-05,Probiotics,Health Supplements,30 tablets,1,24900,Nowon-gu,Seoul,01844,,F,60s
+2025-05-05,Broccoli,Vegetables,500g,1,3900,Yongsan-gu,Seoul,04332,,F,20s
+2025-05-05,White Rice,Fruit/Nuts/Rice,5kg,4,99600,Yeongdeungpo-gu,Seoul,07468,,F,30s
+2025-05-05,Greek Yogurt,Dairy,400g,2,11800,Yongsan-gu,Seoul,04401,,F,40s
+2025-05-05,White Rice,Fruit/Nuts/Rice,5kg,2,49800,Songpa-gu,Seoul,05704,,F,40s
+2025-05-05,Pork,Meat/Processed Meat/Egg,500g,1,11900,Gangnam-gu,Seoul,06127,,F,50s
+2025-05-05,Probiotics,Health Supplements,30 tablets,1,24900,Yeongdeungpo-gu,Seoul,07406,,M,40s
+2025-05-05,Green Tea,Coffee/Tea,20-pack,1,5900,Songpa-gu,Seoul,05810,,F,30s
+2025-05-05,Lettuce,Vegetables,200g,3,8700,Gangnam-gu,Seoul,06141,,M,50s
+2025-05-05,White Bread,Bakery,1 pc,4,18000,Seongdong-gu,Seoul,04811,,M,50s
+2025-05-05,Greek Yogurt,Dairy,400g,2,11800,Seocho-gu,Seoul,06656,,M,40s
+2025-05-05,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Seongdong-gu,Seoul,04788,,M,60s
+2025-05-05,Salad Kit,Ready Meal/Meal Kit/Salad,300g,3,20700,Yeongdeungpo-gu,Seoul,07493,,F,50s
+2025-05-05,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Gangseo-gu,Seoul,07663,,F,20s
+2025-05-05,Onion,Vegetables,1kg,2,7000,Songpa-gu,Seoul,05699,,F,30s
+2025-05-05,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Seocho-gu,Seoul,06713,,M,60s
+2025-05-05,Cheddar Cheese,Dairy,200g,4,26000,Seocho-gu,Seoul,06674,,M,40s
+2025-05-05,Onion,Vegetables,1kg,1,3500,Yeongdeungpo-gu,Seoul,07271,,F,30s
+2025-05-05,Pork,Meat/Processed Meat/Egg,500g,1,11900,Seongdong-gu,Seoul,04743,,M,30s
+2025-05-05,Broccoli,Vegetables,500g,3,11700,Mapo-gu,Seoul,04178,,M,30s
+2025-05-05,Milk,Dairy,1L,4,11600,Seocho-gu,Seoul,06614,,F,30s
+2025-05-05,Cheddar Cheese,Dairy,200g,1,6500,Gwangjin-gu,Seoul,04977,,M,60s
+2025-05-05,Milk,Dairy,1L,2,5800,Nowon-gu,Seoul,01756,,M,50s
+2025-05-05,Red Ginseng,Health Supplements,30-pack,1,39000,Yongsan-gu,Seoul,04330,,M,60s
+2025-05-05,Broccoli,Vegetables,500g,1,3900,Gangseo-gu,Seoul,07571,,M,20s
+2025-05-05,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,3,29700,Nowon-gu,Seoul,01829,,F,20s
+2025-05-05,Cheddar Cheese,Dairy,200g,2,13000,Songpa-gu,Seoul,05780,,M,60s
+2025-05-05,Red Ginseng,Health Supplements,30-pack,1,39000,Gangnam-gu,Seoul,06289,,F,30s
+2025-05-05,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Mapo-gu,Seoul,03980,,F,20s
+2025-05-05,Broccoli,Vegetables,500g,1,3900,Yeongdeungpo-gu,Seoul,07410,,M,20s
+2025-05-05,Red Ginseng,Health Supplements,30-pack,3,117000,Gwangjin-gu,Seoul,05041,,M,30s
+2025-05-05,Milk,Dairy,1L,1,2900,Yeongdeungpo-gu,Seoul,07326,,M,40s
+2025-05-05,Apple,Fruit/Nuts/Rice,1kg,1,12900,Yongsan-gu,Seoul,04320,,F,40s
+2025-05-05,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Songpa-gu,Seoul,05641,,F,20s
+2025-05-05,Milk,Dairy,1L,3,8700,Songpa-gu,Seoul,05790,,F,40s
+2025-05-05,Mixed Nuts,Fruit/Nuts/Rice,500g,1,15900,Seocho-gu,Seoul,06503,,M,50s
+2025-05-05,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Gangseo-gu,Seoul,07611,,M,40s
+2025-05-05,Mixed Nuts,Fruit/Nuts/Rice,500g,1,15900,Mapo-gu,Seoul,04120,,F,50s
+2025-05-05,Green Tea,Coffee/Tea,20-pack,4,23600,Mapo-gu,Seoul,04042,,M,40s
+2025-05-05,Red Ginseng,Health Supplements,30-pack,4,156000,Gwangjin-gu,Seoul,04939,,F,60s
+2025-05-05,Bagel,Bakery,4-pack,3,20700,Yongsan-gu,Seoul,04325,,M,50s
+2025-05-05,Green Tea,Coffee/Tea,20-pack,1,5900,Songpa-gu,Seoul,05815,,M,20s
+2025-05-05,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,13800,Songpa-gu,Seoul,05609,,F,30s
+2025-05-05,Red Ginseng,Health Supplements,30-pack,3,117000,Gangnam-gu,Seoul,06055,,M,30s
+2025-05-05,Greek Yogurt,Dairy,400g,3,17700,Songpa-gu,Seoul,05875,,M,40s
+2025-05-05,Onion,Vegetables,1kg,4,14000,Gangnam-gu,Seoul,06075,,F,40s
+2025-05-05,Omega-3,Health Supplements,60 tablets,1,19900,Seocho-gu,Seoul,06621,,F,60s
+2025-05-05,Drip Coffee,Coffee/Tea,200g,2,27800,Yongsan-gu,Seoul,04346,,M,40s
+2025-05-05,Croissant,Bakery,4-pack,3,26700,Gwangjin-gu,Seoul,05013,,F,40s
+2025-05-05,Probiotics,Health Supplements,30 tablets,4,99600,Yeongdeungpo-gu,Seoul,07494,,M,60s
+2025-05-05,Mixed Nuts,Fruit/Nuts/Rice,500g,3,47700,Seongdong-gu,Seoul,04704,,F,40s
+2025-05-05,Broccoli,Vegetables,500g,1,3900,Seongdong-gu,Seoul,04756,,F,20s
+2025-05-05,Croissant,Bakery,4-pack,2,17800,Seocho-gu,Seoul,06514,,F,30s
+2025-05-05,Salad Kit,Ready Meal/Meal Kit/Salad,300g,4,27600,Nowon-gu,Seoul,01792,,M,20s
+2025-05-05,Red Ginseng,Health Supplements,30-pack,1,39000,Seocho-gu,Seoul,06504,,F,60s
+2025-05-05,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Yeongdeungpo-gu,Seoul,07480,,M,40s
+2025-05-05,Pork,Meat/Processed Meat/Egg,500g,1,11900,Gangnam-gu,Seoul,06300,,M,30s
+2025-05-05,Egg,Meat/Processed Meat/Egg,10-pack,3,14700,Yeongdeungpo-gu,Seoul,07305,,F,40s
+2025-05-05,Mixed Nuts,Fruit/Nuts/Rice,500g,3,47700,Mapo-gu,Seoul,04135,,M,50s
+2025-05-05,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,2,15800,Seongdong-gu,Seoul,04783,,F,20s
+2025-05-05,Green Tea,Coffee/Tea,20-pack,2,11800,Nowon-gu,Seoul,01707,,M,30s
+2025-05-05,Egg,Meat/Processed Meat/Egg,10-pack,2,9800,Nowon-gu,Seoul,01826,,M,50s
+2025-05-05,Apple,Fruit/Nuts/Rice,1kg,4,51600,Seocho-gu,Seoul,06742,,M,30s
+2025-05-05,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Mapo-gu,Seoul,04145,,M,40s
+2025-05-05,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,4,39600,Yongsan-gu,Seoul,04415,,M,50s
+2025-05-05,Broccoli,Vegetables,500g,2,7800,Nowon-gu,Seoul,01883,,M,50s
+2025-05-05,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Songpa-gu,Seoul,05681,,F,40s
+2025-05-05,White Bread,Bakery,1 pc,1,4500,Songpa-gu,Seoul,05769,,M,40s
+2025-05-05,Croissant,Bakery,4-pack,1,8900,Songpa-gu,Seoul,05753,,M,30s
+2025-05-05,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,13800,Nowon-gu,Seoul,01643,,F,20s
+2025-05-05,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Gwangjin-gu,Seoul,05076,,M,50s
+2025-05-05,White Bread,Bakery,1 pc,3,13500,Gangseo-gu,Seoul,07854,,M,30s
+2025-05-05,Onion,Vegetables,1kg,2,7000,Gwangjin-gu,Seoul,04980,,F,50s
+2025-05-05,Milk,Dairy,1L,3,8700,Yongsan-gu,Seoul,04407,,M,30s
+2025-05-05,Egg,Meat/Processed Meat/Egg,10-pack,2,9800,Mapo-gu,Seoul,04099,,F,30s
+2025-05-05,Green Tea,Coffee/Tea,20-pack,2,11800,Mapo-gu,Seoul,04064,,F,40s
+2025-05-05,Probiotics,Health Supplements,30 tablets,2,49800,Gangnam-gu,Seoul,06166,,M,60s
+2025-05-05,Onion,Vegetables,1kg,3,10500,Gwangjin-gu,Seoul,04981,,F,40s
+2025-05-05,Onion,Vegetables,1kg,1,3500,Yongsan-gu,Seoul,04327,,F,40s
+2025-05-05,Omega-3,Health Supplements,60 tablets,1,19900,Gangseo-gu,Seoul,07813,,F,30s
+2025-05-05,Pork,Meat/Processed Meat/Egg,500g,2,23800,Songpa-gu,Seoul,05861,,M,20s
+2025-05-05,Green Tea,Coffee/Tea,20-pack,1,5900,Nowon-gu,Seoul,01865,,M,20s
+2025-05-05,White Bread,Bakery,1 pc,1,4500,Songpa-gu,Seoul,05882,,F,40s
+2025-05-05,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Gwangjin-gu,Seoul,04953,,M,30s
+2025-05-05,Onion,Vegetables,1kg,3,10500,Gangseo-gu,Seoul,07701,,M,30s
+2025-05-05,Bagel,Bakery,4-pack,1,6900,Gwangjin-gu,Seoul,05094,,F,60s
+2025-05-05,White Rice,Fruit/Nuts/Rice,5kg,2,49800,Seocho-gu,Seoul,06736,,M,40s
+2025-05-05,Apple,Fruit/Nuts/Rice,1kg,4,51600,Yeongdeungpo-gu,Seoul,07285,,F,40s
+2025-05-05,Drip Coffee,Coffee/Tea,200g,1,13900,Songpa-gu,Seoul,05554,,F,30s
+2025-05-05,Red Ginseng,Health Supplements,30-pack,2,78000,Nowon-gu,Seoul,01878,,M,60s
+2025-05-05,Ginger Tea,Coffee/Tea,500ml,1,8900,Nowon-gu,Seoul,01838,,M,40s
+2025-05-05,Ginger Tea,Coffee/Tea,500ml,1,8900,Songpa-gu,Seoul,05712,,M,20s
+2025-05-05,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,6900,Nowon-gu,Seoul,01846,,M,20s
+2025-05-05,Salad Kit,Ready Meal/Meal Kit/Salad,300g,3,20700,Songpa-gu,Seoul,05821,,F,20s
+2025-05-05,Cheddar Cheese,Dairy,200g,2,13000,Mapo-gu,Seoul,04041,,M,30s
+2025-05-05,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Songpa-gu,Seoul,05665,,F,40s
+2025-05-05,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,13800,Gwangjin-gu,Seoul,05095,,M,20s
+2025-05-05,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,13800,Mapo-gu,Seoul,03949,,F,40s
+2025-05-05,White Bread,Bakery,1 pc,1,4500,Seocho-gu,Seoul,06511,,F,30s
+2025-05-05,Broccoli,Vegetables,500g,1,3900,Seongdong-gu,Seoul,04782,,F,50s
+2025-05-05,Probiotics,Health Supplements,30 tablets,1,24900,Songpa-gu,Seoul,05729,,F,50s
+2025-05-05,Lettuce,Vegetables,200g,2,5800,Songpa-gu,Seoul,05541,,F,40s
+2025-05-05,Drip Coffee,Coffee/Tea,200g,2,27800,Songpa-gu,Seoul,05713,,F,20s
+2025-05-05,Greek Yogurt,Dairy,400g,1,5900,Seongdong-gu,Seoul,04750,,M,30s
+2025-05-05,Red Ginseng,Health Supplements,30-pack,3,117000,Gangnam-gu,Seoul,06248,,M,30s
+2025-05-05,Lettuce,Vegetables,200g,2,5800,Seocho-gu,Seoul,06551,,F,20s
+2025-05-05,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Seocho-gu,Seoul,06641,,M,20s
+2025-05-05,Hanwoo Beef Gift Set,Meat/Processed Meat/Egg,1 pc,3,390000,Seocho-gu,Seoul,06649,,M,50s
+2025-05-05,Hanwoo Beef Gift Set,Meat/Processed Meat/Egg,1 pc,3,390000,Seocho-gu,Seoul,06716,,F,40s
+2025-05-06,Onion,Vegetables,1kg,1,3500,Mapo-gu,Seoul,03923,,F,20s
+2025-05-06,Omega-3,Health Supplements,60 tablets,2,39800,Seocho-gu,Seoul,06731,,F,60s
+2025-05-06,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Nowon-gu,Seoul,01860,,F,40s
+2025-05-06,Salad Kit,Ready Meal/Meal Kit/Salad,300g,4,27600,Songpa-gu,Seoul,05857,,M,40s
+2025-05-06,Drip Coffee,Coffee/Tea,200g,2,27800,Songpa-gu,Seoul,05843,,M,50s
+2025-05-06,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Songpa-gu,Seoul,05860,,F,20s
+2025-05-06,Onion,Vegetables,1kg,3,10500,Seocho-gu,Seoul,06602,,F,30s
+2025-05-06,Apple,Fruit/Nuts/Rice,1kg,1,12900,Songpa-gu,Seoul,05706,,F,40s
+2025-05-06,Mixed Nuts,Fruit/Nuts/Rice,500g,4,63600,Songpa-gu,Seoul,05632,,M,30s
+2025-05-06,Pork,Meat/Processed Meat/Egg,500g,1,11900,Songpa-gu,Seoul,05681,,M,60s
+2025-05-06,Greek Yogurt,Dairy,400g,1,5900,Songpa-gu,Seoul,05644,,M,20s
+2025-05-06,Lettuce,Vegetables,200g,3,8700,Yeongdeungpo-gu,Seoul,07266,,M,40s
+2025-05-06,Cheddar Cheese,Dairy,200g,1,6500,Songpa-gu,Seoul,05848,,F,30s
+2025-05-06,Egg,Meat/Processed Meat/Egg,10-pack,2,9800,Yongsan-gu,Seoul,04371,,M,40s
+2025-05-06,Pork,Meat/Processed Meat/Egg,500g,3,35700,Mapo-gu,Seoul,04163,,M,60s
+2025-05-06,Milk,Dairy,1L,3,8700,Seocho-gu,Seoul,06668,,M,60s
+2025-05-06,Ginger Tea,Coffee/Tea,500ml,1,8900,Yeongdeungpo-gu,Seoul,07239,,F,40s
+2025-05-06,Onion,Vegetables,1kg,1,3500,Gangseo-gu,Seoul,07677,,F,30s
+2025-05-06,Lettuce,Vegetables,200g,2,5800,Seongdong-gu,Seoul,04757,,F,30s
+2025-05-06,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,4,39600,Gangseo-gu,Seoul,07763,,F,50s
+2025-05-06,Apple,Fruit/Nuts/Rice,1kg,2,25800,Gangseo-gu,Seoul,07719,,F,60s
+2025-05-06,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,3,29700,Mapo-gu,Seoul,04104,,F,20s
+2025-05-06,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,3,23700,Songpa-gu,Seoul,05792,,M,50s
+2025-05-06,Bagel,Bakery,4-pack,2,13800,Nowon-gu,Seoul,01851,,F,40s
+2025-05-06,Bagel,Bakery,4-pack,1,6900,Gwangjin-gu,Seoul,04928,,M,20s
+2025-05-06,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Seongdong-gu,Seoul,04730,,F,20s
+2025-05-06,Apple,Fruit/Nuts/Rice,1kg,1,12900,Gangnam-gu,Seoul,06393,,F,50s
+2025-05-06,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,4,31600,Gangnam-gu,Seoul,06182,,M,30s
+2025-05-06,Omega-3,Health Supplements,60 tablets,2,39800,Nowon-gu,Seoul,01660,,F,60s
+2025-05-06,Omega-3,Health Supplements,60 tablets,4,79600,Seongdong-gu,Seoul,04738,,F,30s
+2025-05-06,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Seongdong-gu,Seoul,04721,,F,20s
+2025-05-06,Omega-3,Health Supplements,60 tablets,1,19900,Yeongdeungpo-gu,Seoul,07421,,M,60s
+2025-05-06,Pork,Meat/Processed Meat/Egg,500g,2,23800,Seocho-gu,Seoul,06644,,M,50s
+2025-05-06,Apple,Fruit/Nuts/Rice,1kg,1,12900,Gangseo-gu,Seoul,07772,,F,60s
+2025-05-06,Apple,Fruit/Nuts/Rice,1kg,1,12900,Songpa-gu,Seoul,05644,,M,20s
+2025-05-06,Broccoli,Vegetables,500g,3,11700,Mapo-gu,Seoul,03936,,F,40s
+2025-05-06,Onion,Vegetables,1kg,1,3500,Nowon-gu,Seoul,01747,,M,50s
+2025-05-06,Greek Yogurt,Dairy,400g,3,17700,Mapo-gu,Seoul,04053,,F,20s
+2025-05-06,Greek Yogurt,Dairy,400g,2,11800,Gangnam-gu,Seoul,06026,,F,40s
+2025-05-06,Apple,Fruit/Nuts/Rice,1kg,3,38700,Songpa-gu,Seoul,05519,,M,30s
+2025-05-06,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Nowon-gu,Seoul,01678,,F,30s
+2025-05-06,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Gwangjin-gu,Seoul,04903,,F,60s
+2025-05-06,Green Tea,Coffee/Tea,20-pack,1,5900,Gangnam-gu,Seoul,06047,,M,60s
+2025-05-06,Probiotics,Health Supplements,30 tablets,3,74700,Gwangjin-gu,Seoul,05082,,F,60s
+2025-05-06,Pork,Meat/Processed Meat/Egg,500g,4,47600,Gwangjin-gu,Seoul,05052,,M,50s
+2025-05-06,Ginger Tea,Coffee/Tea,500ml,1,8900,Seocho-gu,Seoul,06638,,M,40s
+2025-05-06,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,7900,Yeongdeungpo-gu,Seoul,07310,,F,40s
+2025-05-06,Omega-3,Health Supplements,60 tablets,1,19900,Songpa-gu,Seoul,05669,,M,60s
+2025-05-06,Milk,Dairy,1L,3,8700,Gangseo-gu,Seoul,07635,,F,40s
+2025-05-06,Green Tea,Coffee/Tea,20-pack,1,5900,Gwangjin-gu,Seoul,04903,,M,20s
+2025-05-06,Ginger Tea,Coffee/Tea,500ml,2,17800,Gangseo-gu,Seoul,07896,,M,30s
+2025-05-06,Green Tea,Coffee/Tea,20-pack,2,11800,Yongsan-gu,Seoul,04333,,M,60s
+2025-05-06,Lettuce,Vegetables,200g,1,2900,Gangnam-gu,Seoul,06084,,M,20s
+2025-05-06,Apple,Fruit/Nuts/Rice,1kg,2,25800,Nowon-gu,Seoul,01612,,M,20s
+2025-05-06,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,3,23700,Songpa-gu,Seoul,05683,,M,60s
+2025-05-06,Salad Kit,Ready Meal/Meal Kit/Salad,300g,4,27600,Songpa-gu,Seoul,05577,,F,20s
+2025-05-06,Milk,Dairy,1L,2,5800,Seocho-gu,Seoul,06557,,F,50s
+2025-05-06,Salad Kit,Ready Meal/Meal Kit/Salad,300g,3,20700,Gangnam-gu,Seoul,06056,,F,20s
+2025-05-06,Mixed Nuts,Fruit/Nuts/Rice,500g,3,47700,Songpa-gu,Seoul,05573,,F,50s
+2025-05-06,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Songpa-gu,Seoul,05562,,M,20s
+2025-05-06,Broccoli,Vegetables,500g,1,3900,Songpa-gu,Seoul,05703,,M,20s
+2025-05-06,Milk,Dairy,1L,1,2900,Seongdong-gu,Seoul,04720,,M,50s
+2025-05-06,Mixed Nuts,Fruit/Nuts/Rice,500g,3,47700,Mapo-gu,Seoul,04098,,F,50s
+2025-05-06,Apple,Fruit/Nuts/Rice,1kg,2,25800,Gangseo-gu,Seoul,07829,,F,40s
+2025-05-06,Greek Yogurt,Dairy,400g,2,11800,Yongsan-gu,Seoul,04380,,M,30s
+2025-05-06,Apple,Fruit/Nuts/Rice,1kg,1,12900,Gangnam-gu,Seoul,06099,,F,30s
+2025-05-06,Cheddar Cheese,Dairy,200g,1,6500,Songpa-gu,Seoul,05853,,M,30s
+2025-05-06,Probiotics,Health Supplements,30 tablets,4,99600,Yongsan-gu,Seoul,04319,,F,50s
+2025-05-06,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,6900,Mapo-gu,Seoul,04107,,F,20s
+2025-05-06,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Seocho-gu,Seoul,06568,,F,20s
+2025-05-06,Mixed Nuts,Fruit/Nuts/Rice,500g,1,15900,Yongsan-gu,Seoul,04344,,M,30s
+2025-05-06,Bagel,Bakery,4-pack,2,13800,Gwangjin-gu,Seoul,05035,,F,60s
+2025-05-06,White Bread,Bakery,1 pc,3,13500,Seongdong-gu,Seoul,04706,,M,30s
+2025-05-06,White Rice,Fruit/Nuts/Rice,5kg,3,74700,Songpa-gu,Seoul,05836,,M,40s
+2025-05-06,Lettuce,Vegetables,200g,2,5800,Nowon-gu,Seoul,01739,,F,60s
+2025-05-06,Ginger Tea,Coffee/Tea,500ml,4,35600,Mapo-gu,Seoul,03961,,F,40s
+2025-05-06,Broccoli,Vegetables,500g,4,15600,Gangseo-gu,Seoul,07638,,F,60s
+2025-05-06,Cheddar Cheese,Dairy,200g,2,13000,Seocho-gu,Seoul,06613,,M,40s
+2025-05-06,Apple,Fruit/Nuts/Rice,1kg,3,38700,Yongsan-gu,Seoul,04340,,M,50s
+2025-05-06,Ginger Tea,Coffee/Tea,500ml,1,8900,Gwangjin-gu,Seoul,05008,,F,50s
+2025-05-06,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Gangseo-gu,Seoul,07678,,M,20s
+2025-05-06,White Rice,Fruit/Nuts/Rice,5kg,4,99600,Songpa-gu,Seoul,05575,,M,50s
+2025-05-06,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Yongsan-gu,Seoul,04405,,F,50s
+2025-05-06,Apple,Fruit/Nuts/Rice,1kg,2,25800,Yeongdeungpo-gu,Seoul,07209,,F,50s
+2025-05-06,White Bread,Bakery,1 pc,3,13500,Yongsan-gu,Seoul,04353,,M,60s
+2025-05-06,Omega-3,Health Supplements,60 tablets,1,19900,Mapo-gu,Seoul,04109,,M,20s
+2025-05-06,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,7900,Mapo-gu,Seoul,04183,,M,20s
+2025-05-06,Greek Yogurt,Dairy,400g,1,5900,Seongdong-gu,Seoul,04707,,F,50s
+2025-05-06,Croissant,Bakery,4-pack,1,8900,Gangseo-gu,Seoul,07861,,M,30s
+2025-05-06,Mixed Nuts,Fruit/Nuts/Rice,500g,4,63600,Gwangjin-gu,Seoul,04951,,F,30s
+2025-05-06,Drip Coffee,Coffee/Tea,200g,1,13900,Gangnam-gu,Seoul,06221,,M,40s
+2025-05-06,Green Tea,Coffee/Tea,20-pack,1,5900,Seongdong-gu,Seoul,04701,,F,60s
+2025-05-06,White Bread,Bakery,1 pc,2,9000,Songpa-gu,Seoul,05625,,M,40s
+2025-05-06,Bagel,Bakery,4-pack,4,27600,Gangseo-gu,Seoul,07541,,F,30s
+2025-05-06,Croissant,Bakery,4-pack,2,17800,Mapo-gu,Seoul,04027,,M,60s
+2025-05-06,Croissant,Bakery,4-pack,1,8900,Songpa-gu,Seoul,05856,,F,50s
+2025-05-06,Milk,Dairy,1L,2,5800,Gwangjin-gu,Seoul,04981,,F,50s
+2025-05-06,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Songpa-gu,Seoul,05597,,M,40s
+2025-05-06,Lettuce,Vegetables,200g,2,5800,Songpa-gu,Seoul,05538,,F,30s
+2025-05-06,Onion,Vegetables,1kg,2,7000,Gwangjin-gu,Seoul,05063,,F,30s
+2025-05-06,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,6900,Nowon-gu,Seoul,01836,,F,60s
+2025-05-06,Broccoli,Vegetables,500g,2,7800,Yongsan-gu,Seoul,04386,,F,20s
+2025-05-06,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Yeongdeungpo-gu,Seoul,07332,,M,60s
+2025-05-06,Green Tea,Coffee/Tea,20-pack,2,11800,Gangnam-gu,Seoul,06258,,F,50s
+2025-05-06,Drip Coffee,Coffee/Tea,200g,1,13900,Gangnam-gu,Seoul,06364,,M,50s
+2025-05-06,Bagel,Bakery,4-pack,2,13800,Nowon-gu,Seoul,01843,,F,50s
+2025-05-06,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Gangnam-gu,Seoul,06166,,F,30s
+2025-05-06,White Rice,Fruit/Nuts/Rice,5kg,2,49800,Gangseo-gu,Seoul,07774,,F,20s
+2025-05-06,Green Tea,Coffee/Tea,20-pack,2,11800,Gangnam-gu,Seoul,06134,,F,20s
+2025-05-06,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Gangseo-gu,Seoul,07661,,F,40s
+2025-05-06,Ginger Tea,Coffee/Tea,500ml,1,8900,Mapo-gu,Seoul,04088,,F,40s
+2025-05-06,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Seongdong-gu,Seoul,04721,,M,40s
+2025-05-06,Apple,Fruit/Nuts/Rice,1kg,2,25800,Songpa-gu,Seoul,05538,,M,50s
+2025-05-06,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,6900,Songpa-gu,Seoul,05883,,M,20s
+2025-05-06,Milk,Dairy,1L,1,2900,Songpa-gu,Seoul,05604,,F,20s
+2025-05-06,Apple,Fruit/Nuts/Rice,1kg,2,25800,Seongdong-gu,Seoul,04757,,M,20s
+2025-05-06,Lettuce,Vegetables,200g,2,5800,Seongdong-gu,Seoul,04728,,M,50s
+2025-05-06,Probiotics,Health Supplements,30 tablets,2,49800,Yeongdeungpo-gu,Seoul,07302,,M,50s
+2025-05-06,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,2,15800,Mapo-gu,Seoul,04155,,F,30s
+2025-05-06,Ginger Tea,Coffee/Tea,500ml,1,8900,Mapo-gu,Seoul,04137,,F,30s
+2025-05-06,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Gangseo-gu,Seoul,07756,,F,40s
+2025-05-06,Mixed Nuts,Fruit/Nuts/Rice,500g,2,31800,Seongdong-gu,Seoul,04737,,M,60s
+2025-05-06,Milk,Dairy,1L,2,5800,Mapo-gu,Seoul,04136,,F,30s
+2025-05-06,Onion,Vegetables,1kg,1,3500,Mapo-gu,Seoul,04132,,M,50s
+2025-05-06,Onion,Vegetables,1kg,1,3500,Yeongdeungpo-gu,Seoul,07482,,M,40s
+2025-05-06,Milk,Dairy,1L,4,11600,Gangseo-gu,Seoul,07771,,F,20s
+2025-05-06,Egg,Meat/Processed Meat/Egg,10-pack,2,9800,Gwangjin-gu,Seoul,04976,,F,40s
+2025-05-06,Lettuce,Vegetables,200g,2,5800,Mapo-gu,Seoul,04080,,F,60s
+2025-05-06,Broccoli,Vegetables,500g,1,3900,Songpa-gu,Seoul,05840,,F,30s
+2025-05-06,Green Tea,Coffee/Tea,20-pack,3,17700,Yeongdeungpo-gu,Seoul,07204,,F,20s
+2025-05-06,Probiotics,Health Supplements,30 tablets,2,49800,Nowon-gu,Seoul,01875,,M,60s
+2025-05-06,Croissant,Bakery,4-pack,1,8900,Seocho-gu,Seoul,06754,,F,60s
+2025-05-06,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Gangnam-gu,Seoul,06288,,M,40s
+2025-05-06,Greek Yogurt,Dairy,400g,1,5900,Gangseo-gu,Seoul,07623,,M,30s
+2025-05-06,Pork,Meat/Processed Meat/Egg,500g,1,11900,Mapo-gu,Seoul,04131,,F,40s
+2025-05-06,Pork,Meat/Processed Meat/Egg,500g,3,35700,Gwangjin-gu,Seoul,05091,,M,50s
+2025-05-06,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,2,15800,Mapo-gu,Seoul,03949,,F,40s
+2025-05-06,White Bread,Bakery,1 pc,1,4500,Mapo-gu,Seoul,03923,,F,50s
+2025-05-06,Greek Yogurt,Dairy,400g,1,5900,Seongdong-gu,Seoul,04732,,F,30s
+2025-05-06,Lettuce,Vegetables,200g,1,2900,Songpa-gu,Seoul,05814,,M,40s
+2025-05-06,Omega-3,Health Supplements,60 tablets,1,19900,Songpa-gu,Seoul,05884,,M,60s
+2025-05-06,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,4,39600,Songpa-gu,Seoul,05879,,F,30s
+2025-05-06,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,6900,Yeongdeungpo-gu,Seoul,07330,,F,20s
+2025-05-06,Milk,Dairy,1L,2,5800,Gangseo-gu,Seoul,07868,,M,40s
+2025-05-06,Mixed Nuts,Fruit/Nuts/Rice,500g,1,15900,Seocho-gu,Seoul,06768,,M,40s
+2025-05-06,Red Ginseng,Health Supplements,30-pack,1,39000,Mapo-gu,Seoul,03921,,M,20s
+2025-05-06,Croissant,Bakery,4-pack,2,17800,Gangnam-gu,Seoul,06046,,F,40s
+2025-05-06,Red Ginseng,Health Supplements,30-pack,1,39000,Mapo-gu,Seoul,04154,,F,50s
+2025-05-06,Mixed Nuts,Fruit/Nuts/Rice,500g,3,47700,Gangnam-gu,Seoul,06286,,F,20s
+2025-05-06,Hanwoo Beef Gift Set,Meat/Processed Meat/Egg,1 pc,3,390000,Seocho-gu,Seoul,06688,,F,50s
+2025-05-07,Probiotics,Health Supplements,30 tablets,1,24900,Yongsan-gu,Seoul,04341,,F,30s
+2025-05-07,Mixed Nuts,Fruit/Nuts/Rice,500g,3,47700,Nowon-gu,Seoul,01855,,M,40s
+2025-05-07,Pork,Meat/Processed Meat/Egg,500g,2,23800,Seocho-gu,Seoul,06695,,M,60s
+2025-05-07,Drip Coffee,Coffee/Tea,200g,2,27800,Songpa-gu,Seoul,05816,,F,40s
+2025-05-07,Greek Yogurt,Dairy,400g,3,17700,Songpa-gu,Seoul,05512,,F,40s
+2025-05-07,Lettuce,Vegetables,200g,3,8700,Yeongdeungpo-gu,Seoul,07493,,M,60s
+2025-05-07,Probiotics,Health Supplements,30 tablets,4,99600,Gangseo-gu,Seoul,07552,,F,40s
+2025-05-07,Drip Coffee,Coffee/Tea,200g,1,13900,Seocho-gu,Seoul,06578,,F,20s
+2025-05-07,Red Ginseng,Health Supplements,30-pack,2,78000,Nowon-gu,Seoul,01738,,M,40s
+2025-05-07,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Songpa-gu,Seoul,05567,,M,40s
+2025-05-07,Bagel,Bakery,4-pack,1,6900,Gwangjin-gu,Seoul,05047,,F,40s
+2025-05-07,Mixed Nuts,Fruit/Nuts/Rice,500g,1,15900,Songpa-gu,Seoul,05754,,F,60s
+2025-05-07,Onion,Vegetables,1kg,1,3500,Gangnam-gu,Seoul,06080,,M,60s
+2025-05-07,White Rice,Fruit/Nuts/Rice,5kg,2,49800,Yongsan-gu,Seoul,04409,,F,40s
+2025-05-07,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,4,31600,Yeongdeungpo-gu,Seoul,07282,,M,20s
+2025-05-07,White Bread,Bakery,1 pc,3,13500,Gwangjin-gu,Seoul,05063,,M,30s
+2025-05-07,Mixed Nuts,Fruit/Nuts/Rice,500g,1,15900,Gwangjin-gu,Seoul,04948,,M,40s
+2025-05-07,Cheddar Cheese,Dairy,200g,2,13000,Nowon-gu,Seoul,01645,,M,30s
+2025-05-07,Lettuce,Vegetables,200g,1,2900,Songpa-gu,Seoul,05555,,F,60s
+2025-05-07,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,2,15800,Songpa-gu,Seoul,05793,,F,40s
+2025-05-07,Croissant,Bakery,4-pack,2,17800,Songpa-gu,Seoul,05863,,F,30s
+2025-05-07,Drip Coffee,Coffee/Tea,200g,2,27800,Gwangjin-gu,Seoul,04967,,F,40s
+2025-05-07,Pork,Meat/Processed Meat/Egg,500g,3,35700,Mapo-gu,Seoul,04042,,F,40s
+2025-05-07,Milk,Dairy,1L,1,2900,Seongdong-gu,Seoul,04802,,M,20s
+2025-05-07,Omega-3,Health Supplements,60 tablets,1,19900,Songpa-gu,Seoul,05805,,M,60s
+2025-05-07,Apple,Fruit/Nuts/Rice,1kg,1,12900,Yongsan-gu,Seoul,04385,,M,30s
+2025-05-07,Croissant,Bakery,4-pack,4,35600,Nowon-gu,Seoul,01602,,F,50s
+2025-05-07,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,7900,Yongsan-gu,Seoul,04400,,M,20s
+2025-05-07,Egg,Meat/Processed Meat/Egg,10-pack,2,9800,Gwangjin-gu,Seoul,05079,,M,40s
+2025-05-07,Bagel,Bakery,4-pack,1,6900,Songpa-gu,Seoul,05811,,F,40s
+2025-05-07,Lettuce,Vegetables,200g,3,8700,Yeongdeungpo-gu,Seoul,07428,,F,60s
+2025-05-07,Mixed Nuts,Fruit/Nuts/Rice,500g,2,31800,Seocho-gu,Seoul,06504,,F,60s
+2025-05-07,Bagel,Bakery,4-pack,2,13800,Gangseo-gu,Seoul,07567,,F,40s
+2025-05-07,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,7900,Seongdong-gu,Seoul,04739,,F,50s
+2025-05-07,Green Tea,Coffee/Tea,20-pack,1,5900,Nowon-gu,Seoul,01772,,F,30s
+2025-05-07,Drip Coffee,Coffee/Tea,200g,1,13900,Songpa-gu,Seoul,05885,,M,20s
+2025-05-07,Croissant,Bakery,4-pack,4,35600,Songpa-gu,Seoul,05820,,F,30s
+2025-05-07,Probiotics,Health Supplements,30 tablets,1,24900,Songpa-gu,Seoul,05532,,F,20s
+2025-05-07,White Bread,Bakery,1 pc,4,18000,Songpa-gu,Seoul,05500,,M,50s
+2025-05-07,Probiotics,Health Supplements,30 tablets,2,49800,Mapo-gu,Seoul,04067,,M,50s
+2025-05-07,Cheddar Cheese,Dairy,200g,1,6500,Gwangjin-gu,Seoul,04980,,F,50s
+2025-05-07,Pork,Meat/Processed Meat/Egg,500g,1,11900,Songpa-gu,Seoul,05723,,F,60s
+2025-05-07,Croissant,Bakery,4-pack,1,8900,Gangseo-gu,Seoul,07716,,F,30s
+2025-05-07,Broccoli,Vegetables,500g,1,3900,Gangseo-gu,Seoul,07799,,F,50s
+2025-05-07,Omega-3,Health Supplements,60 tablets,1,19900,Songpa-gu,Seoul,05621,,M,60s
+2025-05-07,Croissant,Bakery,4-pack,1,8900,Mapo-gu,Seoul,04024,,M,60s
+2025-05-07,Green Tea,Coffee/Tea,20-pack,1,5900,Gangseo-gu,Seoul,07546,,M,40s
+2025-05-07,Broccoli,Vegetables,500g,3,11700,Seongdong-gu,Seoul,04767,,M,40s
+2025-05-07,Drip Coffee,Coffee/Tea,200g,2,27800,Songpa-gu,Seoul,05723,,M,50s
+2025-05-07,Milk,Dairy,1L,2,5800,Yeongdeungpo-gu,Seoul,07341,,M,40s
+2025-05-07,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Yongsan-gu,Seoul,04308,,F,60s
+2025-05-07,Onion,Vegetables,1kg,2,7000,Yongsan-gu,Seoul,04305,,F,60s
+2025-05-07,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,6900,Gangnam-gu,Seoul,06228,,M,40s
+2025-05-07,Cheddar Cheese,Dairy,200g,3,19500,Mapo-gu,Seoul,03948,,F,20s
+2025-05-07,Lettuce,Vegetables,200g,1,2900,Yeongdeungpo-gu,Seoul,07215,,F,40s
+2025-05-07,Broccoli,Vegetables,500g,2,7800,Gangseo-gu,Seoul,07646,,M,60s
+2025-05-07,Croissant,Bakery,4-pack,2,17800,Nowon-gu,Seoul,01737,,F,60s
+2025-05-07,Pork,Meat/Processed Meat/Egg,500g,3,35700,Mapo-gu,Seoul,03966,,F,40s
+2025-05-07,Red Ginseng,Health Supplements,30-pack,2,78000,Seongdong-gu,Seoul,04811,,F,20s
+2025-05-08,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,13800,Yongsan-gu,Seoul,04385,,M,20s
+2025-05-08,Green Tea,Coffee/Tea,20-pack,3,17700,Yeongdeungpo-gu,Seoul,07437,,M,30s
+2025-05-08,Greek Yogurt,Dairy,400g,1,5900,Yeongdeungpo-gu,Seoul,07493,,F,40s
+2025-05-08,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Yongsan-gu,Seoul,04401,,F,50s
+2025-05-08,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,3,23700,Gwangjin-gu,Seoul,04967,,F,30s
+2025-05-08,Bagel,Bakery,4-pack,3,20700,Seocho-gu,Seoul,06552,,F,30s
+2025-05-08,White Rice,Fruit/Nuts/Rice,5kg,3,74700,Yeongdeungpo-gu,Seoul,07455,,F,20s
+2025-05-08,Drip Coffee,Coffee/Tea,200g,2,27800,Gwangjin-gu,Seoul,05094,,F,50s
+2025-05-08,Omega-3,Health Supplements,60 tablets,1,19900,Songpa-gu,Seoul,05667,,F,60s
+2025-05-08,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Gwangjin-gu,Seoul,05041,,F,40s
+2025-05-08,Omega-3,Health Supplements,60 tablets,1,19900,Gangnam-gu,Seoul,06284,,F,20s
+2025-05-08,Bagel,Bakery,4-pack,2,13800,Gwangjin-gu,Seoul,05036,,M,50s
+2025-05-08,Green Tea,Coffee/Tea,20-pack,1,5900,Gangseo-gu,Seoul,07715,,M,30s
+2025-05-08,Red Ginseng,Health Supplements,30-pack,1,39000,Songpa-gu,Seoul,05630,,F,60s
+2025-05-08,Probiotics,Health Supplements,30 tablets,1,24900,Songpa-gu,Seoul,05835,,F,30s
+2025-05-08,Red Ginseng,Health Supplements,30-pack,1,39000,Songpa-gu,Seoul,05532,,M,60s
+2025-05-08,Bagel,Bakery,4-pack,1,6900,Yeongdeungpo-gu,Seoul,07232,,F,40s
+2025-05-08,Pork,Meat/Processed Meat/Egg,500g,1,11900,Seongdong-gu,Seoul,04748,,F,40s
+2025-05-08,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,7900,Gangseo-gu,Seoul,07723,,M,40s
+2025-05-08,Croissant,Bakery,4-pack,2,17800,Gangseo-gu,Seoul,07854,,F,30s
+2025-05-08,Mixed Nuts,Fruit/Nuts/Rice,500g,2,31800,Songpa-gu,Seoul,05669,,F,20s
+2025-05-08,White Rice,Fruit/Nuts/Rice,5kg,2,49800,Gangseo-gu,Seoul,07626,,F,20s
+2025-05-08,Salad Kit,Ready Meal/Meal Kit/Salad,300g,3,20700,Gwangjin-gu,Seoul,05094,,M,20s
+2025-05-08,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,13800,Seocho-gu,Seoul,06513,,F,40s
+2025-05-08,Green Tea,Coffee/Tea,20-pack,1,5900,Yeongdeungpo-gu,Seoul,07231,,F,20s
+2025-05-08,Lettuce,Vegetables,200g,1,2900,Yeongdeungpo-gu,Seoul,07425,,F,50s
+2025-05-08,Drip Coffee,Coffee/Tea,200g,1,13900,Gangseo-gu,Seoul,07655,,M,30s
+2025-05-08,Red Ginseng,Health Supplements,30-pack,1,39000,Yeongdeungpo-gu,Seoul,07288,,M,60s
+2025-05-08,Greek Yogurt,Dairy,400g,1,5900,Nowon-gu,Seoul,01852,,F,40s
+2025-05-08,Pork,Meat/Processed Meat/Egg,500g,3,35700,Yeongdeungpo-gu,Seoul,07311,,M,60s
+2025-05-08,Lettuce,Vegetables,200g,1,2900,Gwangjin-gu,Seoul,05061,,F,30s
+2025-05-08,Croissant,Bakery,4-pack,2,17800,Seocho-gu,Seoul,06650,,F,30s
+2025-05-08,Egg,Meat/Processed Meat/Egg,10-pack,2,9800,Mapo-gu,Seoul,04137,,F,30s
+2025-05-08,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Seocho-gu,Seoul,06690,,M,40s
+2025-05-08,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,6900,Seongdong-gu,Seoul,04722,,F,50s
+2025-05-08,Drip Coffee,Coffee/Tea,200g,3,41700,Songpa-gu,Seoul,05518,,F,40s
+2025-05-08,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,6900,Nowon-gu,Seoul,01798,,F,40s
+2025-05-08,Mixed Nuts,Fruit/Nuts/Rice,500g,4,63600,Mapo-gu,Seoul,04033,,M,50s
+2025-05-08,Green Tea,Coffee/Tea,20-pack,2,11800,Mapo-gu,Seoul,04091,,M,20s
+2025-05-08,Red Ginseng,Health Supplements,30-pack,1,39000,Gangseo-gu,Seoul,07698,,F,50s
+2025-05-08,Croissant,Bakery,4-pack,2,17800,Seocho-gu,Seoul,06750,,F,50s
+2025-05-08,Mixed Nuts,Fruit/Nuts/Rice,500g,2,31800,Gangnam-gu,Seoul,06056,,M,50s
+2025-05-08,Drip Coffee,Coffee/Tea,200g,2,27800,Seongdong-gu,Seoul,04785,,M,40s
+2025-05-08,Apple,Fruit/Nuts/Rice,1kg,2,25800,Nowon-gu,Seoul,01856,,F,40s
+2025-05-08,Drip Coffee,Coffee/Tea,200g,1,13900,Mapo-gu,Seoul,04183,,F,50s
+2025-05-08,Milk,Dairy,1L,1,2900,Yeongdeungpo-gu,Seoul,07439,,M,30s
+2025-05-08,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,3,29700,Gangnam-gu,Seoul,06031,,M,20s
+2025-05-08,Bagel,Bakery,4-pack,3,20700,Mapo-gu,Seoul,04104,,M,60s
+2025-05-08,Pork,Meat/Processed Meat/Egg,500g,1,11900,Songpa-gu,Seoul,05513,,M,40s
+2025-05-08,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,4,39600,Nowon-gu,Seoul,01856,,F,30s
+2025-05-08,Egg,Meat/Processed Meat/Egg,10-pack,4,19600,Mapo-gu,Seoul,04088,,M,40s
+2025-05-08,Cheddar Cheese,Dairy,200g,4,26000,Seongdong-gu,Seoul,04794,,F,30s
+2025-05-08,Apple,Fruit/Nuts/Rice,1kg,4,51600,Gwangjin-gu,Seoul,05089,,F,40s
+2025-05-08,Mixed Nuts,Fruit/Nuts/Rice,500g,4,63600,Yongsan-gu,Seoul,04374,,F,50s
+2025-05-08,White Bread,Bakery,1 pc,1,4500,Yongsan-gu,Seoul,04322,,M,30s
+2025-05-08,Greek Yogurt,Dairy,400g,1,5900,Seongdong-gu,Seoul,04810,,M,60s
+2025-05-08,Mixed Nuts,Fruit/Nuts/Rice,500g,1,15900,Mapo-gu,Seoul,04147,,M,40s
+2025-05-08,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,13800,Mapo-gu,Seoul,03910,,M,50s
+2025-05-08,Red Ginseng,Health Supplements,30-pack,2,78000,Yeongdeungpo-gu,Seoul,07459,,F,60s
+2025-05-08,Milk,Dairy,1L,2,5800,Seocho-gu,Seoul,06506,,F,20s
+2025-05-09,Milk,Dairy,1L,2,5800,Yeongdeungpo-gu,Seoul,07433,,F,60s
+2025-05-09,White Rice,Fruit/Nuts/Rice,5kg,4,99600,Mapo-gu,Seoul,04072,,F,30s
+2025-05-09,Drip Coffee,Coffee/Tea,200g,1,13900,Seongdong-gu,Seoul,04778,,F,60s
+2025-05-09,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,13800,Nowon-gu,Seoul,01839,,F,30s
+2025-05-09,Croissant,Bakery,4-pack,1,8900,Songpa-gu,Seoul,05642,,F,30s
+2025-05-09,Ginger Tea,Coffee/Tea,500ml,1,8900,Gangnam-gu,Seoul,06284,,M,20s
+2025-05-09,Red Ginseng,Health Supplements,30-pack,3,117000,Yongsan-gu,Seoul,04396,,F,30s
+2025-05-09,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Gangseo-gu,Seoul,07730,,M,20s
+2025-05-09,Cheddar Cheese,Dairy,200g,2,13000,Nowon-gu,Seoul,01662,,M,50s
+2025-05-09,Broccoli,Vegetables,500g,1,3900,Yeongdeungpo-gu,Seoul,07200,,M,30s
+2025-05-09,Egg,Meat/Processed Meat/Egg,10-pack,4,19600,Songpa-gu,Seoul,05880,,F,20s
+2025-05-09,Croissant,Bakery,4-pack,2,17800,Songpa-gu,Seoul,05522,,F,30s
+2025-05-09,Green Tea,Coffee/Tea,20-pack,1,5900,Seocho-gu,Seoul,06715,,M,40s
+2025-05-09,Greek Yogurt,Dairy,400g,2,11800,Mapo-gu,Seoul,04145,,M,30s
+2025-05-09,Broccoli,Vegetables,500g,2,7800,Nowon-gu,Seoul,01733,,M,40s
+2025-05-09,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,3,29700,Gwangjin-gu,Seoul,04920,,F,30s
+2025-05-09,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,4,39600,Seocho-gu,Seoul,06644,,M,40s
+2025-05-09,Ginger Tea,Coffee/Tea,500ml,1,8900,Gangseo-gu,Seoul,07885,,F,40s
+2025-05-09,Pork,Meat/Processed Meat/Egg,500g,2,23800,Gangnam-gu,Seoul,06189,,M,40s
+2025-05-09,Omega-3,Health Supplements,60 tablets,1,19900,Gangnam-gu,Seoul,06225,,F,60s
+2025-05-09,White Bread,Bakery,1 pc,2,9000,Seongdong-gu,Seoul,04816,,M,50s
+2025-05-09,Onion,Vegetables,1kg,1,3500,Gangnam-gu,Seoul,06146,,M,30s
+2025-05-09,Apple,Fruit/Nuts/Rice,1kg,1,12900,Yeongdeungpo-gu,Seoul,07471,,M,30s
+2025-05-09,Broccoli,Vegetables,500g,2,7800,Seongdong-gu,Seoul,04741,,M,60s
+2025-05-09,Pork,Meat/Processed Meat/Egg,500g,3,35700,Songpa-gu,Seoul,05773,,M,50s
+2025-05-09,Apple,Fruit/Nuts/Rice,1kg,1,12900,Gangnam-gu,Seoul,06153,,F,50s
+2025-05-09,Croissant,Bakery,4-pack,3,26700,Nowon-gu,Seoul,01824,,M,30s
+2025-05-09,Apple,Fruit/Nuts/Rice,1kg,1,12900,Gangnam-gu,Seoul,06032,,M,60s
+2025-05-09,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,3,29700,Nowon-gu,Seoul,01766,,F,30s
+2025-05-09,Lettuce,Vegetables,200g,1,2900,Mapo-gu,Seoul,03900,,M,60s
+2025-05-09,Bagel,Bakery,4-pack,1,6900,Songpa-gu,Seoul,05579,,M,20s
+2025-05-09,White Rice,Fruit/Nuts/Rice,5kg,2,49800,Mapo-gu,Seoul,04015,,M,60s
+2025-05-09,Drip Coffee,Coffee/Tea,200g,1,13900,Nowon-gu,Seoul,01867,,M,40s
+2025-05-09,Milk,Dairy,1L,1,2900,Gangseo-gu,Seoul,07871,,M,20s
+2025-05-09,Lettuce,Vegetables,200g,2,5800,Mapo-gu,Seoul,04040,,F,20s
+2025-05-09,White Bread,Bakery,1 pc,1,4500,Nowon-gu,Seoul,01735,,F,30s
+2025-05-09,Ginger Tea,Coffee/Tea,500ml,1,8900,Songpa-gu,Seoul,05726,,F,40s
+2025-05-09,Probiotics,Health Supplements,30 tablets,1,24900,Gangseo-gu,Seoul,07678,,F,40s
+2025-05-09,Pork,Meat/Processed Meat/Egg,500g,3,35700,Songpa-gu,Seoul,05707,,F,60s
+2025-05-09,Probiotics,Health Supplements,30 tablets,1,24900,Nowon-gu,Seoul,01730,,F,30s
+2025-05-09,Egg,Meat/Processed Meat/Egg,10-pack,4,19600,Gangseo-gu,Seoul,07793,,F,60s
+2025-05-09,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,7900,Mapo-gu,Seoul,03974,,F,60s
+2025-05-09,Bagel,Bakery,4-pack,4,27600,Seocho-gu,Seoul,06543,,F,50s
+2025-05-09,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,3,23700,Nowon-gu,Seoul,01814,,M,60s
+2025-05-09,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,7900,Gangseo-gu,Seoul,07748,,M,20s
+2025-05-09,Omega-3,Health Supplements,60 tablets,1,19900,Songpa-gu,Seoul,05637,,F,40s
+2025-05-09,Mixed Nuts,Fruit/Nuts/Rice,500g,3,47700,Seocho-gu,Seoul,06539,,F,30s
+2025-05-09,Broccoli,Vegetables,500g,2,7800,Songpa-gu,Seoul,05871,,F,30s
+2025-05-09,White Rice,Fruit/Nuts/Rice,5kg,3,74700,Gangseo-gu,Seoul,07748,,M,20s
+2025-05-09,Cheddar Cheese,Dairy,200g,2,13000,Seocho-gu,Seoul,06716,,F,20s
+2025-05-09,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Seocho-gu,Seoul,06774,,F,40s
+2025-05-09,Green Tea,Coffee/Tea,20-pack,2,11800,Songpa-gu,Seoul,05844,,F,30s
+2025-05-09,Broccoli,Vegetables,500g,2,7800,Gwangjin-gu,Seoul,05094,,M,60s
+2025-05-09,Drip Coffee,Coffee/Tea,200g,1,13900,Nowon-gu,Seoul,01859,,M,20s
+2025-05-09,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Seocho-gu,Seoul,06631,,M,40s
+2025-05-09,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Yongsan-gu,Seoul,04342,,F,20s
+2025-05-09,Omega-3,Health Supplements,60 tablets,2,39800,Songpa-gu,Seoul,05792,,F,60s
+2025-05-09,Egg,Meat/Processed Meat/Egg,10-pack,2,9800,Gangnam-gu,Seoul,06187,,F,20s
+2025-05-09,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,7900,Seongdong-gu,Seoul,04773,,F,20s
+2025-05-10,Greek Yogurt,Dairy,400g,1,4720,Yeongdeungpo-gu,Seoul,07459,WEEKEND20,M,40s
+2025-05-10,Onion,Vegetables,1kg,1,2800,Mapo-gu,Seoul,03976,WEEKEND20,M,20s
+2025-05-10,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,11040,Mapo-gu,Seoul,04177,WEEKEND20,M,20s
+2025-05-10,Apple,Fruit/Nuts/Rice,1kg,3,30960,Gangnam-gu,Seoul,06189,WEEKEND20,M,40s
+2025-05-10,Bagel,Bakery,4-pack,1,5520,Gwangjin-gu,Seoul,04913,WEEKEND20,M,40s
+2025-05-10,Drip Coffee,Coffee/Tea,200g,2,22240,Yongsan-gu,Seoul,04394,WEEKEND20,M,50s
+2025-05-10,Lettuce,Vegetables,200g,3,6960,Gangnam-gu,Seoul,06288,WEEKEND20,F,30s
+2025-05-10,Croissant,Bakery,4-pack,2,14240,Songpa-gu,Seoul,05736,WEEKEND20,F,60s
+2025-05-10,Red Ginseng,Health Supplements,30-pack,1,31200,Gangseo-gu,Seoul,07533,WEEKEND20,M,60s
+2025-05-10,Omega-3,Health Supplements,60 tablets,3,47760,Yeongdeungpo-gu,Seoul,07209,WEEKEND20,M,20s
+2025-05-10,Mixed Nuts,Fruit/Nuts/Rice,500g,3,38160,Gangseo-gu,Seoul,07656,WEEKEND20,M,60s
+2025-05-10,Cheddar Cheese,Dairy,200g,3,15600,Mapo-gu,Seoul,03932,WEEKEND20,F,30s
+2025-05-10,Red Ginseng,Health Supplements,30-pack,4,124800,Songpa-gu,Seoul,05571,WEEKEND20,F,60s
+2025-05-10,Croissant,Bakery,4-pack,2,14240,Songpa-gu,Seoul,05659,WEEKEND20,M,20s
+2025-05-10,White Bread,Bakery,1 pc,4,14400,Songpa-gu,Seoul,05511,WEEKEND20,F,60s
+2025-05-10,Onion,Vegetables,1kg,2,5600,Songpa-gu,Seoul,05758,WEEKEND20,M,20s
+2025-05-10,Cheddar Cheese,Dairy,200g,3,15600,Mapo-gu,Seoul,03929,WEEKEND20,F,40s
+2025-05-10,Probiotics,Health Supplements,30 tablets,2,39840,Seocho-gu,Seoul,06730,WEEKEND20,F,20s
+2025-05-10,Milk,Dairy,1L,1,2320,Songpa-gu,Seoul,05687,WEEKEND20,F,40s
+2025-05-10,Egg,Meat/Processed Meat/Egg,10-pack,2,7840,Gangseo-gu,Seoul,07708,WEEKEND20,F,60s
+2025-05-10,Green Tea,Coffee/Tea,20-pack,1,4720,Seongdong-gu,Seoul,04773,WEEKEND20,M,60s
+2025-05-10,Egg,Meat/Processed Meat/Egg,10-pack,4,15680,Songpa-gu,Seoul,05636,WEEKEND20,M,30s
+2025-05-10,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,6320,Mapo-gu,Seoul,04124,WEEKEND20,F,30s
+2025-05-10,Croissant,Bakery,4-pack,3,21360,Songpa-gu,Seoul,05546,WEEKEND20,F,50s
+2025-05-10,Omega-3,Health Supplements,60 tablets,1,15920,Gangnam-gu,Seoul,06007,WEEKEND20,M,60s
+2025-05-10,Mixed Nuts,Fruit/Nuts/Rice,500g,1,12720,Seongdong-gu,Seoul,04760,WEEKEND20,F,60s
+2025-05-10,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,11040,Yeongdeungpo-gu,Seoul,07492,WEEKEND20,F,30s
+2025-05-10,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,6320,Songpa-gu,Seoul,05532,WEEKEND20,F,20s
+2025-05-10,Pork,Meat/Processed Meat/Egg,500g,1,9520,Songpa-gu,Seoul,05867,WEEKEND20,F,40s
+2025-05-10,Apple,Fruit/Nuts/Rice,1kg,2,20640,Songpa-gu,Seoul,05818,WEEKEND20,F,30s
+2025-05-10,Lettuce,Vegetables,200g,2,4640,Mapo-gu,Seoul,03970,WEEKEND20,M,50s
+2025-05-10,Onion,Vegetables,1kg,1,2800,Songpa-gu,Seoul,05686,WEEKEND20,F,50s
+2025-05-10,Apple,Fruit/Nuts/Rice,1kg,1,10320,Gangseo-gu,Seoul,07814,WEEKEND20,F,60s
+2025-05-10,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,5520,Yeongdeungpo-gu,Seoul,07401,WEEKEND20,F,20s
+2025-05-10,Pork,Meat/Processed Meat/Egg,500g,1,9520,Songpa-gu,Seoul,05697,WEEKEND20,M,50s
+2025-05-10,Milk,Dairy,1L,2,4640,Gangseo-gu,Seoul,07779,WEEKEND20,M,30s
+2025-05-10,Lettuce,Vegetables,200g,4,9280,Seocho-gu,Seoul,06506,WEEKEND20,M,50s
+2025-05-10,Cheddar Cheese,Dairy,200g,2,10400,Seongdong-gu,Seoul,04778,WEEKEND20,M,30s
+2025-05-10,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,5520,Seongdong-gu,Seoul,04737,WEEKEND20,M,20s
+2025-05-10,Apple,Fruit/Nuts/Rice,1kg,1,10320,Gwangjin-gu,Seoul,05013,WEEKEND20,M,40s
+2025-05-10,Pork,Meat/Processed Meat/Egg,500g,2,19040,Nowon-gu,Seoul,01759,WEEKEND20,M,30s
+2025-05-10,Omega-3,Health Supplements,60 tablets,1,15920,Songpa-gu,Seoul,05849,WEEKEND20,F,60s
+2025-05-10,Pork,Meat/Processed Meat/Egg,500g,1,9520,Seongdong-gu,Seoul,04746,WEEKEND20,M,30s
+2025-05-10,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,15840,Gwangjin-gu,Seoul,04944,WEEKEND20,F,30s
+2025-05-10,White Rice,Fruit/Nuts/Rice,5kg,2,39840,Songpa-gu,Seoul,05811,WEEKEND20,F,30s
+2025-05-10,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,11040,Nowon-gu,Seoul,01671,WEEKEND20,F,30s
+2025-05-10,Apple,Fruit/Nuts/Rice,1kg,1,10320,Yongsan-gu,Seoul,04312,WEEKEND20,M,30s
+2025-05-10,Croissant,Bakery,4-pack,1,7120,Songpa-gu,Seoul,05527,WEEKEND20,M,30s
+2025-05-10,Egg,Meat/Processed Meat/Egg,10-pack,1,3920,Nowon-gu,Seoul,01799,WEEKEND20,F,50s
+2025-05-10,Red Ginseng,Health Supplements,30-pack,1,31200,Seongdong-gu,Seoul,04743,WEEKEND20,M,30s
+2025-05-10,Croissant,Bakery,4-pack,4,28480,Gangnam-gu,Seoul,06237,WEEKEND20,M,40s
+2025-05-10,White Rice,Fruit/Nuts/Rice,5kg,2,39840,Gangnam-gu,Seoul,06058,WEEKEND20,F,20s
+2025-05-10,Milk,Dairy,1L,3,6960,Songpa-gu,Seoul,05503,WEEKEND20,F,40s
+2025-05-10,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,7920,Gwangjin-gu,Seoul,04996,WEEKEND20,M,20s
+2025-05-10,White Bread,Bakery,1 pc,2,7200,Mapo-gu,Seoul,04072,WEEKEND20,F,40s
+2025-05-10,Onion,Vegetables,1kg,1,2800,Seongdong-gu,Seoul,04772,WEEKEND20,M,60s
+2025-05-10,Lettuce,Vegetables,200g,4,9280,Yeongdeungpo-gu,Seoul,07270,WEEKEND20,M,30s
+2025-05-10,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,11040,Seocho-gu,Seoul,06692,WEEKEND20,M,30s
+2025-05-10,Bagel,Bakery,4-pack,1,5520,Seongdong-gu,Seoul,04779,WEEKEND20,F,30s
+2025-05-10,Apple,Fruit/Nuts/Rice,1kg,1,10320,Gangseo-gu,Seoul,07638,WEEKEND20,F,30s
+2025-05-10,Onion,Vegetables,1kg,1,2800,Gangnam-gu,Seoul,06219,WEEKEND20,M,20s
+2025-05-10,Green Tea,Coffee/Tea,20-pack,3,14160,Yeongdeungpo-gu,Seoul,07308,WEEKEND20,F,50s
+2025-05-10,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,11040,Songpa-gu,Seoul,05779,WEEKEND20,M,60s
+2025-05-10,Greek Yogurt,Dairy,400g,1,4720,Nowon-gu,Seoul,01810,WEEKEND20,M,40s
+2025-05-10,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,7920,Gangnam-gu,Seoul,06043,WEEKEND20,M,60s
+2025-05-10,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,11040,Yongsan-gu,Seoul,04391,WEEKEND20,M,40s
+2025-05-10,Cheddar Cheese,Dairy,200g,4,20800,Seongdong-gu,Seoul,04737,WEEKEND20,M,60s
+2025-05-10,Cheddar Cheese,Dairy,200g,3,15600,Gangnam-gu,Seoul,06172,WEEKEND20,M,60s
+2025-05-10,White Bread,Bakery,1 pc,1,3600,Gangseo-gu,Seoul,07739,WEEKEND20,M,60s
+2025-05-10,Drip Coffee,Coffee/Tea,200g,2,22240,Mapo-gu,Seoul,03926,WEEKEND20,F,20s
+2025-05-10,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,7920,Gwangjin-gu,Seoul,05063,WEEKEND20,F,20s
+2025-05-10,Green Tea,Coffee/Tea,20-pack,4,18880,Seocho-gu,Seoul,06718,WEEKEND20,M,50s
+2025-05-10,Greek Yogurt,Dairy,400g,1,4720,Gangseo-gu,Seoul,07770,WEEKEND20,F,30s
+2025-05-10,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,5520,Mapo-gu,Seoul,04188,WEEKEND20,M,20s
+2025-05-10,Ginger Tea,Coffee/Tea,500ml,3,21360,Mapo-gu,Seoul,04138,WEEKEND20,M,40s
+2025-05-10,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,11040,Gangseo-gu,Seoul,07577,WEEKEND20,M,20s
+2025-05-10,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,6320,Seocho-gu,Seoul,06644,WEEKEND20,M,40s
+2025-05-10,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,3,18960,Yeongdeungpo-gu,Seoul,07493,WEEKEND20,F,30s
+2025-05-10,Bagel,Bakery,4-pack,1,5520,Gangnam-gu,Seoul,06266,WEEKEND20,M,30s
+2025-05-10,Drip Coffee,Coffee/Tea,200g,2,22240,Gangnam-gu,Seoul,06176,WEEKEND20,M,30s
+2025-05-10,Croissant,Bakery,4-pack,1,7120,Seongdong-gu,Seoul,04774,WEEKEND20,F,60s
+2025-05-10,Broccoli,Vegetables,500g,1,3120,Seongdong-gu,Seoul,04806,WEEKEND20,F,40s
+2025-05-10,Cheddar Cheese,Dairy,200g,2,10400,Yeongdeungpo-gu,Seoul,07205,WEEKEND20,F,30s
+2025-05-10,Bagel,Bakery,4-pack,2,11040,Gwangjin-gu,Seoul,05003,WEEKEND20,F,50s
+2025-05-10,Mixed Nuts,Fruit/Nuts/Rice,500g,2,25440,Gangnam-gu,Seoul,06277,WEEKEND20,M,50s
+2025-05-10,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,6320,Nowon-gu,Seoul,01800,WEEKEND20,F,50s
+2025-05-10,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,6320,Songpa-gu,Seoul,05549,WEEKEND20,F,60s
+2025-05-10,Probiotics,Health Supplements,30 tablets,4,79680,Gwangjin-gu,Seoul,05074,WEEKEND20,F,60s
+2025-05-10,White Bread,Bakery,1 pc,1,3600,Gangnam-gu,Seoul,06306,WEEKEND20,F,60s
+2025-05-10,Greek Yogurt,Dairy,400g,3,14160,Gangseo-gu,Seoul,07515,WEEKEND20,F,30s
+2025-05-10,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,3,23760,Gwangjin-gu,Seoul,05065,WEEKEND20,M,20s
+2025-05-10,Omega-3,Health Supplements,60 tablets,2,31840,Mapo-gu,Seoul,04165,WEEKEND20,F,20s
+2025-05-11,Drip Coffee,Coffee/Tea,200g,2,22240,Yeongdeungpo-gu,Seoul,07321,WEEKEND20,F,20s
+2025-05-11,Mixed Nuts,Fruit/Nuts/Rice,500g,1,12720,Songpa-gu,Seoul,05877,WEEKEND20,M,30s
+2025-05-11,White Bread,Bakery,1 pc,1,3600,Nowon-gu,Seoul,01733,WEEKEND20,F,60s
+2025-05-11,White Rice,Fruit/Nuts/Rice,5kg,1,19920,Yeongdeungpo-gu,Seoul,07313,WEEKEND20,F,40s
+2025-05-11,Milk,Dairy,1L,1,2320,Gangnam-gu,Seoul,06239,WEEKEND20,M,30s
+2025-05-11,Ginger Tea,Coffee/Tea,500ml,1,7120,Gwangjin-gu,Seoul,04944,WEEKEND20,F,20s
+2025-05-11,Apple,Fruit/Nuts/Rice,1kg,2,20640,Nowon-gu,Seoul,01672,WEEKEND20,F,40s
+2025-05-11,Greek Yogurt,Dairy,400g,1,4720,Gangnam-gu,Seoul,06181,WEEKEND20,F,60s
+2025-05-11,Omega-3,Health Supplements,60 tablets,1,15920,Gwangjin-gu,Seoul,04982,WEEKEND20,M,60s
+2025-05-11,Greek Yogurt,Dairy,400g,1,4720,Seongdong-gu,Seoul,04732,WEEKEND20,M,40s
+2025-05-11,Egg,Meat/Processed Meat/Egg,10-pack,2,7840,Mapo-gu,Seoul,03991,WEEKEND20,F,40s
+2025-05-11,Bagel,Bakery,4-pack,1,5520,Nowon-gu,Seoul,01877,WEEKEND20,F,50s
+2025-05-11,Milk,Dairy,1L,3,6960,Songpa-gu,Seoul,05760,WEEKEND20,F,30s
+2025-05-11,Onion,Vegetables,1kg,1,2800,Gwangjin-gu,Seoul,05067,WEEKEND20,F,50s
+2025-05-11,White Rice,Fruit/Nuts/Rice,5kg,4,79680,Gangnam-gu,Seoul,06202,WEEKEND20,F,30s
+2025-05-11,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,4,31680,Gwangjin-gu,Seoul,05014,WEEKEND20,F,50s
+2025-05-11,Croissant,Bakery,4-pack,1,7120,Seongdong-gu,Seoul,04800,WEEKEND20,M,30s
+2025-05-11,Cheddar Cheese,Dairy,200g,2,10400,Mapo-gu,Seoul,04184,WEEKEND20,M,20s
+2025-05-11,Egg,Meat/Processed Meat/Egg,10-pack,3,11760,Gwangjin-gu,Seoul,04906,WEEKEND20,F,40s
+2025-05-11,Bagel,Bakery,4-pack,1,5520,Songpa-gu,Seoul,05559,WEEKEND20,M,30s
+2025-05-11,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,2,12640,Gwangjin-gu,Seoul,04999,WEEKEND20,F,30s
+2025-05-11,Lettuce,Vegetables,200g,1,2320,Mapo-gu,Seoul,04031,WEEKEND20,F,30s
+2025-05-11,Omega-3,Health Supplements,60 tablets,2,31840,Gangnam-gu,Seoul,06155,WEEKEND20,M,60s
+2025-05-11,Mixed Nuts,Fruit/Nuts/Rice,500g,1,12720,Gwangjin-gu,Seoul,05085,WEEKEND20,M,50s
+2025-05-11,Green Tea,Coffee/Tea,20-pack,4,18880,Gangseo-gu,Seoul,07679,WEEKEND20,F,20s
+2025-05-11,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,3,18960,Gangseo-gu,Seoul,07864,WEEKEND20,M,40s
+2025-05-11,Egg,Meat/Processed Meat/Egg,10-pack,2,7840,Yongsan-gu,Seoul,04367,WEEKEND20,F,40s
+2025-05-11,Greek Yogurt,Dairy,400g,1,4720,Nowon-gu,Seoul,01819,WEEKEND20,F,30s
+2025-05-11,Mixed Nuts,Fruit/Nuts/Rice,500g,1,12720,Seongdong-gu,Seoul,04817,WEEKEND20,F,50s
+2025-05-11,Egg,Meat/Processed Meat/Egg,10-pack,3,11760,Mapo-gu,Seoul,04145,WEEKEND20,F,40s
+2025-05-11,Cheddar Cheese,Dairy,200g,2,10400,Songpa-gu,Seoul,05508,WEEKEND20,F,30s
+2025-05-11,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,11040,Mapo-gu,Seoul,03912,WEEKEND20,F,50s
+2025-05-11,Greek Yogurt,Dairy,400g,1,4720,Gangseo-gu,Seoul,07650,WEEKEND20,M,40s
+2025-05-11,Onion,Vegetables,1kg,3,8400,Songpa-gu,Seoul,05896,WEEKEND20,F,40s
+2025-05-11,Greek Yogurt,Dairy,400g,2,9440,Gangseo-gu,Seoul,07631,WEEKEND20,M,60s
+2025-05-11,Cheddar Cheese,Dairy,200g,4,20800,Seongdong-gu,Seoul,04770,WEEKEND20,M,20s
+2025-05-11,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,11040,Nowon-gu,Seoul,01636,WEEKEND20,M,30s
+2025-05-11,Drip Coffee,Coffee/Tea,200g,2,22240,Nowon-gu,Seoul,01685,WEEKEND20,F,40s
+2025-05-11,Lettuce,Vegetables,200g,1,2320,Yeongdeungpo-gu,Seoul,07400,WEEKEND20,F,30s
+2025-05-11,Drip Coffee,Coffee/Tea,200g,3,33360,Gangseo-gu,Seoul,07511,WEEKEND20,M,30s
+2025-05-11,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,3,18960,Gangnam-gu,Seoul,06349,WEEKEND20,F,20s
+2025-05-11,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,7920,Nowon-gu,Seoul,01697,WEEKEND20,F,50s
+2025-05-11,Broccoli,Vegetables,500g,3,9360,Seongdong-gu,Seoul,04733,WEEKEND20,F,20s
+2025-05-11,Mixed Nuts,Fruit/Nuts/Rice,500g,1,12720,Songpa-gu,Seoul,05855,WEEKEND20,F,40s
+2025-05-11,Mixed Nuts,Fruit/Nuts/Rice,500g,3,38160,Seocho-gu,Seoul,06611,WEEKEND20,M,30s
+2025-05-11,Lettuce,Vegetables,200g,4,9280,Seocho-gu,Seoul,06528,WEEKEND20,M,30s
+2025-05-11,Pork,Meat/Processed Meat/Egg,500g,2,19040,Songpa-gu,Seoul,05633,WEEKEND20,F,60s
+2025-05-11,Onion,Vegetables,1kg,1,2800,Mapo-gu,Seoul,03984,WEEKEND20,M,30s
+2025-05-11,Croissant,Bakery,4-pack,2,14240,Yongsan-gu,Seoul,04379,WEEKEND20,M,60s
+2025-05-11,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,15840,Yongsan-gu,Seoul,04320,WEEKEND20,M,50s
+2025-05-11,Drip Coffee,Coffee/Tea,200g,1,11120,Yeongdeungpo-gu,Seoul,07327,WEEKEND20,F,50s
+2025-05-11,Greek Yogurt,Dairy,400g,1,4720,Songpa-gu,Seoul,05519,WEEKEND20,F,40s
+2025-05-11,Croissant,Bakery,4-pack,1,7120,Gangnam-gu,Seoul,06118,WEEKEND20,M,50s
+2025-05-11,White Rice,Fruit/Nuts/Rice,5kg,2,39840,Mapo-gu,Seoul,04197,WEEKEND20,F,60s
+2025-05-11,Broccoli,Vegetables,500g,1,3120,Songpa-gu,Seoul,05537,WEEKEND20,M,20s
+2025-05-11,Cheddar Cheese,Dairy,200g,3,15600,Gangnam-gu,Seoul,06306,WEEKEND20,M,60s
+2025-05-11,Omega-3,Health Supplements,60 tablets,1,15920,Yongsan-gu,Seoul,04351,WEEKEND20,F,60s
+2025-05-11,Pork,Meat/Processed Meat/Egg,500g,1,9520,Gangseo-gu,Seoul,07611,WEEKEND20,F,30s
+2025-05-11,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,7920,Songpa-gu,Seoul,05645,WEEKEND20,F,20s
+2025-05-11,Green Tea,Coffee/Tea,20-pack,4,18880,Gangnam-gu,Seoul,06163,WEEKEND20,F,50s
+2025-05-11,Croissant,Bakery,4-pack,1,7120,Gangnam-gu,Seoul,06200,WEEKEND20,M,40s
+2025-05-11,Pork,Meat/Processed Meat/Egg,500g,2,19040,Nowon-gu,Seoul,01606,WEEKEND20,M,30s
+2025-05-11,Drip Coffee,Coffee/Tea,200g,4,44480,Songpa-gu,Seoul,05534,WEEKEND20,F,60s
+2025-05-11,Croissant,Bakery,4-pack,1,7120,Nowon-gu,Seoul,01857,WEEKEND20,M,60s
+2025-05-11,Greek Yogurt,Dairy,400g,1,4720,Gangseo-gu,Seoul,07520,WEEKEND20,M,40s
+2025-05-11,Bagel,Bakery,4-pack,2,11040,Gangseo-gu,Seoul,07880,WEEKEND20,F,50s
+2025-05-11,Red Ginseng,Health Supplements,30-pack,1,31200,Nowon-gu,Seoul,01693,WEEKEND20,F,50s
+2025-05-11,Croissant,Bakery,4-pack,2,14240,Nowon-gu,Seoul,01762,WEEKEND20,M,40s
+2025-05-11,Salad Kit,Ready Meal/Meal Kit/Salad,300g,3,16560,Gangseo-gu,Seoul,07747,WEEKEND20,M,40s
+2025-05-11,Broccoli,Vegetables,500g,3,9360,Seongdong-gu,Seoul,04708,WEEKEND20,M,40s
+2025-05-11,Green Tea,Coffee/Tea,20-pack,1,4720,Songpa-gu,Seoul,05744,WEEKEND20,M,30s
+2025-05-11,Green Tea,Coffee/Tea,20-pack,2,9440,Gangseo-gu,Seoul,07880,WEEKEND20,M,60s
+2025-05-11,Probiotics,Health Supplements,30 tablets,1,19920,Mapo-gu,Seoul,04047,WEEKEND20,M,60s
+2025-05-11,Egg,Meat/Processed Meat/Egg,10-pack,2,7840,Songpa-gu,Seoul,05577,WEEKEND20,F,50s
+2025-05-11,Greek Yogurt,Dairy,400g,4,18880,Gangseo-gu,Seoul,07528,WEEKEND20,F,30s
+2025-05-11,Mixed Nuts,Fruit/Nuts/Rice,500g,2,25440,Gwangjin-gu,Seoul,05030,WEEKEND20,F,40s
+2025-05-11,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,2,12640,Gangnam-gu,Seoul,06370,WEEKEND20,M,30s
+2025-05-11,Egg,Meat/Processed Meat/Egg,10-pack,1,3920,Seocho-gu,Seoul,06545,WEEKEND20,F,40s
+2025-05-11,Mixed Nuts,Fruit/Nuts/Rice,500g,2,25440,Yongsan-gu,Seoul,04404,WEEKEND20,F,50s
+2025-05-11,Cheddar Cheese,Dairy,200g,2,10400,Seongdong-gu,Seoul,04732,WEEKEND20,M,50s
+2025-05-11,Omega-3,Health Supplements,60 tablets,3,47760,Songpa-gu,Seoul,05754,WEEKEND20,M,60s
+2025-05-11,Broccoli,Vegetables,500g,4,12480,Mapo-gu,Seoul,04072,WEEKEND20,M,60s
+2025-05-11,Bagel,Bakery,4-pack,1,5520,Nowon-gu,Seoul,01873,WEEKEND20,M,60s
+2025-05-11,Lettuce,Vegetables,200g,1,2320,Gangnam-gu,Seoul,06166,WEEKEND20,F,40s
+2025-05-11,Ginger Tea,Coffee/Tea,500ml,1,7120,Mapo-gu,Seoul,04075,WEEKEND20,M,30s
+2025-05-11,Greek Yogurt,Dairy,400g,3,14160,Seongdong-gu,Seoul,04717,WEEKEND20,M,50s
+2025-05-11,Cheddar Cheese,Dairy,200g,2,10400,Gangseo-gu,Seoul,07514,WEEKEND20,M,60s
+2025-05-11,Cheddar Cheese,Dairy,200g,2,10400,Songpa-gu,Seoul,05859,WEEKEND20,F,60s
+2025-05-11,White Rice,Fruit/Nuts/Rice,5kg,1,19920,Seocho-gu,Seoul,06747,WEEKEND20,M,50s
+2025-05-11,Omega-3,Health Supplements,60 tablets,1,15920,Yeongdeungpo-gu,Seoul,07469,WEEKEND20,M,50s
+2025-05-11,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,11040,Songpa-gu,Seoul,05608,WEEKEND20,M,60s
+2025-05-11,Omega-3,Health Supplements,60 tablets,1,15920,Songpa-gu,Seoul,05637,WEEKEND20,M,50s
+2025-05-11,White Rice,Fruit/Nuts/Rice,5kg,1,19920,Songpa-gu,Seoul,05617,WEEKEND20,M,50s
+2025-05-12,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Nowon-gu,Seoul,01618,,M,30s
+2025-05-12,Pork,Meat/Processed Meat/Egg,500g,2,23800,Gangseo-gu,Seoul,07529,,M,30s
+2025-05-12,Omega-3,Health Supplements,60 tablets,3,59700,Songpa-gu,Seoul,05775,,F,50s
+2025-05-12,Greek Yogurt,Dairy,400g,2,11800,Nowon-gu,Seoul,01683,,M,30s
+2025-05-12,Apple,Fruit/Nuts/Rice,1kg,1,12900,Seongdong-gu,Seoul,04749,,M,60s
+2025-05-12,Green Tea,Coffee/Tea,20-pack,4,23600,Songpa-gu,Seoul,05607,,F,50s
+2025-05-12,Milk,Dairy,1L,1,2900,Nowon-gu,Seoul,01676,,F,50s
+2025-05-12,Drip Coffee,Coffee/Tea,200g,2,27800,Yongsan-gu,Seoul,04398,,F,40s
+2025-05-12,Croissant,Bakery,4-pack,1,8900,Yongsan-gu,Seoul,04334,,F,40s
+2025-05-12,Milk,Dairy,1L,1,2900,Gangseo-gu,Seoul,07892,,F,30s
+2025-05-12,Onion,Vegetables,1kg,1,3500,Seongdong-gu,Seoul,04800,,F,40s
+2025-05-12,Broccoli,Vegetables,500g,4,15600,Seongdong-gu,Seoul,04751,,F,30s
+2025-05-12,Green Tea,Coffee/Tea,20-pack,2,11800,Nowon-gu,Seoul,01735,,M,60s
+2025-05-12,Croissant,Bakery,4-pack,1,8900,Songpa-gu,Seoul,05710,,F,30s
+2025-05-12,White Bread,Bakery,1 pc,1,4500,Nowon-gu,Seoul,01816,,M,60s
+2025-05-12,Mixed Nuts,Fruit/Nuts/Rice,500g,4,63600,Gangnam-gu,Seoul,06309,,M,30s
+2025-05-12,Omega-3,Health Supplements,60 tablets,2,39800,Yongsan-gu,Seoul,04364,,F,50s
+2025-05-12,Omega-3,Health Supplements,60 tablets,2,39800,Seongdong-gu,Seoul,04721,,F,60s
+2025-05-12,Greek Yogurt,Dairy,400g,3,17700,Songpa-gu,Seoul,05597,,F,40s
+2025-05-12,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,3,29700,Songpa-gu,Seoul,05676,,M,20s
+2025-05-12,Lettuce,Vegetables,200g,1,2900,Songpa-gu,Seoul,05818,,F,50s
+2025-05-12,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,13800,Nowon-gu,Seoul,01878,,M,30s
+2025-05-12,Red Ginseng,Health Supplements,30-pack,2,78000,Songpa-gu,Seoul,05711,,M,60s
+2025-05-12,Cheddar Cheese,Dairy,200g,2,13000,Gangseo-gu,Seoul,07652,,F,50s
+2025-05-12,Onion,Vegetables,1kg,1,3500,Gangnam-gu,Seoul,06114,,F,40s
+2025-05-12,Apple,Fruit/Nuts/Rice,1kg,2,25800,Songpa-gu,Seoul,05581,,M,50s
+2025-05-12,Cheddar Cheese,Dairy,200g,2,13000,Gangseo-gu,Seoul,07743,,M,40s
+2025-05-12,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Yeongdeungpo-gu,Seoul,07284,,F,40s
+2025-05-12,Cheddar Cheese,Dairy,200g,3,19500,Nowon-gu,Seoul,01714,,F,30s
+2025-05-12,Bagel,Bakery,4-pack,3,20700,Seocho-gu,Seoul,06643,,M,40s
+2025-05-12,Mixed Nuts,Fruit/Nuts/Rice,500g,1,15900,Songpa-gu,Seoul,05726,,F,50s
+2025-05-12,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Gangseo-gu,Seoul,07633,,F,30s
+2025-05-12,Apple,Fruit/Nuts/Rice,1kg,1,12900,Songpa-gu,Seoul,05557,,F,40s
+2025-05-12,Milk,Dairy,1L,2,5800,Yongsan-gu,Seoul,04351,,M,30s
+2025-05-12,Drip Coffee,Coffee/Tea,200g,2,27800,Seongdong-gu,Seoul,04720,,M,20s
+2025-05-12,Greek Yogurt,Dairy,400g,4,23600,Yongsan-gu,Seoul,04347,,F,50s
+2025-05-12,Croissant,Bakery,4-pack,3,26700,Mapo-gu,Seoul,04006,,F,50s
+2025-05-12,Pork,Meat/Processed Meat/Egg,500g,1,11900,Yongsan-gu,Seoul,04384,,M,50s
+2025-05-12,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,1,7900,Nowon-gu,Seoul,01608,,F,50s
+2025-05-12,Mixed Nuts,Fruit/Nuts/Rice,500g,2,31800,Songpa-gu,Seoul,05740,,F,40s
+2025-05-12,Onion,Vegetables,1kg,3,10500,Gangseo-gu,Seoul,07615,,M,30s
+2025-05-12,Cheddar Cheese,Dairy,200g,1,6500,Nowon-gu,Seoul,01817,,F,20s
+2025-05-12,Green Tea,Coffee/Tea,20-pack,3,17700,Yongsan-gu,Seoul,04315,,M,60s
+2025-05-12,Probiotics,Health Supplements,30 tablets,1,24900,Yongsan-gu,Seoul,04308,,M,50s
+2025-05-12,Apple,Fruit/Nuts/Rice,1kg,1,12900,Songpa-gu,Seoul,05695,,M,60s
+2025-05-12,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Songpa-gu,Seoul,05570,,F,50s
+2025-05-12,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Mapo-gu,Seoul,04198,,M,60s
+2025-05-12,Greek Yogurt,Dairy,400g,2,11800,Yeongdeungpo-gu,Seoul,07267,,M,30s
+2025-05-12,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,13800,Gwangjin-gu,Seoul,04921,,F,50s
+2025-05-12,Milk,Dairy,1L,1,2900,Nowon-gu,Seoul,01820,,M,20s
+2025-05-12,Ginger Tea,Coffee/Tea,500ml,2,17800,Gangnam-gu,Seoul,06291,,F,40s
+2025-05-12,Apple,Fruit/Nuts/Rice,1kg,1,12900,Seongdong-gu,Seoul,04785,,F,30s
+2025-05-12,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Songpa-gu,Seoul,05878,,F,20s
+2025-05-12,Green Tea,Coffee/Tea,20-pack,1,5900,Mapo-gu,Seoul,04158,,F,20s
+2025-05-12,Cheddar Cheese,Dairy,200g,4,26000,Yeongdeungpo-gu,Seoul,07285,,M,30s
+2025-05-12,Milk,Dairy,1L,1,2900,Songpa-gu,Seoul,05794,,M,30s
+2025-05-12,Ginger Tea,Coffee/Tea,500ml,1,8900,Songpa-gu,Seoul,05858,,M,50s
+2025-05-12,Broccoli,Vegetables,500g,1,3900,Songpa-gu,Seoul,05664,,F,20s
+2025-05-12,Greek Yogurt,Dairy,400g,3,17700,Gangnam-gu,Seoul,06170,,F,20s
+2025-05-13,Cheddar Cheese,Dairy,200g,3,19500,Yeongdeungpo-gu,Seoul,07229,,F,60s
+2025-05-13,Cheddar Cheese,Dairy,200g,2,13000,Mapo-gu,Seoul,04078,,F,50s
+2025-05-13,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Seongdong-gu,Seoul,04706,,M,20s
+2025-05-13,Milk,Dairy,1L,1,2900,Seongdong-gu,Seoul,04754,,M,50s
+2025-05-13,Drip Coffee,Coffee/Tea,200g,2,27800,Nowon-gu,Seoul,01882,,M,20s
+2025-05-13,Apple,Fruit/Nuts/Rice,1kg,1,12900,Yongsan-gu,Seoul,04378,,M,50s
+2025-05-13,Ginger Tea,Coffee/Tea,500ml,1,8900,Seocho-gu,Seoul,06717,,M,50s
+2025-05-13,Croissant,Bakery,4-pack,4,35600,Seocho-gu,Seoul,06583,,M,30s
+2025-05-13,Onion,Vegetables,1kg,2,7000,Gangseo-gu,Seoul,07558,,M,60s
+2025-05-13,White Rice,Fruit/Nuts/Rice,5kg,2,49800,Seongdong-gu,Seoul,04714,,M,40s
+2025-05-13,Egg,Meat/Processed Meat/Egg,10-pack,2,9800,Mapo-gu,Seoul,04136,,M,40s
+2025-05-13,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,3,29700,Gangseo-gu,Seoul,07637,,F,40s
+2025-05-13,Salad Kit,Ready Meal/Meal Kit/Salad,300g,2,13800,Yongsan-gu,Seoul,04397,,F,20s
+2025-05-13,Ginger Tea,Coffee/Tea,500ml,4,35600,Seocho-gu,Seoul,06552,,M,20s
+2025-05-13,Apple,Fruit/Nuts/Rice,1kg,2,25800,Songpa-gu,Seoul,05821,,M,50s
+2025-05-13,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,2,15800,Yeongdeungpo-gu,Seoul,07334,,F,20s
+2025-05-13,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Gangnam-gu,Seoul,06195,,F,20s
+2025-05-13,Croissant,Bakery,4-pack,4,35600,Yongsan-gu,Seoul,04354,,F,60s
+2025-05-13,Croissant,Bakery,4-pack,3,26700,Nowon-gu,Seoul,01795,,F,20s
+2025-05-13,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Mapo-gu,Seoul,03932,,M,30s
+2025-05-13,Cheddar Cheese,Dairy,200g,2,13000,Songpa-gu,Seoul,05658,,M,50s
+2025-05-13,Croissant,Bakery,4-pack,1,8900,Nowon-gu,Seoul,01638,,M,20s
+2025-05-13,Bagel,Bakery,4-pack,1,6900,Seocho-gu,Seoul,06511,,F,40s
+2025-05-13,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Gangnam-gu,Seoul,06261,,F,60s
+2025-05-13,White Bread,Bakery,1 pc,1,4500,Mapo-gu,Seoul,03908,,F,50s
+2025-05-13,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,6900,Seocho-gu,Seoul,06714,,M,30s
+2025-05-13,Mixed Nuts,Fruit/Nuts/Rice,500g,3,47700,Yeongdeungpo-gu,Seoul,07340,,M,50s
+2025-05-13,Drip Coffee,Coffee/Tea,200g,1,13900,Gangseo-gu,Seoul,07501,,F,30s
+2025-05-13,Salad Kit,Ready Meal/Meal Kit/Salad,300g,4,27600,Yeongdeungpo-gu,Seoul,07305,,M,20s
+2025-05-13,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,2,15800,Songpa-gu,Seoul,05556,,M,50s
+2025-05-13,Bagel,Bakery,4-pack,1,6900,Gwangjin-gu,Seoul,04920,,M,20s
+2025-05-13,White Bread,Bakery,1 pc,1,4500,Songpa-gu,Seoul,05639,,M,40s
+2025-05-13,White Rice,Fruit/Nuts/Rice,5kg,2,49800,Seocho-gu,Seoul,06745,,M,30s
+2025-05-13,White Bread,Bakery,1 pc,1,4500,Mapo-gu,Seoul,04115,,F,30s
+2025-05-13,Croissant,Bakery,4-pack,1,8900,Songpa-gu,Seoul,05891,,M,30s
+2025-05-13,White Rice,Fruit/Nuts/Rice,5kg,4,99600,Songpa-gu,Seoul,05509,,F,60s
+2025-05-13,Bagel,Bakery,4-pack,2,13800,Nowon-gu,Seoul,01758,,F,30s
+2025-05-13,Omega-3,Health Supplements,60 tablets,3,59700,Mapo-gu,Seoul,03926,,F,40s
+2025-05-13,Omega-3,Health Supplements,60 tablets,1,19900,Yeongdeungpo-gu,Seoul,07237,,M,30s
+2025-05-13,Mixed Nuts,Fruit/Nuts/Rice,500g,1,15900,Seocho-gu,Seoul,06797,,F,20s
+2025-05-13,White Rice,Fruit/Nuts/Rice,5kg,3,74700,Seocho-gu,Seoul,06750,,M,20s
+2025-05-13,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,6900,Gangnam-gu,Seoul,06287,,F,40s
+2025-05-13,Green Tea,Coffee/Tea,20-pack,2,11800,Seocho-gu,Seoul,06650,,F,60s
+2025-05-13,Bagel,Bakery,4-pack,2,13800,Songpa-gu,Seoul,05604,,F,30s
+2025-05-13,Bagel,Bakery,4-pack,1,6900,Yongsan-gu,Seoul,04324,,M,40s
+2025-05-13,White Bread,Bakery,1 pc,3,13500,Gwangjin-gu,Seoul,04982,,M,30s
+2025-05-13,Broccoli,Vegetables,500g,1,3900,Songpa-gu,Seoul,05562,,F,20s
+2025-05-13,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Yeongdeungpo-gu,Seoul,07281,,M,50s
+2025-05-13,Bagel,Bakery,4-pack,1,6900,Yeongdeungpo-gu,Seoul,07290,,F,30s
+2025-05-13,Cheddar Cheese,Dairy,200g,2,13000,Gangseo-gu,Seoul,07532,,M,30s
+2025-05-13,Ginger Tea,Coffee/Tea,500ml,1,8900,Songpa-gu,Seoul,05628,,F,50s
+2025-05-13,Egg,Meat/Processed Meat/Egg,10-pack,3,14700,Nowon-gu,Seoul,01645,,F,50s
+2025-05-13,Broccoli,Vegetables,500g,1,3900,Yeongdeungpo-gu,Seoul,07283,,M,60s
+2025-05-13,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Nowon-gu,Seoul,01768,,F,40s
+2025-05-13,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,4,39600,Gangnam-gu,Seoul,06336,,M,30s
+2025-05-13,Broccoli,Vegetables,500g,1,3900,Seongdong-gu,Seoul,04811,,M,50s
+2025-05-13,Greek Yogurt,Dairy,400g,1,5900,Yeongdeungpo-gu,Seoul,07284,,F,40s
+2025-05-13,Cheddar Cheese,Dairy,200g,1,6500,Mapo-gu,Seoul,04132,,F,30s
+2025-05-13,Milk,Dairy,1L,2,5800,Gangseo-gu,Seoul,07653,,M,60s
+2025-05-13,White Bread,Bakery,1 pc,3,13500,Yeongdeungpo-gu,Seoul,07420,,F,30s
+2025-05-13,Lettuce,Vegetables,200g,1,2900,Gangnam-gu,Seoul,06270,,F,60s
+2025-05-13,White Bread,Bakery,1 pc,2,9000,Gwangjin-gu,Seoul,05092,,F,30s
+2025-05-13,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Mapo-gu,Seoul,04052,,M,40s
+2025-05-14,Apple,Fruit/Nuts/Rice,1kg,1,12900,Seongdong-gu,Seoul,04702,,F,50s
+2025-05-14,Salad Kit,Ready Meal/Meal Kit/Salad,300g,1,6900,Songpa-gu,Seoul,05690,,F,20s
+2025-05-14,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Gangnam-gu,Seoul,06374,,M,40s
+2025-05-14,Broccoli,Vegetables,500g,1,3900,Yongsan-gu,Seoul,04404,,F,30s
+2025-05-14,Egg,Meat/Processed Meat/Egg,10-pack,2,9800,Seocho-gu,Seoul,06507,,M,50s
+2025-05-14,Pork,Meat/Processed Meat/Egg,500g,2,23800,Yeongdeungpo-gu,Seoul,07499,,M,40s
+2025-05-14,Drip Coffee,Coffee/Tea,200g,1,13900,Gangseo-gu,Seoul,07668,,M,40s
+2025-05-14,Omega-3,Health Supplements,60 tablets,2,39800,Yongsan-gu,Seoul,04418,,F,30s
+2025-05-14,Green Tea,Coffee/Tea,20-pack,1,5900,Songpa-gu,Seoul,05635,,F,20s
+2025-05-14,Mixed Nuts,Fruit/Nuts/Rice,500g,1,15900,Seocho-gu,Seoul,06677,,M,40s
+2025-05-14,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,3,29700,Gangseo-gu,Seoul,07552,,M,50s
+2025-05-14,Pork,Meat/Processed Meat/Egg,500g,3,35700,Yongsan-gu,Seoul,04337,,M,40s
+2025-05-14,Broccoli,Vegetables,500g,3,11700,Seongdong-gu,Seoul,04762,,M,50s
+2025-05-14,Broccoli,Vegetables,500g,2,7800,Seongdong-gu,Seoul,04795,,M,30s
+2025-05-14,Bagel,Bakery,4-pack,4,27600,Nowon-gu,Seoul,01844,,F,60s
+2025-05-14,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Mapo-gu,Seoul,04041,,F,40s
+2025-05-14,Lettuce,Vegetables,200g,3,8700,Seocho-gu,Seoul,06619,,F,40s
+2025-05-14,Ginger Tea,Coffee/Tea,500ml,2,17800,Mapo-gu,Seoul,03972,,F,20s
+2025-05-14,Drip Coffee,Coffee/Tea,200g,2,27800,Gwangjin-gu,Seoul,05039,,F,30s
+2025-05-14,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Gwangjin-gu,Seoul,04997,,F,30s
+2025-05-14,Red Ginseng,Health Supplements,30-pack,3,117000,Yongsan-gu,Seoul,04370,,M,50s
+2025-05-14,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Mapo-gu,Seoul,04031,,M,40s
+2025-05-14,Pork,Meat/Processed Meat/Egg,500g,1,11900,Gangnam-gu,Seoul,06156,,M,40s
+2025-05-14,Onion,Vegetables,1kg,1,3500,Songpa-gu,Seoul,05506,,F,30s
+2025-05-14,Cheddar Cheese,Dairy,200g,3,19500,Gwangjin-gu,Seoul,05053,,F,30s
+2025-05-14,Ginger Tea,Coffee/Tea,500ml,2,17800,Seongdong-gu,Seoul,04784,,M,20s
+2025-05-14,Drip Coffee,Coffee/Tea,200g,1,13900,Gangseo-gu,Seoul,07803,,M,20s
+2025-05-14,Onion,Vegetables,1kg,3,10500,Gwangjin-gu,Seoul,05004,,F,40s
+2025-05-14,Ginger Tea,Coffee/Tea,500ml,1,8900,Gwangjin-gu,Seoul,04942,,F,30s
+2025-05-14,Omega-3,Health Supplements,60 tablets,2,39800,Gwangjin-gu,Seoul,04904,,M,60s
+2025-05-14,Mixed Nuts,Fruit/Nuts/Rice,500g,2,31800,Mapo-gu,Seoul,03991,,M,30s
+2025-05-14,Mixed Nuts,Fruit/Nuts/Rice,500g,2,31800,Seocho-gu,Seoul,06632,,M,50s
+2025-05-14,Udon Kit,Ready Meal/Meal Kit/Salad,2-pack,2,15800,Mapo-gu,Seoul,03978,,M,30s
+2025-05-14,Pork,Meat/Processed Meat/Egg,500g,2,23800,Yeongdeungpo-gu,Seoul,07282,,M,30s
+2025-05-14,Mixed Nuts,Fruit/Nuts/Rice,500g,2,31800,Yeongdeungpo-gu,Seoul,07357,,M,50s
+2025-05-14,Lettuce,Vegetables,200g,1,2900,Gangnam-gu,Seoul,06206,,M,30s
+2025-05-14,Lettuce,Vegetables,200g,3,8700,Yeongdeungpo-gu,Seoul,07337,,M,50s
+2025-05-14,Bagel,Bakery,4-pack,1,6900,Songpa-gu,Seoul,05810,,M,30s
+2025-05-14,Broccoli,Vegetables,500g,4,15600,Seocho-gu,Seoul,06667,,F,20s
+2025-05-14,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,1,9900,Nowon-gu,Seoul,01826,,F,20s
+2025-05-14,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Seocho-gu,Seoul,06794,,M,60s
+2025-05-14,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Gwangjin-gu,Seoul,04960,,F,60s
+2025-05-14,White Rice,Fruit/Nuts/Rice,5kg,1,24900,Gangnam-gu,Seoul,06312,,M,60s
+2025-05-14,Apple,Fruit/Nuts/Rice,1kg,2,25800,Songpa-gu,Seoul,05782,,F,50s
+2025-05-14,Green Tea,Coffee/Tea,20-pack,1,5900,Yeongdeungpo-gu,Seoul,07229,,M,30s
+2025-05-14,White Bread,Bakery,1 pc,4,18000,Seongdong-gu,Seoul,04790,,M,40s
+2025-05-14,Bagel,Bakery,4-pack,2,13800,Yeongdeungpo-gu,Seoul,07314,,F,30s
+2025-05-14,White Rice,Fruit/Nuts/Rice,5kg,3,74700,Songpa-gu,Seoul,05878,,F,20s
+2025-05-14,Mixed Nuts,Fruit/Nuts/Rice,500g,1,15900,Seongdong-gu,Seoul,04783,,F,40s
+2025-05-14,Egg,Meat/Processed Meat/Egg,10-pack,4,19600,Mapo-gu,Seoul,03976,,F,40s
+2025-05-14,White Bread,Bakery,1 pc,1,4500,Gwangjin-gu,Seoul,04950,,F,20s
+2025-05-14,Ginger Tea,Coffee/Tea,500ml,1,8900,Gangseo-gu,Seoul,07820,,F,20s
+2025-05-14,Cheddar Cheese,Dairy,200g,1,6500,Yongsan-gu,Seoul,04356,,M,20s
+2025-05-14,Croissant,Bakery,4-pack,4,35600,Songpa-gu,Seoul,05811,,F,50s
+2025-05-14,Mixed Nuts,Fruit/Nuts/Rice,500g,2,31800,Gangnam-gu,Seoul,06134,,F,50s
+2025-05-14,Drip Coffee,Coffee/Tea,200g,2,27800,Nowon-gu,Seoul,01837,,F,40s
+2025-05-14,Milk,Dairy,1L,4,11600,Seocho-gu,Seoul,06514,,M,20s
+2025-05-14,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Nowon-gu,Seoul,01621,,M,20s
+2025-05-14,Kimchi Stew Kit,Ready Meal/Meal Kit/Salad,600g,2,19800,Mapo-gu,Seoul,04006,,M,30s
+2025-05-14,Egg,Meat/Processed Meat/Egg,10-pack,1,4900,Yeongdeungpo-gu,Seoul,07353,,F,50s
