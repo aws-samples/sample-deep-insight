@@ -47,12 +47,35 @@ sys.path.insert(0, str(HERE))
 from grade import artifacts_dir, load_scenario  # noqa: E402
 from graders import recompute  # noqa: E402
 from graders.citations import load_citations  # noqa: E402
-from graders.plan import plans_from_events  # noqa: E402
 
 # What the Validator and every agent after it write: removed before staging, so
 # the Validator starts where it would in a full run.
 LATER_OUTPUTS = ["citations.json", "validation_report.txt", "final_report*", "audit_*", "report*.docx",
                  "code/validator_*", "code/reporter_*", "code/audit_*", "cache/priority_calcs.pkl", "cache/verified.pkl"]
+
+
+def plans_from_events(run_dir):
+    """Every plan the Planner wrote in a run, in order (more than one after a revision); the Validator works from the last."""
+    path = Path(run_dir) / "events.jsonl"
+    plans, current = [], ""
+    if not path.is_file():
+        return plans
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            try:
+                ev = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if ev.get("agent_name") != "planner":
+                continue
+            if ev.get("type") == "agent_text_stream":
+                current += ev.get("data", "")
+            elif ev.get("type") == "agent_usage_stream" and current:
+                plans.append(current)
+                current = ""
+    if current:
+        plans.append(current)
+    return plans
 
 
 def pick_plants(calcs, strict, csv_name, k, rng):

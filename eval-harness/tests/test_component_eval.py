@@ -57,3 +57,13 @@ def test_score(tmp_path):
     assert (r["caught"], r["missed"], r["not_checked"], r["value_changed"]) == (1, 1, 1, 1)
     assert r["recall"] == 0.5 and r["by_kind"]["derived"]["missed"] == 1
     assert (r["false_alarm"], r["right_checked"]) == (1, 2)
+
+
+def test_plans_from_events_takes_each_invocation(tmp_path):
+    events = [{"type": "agent_text_stream", "agent_name": "planner", "data": "첫 계획"},
+              {"type": "agent_usage_stream", "agent_name": "planner"},
+              {"type": "agent_text_stream", "agent_name": "coordinator", "data": "x"},
+              {"type": "agent_text_stream", "agent_name": "planner", "data": "수정 "},
+              {"type": "agent_text_stream", "agent_name": "planner", "data": "계획"}]
+    (tmp_path / "events.jsonl").write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in events), encoding="utf-8")
+    assert ce.plans_from_events(tmp_path) == ["첫 계획", "수정 계획"]

@@ -35,6 +35,7 @@ duration                  1920s         1680s           -12% ▲ better
 eval-harness/
 ├── run_eval.py, grade.py, compare.py, pairwise.py    평소에 쓰는 명령
 ├── eval_runtime.py, langfuse_sync.py, calibrate.py   평가 런타임 설정, 게시, 보정
+├── component_eval.py                                 컴포넌트 실행: 오류를 심고 Validator만 실행
 ├── graders/       채점 모듈: 규칙 기반 채점기, factcheck.py, judge.py, cost.py
 ├── sanity/        유료 평가기 검사: factcheck_sanity.py, judge_sanity.py, factcheck_cases/
 ├── config/        scenarios.yaml, judge.yaml, pricing.yaml, runtime_configs.yaml,
@@ -50,6 +51,16 @@ eval-harness/
 `eval-harness/` 기준입니다.
 
 ## 동작 방식: 단계와 파일
+
+실행은 두 종류입니다. 둘 다 eval 런타임과 같은 시나리오를 쓰고, 무엇을 호출하고 무엇을
+채점하는지가 다릅니다.
+
+| 실행 | 명령 | 무엇이 도는가 | 채점 | 비용 |
+|---|---|---|---|---|
+| **전체 실행** | `run_eval.py` | 시나리오 요청에 대한 전체 워크플로(Coordinator → Planner → Coder → Validator → Reporter → Auditor) | `grade.py`: 규칙 채점기, fact check, LLM judge. 이어서 `compare.py`, `pairwise.py` | 실행당 $4~6 |
+| **컴포넌트 실행** | `component_eval.py validator` | 저장된 전체 실행의 결과물에 오류를 심고 Validator만 실행([아래](#컴포넌트-실행-에이전트-하나-심어둔-오류)) | 규칙 검사: 심은 오류마다 잡음/놓침/검사 안 함, 오경보, 값 변경 | 실행당 약 $1.3~2 |
+
+이 절의 나머지는 전체 실행에 대한 설명입니다.
 
 ```
 config/scenarios.yaml + jungle-market CSV
@@ -90,7 +101,6 @@ scores.json  (core_pass: PASS / FAIL)
 | `sanity/factcheck_sanity.py` | fact checker가 알려진 오류를 잡고, 그 밖의 것은 틀렸다고 하지 않는지 | `sanity/factcheck_cases/*.yaml` (gold case) | `eval_results/factcheck_sanity/<time>.json` | 예: 반복당 약 $5 |
 | `sanity/judge_sanity.py <run>` | judge가 떨어뜨려야 할 것을 떨어뜨리는지 | 실행 하나의 보고서와 그로부터 만든 변형 | `eval_results/judge_sanity/<time>.json` | 예 |
 | `pytest` | 프롬프트 렌더링, 요청 필드 유효성, 채점기가 심어둔 결함을 잡는지, 프롬프트가 Auditor·Validator에게 주는 코드가 막아야 할 것을 막는지(`tests/test_prompt_code.py`) | 코드와 fixture | 없음 | 아니요 |
-| `planner_eval.py runs <tag>` / `generate --scenario <s>` | Planner의 계획이 요청을 다루는지(아래) | `events.jsonl` 또는 Planner 호출 | `plan_eval.json` | 예: 계획당 judge, `generate`는 계획당 약 $0.10 추가 |
 
 5단계를 실행하기 전에는 Langfuse에 아무것도 올라가지 않습니다. 실행과 채점
 결과는 `eval_results/`에만 남습니다.
@@ -353,30 +363,6 @@ Runner는 `managed-agentcore/.env`(배포 스크립트가 작성)에서 `RUNTIME
 
 `test_no_legacy_human_stop_sequence`는 알려진 버그를 기록하는 예상된 실패(`xfail`,
 strict)입니다. 버그가 고쳐지면 오류로 바뀌므로, 고칠 때 마커도 함께 지웁니다.
-
-## Planner: 실행 전에 계획이 맞는지
-
-Planner는 데이터를 보지 않고 요청만 보며, 이후 모든 에이전트가 그 계획대로
-일합니다. 그래서 계획에서 빠진 요구사항은 대개 보고서에서도 빠집니다.
-`planner_eval.py`는 Planner가 알 수 있는 것만으로 계획을 채점합니다.
-
-| 검사 | 방법 |
-|---|---|
-| `plan_requirements_met`, `plan_requirements_missing`, `_partial` | judge가 시나리오 요구사항마다 계획 단계로 met / partial / missing을 판정 |
-| `plan_data_quality` | judge: 분석 전에 데이터를 점검하는 단계(결측치, 중복, 타입, 범위)가 있는지 |
-| `plan_workflow_ok`, `plan_auditor_planned` | 규칙: Coder → Validator → Reporter, Reporter 뒤에 Auditor |
-| `plan_format_ok`, `plan_language_ok` | 규칙: 요청이 지정한 형식(DOCX, PDF)이 계획에 있는지, 계획이 요청과 같은 언어인지 |
-
-```bash
-.venv/bin/python planner_eval.py runs eval_results/baseline              # 저장된 실행의 계획
-.venv/bin/python planner_eval.py generate --scenario yummy_food_kr --repeat 5 --tag planner-my-change
-```
-
-`generate`는 배포된 프롬프트, eval 런타임의 `PLANNER_MODEL_ID`, 런타임이 만드는
-요청 필드로 Planner만 호출합니다. 그래서 `planner.md` 변경을 전체 실행 대신 계획당
-약 $0.10로 여러 번 확인할 수 있습니다. 전체 실행과 다른 점은 하나입니다. 사용자
-메시지가 실행에서는 Coordinator의 인계 문장이고, 여기서는 요청 자체입니다. 테스트
-시나리오는 `--allow-test`가 필요하고, `--no-judge`는 규칙 검사만 합니다.
 
 ## 컴포넌트 실행: 에이전트 하나, 심어둔 오류
 

@@ -36,6 +36,7 @@ duration                  1920s         1680s           -12% ▲ better
 eval-harness/
 ├── run_eval.py, grade.py, compare.py, pairwise.py    commands you run day to day
 ├── eval_runtime.py, langfuse_sync.py, calibrate.py   eval runtime setup, publishing, calibration
+├── component_eval.py                                 component runs: the Validator alone, errors planted
 ├── graders/       scoring modules: rule-based graders, factcheck.py, judge.py, cost.py
 ├── sanity/        checks on the paid evaluators: factcheck_sanity.py, judge_sanity.py, factcheck_cases/
 ├── config/        scenarios.yaml, judge.yaml, pricing.yaml, runtime_configs.yaml,
@@ -51,6 +52,16 @@ Run every command from `eval-harness/`. Paths in `config/scenarios.yaml` are
 relative to `eval-harness/`.
 
 ## How it runs: steps and files
+
+There are two kinds of run. Both use the eval runtime and the same scenarios;
+they differ in what is invoked and what is graded.
+
+| Run | Command | What runs | Graded by | Cost |
+|---|---|---|---|---|
+| **Full run** | `run_eval.py` | the whole workflow on a scenario's request (Coordinator → Planner → Coder → Validator → Reporter → Auditor) | `grade.py`: rule graders, fact check, LLM judge; then `compare.py`, `pairwise.py` | $4–6 per run |
+| **Component run** | `component_eval.py validator` | the Validator alone, on a saved full run's artifacts with errors planted ([below](#component-runs-one-agent-planted-errors)) | rule checks: each planted error caught / missed / not checked, false alarms, values changed | about $1.3–2 per run |
+
+The rest of this section is about full runs.
 
 ```
 config/scenarios.yaml + jungle-market CSV
@@ -91,7 +102,6 @@ inputs whose right answers are known:
 | `sanity/factcheck_sanity.py` | the fact checker catches known errors and calls nothing else wrong | `sanity/factcheck_cases/*.yaml` (gold cases) | `eval_results/factcheck_sanity/<time>.json` | Yes: about $5 per repeat |
 | `sanity/judge_sanity.py <run>` | the judge fails what must fail | one run's report and variants built from it | `eval_results/judge_sanity/<time>.json` | Yes |
 | `pytest` | prompts render, request fields are valid, graders catch planted defects, the code the prompts give the Auditor and Validator blocks what it must (`tests/test_prompt_code.py`) | the code and fixtures | nothing | No |
-| `planner_eval.py runs <tag>` / `generate --scenario <s>` | the Planner's plan covers the request (below) | `events.jsonl`, or a Planner call | `plan_eval.json` | Yes: the judge per plan; `generate` adds about $0.10 per plan |
 
 Nothing reaches Langfuse until step 5 is run: runs and grades stay in
 `eval_results/` only.
@@ -373,31 +383,6 @@ The runner reads `RUNTIME_ARN`, `AWS_REGION` and `S3_BUCKET_NAME` from
 `test_no_legacy_human_stop_sequence` is an expected failure (`xfail`, strict)
 documenting a known bug; it turns into an error once the bug is fixed, so the
 marker gets removed with the fix.
-
-## Planner: is the plan right before anything runs
-
-The Planner sees only the request, not the data, and every later agent works
-from its plan, so a requirement missing from the plan is usually missing from
-the report. `planner_eval.py` grades plans on what the Planner can know:
-
-| Check | How |
-|---|---|
-| `plan_requirements_met`, `plan_requirements_missing`, `_partial` | the judge marks each scenario requirement met / partial / missing by the plan's steps |
-| `plan_data_quality` | the judge: some step checks the data first (missing values, duplicates, types, ranges) |
-| `plan_workflow_ok`, `plan_auditor_planned` | rules: Coder → Validator → Reporter, and the Auditor after the Reporter |
-| `plan_format_ok`, `plan_language_ok` | rules: the format the request names (DOCX, PDF) is planned; the plan is in the request's language |
-
-```bash
-.venv/bin/python planner_eval.py runs eval_results/baseline              # the plans in saved runs
-.venv/bin/python planner_eval.py generate --scenario yummy_food_kr --repeat 5 --tag planner-my-change
-```
-
-`generate` calls the Planner alone with the deployed prompt, the eval
-runtime's `PLANNER_MODEL_ID` and the request fields the runtime builds, so a
-`planner.md` change can be checked over many samples for about $0.10 a plan
-instead of full runs. The one difference from a full run: its user message is
-the request, where a run passes the Coordinator's hand-off text. Test
-scenarios need `--allow-test`. `--no-judge` runs the rules only.
 
 ## Component runs: one agent, planted errors
 
