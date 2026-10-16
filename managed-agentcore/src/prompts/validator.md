@@ -95,7 +95,7 @@ print(f"Columns: {{list(df.columns)}}")  # Print to verify column names
 
 A value matches when it equals the recomputation rounded to the decimals the
 stored value has: 3.17 stored allows ±0.005, 2987 stored allows ±0.5, 45.42%
-allows ±0.005. NEVER use a fixed absolute tolerance (`< 0.5`, `< 0.01`) or a
+allows ±0.005, and 20850.0 (a float rounded to an integer) allows ±0.5. NEVER use a fixed absolute tolerance (`< 0.5`, `< 0.01`) or a
 percent tolerance (`1%`): ROAS, CTR and shares are small numbers, and a fixed
 0.5 accepts a ROAS of 3.49 for 3.17 — a 10% error marked verified.
 ```python
@@ -106,7 +106,7 @@ def same_value(expected, actual):
     except (ValueError, TypeError):
         return str(expected) == str(actual)
     text = repr(float(e)) if isinstance(expected, float) else str(expected)
-    decimals = len(text.split('.')[1]) if '.' in text and 'e' not in text else 0
+    decimals = len(text.split('.')[1].rstrip('0')) if '.' in text and 'e' not in text else 0  # 20850.0 was rounded to an integer
     return abs(e - a) <= max(0.5 * 10 ** -decimals, abs(a) * 1e-9)
 
 # ❌ WRONG - Direct comparison fails for float vs int
@@ -408,7 +408,7 @@ def same_value(expected, actual):  # equal at the stored value's precision (see 
     except (ValueError, TypeError):
         return str(expected) == str(actual)
     text = repr(float(e)) if isinstance(expected, float) else str(expected)
-    decimals = len(text.split('.')[1]) if '.' in text and 'e' not in text else 0
+    decimals = len(text.split('.')[1].rstrip('0')) if '.' in text and 'e' not in text else 0  # 20850.0 was rounded to an integer
     return abs(e - a) <= max(0.5 * 10 ** -decimals, abs(a) * 1e-9)
 
 with open('./artifacts/cache/priority_calcs.pkl', 'rb') as f:
