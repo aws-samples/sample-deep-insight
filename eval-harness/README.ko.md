@@ -37,8 +37,9 @@ duration                  1920s           1680s           -12% ▲ better
 eval-harness/
 ├── run_eval.py, grade.py, compare.py    평소에 쓰는 명령
 ├── eval_runtime.py                      평가 런타임 설정
-├── component_eval.py                    컴포넌트 실행: 오류를 심고 Validator나 Reporter만 실행
-├── graders/       규칙 기반 채점 모듈과 cost.py
+├── component_eval.py                    컴포넌트 실행: 오류를 심고 에이전트 하나만 실행
+├── components/    에이전트별로 무엇을 심고 어떻게 채점하는지 (validator.py, reporter.py)
+├── graders/       규칙 기반 채점 모듈과 cost.py, 전체 실행과 컴포넌트 실행이 함께 씀
 ├── config/        scenarios.yaml, pricing.yaml, runtime_configs.yaml,
 │                  eval.env (git 제외, 로컬 전용)
 ├── tests/         pytest 테스트와 fixture
@@ -163,6 +164,10 @@ strict)입니다. 버그가 고쳐지면 오류로 바뀌므로, 고칠 때 마�
 | Validator | 틀린 계산을 잡는지(재현율), 맞는 계산을 건드리지 않는지(오경보) | 계산값을 10% 바꿈 |
 | Reporter | Validator가 표시한 값을 빼는지, 나머지를 정확히 인용하는지 | verified 인용을 needs_review로 바꿈 |
 
+에이전트를 추가하려면 `components/__init__.py`의 인터페이스대로 `components/`에 모듈
+하나를 만들고, 런타임 쪽 `managed-agentcore/src/graph/component.py`의 `COMPONENTS`에 이름을,
+`_handler()`에 그 에이전트의 tool handler를 넣습니다.
+
 **Validator.**
 
 ```bash
@@ -203,7 +208,7 @@ Auditor 파일 제거)로 올린 뒤 eval 런타임을 `component: reporter`로 
 
 런타임은 환경변수에 `EVAL_COMPONENT_MODE=1`이 없으면 컴포넌트 실행을 거부합니다.
 두 런타임은 같은 이미지를 쓰고, 이 변수는 `eval_runtime.py`가 eval 런타임에만
-넣습니다.
+`_handler()`에 그 에이전트의 tool handler를 넣습니다.
 
 ## 시나리오
 

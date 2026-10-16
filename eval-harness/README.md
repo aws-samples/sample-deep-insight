@@ -38,8 +38,9 @@ duration                  1920s           1680s           -12% ▲ better
 eval-harness/
 ├── run_eval.py, grade.py, compare.py    commands you run day to day
 ├── eval_runtime.py                      eval runtime setup
-├── component_eval.py                    component runs: the Validator or the Reporter alone, errors planted
-├── graders/       rule-based scoring modules and cost.py
+├── component_eval.py                    component runs: one agent alone, errors planted
+├── components/    per agent: what a component run plants and how it scores (validator.py, reporter.py)
+├── graders/       rule-based scoring modules and cost.py, shared by full and component runs
 ├── config/        scenarios.yaml, pricing.yaml, runtime_configs.yaml,
 │                  eval.env (git-ignored, local only)
 ├── tests/         pytest suite and fixtures
@@ -166,6 +167,10 @@ versions of the agent are compared on the same input.
 |---|---|---|
 | Validator | catches wrong calculations (recall), leaves right ones alone (false alarms) | calculation values changed by 10% |
 | Reporter | keeps out what the Validator flagged, cites the rest correctly | verified citations marked needs_review |
+
+Adding an agent means one module in `components/` with the interface in
+`components/__init__.py`, and on the runtime side its name in `COMPONENTS`
+and its tool handler in `_handler()` (`managed-agentcore/src/graph/component.py`).
 
 **Validator.**
 
