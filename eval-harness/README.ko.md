@@ -151,9 +151,19 @@ strict)입니다. 버그가 고쳐지면 오류로 바뀌므로, 고칠 때 마�
 
 ## 컴포넌트 실행: 에이전트 하나, 심어둔 오류
 
-전체 실행은 에이전트를 한꺼번에 채점합니다. Validator가 틀린 계산을 잡는지 보려면
-틀린 계산이 있어야 하는데, 보통 실행에서는 Coder의 숫자가 맞습니다.
-`component_eval.py`는 저장된 실행의 결과물에 오류를 심고 Validator만 돌립니다.
+전체 실행은 최종 보고서만 채점하므로, 에이전트 하나가 자기 일을 얼마나 잘하는지는
+알 수 없습니다. 점수가 나빠져도 어느 에이전트 때문인지 모르고, 각 에이전트가 받는
+입력이 실행마다 다르고, Coder의 숫자 중 무엇이 틀렸는지도 모릅니다. 컴포넌트 실행은
+에이전트 하나를 따로 잽니다. 입력은 고정하고(저장된 실행의 결과물), 정답은 미리
+알고(일부러 심은 오류), 그 앞 단계는 다시 돌리지 않습니다. 그래서 비용이 적고,
+에이전트의 두 버전을 같은 입력으로 비교할 수 있습니다.
+
+| 에이전트 | 재는 것 | 심는 것 |
+|---|---|---|
+| Validator | 틀린 계산을 잡는지(재현율), 맞는 계산을 건드리지 않는지(오경보) | 계산값을 10% 바꿈 |
+| Reporter | Validator가 표시한 값을 빼는지, 나머지를 정확히 인용하는지 | verified 인용을 needs_review로 바꿈 |
+
+**Validator.**
 
 ```bash
 .venv/bin/python eval_runtime.py enable-components        # 최초 1회, eval 런타임에만
@@ -169,8 +179,8 @@ Validator 시작 시점 상태로 올리고 eval 런타임을 `component: valida
 고치면 안 됨)도 셉니다.
 
 **Reporter.** needs_review 값은 보고서에 나오면 안 됩니다. 값도, 마커도, 참고문헌도
-안 됩니다(`reporter.md`의 `value_status_resolution`). 보통 실행에서는 Validator가
-needs_review를 거의 표시하지 않아서 이 규칙이 실제로 시험되는 일이 드뭅니다.
+안 됩니다(`reporter.md`의 `value_status_resolution`). 이걸 재려면 어떤 값이
+needs_review인지 아는 입력이 필요합니다.
 
 ```bash
 .venv/bin/python component_eval.py reporter --from eval_results/baseline/<run> --plant 4 --tag comp-reporter
