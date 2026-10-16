@@ -1,0 +1,26 @@
+# Model presets for the eval runtime (eval_runtime.py set-models <preset>).
+# A preset only lists what differs from the users' runtime; every other model
+# ID is copied from it. `users` (built in) means "exactly the users' models".
+#
+# The runtime's code must accept a model's request fields before it can be
+# used here: test_l0_static.py lists the combinations that fail today
+# (Opus 5.5 / Sonnet 5.5 reject thinking disabled, #129).
+
+presets:
+  # Workers on the previous Sonnet; Planner stays on Opus 5 because Sonnet 4.5
+  # doesn't accept the Planner's adaptive thinking. Used for the #133 calibration set.
+  sonnet45-workers:
+    models:
+      CODER_MODEL_ID: global.anthropic.claude-sonnet-4-5-20250929-v1:0
+      VALIDATOR_MODEL_ID: global.anthropic.claude-sonnet-4-5-20250929-v1:0
+      REPORTER_MODEL_ID: global.anthropic.claude-sonnet-4-5-20250929-v1:0
+      SUPERVISOR_MODEL_ID: global.anthropic.claude-sonnet-4-5-20250929-v1:0
+      TRACKER_MODEL_ID: global.anthropic.claude-sonnet-4-5-20250929-v1:0
+      AUDITOR_MODEL_ID: global.anthropic.claude-sonnet-4-5-20250929-v1:0
+      DEFAULT_MODEL_ID: global.anthropic.claude-sonnet-4-5-20250929-v1:0
+
+  # Planner on Opus 5.5 only. Works today: the Planner sends adaptive thinking,
+  # which Opus 5.5 accepts. Moving the other agents to Opus 5.5 needs #129 first.
+  opus55-planner:
+    models:
+      PLANNER_MODEL_ID: global.anthropic.claude-opus-5-5

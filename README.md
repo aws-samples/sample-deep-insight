@@ -117,6 +117,23 @@ Browser-based interface for non-technical users:
 
 > 📖 **[Detailed comparison →](./managed-agentcore/production_deployment/docs/DEPLOYMENT_COMPARISON.md)** Security, cost, features, and when to choose each option
 
+## Evaluation
+
+The eval harness turns "did this change make Deep Insight better?" into numbers. It runs fixed analysis requests against the deployed runtime, then scores each run on:
+- ✅ **Completion** — the report, citations and validation files were all produced
+- ✅ **Numeric accuracy** — numbers in the report match the computed values and the source CSV
+- ✅ **Cost & speed** — dollars per run (Bedrock prices), cache hit rate, duration, failed code executions
+
+```bash
+cd eval-harness   # setup: see the Eval Harness README
+.venv/bin/python eval_runtime.py create                                                  # once: a separate runtime for evals, so users aren't affected
+.venv/bin/python run_eval.py --scenario jungle_market_simple --repeat 3 --tag baseline   # run + grade
+.venv/bin/python compare.py eval_results/baseline eval_results/my-change                 # before vs after
+.venv/bin/python -m pytest -q                                                            # static checks, no AWS
+```
+
+📖 [Eval Harness README](./eval-harness/README.md) — setup, scenarios, every metric, and how pass/fail is decided
+
 ---
 
 ## Demo
