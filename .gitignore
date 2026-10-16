@@ -49,3 +49,11 @@ build/
 # Customer-referencing PoC research — keep the file locally, never commit
 # (already covered by under_development/, pinned explicitly for safety)
 under_development/260522-data-validation-jinro/citation-marker-misuse.md
+
+# Eval harness outputs (run artifacts, scores, comparisons)
+eval-harness/eval_results/
+.pytest_cache/
+
+# Eval runtime ARN written by eval-harness/eval_runtime.py (holds the account id)
+eval-harness/config/eval.env
+eval-harness/eval.env
