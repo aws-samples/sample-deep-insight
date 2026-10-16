@@ -1,50 +1,50 @@
 [
   {
     "column_name": "Date",
-    "column_desc": "주문이 발생한 날짜 (형식: M/D/YY)"
+    "column_desc": "주문 날짜 (형식: YYYY-MM-DD, 기간: 2025-05-01(목) ~ 2025-05-14(수)). 기간 중 공휴일은 2025-05-05(월, 어린이날·부처님오신날)와 2025-05-06(화, 대체공휴일)"
   },
   {
     "column_name": "Product",
-    "column_desc": "주문한 상품의 명칭 (예: 미역국, 생강차 등)"
+    "column_desc": "주문한 상품의 이름. 한 행은 주문 1건이며 주문 하나에는 상품 1종만 들어 있음 (주문 ID 컬럼은 없고, 행 수 = 주문 수). 상품마다 카테고리·용량·정가가 하나로 고정됨"
   },
   {
     "column_name": "Category",
-    "column_desc": "상품이 속한 카테고리 분류 (예: 국/반찬/메인요리, 커피/차 등)"
+    "column_desc": "상품의 카테고리 (간편식/밀키트/샐러드, 과일/견과/쌀, 채소, 정육/가공육/달걀, 유제품, 커피/차, 베이커리, 건강식품)"
   },
   {
     "column_name": "Size",
-    "column_desc": "상품의 용량 또는 크기 (예: 300g, 500ml, 1L 등)"
+    "column_desc": "상품 1개의 용량 또는 규격 (예: 300g, 1L, 10개입). 상품마다 하나로 고정됨"
   },
   {
     "column_name": "Qty",
-    "column_desc": "주문한 상품의 수량 (개수)"
+    "column_desc": "주문한 상품의 개수"
   },
   {
     "column_name": "Amount",
-    "column_desc": "주문의 총 금액 (단위: 원)"
+    "column_desc": "이 주문의 결제 금액 (단위: 원) = 정가 x Qty x (1 - 할인율). 프로모션 할인을 뺀 뒤의 금액"
   },
   {
     "column_name": "ship-city",
-    "column_desc": "배송 주소의 시/구 단위 지역명 (예: 강서구, 중구 등)"
+    "column_desc": "배송지의 구 (서울 10개 구: 송파구, 강남구, 서초구, 마포구, 강서구, 노원구, 영등포구, 광진구, 성동구, 용산구)"
   },
   {
     "column_name": "ship-state",
-    "column_desc": "배송 주소의 시/도 단위 광역 지역명 (예: 서울)"
+    "column_desc": "배송지의 시·도 (모든 주문이 서울)"
   },
   {
     "column_name": "ship-postal-code",
-    "column_desc": "배송 주소의 우편번호"
+    "column_desc": "배송지 우편번호. 5자리 문자열이며 앞자리 0을 포함함 (예: 05510)"
   },
   {
     "column_name": "promotion-ids",
-    "column_desc": "주문에 적용된 프로모션 또는 쿠폰 코드 (예: FRUITPROMO5, WEEKEND20 등, 없을 수 있음)"
+    "column_desc": "주문에 적용된 프로모션 코드. 없으면 빈 값. 코드는 WEEKEND20 하나뿐: 토요일·일요일의 모든 주문에 자동 적용되어 20% 할인. 공휴일(2025-05-05, 05-06)에는 적용되지 않음"
   },
   {
     "column_name": "Gender",
-    "column_desc": "고객의 성별 (F: 여성, M: 남성)"
+    "column_desc": "주문 고객의 성별 (F: 여성, M: 남성)"
   },
   {
     "column_name": "Age Group",
-    "column_desc": "고객의 연령대 그룹 (예: 20대, 30대, 40대, 50대 등)"
+    "column_desc": "주문 고객의 연령대 (20대, 30대, 40대, 50대, 60대)"
   }
 ]
