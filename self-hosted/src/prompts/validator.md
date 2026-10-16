@@ -91,16 +91,28 @@ df = pd.read_csv(source_file)
 print(f"Columns: {{list(df.columns)}}")  # Print to verify column names
 ```
 
-**Type-Safe Comparison**
+**Type-Safe Comparison — at the stored value's own precision**
+
+A value matches when it equals the recomputation rounded to the decimals the
+stored value has: 3.17 stored allows ±0.005, 2987 stored allows ±0.5, 45.42%
+allows ±0.005, and 20850.0 (a float rounded to an integer) allows ±0.5. NEVER use a fixed absolute tolerance (`< 0.5`, `< 0.01`) or a
+percent tolerance (`1%`): ROAS, CTR and shares are small numbers, and a fixed
+0.5 accepts a ROAS of 3.49 for 3.17 — a 10% error marked verified.
 ```python
 # ✅ CORRECT
-try:
-    match = abs(float(expected) - float(actual)) < 0.01
-except (ValueError, TypeError):
-    match = str(expected) == str(actual)
+def same_value(expected, actual):
+    try:
+        e, a = float(expected), float(actual)
+    except (ValueError, TypeError):
+        return str(expected) == str(actual)
+    text = repr(float(e)) if isinstance(expected, float) else str(expected)
+    decimals = len(text.split('.')[1].rstrip('0')) if '.' in text and 'e' not in text else 0  # 20850.0 was rounded to an integer
+    return abs(e - a) <= max(0.5 * 10 ** -decimals, abs(a) * 1e-9)
 
 # ❌ WRONG - Direct comparison fails for float vs int
 match = expected == actual
+# ❌ WRONG - A fixed tolerance hides errors in small values (ROAS 3.17 vs 3.49)
+match = abs(float(expected) - float(actual)) <= 0.5
 ```
 
 **JSON Serialization - Convert numpy types**
@@ -379,11 +391,25 @@ print("📦 Cached: priority_calcs.pkl")
 ```
 
 **Step 2: Validate (print column names first)**
+
+This example re-derives only the simplest shapes (one SUM or AVG, a ratio of two
+SUMs). For any other formula it records `match: None`: write a check for that
+shape (GROUP BY, a filter, a derived source_file) before Step 3. Never compare a
+value with itself — a calculation nobody re-derived must not be marked verified.
 ```python
 write_and_execute_tool(
     file_path="./artifacts/code/validator_step2_validate.py",
     content="""
-import pickle, pandas as pd
+import pickle, re, pandas as pd
+
+def same_value(expected, actual):  # equal at the stored value's precision (see Type-Safe Comparison)
+    try:
+        e, a = float(expected), float(actual)
+    except (ValueError, TypeError):
+        return str(expected) == str(actual)
+    text = repr(float(e)) if isinstance(expected, float) else str(expected)
+    decimals = len(text.split('.')[1].rstrip('0')) if '.' in text and 'e' not in text else 0  # 20850.0 was rounded to an integer
+    return abs(e - a) <= max(0.5 * 10 ** -decimals, abs(a) * 1e-9)
 
 with open('./artifacts/cache/priority_calcs.pkl', 'rb') as f:
     priority_calcs = pickle.load(f)
@@ -400,17 +426,27 @@ for calc in priority_calcs:
     df = data_cache.get(src)
     if df is not None:
         expected = calc['value']
-        actual = df[calc.get('source_columns', ['Amount'])[0]].sum() if 'SUM' in calc.get('formula', '') else expected
+        f = calc.get('formula', '').replace(' ', '')
+        sums = re.findall(r'SUM\(([^()]+)\)', f)
+        actual = None  # None = not re-derived by this example
+        if re.fullmatch(r'SUM\([^()]+\)', f):
+            actual = df[sums[0]].sum()
+        elif re.fullmatch(r'(AVG|MEAN)\([^()]+\)', f):
+            actual = df[f[f.index('(') + 1:-1]].mean()
+        elif re.fullmatch(r'SUM\([^()]+\)/SUM\([^()]+\)(\*100)?', f):
+            actual = df[sums[0]].sum() / df[sums[1]].sum() * (100 if f.endswith('*100') else 1)
+        if actual is None:
+            verified[calc['id']] = {{'match': None, 'expected': expected, 'actual': None,
+                                    'note': f"not re-derived: {{calc.get('formula')}}"}}
+            continue
 
-        try:
-            match = abs(float(expected) - float(actual)) < 0.01
-        except:
-            match = str(expected) == str(actual)
+        match = same_value(expected, actual)
 
         verified[calc['id']] = {{'match': match, 'expected': expected, 'actual': actual}}
 
 match_count = sum(1 for v in verified.values() if v['match'])
-print(f"Verified: {{match_count}}/{{len(verified)}}")
+todo = [k for k, v in verified.items() if v['match'] is None]
+print(f"Verified: {{match_count}}/{{len(verified)}} · not re-derived yet: {{len(todo)}} {{todo[:10]}}")
 
 with open('./artifacts/cache/verified.pkl', 'wb') as f:
     pickle.dump(verified, f)
