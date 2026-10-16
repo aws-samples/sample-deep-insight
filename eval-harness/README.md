@@ -154,10 +154,20 @@ marker gets removed with the fix.
 
 ## Component runs: one agent, planted errors
 
-A full run grades the agents together. To see whether the Validator catches a
-wrong calculation, it needs a wrong calculation to look at, and in a normal
-run the Coder's numbers are right. `component_eval.py` runs the Validator
-alone on a saved run's artifacts with errors planted:
+A full run grades only the final report, so it can't say how well one agent
+does its own job: a worse score doesn't say which agent caused it, the inputs
+each agent got differ from run to run, and nobody knows which of the Coder's
+numbers were wrong. A component run measures one agent on its own: the input
+is fixed (a saved run's artifacts), the answer is known (errors planted on
+purpose), and nothing before the agent is re-run, so it is cheaper and two
+versions of the agent are compared on the same input.
+
+| Agent | Measures | Planted |
+|---|---|---|
+| Validator | catches wrong calculations (recall), leaves right ones alone (false alarms) | calculation values changed by 10% |
+| Reporter | keeps out what the Validator flagged, cites the rest correctly | verified citations marked needs_review |
+
+**Validator.**
 
 ```bash
 .venv/bin/python eval_runtime.py enable-components        # once; eval runtime only
@@ -174,8 +184,8 @@ missed (verified) or not checked, plus false alarms on right values and
 planted values it changed (it must mark, not correct).
 
 **Reporter.** A needs_review value must not reach the report: no value,
-marker or reference (`reporter.md`, `value_status_resolution`). In a normal
-run the Validator marks few or none, so the rule is rarely exercised:
+marker or reference (`reporter.md`, `value_status_resolution`). Measuring
+that needs an input with needs_review values whose ids are known:
 
 ```bash
 .venv/bin/python component_eval.py reporter --from eval_results/baseline/<run> --plant 4 --tag comp-reporter

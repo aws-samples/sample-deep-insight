@@ -1,4 +1,9 @@
-"""Run one agent on a saved run's artifacts, with errors planted, and see what it does with them.
+"""Measure one agent on its own: a saved run's artifacts as the fixed input, errors planted as the known answer.
+
+A full run grades only the final report, so it can't say which agent a worse
+score came from, and each agent's input differs from run to run. Here the
+agent runs alone (nothing before it is re-run) on an input whose right answer
+is known, so two versions of it are compared on the same input.
 
     python component_eval.py validator --from eval_results/baseline/<run> [--from ...] \\
         --plant 6 --repeat 2 --tag comp-validator
@@ -24,8 +29,7 @@ needs_review; the Reporter leaves those out) and whether the planted values
 were kept as they are (the Validator must not correct them).
 
 Reporter. needs_review values must not reach the report: no value, marker or
-reference (reporter.md, value_status_resolution). In a normal run the
-Validator marks few or none, so that rule is rarely exercised. Pick verified
+reference (reporter.md, value_status_resolution). Pick verified
 values the saved report cites, mark them needs_review in citations.json, stage
 the artifacts as they were when the Reporter started, and invoke the eval
 runtime with `component: reporter`. Each marked value is then, in the new report:
