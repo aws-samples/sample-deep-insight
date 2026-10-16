@@ -1,0 +1,58 @@
+[
+  {
+    "column_name": "Date",
+    "column_desc": "Date the ads ran and their results were counted (format: YYYY-MM-DD, period: 2025-09-01 to 2025-09-30). One row is one day of ad results for one Date, Media and Product; every Date x Media x Product combination has exactly one row (4 media x 6 products x 30 days = 720 rows, no duplicates, no missing rows)"
+  },
+  {
+    "column_name": "Media",
+    "column_desc": "Media where the ad ran and the product was sold (Kuppang, Neiba, Amazon, Kulsam)"
+  },
+  {
+    "column_name": "Category",
+    "column_desc": "Product category, fixed per product (Convenience Food: Instant Rice Set, Frozen Dumplings; Health Food: Protein Bar, Omega-3; Fresh Food: Salad Kit, Premium Fruit)"
+  },
+  {
+    "column_name": "Product",
+    "column_desc": "Name of the advertised product (Instant Rice Set, Frozen Dumplings, Protein Bar, Omega-3, Salad Kit, Premium Fruit)"
+  },
+  {
+    "column_name": "Impressions",
+    "column_desc": "Number of times this row's ad (Date, Media, Product) was shown"
+  },
+  {
+    "column_name": "Clicks",
+    "column_desc": "Number of clicks on this row's ad"
+  },
+  {
+    "column_name": "Conversions",
+    "column_desc": "Number of purchases (orders) made after clicking this row's ad"
+  },
+  {
+    "column_name": "Ad Cost",
+    "column_desc": "Ad spend of this row (unit: KRW)"
+  },
+  {
+    "column_name": "Revenue",
+    "column_desc": "Total paid amount of this row's conversions (purchases after an ad click) (unit: KRW). Sales that did not come through an ad are not included"
+  },
+  {
+    "column_name": "CTR",
+    "column_desc": "Click-through rate of this row (%) = Clicks / Impressions x 100, rounded to 2 decimals. CTR over several rows is SUM(Clicks) / SUM(Impressions) x 100"
+  },
+  {
+    "column_name": "CVR",
+    "column_desc": "Conversion rate of this row (%) = Conversions / Clicks x 100, rounded to 2 decimals. Conversion rate over several rows is SUM(Conversions) / SUM(Clicks) x 100"
+  },
+  {
+    "column_name": "ROAS",
+    "column_desc": "Return on ad spend of this row = Revenue / Ad Cost, rounded to 2 decimals. A ratio, not a percent (3.50 = KRW 3.5 of revenue per KRW 1 of ad spend = 350%). ROAS over several rows is SUM(Revenue) / SUM(Ad Cost)"
+  },
+  {
+    "column_name": "Main Age Group",
+    "column_desc": "Age group that buys this product the most (20s, 30s, 40s, 50s). Fixed per product: the same whatever the Media or Date. It does not mean all of the row's revenue came from this age group"
+  },
+  {
+    "column_name": "Main Gender",
+    "column_desc": "Gender that buys this product the most (Male, Female). Fixed per product: the same whatever the Media or Date. It does not mean all of the row's revenue came from this gender"
+  }
+]
