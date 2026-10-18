@@ -110,7 +110,7 @@ def test_validator_example_never_verifies_what_it_did_not_recompute(tmp_path, mo
     import pandas as pd
     monkeypatch.chdir(tmp_path)
     (tmp_path / "artifacts" / "cache").mkdir(parents=True)
-    pd.DataFrame({"매출액": [100.0, 300.0], "광고비용": [50.0, 50.0], "매체": ["a", "b"]}).to_csv("data.csv", index=False)
+    pd.DataFrame({"매출액": [100.0, 300.0], "광고비용": [50.0, 50.0], "Ad Cost": [50.0, 50.0], "매체": ["a", "b"]}).to_csv("data.csv", index=False)
     calcs = [
         {"id": "rev", "value": 400.0, "formula": "SUM(매출액)", "source_file": "data.csv"},
         {"id": "rev_wrong", "value": 410.0, "formula": "SUM(매출액)", "source_file": "data.csv"},
@@ -119,6 +119,8 @@ def test_validator_example_never_verifies_what_it_did_not_recompute(tmp_path, mo
         {"id": "roas_10pct_off", "value": 4.4, "formula": "SUM(매출액)/SUM(광고비용)", "source_file": "data.csv"},   # a fixed 0.5 would pass it
         {"id": "roas_rounded", "value": 4.0004, "formula": "SUM(매출액)/SUM(광고비용)", "source_file": "data.csv"},  # 4 decimals: 4.0004 ≠ 4.0
         {"id": "by_media", "value": 999.0, "formula": "SUM(매출액)/SUM(광고비용) GROUP BY 매체", "source_file": "data.csv"},
+        {"id": "spaced_column", "value": 4.0, "formula": "SUM(매출액) / SUM(Ad Cost)", "source_file": "data.csv"},   # was KeyError: 'AdCost'
+        {"id": "no_such_column", "value": 4.0, "formula": "SUM(매출액)/SUM(Spend)", "source_file": "data.csv"},     # not a column: not re-derived
     ]
     with open("artifacts/cache/priority_calcs.pkl", "wb") as f:
         pickle.dump(calcs, f)
@@ -126,7 +128,8 @@ def test_validator_example_never_verifies_what_it_did_not_recompute(tmp_path, mo
     with open("artifacts/cache/verified.pkl", "rb") as f:
         v = pickle.load(f)
     assert {k: r["match"] for k, r in v.items()} == {"rev": True, "rev_wrong": False, "roas": True, "avg": True, "by_media": None,
-                                                          "roas_10pct_off": False, "roas_rounded": False}
+                                                          "roas_10pct_off": False, "roas_rounded": False,
+                                                          "spaced_column": True, "no_such_column": None}
 
 
 def test_validator_same_value_reads_the_stored_precision():
@@ -161,5 +164,7 @@ def test_validator_same_value_is_one_rule_with_inclusive_ties():
     for stored, computed in [(6.56, 393300 / 60000), (6.55, 393300 / 60000), (2.34, 2.345), (2.35, 2.345),
                              (0.13, 0.125), (0.12, 0.125), (1.01, 1.005), (2987, 2987.4)]:
         assert same_value(stored, computed), (stored, computed)
-    for stored, computed in [(6.57, 6.555), (6.54, 6.555), (3.49, 3.17), (2987, 2988)]:
+    assert same_value(5e-05, 5.2e-05) and same_value(20850.0, 20850.08)    # 5 decimals; rounded to an integer
+    for stored, computed in [(6.57, 6.555), (6.54, 6.555), (3.49, 3.17), (2987, 2988),
+                             (5e-05, 0.4), (1.25e-05, 1.3e-05)]:                # repr 5e-05 once meant 0 decimals, ±0.5
         assert not same_value(stored, computed), (stored, computed)

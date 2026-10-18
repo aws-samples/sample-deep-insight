@@ -95,8 +95,8 @@ print(f"Columns: {{list(df.columns)}}")  # Print to verify column names
 
 A value matches when it equals the recomputation rounded to the decimals the
 stored value has: 3.17 stored allows ±0.005, 2987 stored allows ±0.5, 45.42%
-allows ±0.005, and 20850.0 (a float rounded to an integer) allows ±0.5. The
-bound is inclusive, so a tie matches whichever way it was rounded: 6.555 is
+allows ±0.005, 20850.0 (a float rounded to an integer) allows ±0.5, and 5e-05
+allows ±0.000005. The bound is inclusive, so a tie matches whichever way it was rounded: 6.555 is
 6.55 by Python's round() and 6.56 by pandas, and both match. NEVER use a fixed
 absolute tolerance (`< 0.5`, `< 0.01`) or a
 percent tolerance (`1%`): ROAS, CTR and shares are small numbers, and a fixed
@@ -108,8 +108,10 @@ def same_value(expected, actual):
         e, a = float(expected), float(actual)
     except (ValueError, TypeError):
         return str(expected) == str(actual)
+    from decimal import Decimal
     text = repr(float(e)) if isinstance(expected, float) else str(expected)
-    decimals = len(text.split('.')[1].rstrip('0')) if '.' in text and 'e' not in text else 0  # 20850.0 was rounded to an integer
+    # digits after the point as stored: 3.17 → 2, 20850.0 → 0 (rounded to an integer), 5e-05 → 5
+    decimals = max(0, -Decimal(text).normalize().as_tuple().exponent)
     return abs(e - a) <= 0.5 * 10 ** -decimals + 1e-9 * max(1.0, abs(a))
 
 # ❌ WRONG - Direct comparison fails for float vs int
@@ -410,8 +412,10 @@ def same_value(expected, actual):  # equal at the stored value's precision (see 
         e, a = float(expected), float(actual)
     except (ValueError, TypeError):
         return str(expected) == str(actual)
+    from decimal import Decimal
     text = repr(float(e)) if isinstance(expected, float) else str(expected)
-    decimals = len(text.split('.')[1].rstrip('0')) if '.' in text and 'e' not in text else 0  # 20850.0 was rounded to an integer
+    # digits after the point as stored: 3.17 → 2, 20850.0 → 0 (rounded to an integer), 5e-05 → 5
+    decimals = max(0, -Decimal(text).normalize().as_tuple().exponent)
     return abs(e - a) <= 0.5 * 10 ** -decimals + 1e-9 * max(1.0, abs(a))
 
 with open('./artifacts/cache/priority_calcs.pkl', 'rb') as f:
@@ -429,15 +433,17 @@ for calc in priority_calcs:
     df = data_cache.get(src)
     if df is not None:
         expected = calc['value']
-        f = calc.get('formula', '').replace(' ', '')
-        sums = re.findall(r'SUM\(([^()]+)\)', f)
+        # spaces go only around brackets and operators: a column name keeps its own (SUM(Ad Cost))
+        f = re.sub(r'\s*([()/*])\s*', r'\1', calc.get('formula', '').strip())
+        cols = re.findall(r'(?:SUM|AVG|MEAN)\(([^()]+)\)', f)
         actual = None  # None = not re-derived by this example
-        if re.fullmatch(r'SUM\([^()]+\)', f):
-            actual = df[sums[0]].sum()
-        elif re.fullmatch(r'(AVG|MEAN)\([^()]+\)', f):
-            actual = df[f[f.index('(') + 1:-1]].mean()
-        elif re.fullmatch(r'SUM\([^()]+\)/SUM\([^()]+\)(\*100)?', f):
-            actual = df[sums[0]].sum() / df[sums[1]].sum() * (100 if f.endswith('*100') else 1)
+        if cols and all(c in df.columns for c in cols):  # a name that is not a column: not re-derived
+            if re.fullmatch(r'SUM\([^()]+\)', f):
+                actual = df[cols[0]].sum()
+            elif re.fullmatch(r'(AVG|MEAN)\([^()]+\)', f):
+                actual = df[cols[0]].mean()
+            elif re.fullmatch(r'SUM\([^()]+\)/SUM\([^()]+\)(\*100)?', f):
+                actual = df[cols[0]].sum() / df[cols[1]].sum() * (100 if f.endswith('*100') else 1)
         if actual is None:
             verified[calc['id']] = {{'match': None, 'expected': expected, 'actual': None,
                                     'note': f"not re-derived: {{calc.get('formula')}}"}}
