@@ -535,8 +535,11 @@ async function loadSampleData() {
 function renderSampleDataLinks() {
     const container = document.getElementById("sample-data-links");
     const t = translations[currentLang];
+    // A dataset named for one language shows in that language; one with no
+    // language suffix (jungle-market) shows in both.
     const suffix = currentLang === "ko" ? "-kr" : "-en";
-    const filtered = allSampleDatasets.filter(ds => ds.name.endsWith(suffix));
+    const filtered = allSampleDatasets.filter(ds =>
+        ds.name.endsWith(suffix) || !(ds.name.endsWith("-kr") || ds.name.endsWith("-en")));
     if (filtered.length === 0) {
         container.innerHTML = `<span style="color:var(--text-muted)">${t.sample_none}</span>`;
         return;
