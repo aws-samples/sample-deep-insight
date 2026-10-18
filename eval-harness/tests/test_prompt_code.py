@@ -126,3 +126,13 @@ def test_validator_example_never_verifies_what_it_did_not_recompute(tmp_path, mo
         v = pickle.load(f)
     assert {k: r["match"] for k, r in v.items()} == {"rev": True, "rev_wrong": False, "roas": True, "avg": True, "by_media": None,
                                                           "roas_10pct_off": False, "roas_rounded": False}
+
+
+def test_validator_same_value_reads_the_stored_precision():
+    """A float with a trailing .0 was rounded to an integer: 20850.0 vs 20850.08 is a match (a false alarm once)."""
+    code = _validator_step2()
+    ns = {}
+    exec(code[:code.index("with open('./artifacts/cache/priority_calcs.pkl'")], ns)
+    same = ns["same_value"]
+    assert same(20850.0, 20850.0822) and same(2987, 2987.4) and same(3.17, 3.1695)
+    assert not same(3.487, 3.17) and not same(2.343, 2.132) and not same(4.0004, 4.0)
