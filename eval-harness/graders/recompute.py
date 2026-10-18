@@ -325,6 +325,8 @@ def _recompute_expr(formula, df, description):
     expr = "".join(out)
     if not aggs or not re.fullmatch(r"[\sa0-9.+\-*/()]*", expr) or re.search(r"[a-z]", re.sub(r"\ba\d+\b", "", expr)):
         return None
+    if "**" in expr:
+        return None  # a power like 9**9**9**9 would hang eval(); no formula in the saved runs uses one
 
     keys = list(dict.fromkeys(clause_keys + global_keys + [k for a in aggs for k in a["keys"]]))
     base = _apply(df, global_filters)
@@ -465,11 +467,16 @@ def _named_subset(formula, df, description, stored):
 
 
 def same_value(stored, expected):
-    """Stored equals expected, or expected rounded to the precision the stored value was written with.
+    """Stored equals expected to within half a unit of the stored value's last digit.
 
     19655.0 matches 19655.41 (stored as a whole number), 18.6 and 18.551663
-    match 18.55166312549055 (rounded to 1 and 6 decimals), a float from another
+    match 18.55166312549055 (1 and 6 decimals), a float from another
     computation matches to ~1e-9, and 16,432,923 does not match 16,431,923.
+    A tie matches either way it was rounded: 6.555 is 6.55 by Python's round()
+    and 6.56 by pandas/numpy and half-up, and both are right. The bound is
+    inclusive, with 1e-9 for float error (0.125 vs 0.13 differ by
+    0.005000000000000004). The Validator's same_value() in validator.md is the
+    same rule.
     """
     if abs(stored - expected) <= max(abs(expected) * 1e-9, 1e-9):
         return True
@@ -477,7 +484,7 @@ def same_value(stored, expected):
     if "e" in text:
         return False
     decimals = 0 if text.endswith(".0") else len(text.split(".")[1])
-    return abs(round(expected, decimals) - stored) <= max(abs(stored) * 1e-12, 1e-12)
+    return abs(stored - expected) <= 0.5 * 10 ** -decimals + 1e-9 * max(1.0, abs(expected))
 
 
 def grade(artifacts_dir, csv_path):

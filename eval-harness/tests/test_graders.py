@@ -209,6 +209,12 @@ def test_derived_file_counts_only_when_it_matches(tmp_path):
     (round(18.55166312549055, 8), 18.55166312549055, True),
     (18.551664, 18.55166312549055, False),  # 6 decimals, last digit wrong
     (18.551663125490547, 18.55166312549055, True),  # same value from another computation
+    # a tie is right whichever way it was rounded: Python's round() vs pandas/numpy and half-up
+    (6.56, 393300 / 60000, True),        # 6.555: Python 6.55, numpy 6.56
+    (6.55, 393300 / 60000, True),
+    (2.34, 2.345, True), (2.35, 2.345, True),
+    (0.13, 0.125, True), (0.12, 0.125, True),   # 0.13 - 0.125 is 0.005000000000000004 in floats
+    (6.57, 6.555, False), (6.54, 6.555, False),  # one step past the tie
 ])
 def test_same_value_respects_stored_precision(stored, expected, ok):
     assert recompute.same_value(stored, expected) is ok
@@ -261,7 +267,8 @@ def test_general_expressions(df, formula, description, expected):
 
 
 @pytest.mark.parametrize("formula", ["cat_sales/total_sales*100", "STD(daily_sum)/MEAN(daily_sum)*100", "SUM(line_total WHERE seg)/SUM(line_total)",
-                                     "__import__('os').system('x')", "SUM(line_total) + foo"])
+                                     "__import__('os').system('x')", "SUM(line_total) + foo",
+                                     "SUM(line_total) ** 2", "SUM(line_total) / 9**9**9**9"])  # ** could hang eval()
 def test_names_the_agent_made_up_stay_unsupported(df, formula):
     assert recompute.recompute(formula, df, "") is None
 
@@ -317,6 +324,16 @@ def test_audit_missed(clean, scenario):
     make_run.corrupt_report_number(clean)
     s = grade(clean, scenario)
     assert s["audit_pass"] is True and s["audit_missed"] is True and s["audit_missed_kinds"] == ["cited_value"]
+
+
+def test_audit_missed_when_every_cited_value_is_wrong(clean, scenario):
+    """A match rate of 0.0 is the worst case, not a missing one (it used to read as 1 through `or 1`)."""
+    calcs, top_name = make_run._calcs()
+    body = [f"수치 {c['value'] * 2:,.2f} [{i}]입니다." for i, c in enumerate(calcs, 1)]
+    make_run.write_docx(clean / "artifacts" / "final_report_with_citations.docx", body, [])
+    s = grade(clean, scenario)
+    assert s["cited_value_match_rate"] == 0.0 and s["audit_pass"] is True
+    assert s["audit_missed"] is True and s["audit_missed_kinds"] == ["cited_value"]
 
 
 def test_validator_false_alarm(clean, scenario):

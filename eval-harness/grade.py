@@ -126,7 +126,8 @@ def grade_run(run_dir, csv_path=None, scenario=None):
     # The Auditor passed a report the rule graders find a defect in: the defects
     # its engine exists to block (wrong cited value, broken [n], [n] inside a number).
     if scores.get("audit_present"):
-        missed = [k for k, bad in (("cited_value", (scores.get("cited_value_match_rate") or 1) < 1),
+        rate = scores.get("cited_value_match_rate")
+        missed = [k for k, bad in (("cited_value", rate is not None and rate < 1),  # 0.0 is every value wrong
                                    ("broken_ref", (scores.get("broken_citation_refs") or 0) > 0),
                                    ("inside_number", (scores.get("citation_inside_number") or 0) > 0)) if bad]
         scores["audit_missed"] = scores.get("audit_verdict") == "pass" and bool(missed)
