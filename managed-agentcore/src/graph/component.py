@@ -5,10 +5,14 @@ after the Validator, so measuring one of them means paying for the agents
 before it and accepting whatever they produced. A component run starts the
 agent where a full run would have reached it: the data files arrive as usual,
 the artifacts the earlier agents wrote are staged into ./artifacts/, the
-shared state carries the request and plan, and the agent's tool handler runs
-exactly as the Supervisor would call it. eval-harness/component_eval.py builds
-these runs from saved ones, with errors planted where it wants to see whether
-they are caught.
+shared state carries the request and plan, and the agent's tool handler is
+the one the Supervisor calls. Its input is not a full run's, though: the
+message is the task alone, not the previous agent's response, and `clues`
+(the earlier agents' responses) is empty. So a component run compares two
+versions of an agent on the same input; its counts are not what the agent
+scores inside a full run. eval-harness/component_eval.py builds these runs
+from saved ones, with errors planted where it wants to see whether they are
+caught.
 
 Payload (besides prompt and data_directory, as for a full run):
     component            "validator" or "reporter"

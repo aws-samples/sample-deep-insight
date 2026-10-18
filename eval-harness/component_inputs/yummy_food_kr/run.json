@@ -1,0 +1,19 @@
+{
+  "scenario": "yummy_food_kr",
+  "pinned_from": "yummy_food_kr-20261015-050516-1",
+  "pinned_at": "2026-10-18",
+  "git_sha": "fc83be10d81cc71068d55244d6f66d9ab743a29d",
+  "runtime_version": "4",
+  "models": {
+    "AUDITOR_MODEL_ID": "global.anthropic.claude-sonnet-5",
+    "CODER_MODEL_ID": "global.anthropic.claude-sonnet-5",
+    "COORDINATOR_MODEL_ID": "global.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "DEFAULT_MODEL_ID": "global.anthropic.claude-sonnet-5",
+    "PLANNER_MODEL_ID": "global.anthropic.claude-opus-5",
+    "REPORTER_MODEL_ID": "global.anthropic.claude-sonnet-5",
+    "SUPERVISOR_MODEL_ID": "global.anthropic.claude-sonnet-5",
+    "TRACKER_MODEL_ID": "global.anthropic.claude-sonnet-5",
+    "VALIDATOR_MODEL_ID": "global.anthropic.claude-sonnet-5",
+    "WEB_UTILITY_MODEL_ID": "global.anthropic.claude-sonnet-5"
+  }
+}

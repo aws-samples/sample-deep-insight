@@ -1,0 +1,2095 @@
+{
+  "generated_at": "2026-10-18T10:59:37.556407",
+  "calculations": [
+    {
+      "id": "dup_before",
+      "value": 15680,
+      "description": "원본 데이터 총 행 수(중복 제거 전)",
+      "formula": "COUNT(rows) raw csv",
+      "source_file": "/app/data/jungle-market-sales.csv",
+      "source_columns": [],
+      "importance": "low"
+    },
+    {
+      "id": "dup_after",
+      "value": 15569,
+      "description": "중복 제거 후 총 행 수",
+      "formula": "COUNT(rows) after drop_duplicates()",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [],
+      "importance": "low"
+    },
+    {
+      "id": "total_sales",
+      "value": 110270.26,
+      "description": "전체 매출(line_total 합계)",
+      "formula": "SUM(line_total)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "n_orders",
+      "value": 2987,
+      "description": "총 주문 수(고유 order_id)",
+      "formula": "COUNT(DISTINCT order_id)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "n_customers",
+      "value": 1847,
+      "description": "총 고객 수(고유 customer_id)",
+      "formula": "COUNT(DISTINCT customer_id)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "aov",
+      "value": 36.91672581185136,
+      "description": "평균 주문 금액(AOV)",
+      "formula": "MEAN(SUM(line_total) GROUP BY order_id)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "avg_qty",
+      "value": 1.4050356477615775,
+      "description": "라인 아이템 평균 구매 수량",
+      "formula": "MEAN(quantity)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "quantity"
+      ],
+      "importance": "medium"
+    },
+    {
+      "id": "discount_rate",
+      "value": 0.03695567971668555,
+      "description": "전체 할인율",
+      "formula": "SUM(discount) / SUM(unit_price*quantity)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "discount",
+        "unit_price",
+        "quantity"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "avg_lines_per_order",
+      "value": 5.212253096752595,
+      "description": "주문당 평균 상품 종류 수(장바구니 크기)",
+      "formula": "MEAN(COUNT(rows) GROUP BY order_id)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id"
+      ],
+      "importance": "medium"
+    },
+    {
+      "id": "new_order_share",
+      "value": 0.13056578506863073,
+      "description": "신규 고객 주문 비중",
+      "formula": "COUNT(order_id WHERE customer_type='New')/COUNT(order_id)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_type",
+        "order_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "returning_order_share",
+      "value": 0.8694342149313693,
+      "description": "재구매 고객 주문 비중",
+      "formula": "COUNT(order_id WHERE customer_type='Returning')/COUNT(order_id)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_type",
+        "order_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "new_sales_share",
+      "value": 0.1226681609347797,
+      "description": "신규 고객 매출 비중",
+      "formula": "SUM(line_total WHERE customer_type='New')/SUM(line_total)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_type",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "returning_sales_share",
+      "value": 0.8773318390652204,
+      "description": "재구매 고객 매출 비중",
+      "formula": "SUM(line_total WHERE customer_type='Returning')/SUM(line_total)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_type",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "aov_new",
+      "value": 34.68371794871795,
+      "description": "신규 고객 AOV",
+      "formula": "MEAN(SUM(line_total) GROUP BY order_id) WHERE customer_type='New'",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_type",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "aov_returning",
+      "value": 37.252063919907584,
+      "description": "재구매 고객 AOV",
+      "formula": "MEAN(SUM(line_total) GROUP BY order_id) WHERE customer_type='Returning'",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_type",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "week1_sales",
+      "value": 53425.53,
+      "description": "1주차(3/2-3/8) 매출",
+      "formula": "SUM(line_total) WHERE week='Week1'",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "week2_sales",
+      "value": 56844.73,
+      "description": "2주차(3/9-3/15) 매출",
+      "formula": "SUM(line_total) WHERE week='Week2'",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "wow_growth",
+      "value": 0.06399936509754801,
+      "description": "주차 대비 매출 성장률(WoW)",
+      "formula": "(week2_sales-week1_sales)/week1_sales",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "daily_avg_sales",
+      "value": 7876.447142857143,
+      "description": "일평균 매출",
+      "formula": "MEAN(daily SUM(line_total))",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "next_month_baseline",
+      "value": 236293.4142857143,
+      "description": "다음달 매출 베이스라인 추정(일평균x30일)",
+      "formula": "daily_avg_sales * 30",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "dow_sales_Monday",
+      "value": 15126.24,
+      "description": "요일별 매출 - 월요일",
+      "formula": "SUM(line_total) GROUP BY day_of_week",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "dow_sales_Tuesday",
+      "value": 13253.56,
+      "description": "요일별 매출 - 화요일",
+      "formula": "SUM(line_total) GROUP BY day_of_week",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "dow_sales_Wednesday",
+      "value": 14945.970000000001,
+      "description": "요일별 매출 - 수요일",
+      "formula": "SUM(line_total) GROUP BY day_of_week",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "dow_sales_Thursday",
+      "value": 13566.49,
+      "description": "요일별 매출 - 목요일",
+      "formula": "SUM(line_total) GROUP BY day_of_week",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "dow_sales_Friday",
+      "value": 15860.640000000001,
+      "description": "요일별 매출 - 금요일",
+      "formula": "SUM(line_total) GROUP BY day_of_week",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "dow_sales_Saturday",
+      "value": 19416.850000000002,
+      "description": "요일별 매출 - 토요일",
+      "formula": "SUM(line_total) GROUP BY day_of_week",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "dow_sales_Sunday",
+      "value": 18100.510000000002,
+      "description": "요일별 매출 - 일요일",
+      "formula": "SUM(line_total) GROUP BY day_of_week",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "peak_dow",
+      "value": "Saturday",
+      "description": "매출 최고 요일",
+      "formula": "ARGMAX(SUM(line_total) GROUP BY day_of_week)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "peak_hour",
+      "value": 19,
+      "description": "매출 최고 시간대",
+      "formula": "ARGMAX(SUM(line_total) GROUP BY order_hour)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_hour",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "peak_hour_sales",
+      "value": 9091.76,
+      "description": "최고 시간대 매출",
+      "formula": "MAX(SUM(line_total) GROUP BY order_hour)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_hour",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_sales_Beverages",
+      "value": 19577.350000000002,
+      "description": "카테고리별 매출 - Beverages",
+      "formula": "SUM(line_total) GROUP BY category",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "category",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_sales_Dairy_and_Eggs",
+      "value": 17969.97,
+      "description": "카테고리별 매출 - Dairy & Eggs",
+      "formula": "SUM(line_total) GROUP BY category",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "category",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_sales_Pantry",
+      "value": 16536.8,
+      "description": "카테고리별 매출 - Pantry",
+      "formula": "SUM(line_total) GROUP BY category",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "category",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_sales_Ready_Meals",
+      "value": 10712.88,
+      "description": "카테고리별 매출 - Ready Meals",
+      "formula": "SUM(line_total) GROUP BY category",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "category",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_sales_Produce",
+      "value": 9601.66,
+      "description": "카테고리별 매출 - Produce",
+      "formula": "SUM(line_total) GROUP BY category",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "category",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_sales_Plant-based",
+      "value": 9195.68,
+      "description": "카테고리별 매출 - Plant-based",
+      "formula": "SUM(line_total) GROUP BY category",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "category",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_sales_Bakery",
+      "value": 8225.460000000001,
+      "description": "카테고리별 매출 - Bakery",
+      "formula": "SUM(line_total) GROUP BY category",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "category",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_sales_Snacks",
+      "value": 7078.78,
+      "description": "카테고리별 매출 - Snacks",
+      "formula": "SUM(line_total) GROUP BY category",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "category",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_sales_Frozen",
+      "value": 6874.610000000001,
+      "description": "카테고리별 매출 - Frozen",
+      "formula": "SUM(line_total) GROUP BY category",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "category",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_sales_Household",
+      "value": 4497.07,
+      "description": "카테고리별 매출 - Household",
+      "formula": "SUM(line_total) GROUP BY category",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "category",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "top20_product_share",
+      "value": 0.4001453338370654,
+      "description": "상위 20% 상품의 매출 비중(파레토)",
+      "formula": "SUM(line_total) top 12 products / SUM(line_total) all",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "product_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "top_product_P028",
+      "value": 10789.89,
+      "description": "상위 상품 매출 - Ground Coffee",
+      "formula": "SUM(line_total) GROUP BY product_id",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "product_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "top_product_P023",
+      "value": 4590.14,
+      "description": "상위 상품 매출 - Olive Oil",
+      "formula": "SUM(line_total) GROUP BY product_id",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "product_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "top_product_P039",
+      "value": 3518.7,
+      "description": "상위 상품 매출 - Sushi Box",
+      "formula": "SUM(line_total) GROUP BY product_id",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "product_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "top_product_P044",
+      "value": 3396.35,
+      "description": "상위 상품 매출 - Oat Milk",
+      "formula": "SUM(line_total) GROUP BY product_id",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "product_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "top_product_P013",
+      "value": 3326.69,
+      "description": "상위 상품 매출 - Parmesan Cheese",
+      "formula": "SUM(line_total) GROUP BY product_id",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "product_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "top_product_P011",
+      "value": 3152.37,
+      "description": "상위 상품 매출 - Butter",
+      "formula": "SUM(line_total) GROUP BY product_id",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "product_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "top_product_P029",
+      "value": 2776.69,
+      "description": "상위 상품 매출 - Green Tea",
+      "formula": "SUM(line_total) GROUP BY product_id",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "product_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "top_product_P015",
+      "value": 2658.55,
+      "description": "상위 상품 매출 - Brie",
+      "formula": "SUM(line_total) GROUP BY product_id",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "product_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "top_product_P031",
+      "value": 2496.14,
+      "description": "상위 상품 매출 - Sparkling Water (6)",
+      "formula": "SUM(line_total) GROUP BY product_id",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "product_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "top_product_P050",
+      "value": 2479.73,
+      "description": "상위 상품 매출 - Frozen Pizza",
+      "formula": "SUM(line_total) GROUP BY product_id",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "product_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_customers_VIP_최우수",
+      "value": 484.0,
+      "description": "RFM 세그먼트 고객수 - VIP(최우수)",
+      "formula": "COUNT(customer_id) GROUP BY RFM segment",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_sales_VIP_최우수",
+      "value": 54186.62,
+      "description": "RFM 세그먼트 매출 - VIP(최우수)",
+      "formula": "SUM(order monetary) GROUP BY RFM segment",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_sales_share_VIP_최우수",
+      "value": 0.49139831537533335,
+      "description": "RFM 세그먼트 매출 비중 - VIP(최우수)",
+      "formula": "seg_sales / total_sales",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_customer_share_VIP_최우수",
+      "value": 0.26204656199242016,
+      "description": "RFM 세그먼트 고객 비중 - VIP(최우수)",
+      "formula": "seg_customers / total_customers",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_avg_monetary_VIP_최우수",
+      "value": 111.955826446281,
+      "description": "RFM 세그먼트 1인당 평균 매출 - VIP(최우수)",
+      "formula": "AVG(monetary) GROUP BY RFM segment",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_customers_우수고객",
+      "value": 375.0,
+      "description": "RFM 세그먼트 고객수 - 우수고객",
+      "formula": "COUNT(customer_id) GROUP BY RFM segment",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_sales_우수고객",
+      "value": 21551.05,
+      "description": "RFM 세그먼트 매출 - 우수고객",
+      "formula": "SUM(order monetary) GROUP BY RFM segment",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_sales_share_우수고객",
+      "value": 0.1954384618300528,
+      "description": "RFM 세그먼트 매출 비중 - 우수고객",
+      "formula": "seg_sales / total_sales",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_customer_share_우수고객",
+      "value": 0.2030319436924743,
+      "description": "RFM 세그먼트 고객 비중 - 우수고객",
+      "formula": "seg_customers / total_customers",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_avg_monetary_우수고객",
+      "value": 57.46946666666666,
+      "description": "RFM 세그먼트 1인당 평균 매출 - 우수고객",
+      "formula": "AVG(monetary) GROUP BY RFM segment",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_customers_일반고객",
+      "value": 499.0,
+      "description": "RFM 세그먼트 고객수 - 일반고객",
+      "formula": "COUNT(customer_id) GROUP BY RFM segment",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_sales_일반고객",
+      "value": 20162.02,
+      "description": "RFM 세그먼트 매출 - 일반고객",
+      "formula": "SUM(order monetary) GROUP BY RFM segment",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_sales_share_일반고객",
+      "value": 0.1828418650686051,
+      "description": "RFM 세그먼트 매출 비중 - 일반고객",
+      "formula": "seg_sales / total_sales",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_customer_share_일반고객",
+      "value": 0.2701678397401191,
+      "description": "RFM 세그먼트 고객 비중 - 일반고객",
+      "formula": "seg_customers / total_customers",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_avg_monetary_일반고객",
+      "value": 40.404849699398795,
+      "description": "RFM 세그먼트 1인당 평균 매출 - 일반고객",
+      "formula": "AVG(monetary) GROUP BY RFM segment",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_customers_이탈위험",
+      "value": 445.0,
+      "description": "RFM 세그먼트 고객수 - 이탈위험",
+      "formula": "COUNT(customer_id) GROUP BY RFM segment",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_sales_이탈위험",
+      "value": 13487.68,
+      "description": "RFM 세그먼트 매출 - 이탈위험",
+      "formula": "SUM(order monetary) GROUP BY RFM segment",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_sales_share_이탈위험",
+      "value": 0.12231475649009987,
+      "description": "RFM 세그먼트 매출 비중 - 이탈위험",
+      "formula": "seg_sales / total_sales",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_customer_share_이탈위험",
+      "value": 0.2409312398484028,
+      "description": "RFM 세그먼트 고객 비중 - 이탈위험",
+      "formula": "seg_customers / total_customers",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_avg_monetary_이탈위험",
+      "value": 30.309393258426965,
+      "description": "RFM 세그먼트 1인당 평균 매출 - 이탈위험",
+      "formula": "AVG(monetary) GROUP BY RFM segment",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_customers_이탈_저가치",
+      "value": 44.0,
+      "description": "RFM 세그먼트 고객수 - 이탈/저가치",
+      "formula": "COUNT(customer_id) GROUP BY RFM segment",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_sales_이탈_저가치",
+      "value": 882.89,
+      "description": "RFM 세그먼트 매출 - 이탈/저가치",
+      "formula": "SUM(order monetary) GROUP BY RFM segment",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_sales_share_이탈_저가치",
+      "value": 0.008006601235908939,
+      "description": "RFM 세그먼트 매출 비중 - 이탈/저가치",
+      "formula": "seg_sales / total_sales",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_customer_share_이탈_저가치",
+      "value": 0.023822414726583648,
+      "description": "RFM 세그먼트 고객 비중 - 이탈/저가치",
+      "formula": "seg_customers / total_customers",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "seg_avg_monetary_이탈_저가치",
+      "value": 20.06568181818182,
+      "description": "RFM 세그먼트 1인당 평균 매출 - 이탈/저가치",
+      "formula": "AVG(monetary) GROUP BY RFM segment",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "top10pct_cust_sales_share",
+      "value": 0.2783424107279696,
+      "description": "상위 10% 고객의 매출 집중도",
+      "formula": "SUM(monetary) top 185 customers / total_sales",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "top20pct_cust_sales_share",
+      "value": 0.4439220511496028,
+      "description": "상위 20% 고객의 매출 집중도",
+      "formula": "SUM(monetary) top 370 customers / total_sales",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "repeat_customers",
+      "value": 697,
+      "description": "재구매 고객 수(주문 2회 이상)",
+      "formula": "COUNT(customer_id WHERE frequency>=2)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "repeat_rate",
+      "value": 0.37736870600974554,
+      "description": "재구매율(고객 기준)",
+      "formula": "repeat_customers / total_customers",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "churn_risk_customers",
+      "value": 545,
+      "description": "이탈 위험 고객 수(최근 구매 7일 초과)",
+      "formula": "COUNT(customer_id WHERE recency_days>7)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "churn_risk_rate",
+      "value": 0.29507309149972927,
+      "description": "이탈 위험 고객 비율",
+      "formula": "churn_risk_customers / total_customers",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "avg_repurchase_interval",
+      "value": 3.557017543859649,
+      "description": "평균 재구매 간격(일)",
+      "formula": "MEAN(order_date diff) for customers with multiple orders",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "customer_id",
+        "order_date"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "city_sales_Singapore",
+      "value": 16645.52,
+      "description": "도시별 매출 - Singapore",
+      "formula": "SUM(line_total) GROUP BY city",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "city",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "city_aov_Singapore",
+      "value": 40.40174757281554,
+      "description": "도시별 AOV - Singapore",
+      "formula": "MEAN(order_value) GROUP BY city",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "city",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "city_sales_Sydney",
+      "value": 16258.800000000001,
+      "description": "도시별 매출 - Sydney",
+      "formula": "SUM(line_total) GROUP BY city",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "city",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "city_aov_Sydney",
+      "value": 41.26598984771574,
+      "description": "도시별 AOV - Sydney",
+      "formula": "MEAN(order_value) GROUP BY city",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "city",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "city_sales_New_York",
+      "value": 15996.43,
+      "description": "도시별 매출 - New York",
+      "formula": "SUM(line_total) GROUP BY city",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "city",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "city_aov_New_York",
+      "value": 50.78231746031746,
+      "description": "도시별 AOV - New York",
+      "formula": "MEAN(order_value) GROUP BY city",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "city",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "city_sales_Paris",
+      "value": 13790.41,
+      "description": "도시별 매출 - Paris",
+      "formula": "SUM(line_total) GROUP BY city",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "city",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "city_aov_Paris",
+      "value": 37.88574175824176,
+      "description": "도시별 AOV - Paris",
+      "formula": "MEAN(order_value) GROUP BY city",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "city",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "city_sales_London",
+      "value": 12608.1,
+      "description": "도시별 매출 - London",
+      "formula": "SUM(line_total) GROUP BY city",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "city",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "city_aov_London",
+      "value": 37.30207100591716,
+      "description": "도시별 AOV - London",
+      "formula": "MEAN(order_value) GROUP BY city",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "city",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "city_sales_Berlin",
+      "value": 12384.75,
+      "description": "도시별 매출 - Berlin",
+      "formula": "SUM(line_total) GROUP BY city",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "city",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "city_aov_Berlin",
+      "value": 37.080089820359284,
+      "description": "도시별 AOV - Berlin",
+      "formula": "MEAN(order_value) GROUP BY city",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "city",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "city_sales_Seoul",
+      "value": 11552.02,
+      "description": "도시별 매출 - Seoul",
+      "formula": "SUM(line_total) GROUP BY city",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "city",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "city_aov_Seoul",
+      "value": 28.73636815920398,
+      "description": "도시별 AOV - Seoul",
+      "formula": "MEAN(order_value) GROUP BY city",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "city",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "city_sales_Tokyo",
+      "value": 11034.23,
+      "description": "도시별 매출 - Tokyo",
+      "formula": "SUM(line_total) GROUP BY city",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "city",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "city_aov_Tokyo",
+      "value": 25.78091121495327,
+      "description": "도시별 AOV - Tokyo",
+      "formula": "MEAN(order_value) GROUP BY city",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "city",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "best_age_gender_aov_value",
+      "value": 41.95668049792531,
+      "description": "최고 AOV 연령x성별 세그먼트 - 55+/M",
+      "formula": "MAX(MEAN(order_value) GROUP BY age_group,gender)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "age_group",
+        "gender",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "channel_sales_App",
+      "value": 61130.56,
+      "description": "채널별 매출 - App",
+      "formula": "SUM(line_total) GROUP BY channel",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "channel",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "channel_aov_App",
+      "value": 35.19318364997121,
+      "description": "채널별 AOV - App",
+      "formula": "MEAN(order_value) GROUP BY channel",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "channel",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "channel_sales_Web",
+      "value": 49139.700000000004,
+      "description": "채널별 매출 - Web",
+      "formula": "SUM(line_total) GROUP BY channel",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "channel",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "channel_aov_Web",
+      "value": 39.31176000000001,
+      "description": "채널별 AOV - Web",
+      "formula": "MEAN(order_value) GROUP BY channel",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "channel",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "promo_sales_none",
+      "value": 81335.22,
+      "description": "프로모션별 매출 - 없음",
+      "formula": "SUM(line_total) GROUP BY promo_code",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "promo_code",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "promo_sales_SAVE10",
+      "value": 19698.66,
+      "description": "프로모션별 매출 - SAVE10",
+      "formula": "SUM(line_total) GROUP BY promo_code",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "promo_code",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "promo_sales_WELCOME10",
+      "value": 8750.08,
+      "description": "프로모션별 매출 - WELCOME10",
+      "formula": "SUM(line_total) GROUP BY promo_code",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "promo_code",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "promo_sales_PASTA30",
+      "value": 486.3,
+      "description": "프로모션별 매출 - PASTA30",
+      "formula": "SUM(line_total) GROUP BY promo_code",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "promo_code",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "aov_with_promo",
+      "value": 39.462368995633184,
+      "description": "프로모션 적용 주문 AOV",
+      "formula": "MEAN(order_value) WHERE has_promo=True",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "promo_code",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "aov_without_promo",
+      "value": 35.79079188797682,
+      "description": "프로모션 미적용 주문 AOV",
+      "formula": "MEAN(order_value) WHERE has_promo=False",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "promo_code",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "discbucket_sales_0%",
+      "value": 81335.22,
+      "description": "할인율 구간별 매출 - 0%",
+      "formula": "SUM(line_total) GROUP BY discount_pct bucket",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "discount",
+        "unit_price",
+        "quantity",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "discbucket_sales_10-15%",
+      "value": 21706.8,
+      "description": "할인율 구간별 매출 - 10-15%",
+      "formula": "SUM(line_total) GROUP BY discount_pct bucket",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "discount",
+        "unit_price",
+        "quantity",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "discbucket_sales_15-20%",
+      "value": 6627.35,
+      "description": "할인율 구간별 매출 - 15-20%",
+      "formula": "SUM(line_total) GROUP BY discount_pct bucket",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "discount",
+        "unit_price",
+        "quantity",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "discbucket_sales_20%+",
+      "value": 600.89,
+      "description": "할인율 구간별 매출 - 20%+",
+      "formula": "SUM(line_total) GROUP BY discount_pct bucket",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "discount",
+        "unit_price",
+        "quantity",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "multi_item_order_share",
+      "value": 1.0,
+      "description": "2개 이상 상품을 구매한 주문 비중",
+      "formula": "COUNT(orders WHERE n_items>=2) / COUNT(orders)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "product_name"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "basket_pair_Ground_Coffee_Oat_Milk",
+      "value": 477,
+      "description": "동시구매 조합 - Ground Coffee + Oat Milk",
+      "formula": "COUNT(orders containing both products)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "product_name"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "basket_pair_Pasta_Sauce_Spaghetti",
+      "value": 266,
+      "description": "동시구매 조합 - Pasta Sauce + Spaghetti",
+      "formula": "COUNT(orders containing both products)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "product_name"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "basket_pair_Parmesan_Cheese_Spaghetti",
+      "value": 253,
+      "description": "동시구매 조합 - Parmesan Cheese + Spaghetti",
+      "formula": "COUNT(orders containing both products)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "product_name"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "basket_pair_Parmesan_Cheese_Pasta_Sauce",
+      "value": 197,
+      "description": "동시구매 조합 - Parmesan Cheese + Pasta Sauce",
+      "formula": "COUNT(orders containing both products)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "product_name"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "basket_pair_Cereal_Whole_Milk",
+      "value": 188,
+      "description": "동시구매 조합 - Cereal + Whole Milk",
+      "formula": "COUNT(orders containing both products)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "product_name"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "basket_pair_Butter_Sourdough_Bread",
+      "value": 143,
+      "description": "동시구매 조합 - Butter + Sourdough Bread",
+      "formula": "COUNT(orders containing both products)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "product_name"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "basket_pair_Baguette_Butter",
+      "value": 140,
+      "description": "동시구매 조합 - Baguette + Butter",
+      "formula": "COUNT(orders containing both products)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "product_name"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "basket_pair_Ground_Coffee_Whole_Milk",
+      "value": 132,
+      "description": "동시구매 조합 - Ground Coffee + Whole Milk",
+      "formula": "COUNT(orders containing both products)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "product_name"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "basket_pair_Butter_Ground_Coffee",
+      "value": 122,
+      "description": "동시구매 조합 - Butter + Ground Coffee",
+      "formula": "COUNT(orders containing both products)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "product_name"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "basket_pair_Oat_Milk_Whole_Milk",
+      "value": 118,
+      "description": "동시구매 조합 - Oat Milk + Whole Milk",
+      "formula": "COUNT(orders containing both products)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "product_name"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "corr_value_nitems",
+      "value": 0.8202561907197511,
+      "description": "주문금액과 상품종류수의 상관계수",
+      "formula": "CORR(order_value, n_items)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "line_total",
+        "product_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s1_target_customers",
+      "value": 489,
+      "description": "전략1 타깃 고객수(이탈위험+이탈저가치 세그먼트)",
+      "formula": "COUNT(customer_id WHERE segment IN ('이탈위험','이탈/저가치'))",
+      "source_file": "./artifacts/cache/customer_rfm.csv",
+      "source_columns": [
+        "segment",
+        "customer_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s1_conservative",
+      "value": 1457.3007405467847,
+      "description": "전략1 보수적 기대 매출 증분",
+      "formula": "target_customers * 8% 재활성화율 * AOV(재구매고객)",
+      "source_file": "./artifacts/cache/customer_rfm.csv",
+      "source_columns": [
+        "segment",
+        "customer_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s1_base",
+      "value": 2732.438888525221,
+      "description": "전략1 기본 기대 매출 증분",
+      "formula": "target_customers * 15% 재활성화율 * AOV(재구매고객)",
+      "source_file": "./artifacts/cache/customer_rfm.csv",
+      "source_columns": [
+        "segment",
+        "customer_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s1_optimistic",
+      "value": 4554.064814208702,
+      "description": "전략1 낙관적 기대 매출 증분",
+      "formula": "target_customers * 25% 재활성화율 * AOV(재구매고객)",
+      "source_file": "./artifacts/cache/customer_rfm.csv",
+      "source_columns": [
+        "segment",
+        "customer_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s2_coffee_only_orders",
+      "value": 224,
+      "description": "전략2 커피 구매했지만 오트밀크 미구매 주문수(업셀 대상)",
+      "formula": "COUNT(orders with Ground Coffee but not Oat Milk)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "product_name"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s2_oat_milk_price",
+      "value": 3.990000000000001,
+      "description": "오트밀크 평균 단가",
+      "formula": "MEAN(unit_price) WHERE product_name='Oat Milk'",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "product_name",
+        "unit_price"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s2_pasta_partial_orders",
+      "value": 454,
+      "description": "전략2 파스타 트리오 중 일부만 구매한 주문수(번들 대상)",
+      "formula": "COUNT(orders with partial pasta trio)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "product_name"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s2_conservative",
+      "value": 172.36800000000005,
+      "description": "전략2 보수적 기대 매출 증분(30일 환산)",
+      "formula": "coffee_only_orders * (30/14) * 10% 전환율 * oat_milk_price * 0.9(번들할인반영)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "product_name",
+        "unit_price"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s2_base",
+      "value": 344.7360000000001,
+      "description": "전략2 기본 기대 매출 증분(30일 환산)",
+      "formula": "coffee_only_orders * (30/14) * 20% 전환율 * oat_milk_price * 0.9(번들할인반영)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "product_name",
+        "unit_price"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s2_optimistic",
+      "value": 603.2880000000001,
+      "description": "전략2 낙관적 기대 매출 증분(30일 환산)",
+      "formula": "coffee_only_orders * (30/14) * 35% 전환율 * oat_milk_price * 0.9(번들할인반영)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "product_name",
+        "unit_price"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s3_low_hours_sales",
+      "value": 6019.43,
+      "description": "저조 시간대(하위 6개 시간) 매출 합계",
+      "formula": "SUM(line_total) WHERE order_hour IN low_hours",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_hour",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s3_low_hours_orders",
+      "value": 144,
+      "description": "저조 시간대 주문수",
+      "formula": "COUNT(DISTINCT order_id) WHERE order_hour IN low_hours",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_hour",
+        "order_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s3_conservative",
+      "value": 911.3157457554163,
+      "description": "전략3 보수적 기대 매출 증분(30일 환산)",
+      "formula": "low_hours_orders * (30/14) * 8% 주문증가율 * AOV",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_hour",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s3_base",
+      "value": 1708.7170232914057,
+      "description": "전략3 기본 기대 매출 증분(30일 환산)",
+      "formula": "low_hours_orders * (30/14) * 15% 주문증가율 * AOV",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_hour",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s3_optimistic",
+      "value": 2847.861705485676,
+      "description": "전략3 낙관적 기대 매출 증분(30일 환산)",
+      "formula": "low_hours_orders * (30/14) * 25% 주문증가율 * AOV",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_hour",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "total_base_impact",
+      "value": 4785.891911816627,
+      "description": "3대 전략 통합 기본 기대 매출 증분",
+      "formula": "s1_base + s2_base + s3_base",
+      "source_file": "./artifacts/calculation_metadata.json",
+      "source_columns": [],
+      "importance": "high"
+    },
+    {
+      "id": "total_impact_pct",
+      "value": 0.020254021578569106,
+      "description": "3대 전략 통합 기대 매출 증분이 베이스라인 대비 비중",
+      "formula": "total_base_impact / next_month_baseline",
+      "source_file": "./artifacts/calculation_metadata.json",
+      "source_columns": [],
+      "importance": "high"
+    },
+    {
+      "id": "vip_avg_items",
+      "value": 5.408827785817656,
+      "description": "VIP 세그먼트 평균 주문당 품목수",
+      "formula": "MEAN(n_items) WHERE segment='VIP(최우수)'",
+      "source_file": "./artifacts/cache/customer_rfm.csv",
+      "source_columns": [
+        "segment",
+        "order_id",
+        "product_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "target_orders_14d",
+      "value": 1115,
+      "description": "전략2 타깃(우수고객+일반고객) 주문수(14일)",
+      "formula": "COUNT(order_id WHERE segment IN ('우수고객','일반고객'))",
+      "source_file": "./artifacts/cache/customer_rfm.csv",
+      "source_columns": [
+        "segment",
+        "order_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "avg_value_per_item",
+      "value": 7.082680968591433,
+      "description": "품목당 평균 매출(proxy)",
+      "formula": "SUM(order_value)/SUM(n_items)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "line_total",
+        "product_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s2_conservative_v2",
+      "value": 2538.382268564822,
+      "description": "전략2(수정) 보수적 기대 매출 증분(30일 환산)",
+      "formula": "target_orders_14d * (30/14) * 15% 채택률 * 1개 추가품목 * 품목당평균매출",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "segment",
+        "product_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s2_base_v2",
+      "value": 4230.637114274704,
+      "description": "전략2(수정) 기본 기대 매출 증분(30일 환산)",
+      "formula": "target_orders_14d * (30/14) * 25% 채택률 * 1개 추가품목 * 품목당평균매출",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "segment",
+        "product_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s2_optimistic_v2",
+      "value": 6769.019382839527,
+      "description": "전략2(수정) 낙관적 기대 매출 증분(30일 환산)",
+      "formula": "target_orders_14d * (30/14) * 40% 채택률 * 1개 추가품목 * 품목당평균매출",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_id",
+        "segment",
+        "product_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "save10_usage_rate",
+      "value": 0.22333461686561418,
+      "description": "재구매 고객 중 SAVE10 쿠폰 사용률",
+      "formula": "COUNT(order_id WHERE promo_code='SAVE10') / COUNT(order_id WHERE customer_type='Returning')",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "promo_code",
+        "customer_type",
+        "order_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "aov_save10",
+      "value": 33.963206896551725,
+      "description": "SAVE10 쿠폰 사용 주문 AOV",
+      "formula": "MEAN(order_value) WHERE promo_code='SAVE10'",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "promo_code",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "aov_returning_no_promo",
+      "value": 37.96567674764502,
+      "description": "프로모션 미사용 재구매고객 AOV",
+      "formula": "MEAN(order_value) WHERE customer_type='Returning' AND promo_code IS NULL",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "promo_code",
+        "customer_type",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "non_save10_returning_orders",
+      "value": 2017,
+      "description": "SAVE10 미사용 재구매고객 주문수(14일)",
+      "formula": "returning_orders - save10_orders",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "promo_code",
+        "customer_type",
+        "order_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "aov_uplift_per_order",
+      "value": -4.002469851093295,
+      "description": "SAVE10 사용시 AOV 증분",
+      "formula": "aov_save10 - aov_returning_no_promo",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "promo_code",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s3_conservative_v2",
+      "value": 0.0,
+      "description": "전략3(수정) 보수적 기대 매출 증분(30일 환산)",
+      "formula": "non_save10_returning_orders * (30/14) * 10% 타기팅율 * aov_uplift_per_order",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "promo_code",
+        "customer_type",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s3_base_v2",
+      "value": 0.0,
+      "description": "전략3(수정) 기본 기대 매출 증분(30일 환산)",
+      "formula": "non_save10_returning_orders * (30/14) * 20% 타기팅율 * aov_uplift_per_order",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "promo_code",
+        "customer_type",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s3_optimistic_v2",
+      "value": 0.0,
+      "description": "전략3(수정) 낙관적 기대 매출 증분(30일 환산)",
+      "formula": "non_save10_returning_orders * (30/14) * 35% 타기팅율 * aov_uplift_per_order",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "promo_code",
+        "customer_type",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "total_base_v2",
+      "value": 6963.076002799925,
+      "description": "3대 전략(최종) 통합 기본 기대 매출 증분",
+      "formula": "s1_base + s2_base_v2 + s3_base_v2",
+      "source_file": "./artifacts/calculation_metadata.json",
+      "source_columns": [],
+      "importance": "high"
+    },
+    {
+      "id": "total_conservative_v2",
+      "value": 3995.6830091116067,
+      "description": "3대 전략(최종) 통합 보수적 기대 매출 증분",
+      "formula": "s1_conservative + s2_conservative_v2 + s3_conservative_v2",
+      "source_file": "./artifacts/calculation_metadata.json",
+      "source_columns": [],
+      "importance": "high"
+    },
+    {
+      "id": "total_optimistic_v2",
+      "value": 11323.084197048229,
+      "description": "3대 전략(최종) 통합 낙관적 기대 매출 증분",
+      "formula": "s1_optimistic + s2_optimistic_v2 + s3_optimistic_v2",
+      "source_file": "./artifacts/calculation_metadata.json",
+      "source_columns": [],
+      "importance": "high"
+    },
+    {
+      "id": "total_impact_pct_v2",
+      "value": 0.02946792242961337,
+      "description": "3대 전략(최종) 기본 기대 매출 증분의 베이스라인 대비 비중",
+      "formula": "total_base_v2 / next_month_baseline",
+      "source_file": "./artifacts/calculation_metadata.json",
+      "source_columns": [],
+      "importance": "high"
+    },
+    {
+      "id": "low_weekdays_orders",
+      "value": 729,
+      "description": "저조 요일(화,목) 주문수(14일)",
+      "formula": "SUM(COUNT(order_id) GROUP BY dow) for 2 lowest weekdays",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "order_id"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "gap_orders_per_day",
+      "value": 149.5,
+      "description": "주말 대비 저조요일 평균 주문수 격차(일별)",
+      "formula": "MEAN(orders on weekend days) - MEAN(orders on low weekdays)",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "order_id",
+        "dow"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s3_conservative_final",
+      "value": 7095.922082835143,
+      "description": "전략3(최종) 보수적 기대 매출 증분(30일 환산)",
+      "formula": "gap_orders_per_day * 2개저조요일 * 4.3주 * 15% 격차해소율 * AOV",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s3_base_final",
+      "value": 14191.844165670285,
+      "description": "전략3(최종) 기본 기대 매출 증분(30일 환산)",
+      "formula": "gap_orders_per_day * 2개저조요일 * 4.3주 * 30% 격차해소율 * AOV",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "s3_optimistic_final",
+      "value": 23653.073609450475,
+      "description": "전략3(최종) 낙관적 기대 매출 증분(30일 환산)",
+      "formula": "gap_orders_per_day * 2개저조요일 * 4.3주 * 50% 격차해소율 * AOV",
+      "source_file": "./artifacts/cache/df_main.pkl",
+      "source_columns": [
+        "order_date",
+        "order_id",
+        "line_total"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "total_conservative_final",
+      "value": 11091.605091946749,
+      "description": "3대 전략(최종) 통합 보수적 기대 매출 증분",
+      "formula": "s1_conservative + s2_conservative_v2 + s3_conservative_final",
+      "source_file": "./artifacts/calculation_metadata.json",
+      "source_columns": [],
+      "importance": "high"
+    },
+    {
+      "id": "total_base_final",
+      "value": 21154.92016847021,
+      "description": "3대 전략(최종) 통합 기본 기대 매출 증분",
+      "formula": "s1_base + s2_base_v2 + s3_base_final",
+      "source_file": "./artifacts/calculation_metadata.json",
+      "source_columns": [],
+      "importance": "high"
+    },
+    {
+      "id": "total_optimistic_final",
+      "value": 34976.157806498704,
+      "description": "3대 전략(최종) 통합 낙관적 기대 매출 증분",
+      "formula": "s1_optimistic + s2_optimistic_v2 + s3_optimistic_final",
+      "source_file": "./artifacts/calculation_metadata.json",
+      "source_columns": [],
+      "importance": "high"
+    },
+    {
+      "id": "total_impact_pct_final",
+      "value": 0.0895281835611835,
+      "description": "3대 전략(최종) 기본 기대 매출 증분의 베이스라인 대비 비중",
+      "formula": "total_base_final / next_month_baseline",
+      "source_file": "./artifacts/calculation_metadata.json",
+      "source_columns": [],
+      "importance": "high"
+    }
+  ]
+}
