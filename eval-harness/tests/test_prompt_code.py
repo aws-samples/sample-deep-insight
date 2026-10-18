@@ -16,6 +16,7 @@ actually re-derived it.
 """
 import json
 import re
+from pathlib import Path
 
 import pytest
 
@@ -136,3 +137,29 @@ def test_validator_same_value_reads_the_stored_precision():
     same = ns["same_value"]
     assert same(20850.0, 20850.0822) and same(2987, 2987.4) and same(3.17, 3.1695)
     assert not same(3.487, 3.17) and not same(2.343, 2.132) and not same(4.0004, 4.0)
+
+
+def _same_value_defs():
+    """Every same_value() in both editions of validator.md, as written."""
+    repo = Path(__file__).resolve().parents[2]
+    out = []
+    for edition in ("managed-agentcore", "self-hosted"):
+        md = (repo / edition / "src" / "prompts" / "validator.md").read_text(encoding="utf-8")
+        out += [m.group(0) for m in re.finditer(r"def same_value\(expected, actual\):.*?\n((?:    .*\n)+)", md)]
+    return out
+
+
+def test_validator_same_value_is_one_rule_with_inclusive_ties():
+    """The rule the rule grader uses too (graders/recompute.same_value): a tie matches either rounding."""
+    defs = _same_value_defs()
+    assert len(defs) == 4                                              # 2 per edition
+    bodies = {d.split("\n", 1)[1] for d in defs}                       # the line after def may carry a comment
+    assert len(bodies) == 1, "same_value() differs between its copies in validator.md"
+    env = {}
+    exec(defs[0], env)
+    same_value = env["same_value"]
+    for stored, computed in [(6.56, 393300 / 60000), (6.55, 393300 / 60000), (2.34, 2.345), (2.35, 2.345),
+                             (0.13, 0.125), (0.12, 0.125), (1.01, 1.005), (2987, 2987.4)]:
+        assert same_value(stored, computed), (stored, computed)
+    for stored, computed in [(6.57, 6.555), (6.54, 6.555), (3.49, 3.17), (2987, 2988)]:
+        assert not same_value(stored, computed), (stored, computed)

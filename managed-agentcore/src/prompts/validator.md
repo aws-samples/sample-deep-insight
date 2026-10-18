@@ -95,7 +95,10 @@ print(f"Columns: {{list(df.columns)}}")  # Print to verify column names
 
 A value matches when it equals the recomputation rounded to the decimals the
 stored value has: 3.17 stored allows ±0.005, 2987 stored allows ±0.5, 45.42%
-allows ±0.005, and 20850.0 (a float rounded to an integer) allows ±0.5. NEVER use a fixed absolute tolerance (`< 0.5`, `< 0.01`) or a
+allows ±0.005, and 20850.0 (a float rounded to an integer) allows ±0.5. The
+bound is inclusive, so a tie matches whichever way it was rounded: 6.555 is
+6.55 by Python's round() and 6.56 by pandas, and both match. NEVER use a fixed
+absolute tolerance (`< 0.5`, `< 0.01`) or a
 percent tolerance (`1%`): ROAS, CTR and shares are small numbers, and a fixed
 0.5 accepts a ROAS of 3.49 for 3.17 — a 10% error marked verified.
 ```python
@@ -107,7 +110,7 @@ def same_value(expected, actual):
         return str(expected) == str(actual)
     text = repr(float(e)) if isinstance(expected, float) else str(expected)
     decimals = len(text.split('.')[1].rstrip('0')) if '.' in text and 'e' not in text else 0  # 20850.0 was rounded to an integer
-    return abs(e - a) <= max(0.5 * 10 ** -decimals, abs(a) * 1e-9)
+    return abs(e - a) <= 0.5 * 10 ** -decimals + 1e-9 * max(1.0, abs(a))
 
 # ❌ WRONG - Direct comparison fails for float vs int
 match = expected == actual
@@ -409,7 +412,7 @@ def same_value(expected, actual):  # equal at the stored value's precision (see 
         return str(expected) == str(actual)
     text = repr(float(e)) if isinstance(expected, float) else str(expected)
     decimals = len(text.split('.')[1].rstrip('0')) if '.' in text and 'e' not in text else 0  # 20850.0 was rounded to an integer
-    return abs(e - a) <= max(0.5 * 10 ** -decimals, abs(a) * 1e-9)
+    return abs(e - a) <= 0.5 * 10 ** -decimals + 1e-9 * max(1.0, abs(a))
 
 with open('./artifacts/cache/priority_calcs.pkl', 'rb') as f:
     priority_calcs = pickle.load(f)
