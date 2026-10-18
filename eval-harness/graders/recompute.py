@@ -45,6 +45,7 @@ leaves needs_review numbers out of the report), out of
 `validator_needs_review_checked`.
 """
 import re
+from decimal import Decimal
 from pathlib import Path
 
 from .citations import load_calculations, load_citations
@@ -480,10 +481,8 @@ def same_value(stored, expected):
     """
     if abs(stored - expected) <= max(abs(expected) * 1e-9, 1e-9):
         return True
-    text = repr(float(stored))
-    if "e" in text:
-        return False
-    decimals = 0 if text.endswith(".0") else len(text.split(".")[1])
+    # digits after the point as stored: 3.17 → 2, 20850.0 → 0 (rounded to an integer), 5e-05 → 5
+    decimals = max(0, -Decimal(repr(float(stored))).normalize().as_tuple().exponent)
     return abs(stored - expected) <= 0.5 * 10 ** -decimals + 1e-9 * max(1.0, abs(expected))
 
 

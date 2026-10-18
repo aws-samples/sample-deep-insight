@@ -215,6 +215,8 @@ def test_derived_file_counts_only_when_it_matches(tmp_path):
     (2.34, 2.345, True), (2.35, 2.345, True),
     (0.13, 0.125, True), (0.12, 0.125, True),   # 0.13 - 0.125 is 0.005000000000000004 in floats
     (6.57, 6.555, False), (6.54, 6.555, False),  # one step past the tie
+    (5e-05, 5.2e-05, True), (5e-05, 0.4, False),  # repr in exponent form: 5 decimals
+    (20850.0, 20850.08, True),          # a float rounded to an integer
 ])
 def test_same_value_respects_stored_precision(stored, expected, ok):
     assert recompute.same_value(stored, expected) is ok
