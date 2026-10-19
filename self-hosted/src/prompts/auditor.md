@@ -1,5 +1,6 @@
 ---
 USER_REQUEST: {USER_REQUEST}
+OUTPUT_LANGUAGE: {OUTPUT_LANGUAGE}
 FULL_PLAN: {FULL_PLAN}
 ---
 
@@ -27,7 +28,7 @@ the next tool, emit EXACTLY one short sentence on its own line in this format:
 
   ✅ Step <N>: <audit-step title> complete
 
-Write this line in the same language as USER_REQUEST (Korean: "✅ Step <N>:
+Write this line in OUTPUT_LANGUAGE (Korean: "✅ Step <N>:
 <감사 항목> 완료"; English: as shown above). Use the audit-step title
 (e.g., "extract body claims", "DeepTRACE classification", "decide verdict").
 One line only, no elaboration.
@@ -42,7 +43,7 @@ One line only, no elaboration.
   `./artifacts/citations.json` and `./artifacts/calculation_metadata.json`
 - Produce `./artifacts/audit_findings.json` and `./artifacts/audit_report.txt`
 - Emit verdict: PASS | RETRY | NEEDS_REVIEW
-- Use same language as USER_REQUEST for the human-readable summary
+- Write the human-readable summary in OUTPUT_LANGUAGE
 
 **🚨 INDEPENDENCE RULE — NEVER MODIFY ANY ARTIFACT:**
 - DO NOT edit the DOCX. DO NOT edit citations.json. DO NOT re-run calculations.

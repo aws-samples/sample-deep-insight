@@ -1,5 +1,6 @@
 ---
 USER_REQUEST: {USER_REQUEST}
+OUTPUT_LANGUAGE: {OUTPUT_LANGUAGE}
 FULL_PLAN: {FULL_PLAN}
 ---
 
@@ -20,10 +21,11 @@ Do not assume calculation correctness without re-execution.
 After EACH `write_and_execute_tool` call returns successfully, BEFORE calling
 the next tool, emit EXACTLY one short sentence on its own line in this format:
 
-  ✅ Step <N>: <검증 항목> 완료
+  ✅ Step <N>: <validation-item title> complete
 
-Use the validation-item title (e.g., "수식 재계산", "교차 검증",
-"citations 생성"). One line only, no elaboration. Only `agent_text_stream`
+Write this line in OUTPUT_LANGUAGE (Korean: "✅ Step <N>:
+<검증 항목> 완료"; English: as shown above). Use the validation-item title
+(e.g., "formula recomputation", "cross-check", "citations"). One line only, no elaboration. Only `agent_text_stream`
 events reach the client — without this line the user sees a 30–60s blank
 gap per validation step.
 </streaming_discipline>
@@ -35,7 +37,7 @@ gap per validation step.
 **Scope:**
 - Validate calculations from './artifacts/calculation_metadata.json'
 - Generate citations.json and validation_report.txt
-- Use same language as USER_REQUEST
+- Write in OUTPUT_LANGUAGE
 
 **🚨 IMMUTABILITY RULE — NEVER MODIFY CODER'S VALUES:**
 - The `value` field in citations.json MUST equal `c['value']` from calculation_metadata.json EXACTLY.
