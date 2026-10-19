@@ -17,6 +17,11 @@
 #                  min_recompute     calculations that must be re-derived from the CSV
 #                  min_cited_checked "number [n]" pairs that must be compared
 #                  Set from real runs: half of the lowest count in a normal run.
+# components:    → component runs on this scenario's pinned input
+#                  (component_inputs/<scenario>/, made by `component_eval.py pin`):
+#                  per agent, errors to plant and the seed. The same input and
+#                  seed give every version the same planted errors. Run by
+#                  `component_eval.py <agent> --scenario` or `run_eval.py --components`.
 
 scenarios:
   # Main benchmark: open growth request. The data has planted patterns a
@@ -36,6 +41,9 @@ scenarios:
       다음 달 매출을 크게 늘릴 수 있는 실행 가능한 전략 3가지를 우선순위와 기대 효과를 포함해서 제안해줘.
       결과는 DOCX로 저장해줘.
     hitl: []
+    components:
+      validator: {plant: 6, seed: 0}
+      reporter: {plant: 4, seed: 0}
     pass:
       # not calibrated on real runs yet: re-set from the first baseline runs
       min_recompute: 10
@@ -99,6 +107,9 @@ scenarios:
       어디서 낭비되는지 찾아주고, 광고비 효율을 높일 수 있는 실행 가능한 전략 3가지를
       우선순위와 기대 효과를 포함해서 제안해줘. 결과는 DOCX로 저장해줘.
     hitl: []
+    components:
+      validator: {plant: 6, seed: 0}
+      reporter: {plant: 4, seed: 0}
     pass: &yummy_pass
       # not calibrated on real runs yet: re-set from the first baseline runs
       min_recompute: 10

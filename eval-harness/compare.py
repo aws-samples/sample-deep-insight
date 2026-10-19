@@ -15,12 +15,19 @@ Then one markdown table per scenario:
                      excludes 0
   pass^k             chance that k runs in a row all pass
 
+Component runs under a tag (eval_results/<tag>/component/, from
+component_eval.py or run_eval.py --components) get a table per agent under
+their scenario. They compare two versions of one agent only when both ran on
+the same input: a tag whose source run or planted errors differ from the
+first tag's is flagged.
+
 With about 3 runs per side no delta is flagged: a bootstrap over 3 values is
 too coarse (a constant series resamples to itself and gives a zero-width
 interval), so 2/3 → 3/3 or even 0/3 → 3/3 is shown, not called a change. Runs under one tag that mix git SHAs, runtime versions
 or model sets are flagged too, since averaging across them compares nothing.
 """
 import argparse
+import hashlib
 import json
 import math
 import random
@@ -61,6 +68,90 @@ METRICS = [
     ("code_exec_failed", "failed code executions", -1, "num"),
     ("code_executions", "code executions", -1, "num"),
 ]
+
+
+# Component runs (component_eval.py): per agent, metrics from result.json.
+COMPONENT_METRICS = {
+    "validator": [
+        ("recall", "recall (caught / checked)", +1, "rate"),
+        ("caught", "planted errors caught", +1, "num"),
+        ("missed", "planted errors verified", -1, "num"),
+        ("not_checked", "planted errors not checked", -1, "num"),
+        ("false_alarm", "false alarms on right values", -1, "num"),
+        ("value_changed", "planted values changed (must mark, not correct)", -1, "num"),
+        ("cost_usd", "cost", -1, "usd"),
+    ],
+    "reporter": [
+        ("report_ok", "report written", +1, "binary"),
+        ("leak_rate", "needs_review values in the report", -1, "rate"),
+        ("left_out", "needs_review values left out", +1, "num"),
+        ("cited", "needs_review values cited", -1, "num"),
+        ("quoted", "needs_review values quoted", -1, "num"),
+        ("cited_value_match_rate", "printed value = citation", +1, "rate"),
+        ("citation_inside_number", "[n] inside a number", -1, "num"),
+        ("cost_usd", "cost", -1, "usd"),
+    ],
+}
+
+
+def input_fingerprint(planted):
+    """What a component run was given: source run, plant settings and the planted errors (not the repeat number)."""
+    record = {k: v for k, v in planted.items() if k != "repeat"}
+    record["source_run"] = Path(str(record.get("source_run", ""))).name
+    return hashlib.sha256(json.dumps(record, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:12]
+
+
+def load_component_runs(tag_dir):
+    """[(component, scenario, result)] with the result's grader counts flattened and _source/_repeat/_input added."""
+    runs = []
+    for result_path in sorted(Path(tag_dir).glob("component/*/*/result.json")):
+        run_dir = result_path.parent
+        r = json.loads(result_path.read_text(encoding="utf-8"))
+        planted_path = run_dir / "planted.json"
+        planted = json.loads(planted_path.read_text(encoding="utf-8")) if planted_path.is_file() else {}
+        scenario = planted.get("scenario") or run_dir.name.rsplit("-", 3)[0]
+        r = {**r.get("graders", {}), **r, "_source": Path(str(planted.get("source_run", "?"))).name,
+             "_repeat": planted.get("repeat"), "_input": input_fingerprint(planted) if planted else None}
+        runs.append((run_dir.parent.name, scenario, r))
+    return runs
+
+
+def input_warnings(comp, tags, runs_by_tag):
+    """A component's A/B holds only on the same input: same source run, and the same errors for the same repeat number."""
+    out = []
+    base = {r["_repeat"]: (r["_source"], r["_input"]) for r in runs_by_tag[tags[0]]}
+    for t in tags[1:]:
+        cand = {r["_repeat"]: (r["_source"], r["_input"]) for r in runs_by_tag[t]}
+        sources = {s for s, _ in base.values()}, {s for s, _ in cand.values()}
+        if sources[0] and sources[1] and sources[0] != sources[1]:
+            out.append(f"> ⚠ {comp}: `{Path(t).name}` ran on {', '.join(sorted(sources[1]))}, `{Path(tags[0]).name}` on "
+                       f"{', '.join(sorted(sources[0]))}: not the same input, so the difference isn't the agent's alone.")
+            continue
+        differ = sorted(i for i in base.keys() & cand.keys() if base[i] != cand[i])
+        if differ:
+            out.append(f"> ⚠ {comp}: repeat(s) {', '.join(map(str, differ))} planted different errors in `{Path(t).name}` than in "
+                       f"`{Path(tags[0]).name}` (another plant or seed setting?): not the same input.")
+    return out
+
+
+def component_table(comp, tags, runs_by_tag):
+    header = [f"{comp} on its own (component runs)"] + [Path(t).name for t in tags] + [f"Δ {Path(t).name}" for t in tags[1:]]
+    warnings = input_warnings(comp, tags, runs_by_tag)
+    lines = warnings + ([""] if warnings else []) + ["| " + " | ".join(header) + " |", "|" + "---|" * len(header)]
+    for metric, label, direction, kind in COMPONENT_METRICS.get(comp, []):
+        stats = [summarize(values(runs_by_tag[t], metric)) for t in tags]
+        if all(s is None for s in stats):
+            continue
+        row = [label] + [fmt_stat(s, kind) for s in stats]
+        for s in stats[1:]:
+            text, flag = delta(stats[0], s, kind, direction)
+            row.append(f"{text} {flag}".strip())
+        lines.append("| " + " | ".join(row) + " |")
+    models = [", ".join(sorted({str(r.get("model_id")).split("anthropic.")[-1].split("-v1")[0] for r in runs_by_tag[t] if r.get("model_id")}))
+              or "–" for t in tags]
+    if any(m != "–" for m in models):
+        lines.append("| model | " + " | ".join(models) + " |" + " |" * (len(tags) - 1))
+    return lines
 
 
 def split_of(scenario, run_meta, listed):
@@ -193,10 +284,14 @@ def config_warnings(tags, runs_by_tag):
     return out
 
 
-def table(scenario, tags, runs_by_tag):
+def table(scenario, tags, runs_by_tag, components=None):
+    # Each agent on its own, on the scenario's fixed input.
+    component_lines = [line for comp in sorted(components or {}) for line in [""] + component_table(comp, tags, components[comp])]
+    ns = [len(runs_by_tag[t]) for t in tags]
+    if not any(ns):
+        return "\n".join([f"### {scenario}", "", "> Component runs only, no full runs under these tags."] + component_lines)
     lines = [f"### {scenario}", ""]
     lines += config_warnings(tags, runs_by_tag)
-    ns = [len(runs_by_tag[t]) for t in tags]
     if min(ns) < 5:
         lines.append(f"> Fewer than {MIN_N_FOR_FLAGS} runs on a side (n = {', '.join(map(str, ns))}): deltas are shown without ▲/▼. "
                      "With this few runs a bootstrap interval can be zero-width and isn't evidence of a change.")
@@ -231,7 +326,8 @@ def table(scenario, tags, runs_by_tag):
                 short = ", ".join(sorted(m.split("anthropic.")[-1].split("-v1")[0] for m in models if m))
                 cells.append(f"{fmt(statistics.fmean(v), 'usd')} ({short})" if v else "–")
             lines.append(f"| {a} | " + " | ".join(cells) + " |")
-    return "\n".join(lines)
+
+    return "\n".join(lines + component_lines)
 
 
 # Section order and headings; None = a scenario no longer in scenarios.yaml.
@@ -256,16 +352,21 @@ def main():
     args = ap.parse_args()
 
     by_scenario = defaultdict(lambda: defaultdict(list))
+    comps = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))   # scenario -> component -> tag -> results
     split = {}
+    listed = load_scenarios()
     for t in args.tags:
         if not Path(t).is_dir():
             ap.error(f"no such tag folder: {t}")
         for scenario, s in load_runs(t):
             by_scenario[scenario][t].append(s)
             split.setdefault(scenario, s["_split"])
+        for comp, scenario, r in load_component_runs(t):
+            comps[scenario][comp][t].append(r)
+            by_scenario[scenario][t]   # a scenario with component runs only still gets a section
+            split.setdefault(scenario, (listed.get(scenario) or {}).get("split"))
 
     scenarios = args.scenario or sorted(by_scenario)
-    listed = load_scenarios()
     for sc in scenarios:  # a --scenario with no runs yet
         split.setdefault(sc, (listed.get(sc) or {}).get("split"))
     parts = [f"## Eval comparison: {' vs '.join(Path(t).name for t in args.tags)}", "",
@@ -276,7 +377,7 @@ def main():
             continue
         parts += [f"## {heading}", ""] + pooled(group, args.tags, by_scenario) + [""]
         for sc in group:
-            parts += [table(sc, args.tags, by_scenario[sc]), ""]
+            parts += [table(sc, args.tags, by_scenario[sc], comps.get(sc)), ""]
     text = "\n".join(parts)
     print(text)
     if args.out:

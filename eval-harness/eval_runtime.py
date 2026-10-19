@@ -6,6 +6,7 @@
     python eval_runtime.py set-models users             # back to the users' runtime's models
     python eval_runtime.py set-image                    # follow the users' runtime's current image
     python eval_runtime.py set-image <uri>[:tag|@sha256:…]  # a candidate image, before it goes to users
+    python eval_runtime.py enable-components            # allow single-agent (component) runs, see below
     python eval_runtime.py delete
 
 Why: the web app and the harness used to share one runtime. Switching models
@@ -21,6 +22,12 @@ users are busy.
 
 The runtime ARN is written to eval-harness/config/eval.env (git-ignored), which
 run_eval.py reads as EVAL_RUNTIME_ARN.
+
+Component runs (component_eval.py) invoke one agent on a saved run's
+artifacts instead of the whole workflow. Both runtimes run the same image, so
+the runtime refuses them unless EVAL_COMPONENT_MODE=1 is in its environment,
+and only this tool puts it there: create sets it, and every update here keeps
+it. The users' runtime never has it.
 """
 import argparse
 import copy
@@ -36,6 +43,8 @@ ENV_FILE = HERE / "config" / "eval.env"
 CONFIGS = HERE / "config" / "runtime_configs.yaml"
 EVAL_NAME = "deep_insight_eval_runtime"
 USERS_NAME = "deep_insight_runtime_vpc"
+# Only the eval runtime carries these (see component runs above).
+EVAL_ONLY_ENV = {"EVAL_COMPONENT_MODE": "1"}
 # Settings copied from the users' runtime as they are.
 COPY = ["roleArn", "networkConfiguration", "protocolConfiguration", "lifecycleConfiguration",
         "requestHeaderConfiguration", "authorizerConfiguration"]
@@ -88,6 +97,7 @@ def _update(ctl, current, **changes):
     # 2026-06-11 rejects any update that carries it, even unchanged; left out, it stays as is.
     ((args.get("networkConfiguration") or {}).get("networkModeConfig") or {}).pop("requireServiceS3Endpoint", None)
     args.update(changes)
+    args["environmentVariables"] = {**(args.get("environmentVariables") or {}), **EVAL_ONLY_ENV}
     ctl.update_agent_runtime(agentRuntimeId=current["agentRuntimeId"], metadataConfiguration={"requireMMDSV2": True}, **args)
     return wait_ready(ctl, current["agentRuntimeId"])
 
@@ -133,7 +143,7 @@ def cmd_create(ctl, args):
         agentRuntimeName=EVAL_NAME,
         description="Deep Insight eval runtime (eval-harness/eval_runtime.py); no user traffic",
         agentRuntimeArtifact={"containerConfiguration": {"containerUri": uri}},
-        environmentVariables=users["environmentVariables"],
+        environmentVariables={**users["environmentVariables"], **EVAL_ONLY_ENV},
         tags={"purpose": "eval", "copied-from": USERS_NAME},
         **{**copied, "networkConfiguration": create_net},
     )
@@ -179,6 +189,11 @@ def cmd_set_image(ctl, args):
     print(f"{EVAL_NAME} v{r['agentRuntimeVersion']} image → {uri}")
 
 
+def cmd_enable_components(ctl, args):
+    r = _update(ctl, _eval(ctl))  # _update always adds EVAL_ONLY_ENV
+    print(f"{EVAL_NAME} v{r['agentRuntimeVersion']} · EVAL_COMPONENT_MODE={r['environmentVariables'].get('EVAL_COMPONENT_MODE')}")
+
+
 def cmd_delete(ctl, args):
     r = _eval(ctl)
     ctl.delete_agent_runtime(agentRuntimeId=r["agentRuntimeId"])
@@ -196,11 +211,12 @@ def main():
     sub.add_parser("status")
     sm = sub.add_parser("set-models"); sm.add_argument("preset")
     si = sub.add_parser("set-image"); si.add_argument("image", nargs="?")
+    sub.add_parser("enable-components")
     sub.add_parser("delete")
     args = ap.parse_args()
     ctl = client(args.region)
     {"create": cmd_create, "status": cmd_status, "set-models": cmd_set_models,
-     "set-image": cmd_set_image, "delete": cmd_delete}[args.cmd](ctl, args)
+     "set-image": cmd_set_image, "enable-components": cmd_enable_components, "delete": cmd_delete}[args.cmd](ctl, args)
     return 0
 
 

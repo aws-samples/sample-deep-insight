@@ -21,6 +21,13 @@ Test-split scenarios (moon_market, see scenarios.yaml) run only with
 --allow-test: they are for a release check, and looking at their results
 while tuning makes them a second dev set.
 
+--components validator,reporter also runs those agents on their own
+(component_eval.py) on each scenario's pinned input, in their own sessions
+on the same runtime while the full runs go, one per repeat, under the same
+tag (eval_results/<tag>/component/). compare.py puts their counts next to the
+full-run metrics. A scenario without a pinned input or `components:` entry
+for an agent gets no component run for it.
+
 The invoke and feedback logic mirrors managed-agentcore/02_invoke_agentcore_runtime_vpc.py,
 which can't be imported (it parses CLI args and loads .env at import time).
 """
@@ -31,6 +38,7 @@ import subprocess
 import sys
 import time
 from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -240,6 +248,19 @@ def refuse_test_split(scenarios, allow_test):
     return None
 
 
+def component_jobs(scenario_names, wanted):
+    """(component, scenario, pinned input, plant, seed) for each wanted component a scenario has settings and an input for."""
+    import component_eval
+    jobs = []
+    for name in scenario_names:
+        src = component_eval.pinned_input(name)
+        for comp in wanted:
+            settings = component_eval.scenario_settings(load_scenario(name), comp)
+            if src is not None and settings is not None:
+                jobs.append((comp, name, src, *settings))
+    return jobs
+
+
 def main():
     # eval.env (written by eval_runtime.py create) points at the eval runtime;
     # managed-agentcore/.env only has the users' runtime.
@@ -260,6 +281,8 @@ def main():
     ap.add_argument("--timeout", type=int, default=3600, help="seconds per run")
     ap.add_argument("--allow-session-fallback", action="store_true",
                     help="if the runtime reports no session_id, grade the newest S3 session (only for a bucket nobody else uses)")
+    ap.add_argument("--components", default="",
+                    help="comma-separated agents (validator,reporter) to also run on their own on each scenario's pinned input")
     args = ap.parse_args()
     scenarios = {name: load_scenario(name) for name in args.scenario}
     if (refused := refuse_test_split(scenarios, args.allow_test)):
@@ -269,6 +292,14 @@ def main():
     if args.runtime_arn == env.get("RUNTIME_ARN") and not args.allow_users_runtime:
         ap.error("this is the users' runtime (managed-agentcore/.env RUNTIME_ARN); evals belong on the eval runtime "
                  "(`eval_runtime.py create`). Pass --allow-users-runtime to run here anyway.")
+
+    import component_eval
+    wanted = [c for c in args.components.split(",") if c]
+    if (unknown := set(wanted) - set(component_eval.COMPONENTS)):
+        ap.error(f"unknown component(s) {', '.join(sorted(unknown))}; known: {', '.join(component_eval.COMPONENTS)}")
+    jobs = component_jobs(scenarios, wanted)
+    if wanted and not jobs:
+        ap.error(f"no scenario here has a pinned input and `components:` settings for {', '.join(wanted)}")
 
     cfg = {**git_info(), "runtime_arn": args.runtime_arn, "region": args.region, **runtime_config(args.region, args.runtime_arn)}
     if not args.bucket:
@@ -283,6 +314,17 @@ def main():
                              config=Config(connect_timeout=60, read_timeout=args.timeout, retries={"max_attempts": 0}))
     s3 = boto3.client("s3", region_name=args.region)
     out_root = HERE / "eval_results" / args.tag
+
+    # Component runs go in parallel with the full runs: their own sessions, their own clients.
+    repeats = range(args.first_repeat, args.first_repeat + args.repeat)
+    pool = ThreadPoolExecutor(max_workers=len(jobs)) if jobs else None
+    futures = []
+    for comp, name, src, plant, seed in jobs:
+        log(f"{comp} · {name}: {args.repeat} component run(s) on {src.relative_to(HERE)} (plant {plant}, seed {seed})")
+        futures.append((comp, pool.submit(component_eval.run_components, comp, [src], plant=plant, seed=seed, repeats=repeats,
+                                          tag=args.tag, runtime_arn=args.runtime_arn, bucket=args.bucket,
+                                          clients=component_eval.make_clients(args.region, args.timeout),
+                                          allow_test=args.allow_test, config=cfg, log=log)))
 
     failures = 0
     for name, scenario in scenarios.items():
@@ -300,6 +342,18 @@ def main():
                 + (f" ({', '.join(s['core_fail_reasons'])})" if s["core_fail_reasons"] else "")
                 + (f" · {meta['error']}" if meta.get("error") else "")
                 + (f" · ⚠ {meta['warning']}" if meta.get("warning") else ""))
+    for comp, fut in futures:
+        try:
+            results, failed = fut.result()
+        except Exception as e:
+            log(f"{comp}: component runs failed: {type(e).__name__}: {e}")
+            failures += 1
+            continue
+        failures += failed
+        if results:
+            print(component_eval.COMPONENTS[comp].table(results), flush=True)
+    if pool:
+        pool.shutdown()
     return 1 if failures else 0
 
 
