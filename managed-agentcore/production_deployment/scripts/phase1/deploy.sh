@@ -138,10 +138,21 @@ echo "Target region: ${AWS_REGION}"
 BUCKET_EXISTS=false
 BUCKET_REGION=""
 
-if aws s3api head-bucket --bucket "${S3_BUCKET_NAME}" 2>/dev/null; then
+# --expected-bucket-owner: fail if a bucket with this name exists but is owned by another
+# account (shadow-resource / bucket squatting). Distinguish "ours" vs "not found" vs "someone else's".
+HEAD_ERR=$(aws s3api head-bucket --bucket "${S3_BUCKET_NAME}" \
+    --expected-bucket-owner "${AWS_ACCOUNT_ID}" 2>&1 >/dev/null) && HEAD_RC=0 || HEAD_RC=$?
+if [ $HEAD_RC -ne 0 ] && ! echo "$HEAD_ERR" | grep -qE '\(404\)|Not Found'; then
+    echo -e "${RED}✗${NC} Bucket ${S3_BUCKET_NAME} exists but is NOT owned by account ${AWS_ACCOUNT_ID} (or is not accessible)."
+    echo "   Refusing to upload CloudFormation templates to it."
+    echo "   Use a different environment name (-e) or investigate who owns this bucket."
+    exit 1
+fi
+
+if [ $HEAD_RC -eq 0 ]; then
     BUCKET_EXISTS=true
     # Get bucket region
-    BUCKET_REGION=$(aws s3api get-bucket-location --bucket "${S3_BUCKET_NAME}" --query 'LocationConstraint' --output text 2>/dev/null || echo "us-east-1")
+    BUCKET_REGION=$(aws s3api get-bucket-location --bucket "${S3_BUCKET_NAME}" --expected-bucket-owner "${AWS_ACCOUNT_ID}" --query 'LocationConstraint' --output text 2>/dev/null || echo "us-east-1")
     # AWS returns "None" for us-east-1, normalize it
     if [ "$BUCKET_REGION" == "None" ] || [ "$BUCKET_REGION" == "null" ]; then
         BUCKET_REGION="us-east-1"
@@ -179,6 +190,7 @@ if [ "$BUCKET_EXISTS" = false ]; then
     # Enable versioning (best practice)
     aws s3api put-bucket-versioning \
         --bucket "${S3_BUCKET_NAME}" \
+        --expected-bucket-owner "${AWS_ACCOUNT_ID}" \
         --region "$AWS_REGION" \
         --versioning-configuration Status=Enabled
 
@@ -194,8 +206,12 @@ echo -e "${YELLOW}Uploading nested templates to S3...${NC}"
 for template in "$NESTED_DIR"/*.yaml; do
     template_name=$(basename "$template")
     echo "  Uploading: $template_name"
-    aws s3 cp "$template" "s3://${S3_BUCKET_NAME}/nested/$template_name" \
-        --region "$AWS_REGION"
+    aws s3api put-object \
+        --bucket "${S3_BUCKET_NAME}" \
+        --key "nested/$template_name" \
+        --body "$template" \
+        --expected-bucket-owner "${AWS_ACCOUNT_ID}" \
+        --region "$AWS_REGION" >/dev/null
 done
 
 echo -e "${GREEN}✓${NC} Nested templates uploaded"

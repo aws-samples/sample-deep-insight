@@ -29,7 +29,7 @@ from pathlib import Path
 
 # Configuration from .env
 AWS_REGION = os.getenv('AWS_REGION', 'us-east-1')
-S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME', 'bedrock-logs-738490718699')
+S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME')
 S3_PREFIX = 'deep-insight/fargate_sessions/'
 
 # Local artifacts directory
@@ -49,7 +49,7 @@ def load_env_vars():
 
     global AWS_REGION, S3_BUCKET_NAME
     AWS_REGION = os.getenv('AWS_REGION', 'us-east-1')
-    S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME', 'bedrock-logs-738490718699')
+    S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME')
 
 
 def list_sessions(s3_client):
@@ -156,6 +156,9 @@ def main():
     """Main entry point"""
     # Load environment variables
     load_env_vars()
+    if not S3_BUCKET_NAME:
+        print("ERROR: S3_BUCKET_NAME is not set. Run Phase 3 to generate .env first.")
+        sys.exit(1)
 
     print("=" * 60)
     print("📥 Deep Insight Artifact Downloader")
