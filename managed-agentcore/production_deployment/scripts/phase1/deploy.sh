@@ -141,11 +141,14 @@ BUCKET_REGION=""
 # --expected-bucket-owner: fail if a bucket with this name exists but is owned by another
 # account (shadow-resource / bucket squatting). Distinguish "ours" vs "not found" vs "someone else's".
 HEAD_ERR=$(aws s3api head-bucket --bucket "${S3_BUCKET_NAME}" \
-    --expected-bucket-owner "${AWS_ACCOUNT_ID}" 2>&1 >/dev/null) && HEAD_RC=0 || HEAD_RC=$?
+    --expected-bucket-owner "${AWS_ACCOUNT_ID}" \
+    --region "$AWS_REGION" 2>&1 >/dev/null) && HEAD_RC=0 || HEAD_RC=$?
 if [ $HEAD_RC -ne 0 ] && ! echo "$HEAD_ERR" | grep -qE '\(404\)|Not Found'; then
     echo -e "${RED}✗${NC} Bucket ${S3_BUCKET_NAME} exists but is NOT owned by account ${AWS_ACCOUNT_ID} (or is not accessible)."
+    echo "   AWS error: $(echo "$HEAD_ERR" | tr -s '\n' ' ' | sed 's/^ //')"
     echo "   Refusing to upload CloudFormation templates to it."
-    echo "   Use a different environment name (-e) or investigate who owns this bucket."
+    echo "   Check IAM permissions / network first; if the bucket is owned by another account,"
+    echo "   use a different environment name (e.g. ./deploy.sh staging --region ${AWS_REGION})."
     exit 1
 fi
 
