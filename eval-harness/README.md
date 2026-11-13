@@ -38,7 +38,10 @@ duration                  1920s           1680s           -12% ▲ better
 eval-harness/
 ├── run_eval.py, grade.py, compare.py    commands you run day to day
 ├── eval_runtime.py                      eval runtime setup
-├── graders/       rule-based scoring modules and cost.py
+├── component_eval.py                    component runs: one agent alone, errors planted
+├── components/    per agent: what a component run plants and how it scores (validator.py, reporter.py)
+├── component_inputs/  per scenario: the saved run component runs start from (in git; `component_eval.py pin`)
+├── graders/       rule-based scoring modules and cost.py, shared by full and component runs
 ├── config/        scenarios.yaml, pricing.yaml, runtime_configs.yaml,
 │                  eval.env (git-ignored, local only)
 ├── tests/         pytest suite and fixtures
@@ -49,6 +52,16 @@ Run every command from `eval-harness/`. Paths in `config/scenarios.yaml` are
 relative to `eval-harness/`.
 
 ## How it runs: steps and files
+
+There are two kinds of run. Both use the eval runtime and the same scenarios;
+they differ in what is invoked and what is graded.
+
+| Run | Command | What runs | Graded by | Cost |
+|---|---|---|---|---|
+| **Full run** | `run_eval.py` | the whole workflow on a scenario's request (Coordinator → Planner → Coder → Validator → Reporter → Auditor) | `grade.py` rule graders; then `compare.py` | $4–6 per run |
+| **Component run** | `component_eval.py validator` / `reporter`, or `run_eval.py --components` | one agent alone, on the scenario's pinned run with errors planted ([below](#component-runs-one-agent-planted-errors)) | rule checks: Validator: each planted error caught / missed / not checked; Reporter: each needs_review value left out / cited / quoted, plus the full-run report graders | Validator about $1.3–2 per run |
+
+The rest of this section is about full runs.
 
 ```
 config/scenarios.yaml + jungle-market CSV
@@ -140,6 +153,118 @@ The runner reads `RUNTIME_ARN`, `AWS_REGION` and `S3_BUCKET_NAME` from
 `test_no_legacy_human_stop_sequence` is an expected failure (`xfail`, strict)
 documenting a known bug; it turns into an error once the bug is fixed, so the
 marker gets removed with the fix.
+
+## Component runs: one agent, planted errors
+
+A full run grades only the final report, so it can't say how well one agent
+does its own job: a worse score doesn't say which agent caused it, the inputs
+each agent got differ from run to run, and nobody knows which of the Coder's
+numbers were wrong. A component run measures one agent on its own: the input
+is fixed (a saved run's artifacts), the answer is known (errors planted on
+purpose), and nothing before the agent is re-run, so it is cheaper and two
+versions of the agent are compared on the same input. A model change is the
+case it is for: a full run swaps every agent's model at once, but Deep
+Insight picks a model per agent, so whether the Validator can stay on a
+cheaper model is a question about the Validator alone.
+
+The counts are for that A/B, not absolute numbers: an agent here gets the
+saved artifacts but not what earlier agents said in a full run (below), so
+"caught 3 of 6" is not what the same Validator scores inside a full run.
+Compare two versions on the same input, not a component run with a full run.
+
+**Fixed input.** Each dev scenario has one saved run pinned in
+`component_inputs/<scenario>/` (in git: its artifacts up to the Reporter, the
+plan, and where it came from) and its settings in `scenarios.yaml`:
+
+```yaml
+    components:
+      validator: {plant: 6, seed: 0}
+      reporter: {plant: 4, seed: 0}
+```
+
+Repeat i plants from seed `"<seed>:i"`, so repeat i of every version gets the
+same planted errors, also when batches are split with `--first-repeat`.
+`planted.json` records the source and the errors, and `compare.py` flags two
+tags whose component runs didn't get the same ones. Pin another run when the
+artifact format changes (a new file the Validator reads, say):
+
+```bash
+.venv/bin/python component_eval.py pin --from eval_results/<tag>/<run> [--force]
+```
+
+It keeps the artifacts the agents read (the cached DataFrames no
+calculation's `source_file` names are left out, to keep the folder small) and
+the saved report, which the Reporter component picks its values from; staging
+removes the report again, so no agent sees it.
+
+| Pinned input | From | Validator plants | Reporter marks |
+|---|---|---|---|
+| `jungle_market` | a run that dropped the 111 duplicate rows (total $110,270.26) | 6, all on derived files: that Coder computed from its deduplicated `df_main.pkl`, so no calculation is on the raw CSV | 4 |
+| `yummy_food_kr` | a baseline run with core_pass | 6: 3 raw, 3 derived | 4 |
+
+**On every eval pass.** `run_eval.py --components validator,reporter` runs
+them in their own sessions on the same eval runtime while the full runs go,
+one per repeat, under the same tag, and `compare.py` shows them under the
+scenario ([Comparing tags](#comparing-tags)). On `yummy_food_kr` one repeat cost
+$1.05 (Validator, 6 min) and $3.84 (Reporter, 9 min); both finished inside
+the full run's 22 minutes, so the wall time stays the full run's.
+
+| Agent | Measures | Planted |
+|---|---|---|
+| Validator | catches wrong calculations (recall), leaves right ones alone (false alarms) | calculation values changed by 10% |
+| Reporter | keeps out what the Validator flagged, cites the rest correctly | verified citations marked needs_review |
+
+Adding an agent means one module in `components/` with the interface in
+`components/__init__.py`, and on the runtime side its name in `COMPONENTS`
+and its tool handler in `_handler()` (`managed-agentcore/src/graph/component.py`).
+
+**Validator.**
+
+```bash
+.venv/bin/python eval_runtime.py enable-components        # once; eval runtime only
+.venv/bin/python component_eval.py validator --scenario jungle_market --tag comp-validator
+.venv/bin/python component_eval.py validator --from eval_results/baseline/<run> --plant 6 --tag comp-validator   # any saved run
+```
+
+It changes 10% of the value of up to `plant` high-importance calculations
+(half on the raw CSV and confirmed right by the recomputation, half on files
+the Coder derived), stages the artifacts as they were before the Validator,
+and invokes the eval runtime with `component: validator`
+(`managed-agentcore/src/graph/component.py`). From the Validator's
+`citations.json` it counts each planted error as caught (needs_review),
+missed (verified) or not checked, plus false alarms on right values and
+planted values it changed (it must mark, not correct).
+
+**Reporter.** A needs_review value must not reach the report: no value,
+marker or reference (`reporter.md`, `value_status_resolution`). Measuring
+that needs an input with needs_review values whose ids are known:
+
+```bash
+.venv/bin/python component_eval.py reporter --scenario jungle_market --tag comp-reporter
+```
+
+It picks up to `plant` verified values the saved report cites, marks them
+needs_review in `citations.json`, stages the artifacts as they were before the
+Reporter (its drafts, code and the Auditor's files removed) and invokes the
+eval runtime with `component: reporter`. In the new report each marked value
+is **left out** (right), **cited** (a body `[n]` points to it) or **quoted**
+(printed without its marker, in the body, a table or the references). Only
+values more than 1% from every other citation's value are marked, and
+integers under 100 are skipped, so a number in the report can't be another
+citation's. A value counts as quoted only when it rounds to a number printed
+with at least 3 significant digits at that number's own precision: 6,879.45
+is not "$6,891", and 3.69 is not "3.7". The new report also gets the
+full-run report graders (printed value = citation, broken `[n]`, `[n]`
+inside a number, coverage, citations = metadata).
+
+A component run gets the agent's own inputs, not what earlier agents said in
+a full run (the Supervisor's message, the `clues` the Coder and Validator
+left): the Reporter starts from `./artifacts/` and `all_results.txt`, as its
+prompt tells it to.
+
+The runtime refuses component runs unless `EVAL_COMPONENT_MODE=1` is in its
+environment. Both runtimes run the same image; only `eval_runtime.py` sets
+that variable, on the eval runtime.
 
 ## Scenarios
 
@@ -274,7 +399,13 @@ One table per scenario:
 - A ⚠ line appears when runs under one tag mix git SHAs, runtime versions or
   model sets; split them into separate tags before comparing.
 
-Also prints per-agent cost with the model each agent ran on.
+Also prints per-agent cost with the model each agent ran on, and, for a tag
+with component runs, a table per agent under the scenario: Validator recall,
+caught / verified / not checked, false alarms and changed values; Reporter
+needs_review values left out / cited / quoted, printed value = citation and
+`[n]` inside a number; both with the model the agent ran on. A ⚠ line there means a tag's component runs started
+from another source run or planted other errors than the first tag's, so the
+difference isn't the agent's alone.
 
 ## Grading a run
 

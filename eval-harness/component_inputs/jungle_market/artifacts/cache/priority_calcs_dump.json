@@ -1,0 +1,1720 @@
+[
+  {
+    "id": "total_sales",
+    "value": 110270.26,
+    "formula": "SUM(line_total)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "line_total"
+    ]
+  },
+  {
+    "id": "n_orders",
+    "value": 2987,
+    "formula": "COUNT(DISTINCT order_id)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id"
+    ]
+  },
+  {
+    "id": "n_customers",
+    "value": 1847,
+    "formula": "COUNT(DISTINCT customer_id)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id"
+    ]
+  },
+  {
+    "id": "aov",
+    "value": 36.91672581185136,
+    "formula": "MEAN(SUM(line_total) GROUP BY order_id)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "discount_rate",
+    "value": 0.03695567971668555,
+    "formula": "SUM(discount) / SUM(unit_price*quantity)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "discount",
+      "unit_price",
+      "quantity"
+    ]
+  },
+  {
+    "id": "new_order_share",
+    "value": 0.13056578506863073,
+    "formula": "COUNT(order_id WHERE customer_type='New')/COUNT(order_id)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_type",
+      "order_id"
+    ]
+  },
+  {
+    "id": "returning_order_share",
+    "value": 0.8694342149313693,
+    "formula": "COUNT(order_id WHERE customer_type='Returning')/COUNT(order_id)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_type",
+      "order_id"
+    ]
+  },
+  {
+    "id": "new_sales_share",
+    "value": 0.1226681609347797,
+    "formula": "SUM(line_total WHERE customer_type='New')/SUM(line_total)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_type",
+      "line_total"
+    ]
+  },
+  {
+    "id": "returning_sales_share",
+    "value": 0.8773318390652204,
+    "formula": "SUM(line_total WHERE customer_type='Returning')/SUM(line_total)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_type",
+      "line_total"
+    ]
+  },
+  {
+    "id": "aov_new",
+    "value": 34.68371794871795,
+    "formula": "MEAN(SUM(line_total) GROUP BY order_id) WHERE customer_type='New'",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_type",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "aov_returning",
+    "value": 37.252063919907584,
+    "formula": "MEAN(SUM(line_total) GROUP BY order_id) WHERE customer_type='Returning'",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_type",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "week1_sales",
+    "value": 53425.53,
+    "formula": "SUM(line_total) WHERE week='Week1'",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "line_total"
+    ]
+  },
+  {
+    "id": "week2_sales",
+    "value": 56844.73,
+    "formula": "SUM(line_total) WHERE week='Week2'",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "line_total"
+    ]
+  },
+  {
+    "id": "wow_growth",
+    "value": 0.06399936509754801,
+    "formula": "(week2_sales-week1_sales)/week1_sales",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "line_total"
+    ]
+  },
+  {
+    "id": "daily_avg_sales",
+    "value": 7876.447142857143,
+    "formula": "MEAN(daily SUM(line_total))",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "line_total"
+    ]
+  },
+  {
+    "id": "next_month_baseline",
+    "value": 236293.4142857143,
+    "formula": "daily_avg_sales * 30",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "line_total"
+    ]
+  },
+  {
+    "id": "dow_sales_Monday",
+    "value": 15126.24,
+    "formula": "SUM(line_total) GROUP BY day_of_week",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "line_total"
+    ]
+  },
+  {
+    "id": "dow_sales_Tuesday",
+    "value": 13253.56,
+    "formula": "SUM(line_total) GROUP BY day_of_week",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "line_total"
+    ]
+  },
+  {
+    "id": "dow_sales_Wednesday",
+    "value": 14945.970000000001,
+    "formula": "SUM(line_total) GROUP BY day_of_week",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "line_total"
+    ]
+  },
+  {
+    "id": "dow_sales_Thursday",
+    "value": 13566.49,
+    "formula": "SUM(line_total) GROUP BY day_of_week",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "line_total"
+    ]
+  },
+  {
+    "id": "dow_sales_Friday",
+    "value": 15860.640000000001,
+    "formula": "SUM(line_total) GROUP BY day_of_week",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "line_total"
+    ]
+  },
+  {
+    "id": "dow_sales_Saturday",
+    "value": 19416.850000000002,
+    "formula": "SUM(line_total) GROUP BY day_of_week",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "line_total"
+    ]
+  },
+  {
+    "id": "dow_sales_Sunday",
+    "value": 18100.510000000002,
+    "formula": "SUM(line_total) GROUP BY day_of_week",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "line_total"
+    ]
+  },
+  {
+    "id": "peak_dow",
+    "value": "Saturday",
+    "formula": "ARGMAX(SUM(line_total) GROUP BY day_of_week)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "line_total"
+    ]
+  },
+  {
+    "id": "peak_hour",
+    "value": 19,
+    "formula": "ARGMAX(SUM(line_total) GROUP BY order_hour)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_hour",
+      "line_total"
+    ]
+  },
+  {
+    "id": "peak_hour_sales",
+    "value": 9091.76,
+    "formula": "MAX(SUM(line_total) GROUP BY order_hour)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_hour",
+      "line_total"
+    ]
+  },
+  {
+    "id": "cat_sales_Beverages",
+    "value": 19577.350000000002,
+    "formula": "SUM(line_total) GROUP BY category",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "category",
+      "line_total"
+    ]
+  },
+  {
+    "id": "cat_sales_Dairy_and_Eggs",
+    "value": 17969.97,
+    "formula": "SUM(line_total) GROUP BY category",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "category",
+      "line_total"
+    ]
+  },
+  {
+    "id": "cat_sales_Pantry",
+    "value": 16536.8,
+    "formula": "SUM(line_total) GROUP BY category",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "category",
+      "line_total"
+    ]
+  },
+  {
+    "id": "cat_sales_Ready_Meals",
+    "value": 10712.88,
+    "formula": "SUM(line_total) GROUP BY category",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "category",
+      "line_total"
+    ]
+  },
+  {
+    "id": "cat_sales_Produce",
+    "value": 9601.66,
+    "formula": "SUM(line_total) GROUP BY category",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "category",
+      "line_total"
+    ]
+  },
+  {
+    "id": "cat_sales_Plant-based",
+    "value": 9195.68,
+    "formula": "SUM(line_total) GROUP BY category",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "category",
+      "line_total"
+    ]
+  },
+  {
+    "id": "cat_sales_Bakery",
+    "value": 8225.460000000001,
+    "formula": "SUM(line_total) GROUP BY category",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "category",
+      "line_total"
+    ]
+  },
+  {
+    "id": "cat_sales_Snacks",
+    "value": 7078.78,
+    "formula": "SUM(line_total) GROUP BY category",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "category",
+      "line_total"
+    ]
+  },
+  {
+    "id": "cat_sales_Frozen",
+    "value": 6874.610000000001,
+    "formula": "SUM(line_total) GROUP BY category",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "category",
+      "line_total"
+    ]
+  },
+  {
+    "id": "cat_sales_Household",
+    "value": 4497.07,
+    "formula": "SUM(line_total) GROUP BY category",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "category",
+      "line_total"
+    ]
+  },
+  {
+    "id": "top20_product_share",
+    "value": 0.4001453338370654,
+    "formula": "SUM(line_total) top 12 products / SUM(line_total) all",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "product_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "top_product_P028",
+    "value": 10789.89,
+    "formula": "SUM(line_total) GROUP BY product_id",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "product_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "top_product_P023",
+    "value": 4590.14,
+    "formula": "SUM(line_total) GROUP BY product_id",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "product_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "top_product_P039",
+    "value": 3518.7,
+    "formula": "SUM(line_total) GROUP BY product_id",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "product_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "top_product_P044",
+    "value": 3396.35,
+    "formula": "SUM(line_total) GROUP BY product_id",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "product_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "top_product_P013",
+    "value": 3326.69,
+    "formula": "SUM(line_total) GROUP BY product_id",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "product_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "top_product_P011",
+    "value": 3152.37,
+    "formula": "SUM(line_total) GROUP BY product_id",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "product_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "top_product_P029",
+    "value": 2776.69,
+    "formula": "SUM(line_total) GROUP BY product_id",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "product_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "top_product_P015",
+    "value": 2658.55,
+    "formula": "SUM(line_total) GROUP BY product_id",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "product_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "top_product_P031",
+    "value": 2496.14,
+    "formula": "SUM(line_total) GROUP BY product_id",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "product_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "top_product_P050",
+    "value": 2479.73,
+    "formula": "SUM(line_total) GROUP BY product_id",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "product_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_customers_VIP_최우수",
+    "value": 484.0,
+    "formula": "COUNT(customer_id) GROUP BY RFM segment",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_sales_VIP_최우수",
+    "value": 54186.62,
+    "formula": "SUM(order monetary) GROUP BY RFM segment",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_sales_share_VIP_최우수",
+    "value": 0.49139831537533335,
+    "formula": "seg_sales / total_sales",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_customer_share_VIP_최우수",
+    "value": 0.26204656199242016,
+    "formula": "seg_customers / total_customers",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id"
+    ]
+  },
+  {
+    "id": "seg_avg_monetary_VIP_최우수",
+    "value": 111.955826446281,
+    "formula": "AVG(monetary) GROUP BY RFM segment",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_customers_우수고객",
+    "value": 375.0,
+    "formula": "COUNT(customer_id) GROUP BY RFM segment",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_sales_우수고객",
+    "value": 21551.05,
+    "formula": "SUM(order monetary) GROUP BY RFM segment",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_sales_share_우수고객",
+    "value": 0.1954384618300528,
+    "formula": "seg_sales / total_sales",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_customer_share_우수고객",
+    "value": 0.2030319436924743,
+    "formula": "seg_customers / total_customers",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id"
+    ]
+  },
+  {
+    "id": "seg_avg_monetary_우수고객",
+    "value": 57.46946666666666,
+    "formula": "AVG(monetary) GROUP BY RFM segment",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_customers_일반고객",
+    "value": 499.0,
+    "formula": "COUNT(customer_id) GROUP BY RFM segment",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_sales_일반고객",
+    "value": 20162.02,
+    "formula": "SUM(order monetary) GROUP BY RFM segment",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_sales_share_일반고객",
+    "value": 0.1828418650686051,
+    "formula": "seg_sales / total_sales",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_customer_share_일반고객",
+    "value": 0.2701678397401191,
+    "formula": "seg_customers / total_customers",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id"
+    ]
+  },
+  {
+    "id": "seg_avg_monetary_일반고객",
+    "value": 40.404849699398795,
+    "formula": "AVG(monetary) GROUP BY RFM segment",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_customers_이탈위험",
+    "value": 445.0,
+    "formula": "COUNT(customer_id) GROUP BY RFM segment",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_sales_이탈위험",
+    "value": 13487.68,
+    "formula": "SUM(order monetary) GROUP BY RFM segment",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_sales_share_이탈위험",
+    "value": 0.12231475649009987,
+    "formula": "seg_sales / total_sales",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_customer_share_이탈위험",
+    "value": 0.2409312398484028,
+    "formula": "seg_customers / total_customers",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id"
+    ]
+  },
+  {
+    "id": "seg_avg_monetary_이탈위험",
+    "value": 30.309393258426965,
+    "formula": "AVG(monetary) GROUP BY RFM segment",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_customers_이탈_저가치",
+    "value": 44.0,
+    "formula": "COUNT(customer_id) GROUP BY RFM segment",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_sales_이탈_저가치",
+    "value": 882.89,
+    "formula": "SUM(order monetary) GROUP BY RFM segment",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_sales_share_이탈_저가치",
+    "value": 0.008006601235908939,
+    "formula": "seg_sales / total_sales",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "seg_customer_share_이탈_저가치",
+    "value": 0.023822414726583648,
+    "formula": "seg_customers / total_customers",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id"
+    ]
+  },
+  {
+    "id": "seg_avg_monetary_이탈_저가치",
+    "value": 20.06568181818182,
+    "formula": "AVG(monetary) GROUP BY RFM segment",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "top10pct_cust_sales_share",
+    "value": 0.2783424107279696,
+    "formula": "SUM(monetary) top 185 customers / total_sales",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "top20pct_cust_sales_share",
+    "value": 0.4439220511496028,
+    "formula": "SUM(monetary) top 370 customers / total_sales",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "repeat_customers",
+    "value": 697,
+    "formula": "COUNT(customer_id WHERE frequency>=2)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_id"
+    ]
+  },
+  {
+    "id": "repeat_rate",
+    "value": 0.37736870600974554,
+    "formula": "repeat_customers / total_customers",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_id"
+    ]
+  },
+  {
+    "id": "churn_risk_customers",
+    "value": 545,
+    "formula": "COUNT(customer_id WHERE recency_days>7)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date"
+    ]
+  },
+  {
+    "id": "churn_risk_rate",
+    "value": 0.29507309149972927,
+    "formula": "churn_risk_customers / total_customers",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date"
+    ]
+  },
+  {
+    "id": "avg_repurchase_interval",
+    "value": 3.557017543859649,
+    "formula": "MEAN(order_date diff) for customers with multiple orders",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "customer_id",
+      "order_date"
+    ]
+  },
+  {
+    "id": "city_sales_Singapore",
+    "value": 16645.52,
+    "formula": "SUM(line_total) GROUP BY city",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "city",
+      "line_total"
+    ]
+  },
+  {
+    "id": "city_aov_Singapore",
+    "value": 40.40174757281554,
+    "formula": "MEAN(order_value) GROUP BY city",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "city",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "city_sales_Sydney",
+    "value": 16258.800000000001,
+    "formula": "SUM(line_total) GROUP BY city",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "city",
+      "line_total"
+    ]
+  },
+  {
+    "id": "city_aov_Sydney",
+    "value": 41.26598984771574,
+    "formula": "MEAN(order_value) GROUP BY city",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "city",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "city_sales_New_York",
+    "value": 15996.43,
+    "formula": "SUM(line_total) GROUP BY city",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "city",
+      "line_total"
+    ]
+  },
+  {
+    "id": "city_aov_New_York",
+    "value": 50.78231746031746,
+    "formula": "MEAN(order_value) GROUP BY city",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "city",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "city_sales_Paris",
+    "value": 13790.41,
+    "formula": "SUM(line_total) GROUP BY city",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "city",
+      "line_total"
+    ]
+  },
+  {
+    "id": "city_aov_Paris",
+    "value": 37.88574175824176,
+    "formula": "MEAN(order_value) GROUP BY city",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "city",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "city_sales_London",
+    "value": 12608.1,
+    "formula": "SUM(line_total) GROUP BY city",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "city",
+      "line_total"
+    ]
+  },
+  {
+    "id": "city_aov_London",
+    "value": 37.30207100591716,
+    "formula": "MEAN(order_value) GROUP BY city",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "city",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "city_sales_Berlin",
+    "value": 12384.75,
+    "formula": "SUM(line_total) GROUP BY city",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "city",
+      "line_total"
+    ]
+  },
+  {
+    "id": "city_aov_Berlin",
+    "value": 37.080089820359284,
+    "formula": "MEAN(order_value) GROUP BY city",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "city",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "city_sales_Seoul",
+    "value": 11552.02,
+    "formula": "SUM(line_total) GROUP BY city",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "city",
+      "line_total"
+    ]
+  },
+  {
+    "id": "city_aov_Seoul",
+    "value": 28.73636815920398,
+    "formula": "MEAN(order_value) GROUP BY city",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "city",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "city_sales_Tokyo",
+    "value": 11034.23,
+    "formula": "SUM(line_total) GROUP BY city",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "city",
+      "line_total"
+    ]
+  },
+  {
+    "id": "city_aov_Tokyo",
+    "value": 25.78091121495327,
+    "formula": "MEAN(order_value) GROUP BY city",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "city",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "best_age_gender_aov_value",
+    "value": 41.95668049792531,
+    "formula": "MAX(MEAN(order_value) GROUP BY age_group,gender)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "age_group",
+      "gender",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "channel_sales_App",
+    "value": 61130.56,
+    "formula": "SUM(line_total) GROUP BY channel",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "channel",
+      "line_total"
+    ]
+  },
+  {
+    "id": "channel_aov_App",
+    "value": 35.19318364997121,
+    "formula": "MEAN(order_value) GROUP BY channel",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "channel",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "channel_sales_Web",
+    "value": 49139.700000000004,
+    "formula": "SUM(line_total) GROUP BY channel",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "channel",
+      "line_total"
+    ]
+  },
+  {
+    "id": "channel_aov_Web",
+    "value": 39.31176000000001,
+    "formula": "MEAN(order_value) GROUP BY channel",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "channel",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "promo_sales_none",
+    "value": 81335.22,
+    "formula": "SUM(line_total) GROUP BY promo_code",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "promo_code",
+      "line_total"
+    ]
+  },
+  {
+    "id": "promo_sales_SAVE10",
+    "value": 19698.66,
+    "formula": "SUM(line_total) GROUP BY promo_code",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "promo_code",
+      "line_total"
+    ]
+  },
+  {
+    "id": "promo_sales_WELCOME10",
+    "value": 8750.08,
+    "formula": "SUM(line_total) GROUP BY promo_code",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "promo_code",
+      "line_total"
+    ]
+  },
+  {
+    "id": "promo_sales_PASTA30",
+    "value": 486.3,
+    "formula": "SUM(line_total) GROUP BY promo_code",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "promo_code",
+      "line_total"
+    ]
+  },
+  {
+    "id": "aov_with_promo",
+    "value": 39.462368995633184,
+    "formula": "MEAN(order_value) WHERE has_promo=True",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "promo_code",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "aov_without_promo",
+    "value": 35.79079188797682,
+    "formula": "MEAN(order_value) WHERE has_promo=False",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "promo_code",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "discbucket_sales_0%",
+    "value": 81335.22,
+    "formula": "SUM(line_total) GROUP BY discount_pct bucket",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "discount",
+      "unit_price",
+      "quantity",
+      "line_total"
+    ]
+  },
+  {
+    "id": "discbucket_sales_10-15%",
+    "value": 21706.8,
+    "formula": "SUM(line_total) GROUP BY discount_pct bucket",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "discount",
+      "unit_price",
+      "quantity",
+      "line_total"
+    ]
+  },
+  {
+    "id": "discbucket_sales_15-20%",
+    "value": 6627.35,
+    "formula": "SUM(line_total) GROUP BY discount_pct bucket",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "discount",
+      "unit_price",
+      "quantity",
+      "line_total"
+    ]
+  },
+  {
+    "id": "discbucket_sales_20%+",
+    "value": 600.89,
+    "formula": "SUM(line_total) GROUP BY discount_pct bucket",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "discount",
+      "unit_price",
+      "quantity",
+      "line_total"
+    ]
+  },
+  {
+    "id": "multi_item_order_share",
+    "value": 1.0,
+    "formula": "COUNT(orders WHERE n_items>=2) / COUNT(orders)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "product_name"
+    ]
+  },
+  {
+    "id": "basket_pair_Ground_Coffee_Oat_Milk",
+    "value": 477,
+    "formula": "COUNT(orders containing both products)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "product_name"
+    ]
+  },
+  {
+    "id": "basket_pair_Pasta_Sauce_Spaghetti",
+    "value": 266,
+    "formula": "COUNT(orders containing both products)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "product_name"
+    ]
+  },
+  {
+    "id": "basket_pair_Parmesan_Cheese_Spaghetti",
+    "value": 253,
+    "formula": "COUNT(orders containing both products)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "product_name"
+    ]
+  },
+  {
+    "id": "basket_pair_Parmesan_Cheese_Pasta_Sauce",
+    "value": 197,
+    "formula": "COUNT(orders containing both products)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "product_name"
+    ]
+  },
+  {
+    "id": "basket_pair_Cereal_Whole_Milk",
+    "value": 188,
+    "formula": "COUNT(orders containing both products)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "product_name"
+    ]
+  },
+  {
+    "id": "basket_pair_Butter_Sourdough_Bread",
+    "value": 143,
+    "formula": "COUNT(orders containing both products)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "product_name"
+    ]
+  },
+  {
+    "id": "basket_pair_Baguette_Butter",
+    "value": 140,
+    "formula": "COUNT(orders containing both products)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "product_name"
+    ]
+  },
+  {
+    "id": "basket_pair_Ground_Coffee_Whole_Milk",
+    "value": 132,
+    "formula": "COUNT(orders containing both products)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "product_name"
+    ]
+  },
+  {
+    "id": "basket_pair_Butter_Ground_Coffee",
+    "value": 122,
+    "formula": "COUNT(orders containing both products)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "product_name"
+    ]
+  },
+  {
+    "id": "basket_pair_Oat_Milk_Whole_Milk",
+    "value": 118,
+    "formula": "COUNT(orders containing both products)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "product_name"
+    ]
+  },
+  {
+    "id": "corr_value_nitems",
+    "value": 0.8202561907197511,
+    "formula": "CORR(order_value, n_items)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "line_total",
+      "product_id"
+    ]
+  },
+  {
+    "id": "s1_target_customers",
+    "value": 489,
+    "formula": "COUNT(customer_id WHERE segment IN ('이탈위험','이탈/저가치'))",
+    "source_file": "./artifacts/cache/customer_rfm.csv",
+    "source_columns": [
+      "segment",
+      "customer_id"
+    ]
+  },
+  {
+    "id": "s1_conservative",
+    "value": 1457.3007405467847,
+    "formula": "target_customers * 8% 재활성화율 * AOV(재구매고객)",
+    "source_file": "./artifacts/cache/customer_rfm.csv",
+    "source_columns": [
+      "segment",
+      "customer_id"
+    ]
+  },
+  {
+    "id": "s1_base",
+    "value": 2732.438888525221,
+    "formula": "target_customers * 15% 재활성화율 * AOV(재구매고객)",
+    "source_file": "./artifacts/cache/customer_rfm.csv",
+    "source_columns": [
+      "segment",
+      "customer_id"
+    ]
+  },
+  {
+    "id": "s1_optimistic",
+    "value": 4554.064814208702,
+    "formula": "target_customers * 25% 재활성화율 * AOV(재구매고객)",
+    "source_file": "./artifacts/cache/customer_rfm.csv",
+    "source_columns": [
+      "segment",
+      "customer_id"
+    ]
+  },
+  {
+    "id": "s2_coffee_only_orders",
+    "value": 224,
+    "formula": "COUNT(orders with Ground Coffee but not Oat Milk)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "product_name"
+    ]
+  },
+  {
+    "id": "s2_oat_milk_price",
+    "value": 3.990000000000001,
+    "formula": "MEAN(unit_price) WHERE product_name='Oat Milk'",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "product_name",
+      "unit_price"
+    ]
+  },
+  {
+    "id": "s2_pasta_partial_orders",
+    "value": 454,
+    "formula": "COUNT(orders with partial pasta trio)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "product_name"
+    ]
+  },
+  {
+    "id": "s2_conservative",
+    "value": 172.36800000000005,
+    "formula": "coffee_only_orders * (30/14) * 10% 전환율 * oat_milk_price * 0.9(번들할인반영)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "product_name",
+      "unit_price"
+    ]
+  },
+  {
+    "id": "s2_base",
+    "value": 344.7360000000001,
+    "formula": "coffee_only_orders * (30/14) * 20% 전환율 * oat_milk_price * 0.9(번들할인반영)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "product_name",
+      "unit_price"
+    ]
+  },
+  {
+    "id": "s2_optimistic",
+    "value": 603.2880000000001,
+    "formula": "coffee_only_orders * (30/14) * 35% 전환율 * oat_milk_price * 0.9(번들할인반영)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "product_name",
+      "unit_price"
+    ]
+  },
+  {
+    "id": "s3_low_hours_sales",
+    "value": 6019.43,
+    "formula": "SUM(line_total) WHERE order_hour IN low_hours",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_hour",
+      "line_total"
+    ]
+  },
+  {
+    "id": "s3_low_hours_orders",
+    "value": 144,
+    "formula": "COUNT(DISTINCT order_id) WHERE order_hour IN low_hours",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_hour",
+      "order_id"
+    ]
+  },
+  {
+    "id": "s3_conservative",
+    "value": 911.3157457554163,
+    "formula": "low_hours_orders * (30/14) * 8% 주문증가율 * AOV",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_hour",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "s3_base",
+    "value": 1708.7170232914057,
+    "formula": "low_hours_orders * (30/14) * 15% 주문증가율 * AOV",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_hour",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "s3_optimistic",
+    "value": 2847.861705485676,
+    "formula": "low_hours_orders * (30/14) * 25% 주문증가율 * AOV",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_hour",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "total_base_impact",
+    "value": 4785.891911816627,
+    "formula": "s1_base + s2_base + s3_base",
+    "source_file": "./artifacts/calculation_metadata.json",
+    "source_columns": []
+  },
+  {
+    "id": "total_impact_pct",
+    "value": 0.020254021578569106,
+    "formula": "total_base_impact / next_month_baseline",
+    "source_file": "./artifacts/calculation_metadata.json",
+    "source_columns": []
+  },
+  {
+    "id": "vip_avg_items",
+    "value": 5.408827785817656,
+    "formula": "MEAN(n_items) WHERE segment='VIP(최우수)'",
+    "source_file": "./artifacts/cache/customer_rfm.csv",
+    "source_columns": [
+      "segment",
+      "order_id",
+      "product_id"
+    ]
+  },
+  {
+    "id": "target_orders_14d",
+    "value": 1115,
+    "formula": "COUNT(order_id WHERE segment IN ('우수고객','일반고객'))",
+    "source_file": "./artifacts/cache/customer_rfm.csv",
+    "source_columns": [
+      "segment",
+      "order_id"
+    ]
+  },
+  {
+    "id": "avg_value_per_item",
+    "value": 7.082680968591433,
+    "formula": "SUM(order_value)/SUM(n_items)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "line_total",
+      "product_id"
+    ]
+  },
+  {
+    "id": "s2_conservative_v2",
+    "value": 2538.382268564822,
+    "formula": "target_orders_14d * (30/14) * 15% 채택률 * 1개 추가품목 * 품목당평균매출",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "segment",
+      "product_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "s2_base_v2",
+    "value": 4230.637114274704,
+    "formula": "target_orders_14d * (30/14) * 25% 채택률 * 1개 추가품목 * 품목당평균매출",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "segment",
+      "product_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "s2_optimistic_v2",
+    "value": 6769.019382839527,
+    "formula": "target_orders_14d * (30/14) * 40% 채택률 * 1개 추가품목 * 품목당평균매출",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_id",
+      "segment",
+      "product_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "save10_usage_rate",
+    "value": 0.22333461686561418,
+    "formula": "COUNT(order_id WHERE promo_code='SAVE10') / COUNT(order_id WHERE customer_type='Returning')",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "promo_code",
+      "customer_type",
+      "order_id"
+    ]
+  },
+  {
+    "id": "aov_save10",
+    "value": 33.963206896551725,
+    "formula": "MEAN(order_value) WHERE promo_code='SAVE10'",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "promo_code",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "aov_returning_no_promo",
+    "value": 37.96567674764502,
+    "formula": "MEAN(order_value) WHERE customer_type='Returning' AND promo_code IS NULL",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "promo_code",
+      "customer_type",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "non_save10_returning_orders",
+    "value": 2017,
+    "formula": "returning_orders - save10_orders",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "promo_code",
+      "customer_type",
+      "order_id"
+    ]
+  },
+  {
+    "id": "aov_uplift_per_order",
+    "value": -4.002469851093295,
+    "formula": "aov_save10 - aov_returning_no_promo",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "promo_code",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "s3_conservative_v2",
+    "value": 0.0,
+    "formula": "non_save10_returning_orders * (30/14) * 10% 타기팅율 * aov_uplift_per_order",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "promo_code",
+      "customer_type",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "s3_base_v2",
+    "value": 0.0,
+    "formula": "non_save10_returning_orders * (30/14) * 20% 타기팅율 * aov_uplift_per_order",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "promo_code",
+      "customer_type",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "s3_optimistic_v2",
+    "value": 0.0,
+    "formula": "non_save10_returning_orders * (30/14) * 35% 타기팅율 * aov_uplift_per_order",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "promo_code",
+      "customer_type",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "total_base_v2",
+    "value": 6963.076002799925,
+    "formula": "s1_base + s2_base_v2 + s3_base_v2",
+    "source_file": "./artifacts/calculation_metadata.json",
+    "source_columns": []
+  },
+  {
+    "id": "total_conservative_v2",
+    "value": 3995.6830091116067,
+    "formula": "s1_conservative + s2_conservative_v2 + s3_conservative_v2",
+    "source_file": "./artifacts/calculation_metadata.json",
+    "source_columns": []
+  },
+  {
+    "id": "total_optimistic_v2",
+    "value": 11323.084197048229,
+    "formula": "s1_optimistic + s2_optimistic_v2 + s3_optimistic_v2",
+    "source_file": "./artifacts/calculation_metadata.json",
+    "source_columns": []
+  },
+  {
+    "id": "total_impact_pct_v2",
+    "value": 0.02946792242961337,
+    "formula": "total_base_v2 / next_month_baseline",
+    "source_file": "./artifacts/calculation_metadata.json",
+    "source_columns": []
+  },
+  {
+    "id": "low_weekdays_orders",
+    "value": 729,
+    "formula": "SUM(COUNT(order_id) GROUP BY dow) for 2 lowest weekdays",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "order_id"
+    ]
+  },
+  {
+    "id": "gap_orders_per_day",
+    "value": 149.5,
+    "formula": "MEAN(orders on weekend days) - MEAN(orders on low weekdays)",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "order_id",
+      "dow"
+    ]
+  },
+  {
+    "id": "s3_conservative_final",
+    "value": 7095.922082835143,
+    "formula": "gap_orders_per_day * 2개저조요일 * 4.3주 * 15% 격차해소율 * AOV",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "s3_base_final",
+    "value": 14191.844165670285,
+    "formula": "gap_orders_per_day * 2개저조요일 * 4.3주 * 30% 격차해소율 * AOV",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "s3_optimistic_final",
+    "value": 23653.073609450475,
+    "formula": "gap_orders_per_day * 2개저조요일 * 4.3주 * 50% 격차해소율 * AOV",
+    "source_file": "./artifacts/cache/df_main.pkl",
+    "source_columns": [
+      "order_date",
+      "order_id",
+      "line_total"
+    ]
+  },
+  {
+    "id": "total_conservative_final",
+    "value": 11091.605091946749,
+    "formula": "s1_conservative + s2_conservative_v2 + s3_conservative_final",
+    "source_file": "./artifacts/calculation_metadata.json",
+    "source_columns": []
+  },
+  {
+    "id": "total_base_final",
+    "value": 21154.92016847021,
+    "formula": "s1_base + s2_base_v2 + s3_base_final",
+    "source_file": "./artifacts/calculation_metadata.json",
+    "source_columns": []
+  },
+  {
+    "id": "total_optimistic_final",
+    "value": 34976.157806498704,
+    "formula": "s1_optimistic + s2_optimistic_v2 + s3_optimistic_final",
+    "source_file": "./artifacts/calculation_metadata.json",
+    "source_columns": []
+  },
+  {
+    "id": "total_impact_pct_final",
+    "value": 0.0895281835611835,
+    "formula": "total_base_final / next_month_baseline",
+    "source_file": "./artifacts/calculation_metadata.json",
+    "source_columns": []
+  }
+]

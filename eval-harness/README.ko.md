@@ -37,7 +37,10 @@ duration                  1920s           1680s           -12% ▲ better
 eval-harness/
 ├── run_eval.py, grade.py, compare.py    평소에 쓰는 명령
 ├── eval_runtime.py                      평가 런타임 설정
-├── graders/       규칙 기반 채점 모듈과 cost.py
+├── component_eval.py                    컴포넌트 실행: 오류를 심고 에이전트 하나만 실행
+├── components/    에이전트별로 무엇을 심고 어떻게 채점하는지 (validator.py, reporter.py)
+├── component_inputs/  시나리오별로 컴포넌트 실행이 시작하는 저장된 실행 (git에 포함, `component_eval.py pin`)
+├── graders/       규칙 기반 채점 모듈과 cost.py, 전체 실행과 컴포넌트 실행이 함께 씀
 ├── config/        scenarios.yaml, pricing.yaml, runtime_configs.yaml,
 │                  eval.env (git 제외, 로컬 전용)
 ├── tests/         pytest 테스트와 fixture
@@ -48,6 +51,16 @@ eval-harness/
 `eval-harness/` 기준입니다.
 
 ## 동작 방식: 단계와 파일
+
+실행은 두 종류입니다. 둘 다 eval 런타임과 같은 시나리오를 쓰고, 무엇을 호출하고 무엇을
+채점하는지가 다릅니다.
+
+| 실행 | 명령 | 무엇이 도는가 | 채점 | 비용 |
+|---|---|---|---|---|
+| **전체 실행** | `run_eval.py` | 시나리오 요청에 대한 전체 워크플로(Coordinator → Planner → Coder → Validator → Reporter → Auditor) | `grade.py` 규칙 채점기. 이어서 `compare.py` | 실행당 $4~6 |
+| **컴포넌트 실행** | `component_eval.py validator` / `reporter`, 또는 `run_eval.py --components` | 시나리오에 고정한 실행에 오류를 심고 에이전트 하나만 실행([아래](#컴포넌트-실행-에이전트-하나-심어둔-오류)) | 규칙 검사: Validator는 심은 오류마다 잡음/놓침/검사 안 함, Reporter는 needs_review 값마다 제외/인용/값 노출 + 전체 실행의 보고서 채점기 | Validator 실행당 약 $1.3~2 |
+
+이 절의 나머지는 전체 실행에 대한 설명입니다.
 
 ```
 config/scenarios.yaml + jungle-market CSV
@@ -137,6 +150,109 @@ Runner는 `managed-agentcore/.env`(배포 스크립트가 작성)에서 `RUNTIME
 
 `test_no_legacy_human_stop_sequence`는 알려진 버그를 기록하는 예상된 실패(`xfail`,
 strict)입니다. 버그가 고쳐지면 오류로 바뀌므로, 고칠 때 마커도 함께 지웁니다.
+
+## 컴포넌트 실행: 에이전트 하나, 심어둔 오류
+
+전체 실행은 최종 보고서만 채점하므로, 에이전트 하나가 자기 일을 얼마나 잘하는지는
+알 수 없습니다. 점수가 나빠져도 어느 에이전트 때문인지 모르고, 각 에이전트가 받는
+입력이 실행마다 다르고, Coder의 숫자 중 무엇이 틀렸는지도 모릅니다. 컴포넌트 실행은
+에이전트 하나를 따로 잽니다. 입력은 고정하고(저장된 실행의 결과물), 정답은 미리
+알고(일부러 심은 오류), 그 앞 단계는 다시 돌리지 않습니다. 그래서 비용이 적고,
+에이전트의 두 버전을 같은 입력으로 비교할 수 있습니다. 모델 변경이 대표적인 경우입니다.
+전체 실행은 모든 에이전트의 모델을 한 번에 바꾸지만 Deep Insight는 에이전트별로 모델을
+고르므로, Validator를 더 싼 모델로 둘 수 있는지는 Validator만의 문제입니다.
+
+이 수치는 그 A/B 비교용이고 절대 수치가 아닙니다. 여기서 에이전트는 저장된 결과물은
+받지만 전체 실행에서 앞 에이전트가 한 말은 받지 않으므로(아래), "6개 중 3개 잡음"이 같은
+Validator가 전체 실행 안에서 내는 수치는 아닙니다. 두 버전을 같은 입력으로 비교하고,
+컴포넌트 실행과 전체 실행을 비교하지 마세요.
+
+**고정 입력.** 개발용 시나리오마다 저장된 실행 하나를 `component_inputs/<scenario>/`에
+고정하고(git에 포함: Reporter 전까지의 결과물, 계획, 어디서 왔는지), 설정은
+`scenarios.yaml`에 둡니다.
+
+```yaml
+    components:
+      validator: {plant: 6, seed: 0}
+      reporter: {plant: 4, seed: 0}
+```
+
+반복 i는 시드 `"<seed>:i"`로 심으므로, 어느 버전이든 반복 i는 같은 오류를 받습니다.
+`--first-repeat`로 나눠 돌려도 같습니다. `planted.json`에 출처와 심은 오류가 남고,
+`compare.py`는 두 태그의 컴포넌트 실행이 같은 오류를 받지 않았으면 표시합니다. 결과물
+형식이 바뀌면(예: Validator가 읽는 파일이 새로 생기면) 다른 실행을 고정합니다.
+
+```bash
+.venv/bin/python component_eval.py pin --from eval_results/<tag>/<run> [--force]
+```
+
+에이전트가 읽는 결과물은 남기고(어떤 계산의 `source_file`도 가리키지 않는 캐시
+DataFrame은 폴더 크기 때문에 뺌), 저장된 보고서도 남깁니다. Reporter 컴포넌트가 심을
+값을 거기서 고르기 때문입니다. 올릴 때 보고서는 다시 빠지므로 어느 에이전트도 보지
+않습니다.
+
+| 고정 입력 | 출처 | Validator 심기 | Reporter 표시 |
+|---|---|---|---|
+| `jungle_market` | 중복 111행을 뺀 실행(총매출 $110,270.26) | 6개, 모두 파생 파일: 그 Coder가 중복을 뺀 `df_main.pkl`로 계산해서 원본 CSV 기반 계산이 없음 | 4개 |
+| `yummy_food_kr` | core_pass를 통과한 baseline 실행 | 6개: 원본 3, 파생 3 | 4개 |
+
+**평가할 때마다.** `run_eval.py --components validator,reporter`는 전체 실행이 도는 동안
+같은 eval 런타임의 별도 세션에서 반복마다 하나씩 돌리고, 같은 태그에 저장합니다.
+`compare.py`가 시나리오 아래에 보여줍니다([태그 비교](#태그-비교)). `yummy_food_kr`에서 반복 한 번에
+Validator $1.05(6분), Reporter $3.84(9분)였고, 둘 다 전체 실행 22분 안에 끝나서 소요 시간은
+전체 실행과 같습니다.
+
+| 에이전트 | 재는 것 | 심는 것 |
+|---|---|---|
+| Validator | 틀린 계산을 잡는지(재현율), 맞는 계산을 건드리지 않는지(오경보) | 계산값을 10% 바꿈 |
+| Reporter | Validator가 표시한 값을 빼는지, 나머지를 정확히 인용하는지 | verified 인용을 needs_review로 바꿈 |
+
+에이전트를 추가하려면 `components/__init__.py`의 인터페이스대로 `components/`에 모듈
+하나를 만들고, 런타임 쪽 `managed-agentcore/src/graph/component.py`의 `COMPONENTS`에 이름을,
+`_handler()`에 그 에이전트의 tool handler를 넣습니다.
+
+**Validator.**
+
+```bash
+.venv/bin/python eval_runtime.py enable-components        # 최초 1회, eval 런타임에만
+.venv/bin/python component_eval.py validator --scenario jungle_market --tag comp-validator
+.venv/bin/python component_eval.py validator --from eval_results/baseline/<run> --plant 6 --tag comp-validator   # 아무 저장된 실행
+```
+
+중요도 high인 계산 최대 `plant`개의 값을 10% 바꿉니다. 절반은 원본 CSV 기반이면서
+재계산으로 맞다고 확인된 것, 절반은 Coder가 만든 파생 파일 기반입니다. 결과물을
+Validator 시작 시점 상태로 올리고 eval 런타임을 `component: validator`로
+호출합니다(`managed-agentcore/src/graph/component.py`). Validator가 쓴
+`citations.json`에서 심은 오류마다 잡음(needs_review), 놓침(verified), 검사 안 함을
+세고, 맞는 값을 needs_review로 표시한 오경보와 심은 값을 바꾼 경우(표시만 해야 하고
+고치면 안 됨)도 셉니다.
+
+**Reporter.** needs_review 값은 보고서에 나오면 안 됩니다. 값도, 마커도, 참고문헌도
+안 됩니다(`reporter.md`의 `value_status_resolution`). 이걸 재려면 어떤 값이
+needs_review인지 아는 입력이 필요합니다.
+
+```bash
+.venv/bin/python component_eval.py reporter --scenario jungle_market --tag comp-reporter
+```
+
+저장된 보고서가 인용한 verified 값 최대 `plant`개를 `citations.json`에서
+needs_review로 바꾸고, 결과물을 Reporter 시작 시점 상태(Reporter의 초안·코드와
+Auditor 파일 제거)로 올린 뒤 eval 런타임을 `component: reporter`로 호출합니다. 새
+보고서에서 바꾼 값마다 **제외**(올바름), **인용**(본문 `[n]`이 그 값을 가리킴),
+**값 노출**(마커 없이 본문·표·참고문헌에 숫자가 나옴)으로 셉니다. 다른 모든 인용값과
+1% 넘게 차이 나는 값만 고르고 100 미만 정수는 건너뛰므로, 보고서의 숫자가 다른 인용의
+값일 수 없습니다. 값 노출은 유효숫자 3자리 이상으로 쓰인 숫자가 그 숫자의 자릿수에서
+반올림으로 일치할 때만 셉니다. 6,879.45는 "$6,891"이 아니고, 3.69는 "3.7"이
+아닙니다. 새 보고서는 전체 실행의 보고서 채점기(`[n]` 앞 숫자 = 인용값, 깨진 `[n]`,
+숫자 안 `[n]`, 인용 비율, 인용 = 메타데이터)로도 채점합니다.
+
+컴포넌트 실행은 에이전트 자신의 입력만 받고, 전체 실행에서 앞 에이전트가 남긴 말
+(Supervisor의 메시지, Coder·Validator가 남긴 `clues`)은 받지 않습니다. Reporter는
+프롬프트대로 `./artifacts/`와 `all_results.txt`에서 시작합니다.
+
+런타임은 환경변수에 `EVAL_COMPONENT_MODE=1`이 없으면 컴포넌트 실행을 거부합니다.
+두 런타임은 같은 이미지를 쓰고, 이 변수는 `eval_runtime.py`가 eval 런타임에만
+`_handler()`에 그 에이전트의 tool handler를 넣습니다.
 
 ## 시나리오
 
@@ -262,7 +378,11 @@ Bedrock 할당량)이므로, 긴 평가 배치는 사용이 많은 시간을 피
 - 한 태그 안에 git SHA, 런타임 버전, 모델 구성이 섞였으면 ⚠ 줄이 나옵니다. 비교 전에
   태그를 나누세요.
 
-에이전트별 비용도 각 에이전트가 쓴 모델과 함께 출력합니다.
+에이전트별 비용도 각 에이전트가 쓴 모델과 함께 출력하고, 컴포넌트 실행이 있는 태그는
+시나리오 아래에 에이전트별 표를 붙입니다. Validator는 재현율, 잡음/놓침/검사 안 함,
+오경보, 바꾼 값, Reporter는 needs_review 값의 제외/인용/값 노출, 출력값 = 인용값, 숫자 안
+`[n]`이고, 둘 다 그 에이전트가 쓴 모델을 함께 보여줍니다. 거기 ⚠ 줄이 있으면 그 태그의 컴포넌트 실행이 첫 태그와 다른 실행에서
+시작했거나 다른 오류를 심었다는 뜻이라, 차이가 그 에이전트만의 것이 아닙니다.
 
 ## 실행 채점
 

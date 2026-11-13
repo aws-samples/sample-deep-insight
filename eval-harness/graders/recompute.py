@@ -486,10 +486,12 @@ def same_value(stored, expected):
     return abs(stored - expected) <= 0.5 * 10 ** -decimals + 1e-9 * max(1.0, abs(expected))
 
 
-def grade(artifacts_dir, csv_path):
+def grade(artifacts_dir, csv_path, with_strict=False):
+    """Metrics; with_strict=True also returns {calculation id: matches} for the strict checks on the raw file."""
     calcs = load_calculations(artifacts_dir)
     if calcs is None:
-        return {"recompute_supported": 0, "details": ["calculation_metadata.json unusable"]}
+        out = {"recompute_supported": 0, "details": ["calculation_metadata.json unusable"]}
+        return (out, {}) if with_strict else out
     df = load_csv(csv_path)
     dedup = df.drop_duplicates() if df.duplicated().any() else None
     source_name = Path(csv_path).name
@@ -564,7 +566,7 @@ def grade(artifacts_dir, csv_path):
     false_alarm = sorted(cid for cid in flagged if strict[cid])
     if false_alarm:
         details.append(f"Validator marked needs_review but recomputed the same: {false_alarm}")
-    return {
+    metrics = {
         "recompute_supported": supported,
         "recompute_total": len(calcs),
         "recompute_lenient": lenient,
@@ -579,3 +581,4 @@ def grade(artifacts_dir, csv_path):
         "validator_false_alarm": len(false_alarm),
         "details": details,
     }
+    return (metrics, strict) if with_strict else metrics

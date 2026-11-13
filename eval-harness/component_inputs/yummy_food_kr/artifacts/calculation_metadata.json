@@ -1,0 +1,1340 @@
+{
+  "generated_at": "2026-10-15T05:11:59.879808",
+  "calculations": [
+    {
+      "id": "total_cost",
+      "value": 388296000,
+      "description": "전체 총 광고비용",
+      "formula": "SUM(광고비용)",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "total_rev",
+      "value": 1316606500,
+      "description": "전체 총 매출액",
+      "formula": "SUM(매출액)",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매출액"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "overall_ctr",
+      "value": 1.8,
+      "description": "전체 통합 CTR(%)",
+      "formula": "SUM(클릭수)/SUM(노출수)*100",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "클릭수",
+        "노출수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "overall_cvr",
+      "value": 4.67,
+      "description": "전체 통합 전환율(%)",
+      "formula": "SUM(전환수)/SUM(클릭수)*100",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "전환수",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "overall_roas",
+      "value": 3.39,
+      "description": "전체 통합 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용)",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "overall_cpc",
+      "value": 277.0,
+      "description": "전체 통합 CPC(원)",
+      "formula": "SUM(광고비용)/SUM(클릭수)",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "광고비용",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "overall_cpa",
+      "value": 5927.4,
+      "description": "전체 통합 CPA(원)",
+      "formula": "SUM(광고비용)/SUM(전환수)",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "광고비용",
+        "전환수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_쿠빵_roas",
+      "value": 4.14,
+      "description": "쿠빵 매체 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 매체",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_쿠빵_ctr",
+      "value": 1.36,
+      "description": "쿠빵 매체 CTR(%)",
+      "formula": "SUM(클릭수)/SUM(노출수)*100 by 매체",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "클릭수",
+        "노출수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_쿠빵_cvr",
+      "value": 6.79,
+      "description": "쿠빵 매체 전환율(%)",
+      "formula": "SUM(전환수)/SUM(클릭수)*100 by 매체",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "전환수",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_쿠빵_cost_share",
+      "value": 41.62,
+      "description": "쿠빵 매체 광고비 점유율(%)",
+      "formula": "SUM(광고비용 by 매체)/SUM(전체 광고비용)*100",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_쿠빵_rev_share",
+      "value": 50.86,
+      "description": "쿠빵 매체 매출 점유율(%)",
+      "formula": "SUM(매출액 by 매체)/SUM(전체 매출액)*100",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "매출액"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_쿠빵_cpa",
+      "value": 5031.9,
+      "description": "쿠빵 매체 CPA(원)",
+      "formula": "SUM(광고비용)/SUM(전환수) by 매체",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "광고비용",
+        "전환수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_컬삼_roas",
+      "value": 3.51,
+      "description": "컬삼 매체 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 매체",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_컬삼_ctr",
+      "value": 1.8,
+      "description": "컬삼 매체 CTR(%)",
+      "formula": "SUM(클릭수)/SUM(노출수)*100 by 매체",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "클릭수",
+        "노출수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_컬삼_cvr",
+      "value": 5.35,
+      "description": "컬삼 매체 전환율(%)",
+      "formula": "SUM(전환수)/SUM(클릭수)*100 by 매체",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "전환수",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_컬삼_cost_share",
+      "value": 12.96,
+      "description": "컬삼 매체 광고비 점유율(%)",
+      "formula": "SUM(광고비용 by 매체)/SUM(전체 광고비용)*100",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_컬삼_rev_share",
+      "value": 13.4,
+      "description": "컬삼 매체 매출 점유율(%)",
+      "formula": "SUM(매출액 by 매체)/SUM(전체 매출액)*100",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "매출액"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_컬삼_cpa",
+      "value": 5825.8,
+      "description": "컬삼 매체 CPA(원)",
+      "formula": "SUM(광고비용)/SUM(전환수) by 매체",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "광고비용",
+        "전환수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_아마존_roas",
+      "value": 3.17,
+      "description": "아마존 매체 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 매체",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_아마존_ctr",
+      "value": 1.2,
+      "description": "아마존 매체 CTR(%)",
+      "formula": "SUM(클릭수)/SUM(노출수)*100 by 매체",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "클릭수",
+        "노출수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_아마존_cvr",
+      "value": 6.39,
+      "description": "아마존 매체 전환율(%)",
+      "formula": "SUM(전환수)/SUM(클릭수)*100 by 매체",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "전환수",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_아마존_cost_share",
+      "value": 17.63,
+      "description": "아마존 매체 광고비 점유율(%)",
+      "formula": "SUM(광고비용 by 매체)/SUM(전체 광고비용)*100",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_아마존_rev_share",
+      "value": 16.48,
+      "description": "아마존 매체 매출 점유율(%)",
+      "formula": "SUM(매출액 by 매체)/SUM(전체 매출액)*100",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "매출액"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_아마존_cpa",
+      "value": 5436.9,
+      "description": "아마존 매체 CPA(원)",
+      "formula": "SUM(광고비용)/SUM(전환수) by 매체",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "광고비용",
+        "전환수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_네이바_roas",
+      "value": 2.35,
+      "description": "네이바 매체 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 매체",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_네이바_ctr",
+      "value": 3.21,
+      "description": "네이바 매체 CTR(%)",
+      "formula": "SUM(클릭수)/SUM(노출수)*100 by 매체",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "클릭수",
+        "노출수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_네이바_cvr",
+      "value": 2.13,
+      "description": "네이바 매체 전환율(%)",
+      "formula": "SUM(전환수)/SUM(클릭수)*100 by 매체",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "전환수",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_네이바_cost_share",
+      "value": 27.79,
+      "description": "네이바 매체 광고비 점유율(%)",
+      "formula": "SUM(광고비용 by 매체)/SUM(전체 광고비용)*100",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_네이바_rev_share",
+      "value": 19.27,
+      "description": "네이바 매체 매출 점유율(%)",
+      "formula": "SUM(매출액 by 매체)/SUM(전체 매출액)*100",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "매출액"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "media_네이바_cpa",
+      "value": 8871.0,
+      "description": "네이바 매체 CPA(원)",
+      "formula": "SUM(광고비용)/SUM(전환수) by 매체",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "광고비용",
+        "전환수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_신선식품_roas",
+      "value": 3.49,
+      "description": "신선식품 카테고리 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_신선식품_ctr",
+      "value": 1.8,
+      "description": "신선식품 카테고리 CTR(%)",
+      "formula": "SUM(클릭수)/SUM(노출수)*100 by 카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "카테고리",
+        "클릭수",
+        "노출수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_신선식품_cvr",
+      "value": 4.8,
+      "description": "신선식품 카테고리 전환율(%)",
+      "formula": "SUM(전환수)/SUM(클릭수)*100 by 카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "카테고리",
+        "전환수",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_신선식품_cost_share",
+      "value": 38.28,
+      "description": "신선식품 카테고리 광고비 점유율(%)",
+      "formula": "SUM(광고비용 by 카테고리)/SUM(전체 광고비용)*100",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "카테고리",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_건강식품_roas",
+      "value": 3.35,
+      "description": "건강식품 카테고리 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_건강식품_ctr",
+      "value": 1.89,
+      "description": "건강식품 카테고리 CTR(%)",
+      "formula": "SUM(클릭수)/SUM(노출수)*100 by 카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "카테고리",
+        "클릭수",
+        "노출수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_건강식품_cvr",
+      "value": 4.37,
+      "description": "건강식품 카테고리 전환율(%)",
+      "formula": "SUM(전환수)/SUM(클릭수)*100 by 카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "카테고리",
+        "전환수",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_건강식품_cost_share",
+      "value": 25.87,
+      "description": "건강식품 카테고리 광고비 점유율(%)",
+      "formula": "SUM(광고비용 by 카테고리)/SUM(전체 광고비용)*100",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "카테고리",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_간편식_roas",
+      "value": 3.31,
+      "description": "간편식 카테고리 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_간편식_ctr",
+      "value": 1.76,
+      "description": "간편식 카테고리 CTR(%)",
+      "formula": "SUM(클릭수)/SUM(노출수)*100 by 카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "카테고리",
+        "클릭수",
+        "노출수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_간편식_cvr",
+      "value": 4.68,
+      "description": "간편식 카테고리 전환율(%)",
+      "formula": "SUM(전환수)/SUM(클릭수)*100 by 카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "카테고리",
+        "전환수",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cat_간편식_cost_share",
+      "value": 35.84,
+      "description": "간편식 카테고리 광고비 점유율(%)",
+      "formula": "SUM(광고비용 by 카테고리)/SUM(전체 광고비용)*100",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "카테고리",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_프리미엄과일_roas",
+      "value": 3.85,
+      "description": "프리미엄과일 상품 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_프리미엄과일_ctr",
+      "value": 1.88,
+      "description": "프리미엄과일 상품 CTR(%)",
+      "formula": "SUM(클릭수)/SUM(노출수)*100 by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "클릭수",
+        "노출수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_프리미엄과일_cvr",
+      "value": 4.62,
+      "description": "프리미엄과일 상품 전환율(%)",
+      "formula": "SUM(전환수)/SUM(클릭수)*100 by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "전환수",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_프리미엄과일_cost",
+      "value": 65025000,
+      "description": "프리미엄과일 상품 총 광고비용",
+      "formula": "SUM(광고비용) by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_오메가3_roas",
+      "value": 3.53,
+      "description": "오메가3 상품 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_오메가3_ctr",
+      "value": 1.9,
+      "description": "오메가3 상품 CTR(%)",
+      "formula": "SUM(클릭수)/SUM(노출수)*100 by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "클릭수",
+        "노출수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_오메가3_cvr",
+      "value": 4.39,
+      "description": "오메가3 상품 전환율(%)",
+      "formula": "SUM(전환수)/SUM(클릭수)*100 by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "전환수",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_오메가3_cost",
+      "value": 50211000,
+      "description": "오메가3 상품 총 광고비용",
+      "formula": "SUM(광고비용) by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_즉석밥세트_roas",
+      "value": 3.45,
+      "description": "즉석밥세트 상품 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_즉석밥세트_ctr",
+      "value": 1.75,
+      "description": "즉석밥세트 상품 CTR(%)",
+      "formula": "SUM(클릭수)/SUM(노출수)*100 by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "클릭수",
+        "노출수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_즉석밥세트_cvr",
+      "value": 4.67,
+      "description": "즉석밥세트 상품 전환율(%)",
+      "formula": "SUM(전환수)/SUM(클릭수)*100 by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "전환수",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_즉석밥세트_cost",
+      "value": 69531000,
+      "description": "즉석밥세트 상품 총 광고비용",
+      "formula": "SUM(광고비용) by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_샐러드키트_roas",
+      "value": 3.21,
+      "description": "샐러드키트 상품 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_샐러드키트_ctr",
+      "value": 1.78,
+      "description": "샐러드키트 상품 CTR(%)",
+      "formula": "SUM(클릭수)/SUM(노출수)*100 by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "클릭수",
+        "노출수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_샐러드키트_cvr",
+      "value": 4.85,
+      "description": "샐러드키트 상품 전환율(%)",
+      "formula": "SUM(전환수)/SUM(클릭수)*100 by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "전환수",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_샐러드키트_cost",
+      "value": 83630000,
+      "description": "샐러드키트 상품 총 광고비용",
+      "formula": "SUM(광고비용) by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_프로틴바_roas",
+      "value": 3.18,
+      "description": "프로틴바 상품 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_프로틴바_ctr",
+      "value": 1.88,
+      "description": "프로틴바 상품 CTR(%)",
+      "formula": "SUM(클릭수)/SUM(노출수)*100 by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "클릭수",
+        "노출수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_프로틴바_cvr",
+      "value": 4.36,
+      "description": "프로틴바 상품 전환율(%)",
+      "formula": "SUM(전환수)/SUM(클릭수)*100 by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "전환수",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_프로틴바_cost",
+      "value": 50251000,
+      "description": "프로틴바 상품 총 광고비용",
+      "formula": "SUM(광고비용) by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_냉동만두_roas",
+      "value": 3.17,
+      "description": "냉동만두 상품 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_냉동만두_ctr",
+      "value": 1.77,
+      "description": "냉동만두 상품 CTR(%)",
+      "formula": "SUM(클릭수)/SUM(노출수)*100 by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "클릭수",
+        "노출수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_냉동만두_cvr",
+      "value": 4.69,
+      "description": "냉동만두 상품 전환율(%)",
+      "formula": "SUM(전환수)/SUM(클릭수)*100 by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "전환수",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "prod_냉동만두_cost",
+      "value": 69648000,
+      "description": "냉동만두 상품 총 광고비용",
+      "formula": "SUM(광고비용) by 상품명",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "상품명",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cross_네이바_간편식_roas",
+      "value": 2.49,
+      "description": "네이바x간편식 교차 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 매체,카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cross_네이바_건강식품_roas",
+      "value": 2.2,
+      "description": "네이바x건강식품 교차 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 매체,카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cross_네이바_신선식품_roas",
+      "value": 2.36,
+      "description": "네이바x신선식품 교차 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 매체,카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cross_아마존_간편식_roas",
+      "value": 2.75,
+      "description": "아마존x간편식 교차 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 매체,카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cross_아마존_건강식품_roas",
+      "value": 8.41,
+      "description": "아마존x건강식품 교차 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 매체,카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cross_아마존_신선식품_roas",
+      "value": 3.12,
+      "description": "아마존x신선식품 교차 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 매체,카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cross_컬삼_간편식_roas",
+      "value": 2.89,
+      "description": "컬삼x간편식 교차 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 매체,카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cross_컬삼_건강식품_roas",
+      "value": 2.61,
+      "description": "컬삼x건강식품 교차 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 매체,카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cross_컬삼_신선식품_roas",
+      "value": 3.81,
+      "description": "컬삼x신선식품 교차 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 매체,카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cross_쿠빵_간편식_roas",
+      "value": 4.35,
+      "description": "쿠빵x간편식 교차 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 매체,카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cross_쿠빵_건강식품_roas",
+      "value": 3.88,
+      "description": "쿠빵x건강식품 교차 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 매체,카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "cross_쿠빵_신선식품_roas",
+      "value": 4.19,
+      "description": "쿠빵x신선식품 교차 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) by 매체,카테고리",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "below_avg_media_cost",
+      "value": 176375000,
+      "description": "전체 평균 ROAS 미달 매체(네이바,컬삼,아마존)의 광고비 합계",
+      "formula": "SUM(광고비용) WHERE 매체별ROAS < 전체ROAS(3.39)",
+      "source_file": "./artifacts/media_agg.csv",
+      "source_columns": [
+        "매체",
+        "광고비용",
+        "ROAS"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "below_avg_media_cost_share",
+      "value": 45.42,
+      "description": "전체 평균 ROAS 미달 매체 광고비 비중(%)",
+      "formula": "SUM(광고비용 WHERE ROAS<3.39)/SUM(전체광고비용)*100",
+      "source_file": "./artifacts/media_agg.csv",
+      "source_columns": [
+        "매체",
+        "광고비용",
+        "ROAS"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "naver_rev_gap",
+      "value": 112203650.0,
+      "description": "네이바 매체가 전체 평균 ROAS(3.39) 수준이었을 경우의 매출 증분 추정치",
+      "formula": "(네이바 광고비 x 전체평균ROAS) - 네이바 실제매출",
+      "source_file": "./artifacts/media_agg.csv",
+      "source_columns": [
+        "매체",
+        "광고비용",
+        "매출액"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "corr_ctr_cvr",
+      "value": -0.898,
+      "description": "CTR과 전환율 간 피어슨 상관계수",
+      "formula": "CORR(CTR, 전환율)",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "CTR",
+        "전환율"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "corr_cost_roas",
+      "value": -0.376,
+      "description": "광고비용과 ROAS 간 피어슨 상관계수",
+      "formula": "CORR(광고비용, ROAS)",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "광고비용",
+        "ROAS"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "corr_ctr_roas",
+      "value": -0.485,
+      "description": "CTR과 ROAS 간 피어슨 상관계수",
+      "formula": "CORR(CTR, ROAS)",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "CTR",
+        "ROAS"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "corr_cvr_roas",
+      "value": 0.549,
+      "description": "전환율과 ROAS 간 피어슨 상관계수",
+      "formula": "CORR(전환율, ROAS)",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "전환율",
+        "ROAS"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "naver_ctr_vs_cvr_gap",
+      "value": 1.08,
+      "description": "네이바 CTR과 전환율 격차(클릭은 높으나 전환이 낮은 패턴)",
+      "formula": "네이바 CTR(%) - 네이바 전환율(%)",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "CTR",
+        "전환율"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "daily_roas_max",
+      "value": 4.51,
+      "description": "일별 ROAS 최고치 (2025-09-06)",
+      "formula": "MAX(일별 SUM(매출액)/SUM(광고비용))",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "날짜",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "daily_roas_min",
+      "value": 2.91,
+      "description": "일별 ROAS 최저치 (2025-09-26)",
+      "formula": "MIN(일별 SUM(매출액)/SUM(광고비용))",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "날짜",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "daily_roas_std",
+      "value": 0.458,
+      "description": "일별 ROAS 표준편차(변동성)",
+      "formula": "STD(일별 ROAS)",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "날짜",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "medium"
+    },
+    {
+      "id": "weekend_roas",
+      "value": 4.0,
+      "description": "주말(토,일) 통합 ROAS",
+      "formula": "SUM(주말 매출액)/SUM(주말 광고비용)",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "날짜",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "weekday_roas",
+      "value": 3.17,
+      "description": "평일 통합 ROAS",
+      "formula": "SUM(평일 매출액)/SUM(평일 광고비용)",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "날짜",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "strategy1_naver_cut_amount",
+      "value": 32377500.0,
+      "description": "전략1: 네이바 예산 30% 축소 금액",
+      "formula": "네이바 총광고비 x 0.30",
+      "source_file": "./artifacts/media_agg.csv",
+      "source_columns": [
+        "매체",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "strategy1_net_rev_gain",
+      "value": 57955725.0,
+      "description": "전략1: 네이바→쿠빵 예산 재배분 시 순매출 증분 추정",
+      "formula": "(축소금액 x 쿠빵ROAS) - (축소금액 x 네이바ROAS)",
+      "source_file": "./artifacts/media_agg.csv",
+      "source_columns": [
+        "매체",
+        "광고비용",
+        "ROAS"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "strategy2_amazon_health_roas",
+      "value": 8.41,
+      "description": "아마존x건강식품 조합의 ROAS",
+      "formula": "SUM(매출액)/SUM(광고비용) WHERE 매체=아마존, 카테고리=건강식품",
+      "source_file": "./artifacts/cross_media_category.csv",
+      "source_columns": [
+        "매체",
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "strategy2_increase_amount",
+      "value": 1797000.0,
+      "description": "전략2: 아마존x건강식품 예산 50% 증액 금액",
+      "formula": "아마존x건강식품 광고비 x 0.5",
+      "source_file": "./artifacts/cross_media_category.csv",
+      "source_columns": [
+        "매체",
+        "카테고리",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "strategy2_conservative_roas",
+      "value": 5.89,
+      "description": "전략2: 보수적 한계ROAS(원래ROAS의 70% 적용)",
+      "formula": "아마존x건강식품ROAS x 0.7",
+      "source_file": "./artifacts/cross_media_category.csv",
+      "source_columns": [
+        "매체",
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "strategy2_expected_rev",
+      "value": 10584330.0,
+      "description": "전략2: 예산 증액 시 기대 증분매출(보수적 시나리오)",
+      "formula": "증액금액 x 보수적한계ROAS",
+      "source_file": "./artifacts/cross_media_category.csv",
+      "source_columns": [
+        "매체",
+        "카테고리",
+        "매출액",
+        "광고비용"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "strategy3_naver_cvr",
+      "value": 2.13,
+      "description": "네이바 현재 전환율(%)",
+      "formula": "SUM(전환수)/SUM(클릭수)*100 WHERE 매체=네이바",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "전환수",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "strategy3_target_cvr",
+      "value": 3.06,
+      "description": "전략3: 네이바 목표 전환율(쿠빵과 격차 20% 보수적 개선 가정)",
+      "formula": "네이바전환율 + (쿠빵전환율-네이바전환율)*0.2",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "전환수",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "strategy3_naver_aov",
+      "value": 20850.0,
+      "description": "네이바 전환당 평균 매출(AOV)",
+      "formula": "SUM(매출액)/SUM(전환수) WHERE 매체=네이바",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "매출액",
+        "전환수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "strategy3_additional_rev",
+      "value": 110671800.0,
+      "description": "전략3: 네이바 전환율 개선 시 기대 증분매출(보수적 시나리오)",
+      "formula": "추가전환수 x 네이바AOV",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "전환수",
+        "클릭수",
+        "매출액"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "strategy3_additional_conv",
+      "value": 5308.0,
+      "description": "전략3: 전환율 개선 시 추가 전환수",
+      "formula": "네이바클릭수 x (목표전환율-현재전환율)/100",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "클릭수"
+      ],
+      "importance": "high"
+    },
+    {
+      "id": "strategy3_rev_increase_pct",
+      "value": 43.6,
+      "description": "전략3: 네이바 매출 대비 증분매출 비율(%)",
+      "formula": "증분매출/네이바현재매출*100",
+      "source_file": "/app/data/yummy-food-market.csv",
+      "source_columns": [
+        "매체",
+        "매출액"
+      ],
+      "importance": "high"
+    }
+  ]
+}

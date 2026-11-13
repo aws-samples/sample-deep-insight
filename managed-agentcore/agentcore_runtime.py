@@ -78,6 +78,7 @@ from typing import Dict, Any, AsyncGenerator
 from bedrock_agentcore.runtime import BedrockAgentCoreApp
 from src.utils.strands_sdk_utils import strands_utils
 from src.graph.builder import build_graph
+from src.graph.component import ComponentRunner, check_component_payload, component_requested
 
 # ECS Cluster configuration from environment
 # Note: Environment variables are provided by AWS via create_agentcore_runtime_vpc.py
@@ -803,9 +804,16 @@ async def agentcore_streaming_execution(
             instrumenting_library_version=os.getenv("TRACER_LIBRARY_VERSION", TRACER_LIBRARY_VERSION_DEFAULT)
         )
 
+        # A component run (one agent on a saved run's artifacts) is an eval-runtime
+        # feature; anywhere else it is refused before anything starts.
+        if component_requested(payload):
+            refused = check_component_payload(payload)
+            if refused:
+                raise ValueError(refused)
+
         with tracer.start_as_current_span("agentcore_session") as span:
-            # Step 4: Build and configure graph
-            graph = build_graph()
+            # Step 4: Build and configure graph (or the single component)
+            graph = ComponentRunner(payload) if component_requested(payload) else build_graph()
             graph_input = _build_graph_input(user_query, payload, request_id)
 
             print(f"🚀 Launching AgentCore Runtime with query: {user_query[:100]}...")

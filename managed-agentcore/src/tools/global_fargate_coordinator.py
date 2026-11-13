@@ -304,6 +304,33 @@ class GlobalFargateSessionManager:
             logger.error(f"❌ Failed to create session with directory data: {e}")
             return False
 
+    def stage_artifacts(self, s3_url: str) -> bool:
+        """
+        Put a saved run's artifacts into the session's ./artifacts/ (component runs only).
+
+        A component run (src/graph/component.py) starts one agent where a full
+        run would have reached it, so the files earlier agents wrote must be
+        there first. They are copied to the session prefix (staged_artifacts/)
+        and synced into /app/artifacts/; the container's final upload then
+        carries them back with whatever the agent adds.
+
+        Args:
+            s3_url: S3 URL of the artifacts folder (e.g., "s3://bucket/uploads/eval-x/artifacts/")
+
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            if not self.ensure_session():
+                raise Exception("Failed to create Fargate session")
+            session_id = self._sessions[self._current_request_id]['session_id']
+            prefix = self._copy_s3_directory_to_session(s3_url, session_id, dest_name="staged_artifacts")
+            self._sync_directory_from_s3_to_container(prefix, local_path="/app/artifacts/")
+            return True
+        except Exception as e:
+            logger.error(f"❌ Failed to stage artifacts: {e}")
+            return False
+
     def execute_code(self, code: str, description: str = ""):
         """
         Execute code with automatic session management and connection retry
@@ -879,7 +906,7 @@ class GlobalFargateSessionManager:
     # 📤 DATA SYNC METHODS (S3 UPLOAD/DOWNLOAD)
     # ========================================================================
 
-    def _copy_s3_directory_to_session(self, s3_url: str, session_id: str) -> str:
+    def _copy_s3_directory_to_session(self, s3_url: str, session_id: str, dest_name: str = "input") -> str:
         """
         Copy files from an S3 URL to the session's input prefix (S3-to-S3 copy).
 
@@ -924,7 +951,7 @@ class GlobalFargateSessionManager:
             source_prefix = parts[1].rstrip("/") + "/" if len(parts) > 1 and parts[1] else ""
 
             # Destination prefix: same format as _upload_directory_to_s3_with_session_id()
-            dest_prefix = f"deep-insight/fargate_sessions/{session_id}/input/"
+            dest_prefix = f"deep-insight/fargate_sessions/{session_id}/{dest_name}/"
             s3_client = boto3.client('s3', region_name=self._get_aws_region())
 
             logger.info(f"📤 Copying S3 directory to session...")
@@ -1028,26 +1055,27 @@ class GlobalFargateSessionManager:
             logger.error(f"❌ Directory upload to S3 failed: {e}")
             raise
 
-    def _sync_directory_from_s3_to_container(self, s3_prefix: str):
+    def _sync_directory_from_s3_to_container(self, s3_prefix: str, local_path: str = "/app/data/"):
         """
         Synchronize entire directory from S3 to container (recursive)
 
         Args:
             s3_prefix: S3 prefix (e.g., "deep-insight/fargate_sessions/{session_id}/input/")
+            local_path: Container directory to sync into
         """
         try:
             alb_dns = self._session_manager.alb_dns
 
             logger.info(f"🔄 Starting directory sync from S3 to container...")
             logger.info(f"   S3 Prefix: {s3_prefix}")
-            logger.info(f"   Target: /app/data/ (recursive)")
+            logger.info(f"   Target: {local_path} (recursive)")
 
             # Directory sync request (container handles recursive download)
             sync_request = {
                 "action": "sync_data_from_s3",
                 "bucket_name": S3_BUCKET_NAME,
                 "s3_key_prefix": s3_prefix,
-                "local_path": "/app/data/"
+                "local_path": local_path
             }
 
             logger.info(f"📤 Sending directory sync request:")

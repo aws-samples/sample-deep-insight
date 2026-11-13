@@ -74,7 +74,7 @@ def test_create_copies_users_runtime_with_pinned_image(env):
     ctl, args = env
     er.cmd_create(ctl, args)
     r = eval_rt(ctl)
-    assert r["environmentVariables"] == USERS_ENV and r["roleArn"] == "arn:role"
+    assert r["environmentVariables"] == {**USERS_ENV, **er.EVAL_ONLY_ENV} and r["roleArn"] == "arn:role"
     assert r["networkConfiguration"]["networkModeConfig"]["subnets"] == ["s"]           # same VPC placement
     assert "requireServiceS3Endpoint" not in r["networkConfiguration"]["networkModeConfig"]   # new runtimes can't set it
     assert er.image(r) == IMAGE.rsplit(":", 1)[0] + "@" + DIGEST       # pinned: a re-pushed :latest doesn't move it
@@ -97,7 +97,8 @@ def test_set_models_preset_keeps_image_and_other_env(env):
     assert ctl.runtimes[USERS_ID]["environmentVariables"] == USERS_ENV                    # users' runtime untouched
     args.preset = "users"
     er.cmd_set_models(ctl, args)
-    assert eval_rt(ctl)["environmentVariables"] == USERS_ENV
+    assert eval_rt(ctl)["environmentVariables"] == {**USERS_ENV, **er.EVAL_ONLY_ENV}
+    assert "EVAL_COMPONENT_MODE" not in ctl.runtimes[USERS_ID]["environmentVariables"]   # component runs stay eval-only
 
 
 def test_set_image_candidate_and_follow_users(env):

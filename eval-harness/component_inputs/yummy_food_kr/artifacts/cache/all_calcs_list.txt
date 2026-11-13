@@ -1,0 +1,102 @@
+total_cost | 전체 총 광고비용 | SUM(광고비용) | 388296000 | /app/data/yummy-food-market.csv
+total_rev | 전체 총 매출액 | SUM(매출액) | 1316606500 | /app/data/yummy-food-market.csv
+overall_ctr | 전체 통합 CTR(%) | SUM(클릭수)/SUM(노출수)*100 | 1.8 | /app/data/yummy-food-market.csv
+overall_cvr | 전체 통합 전환율(%) | SUM(전환수)/SUM(클릭수)*100 | 4.67 | /app/data/yummy-food-market.csv
+overall_roas | 전체 통합 ROAS | SUM(매출액)/SUM(광고비용) | 3.39 | /app/data/yummy-food-market.csv
+overall_cpc | 전체 통합 CPC(원) | SUM(광고비용)/SUM(클릭수) | 277.0 | /app/data/yummy-food-market.csv
+overall_cpa | 전체 통합 CPA(원) | SUM(광고비용)/SUM(전환수) | 5927.4 | /app/data/yummy-food-market.csv
+media_쿠빵_roas | 쿠빵 매체 ROAS | SUM(매출액)/SUM(광고비용) by 매체 | 4.14 | /app/data/yummy-food-market.csv
+media_쿠빵_ctr | 쿠빵 매체 CTR(%) | SUM(클릭수)/SUM(노출수)*100 by 매체 | 1.36 | /app/data/yummy-food-market.csv
+media_쿠빵_cvr | 쿠빵 매체 전환율(%) | SUM(전환수)/SUM(클릭수)*100 by 매체 | 6.79 | /app/data/yummy-food-market.csv
+media_쿠빵_cost_share | 쿠빵 매체 광고비 점유율(%) | SUM(광고비용 by 매체)/SUM(전체 광고비용)*100 | 41.62 | /app/data/yummy-food-market.csv
+media_쿠빵_rev_share | 쿠빵 매체 매출 점유율(%) | SUM(매출액 by 매체)/SUM(전체 매출액)*100 | 50.86 | /app/data/yummy-food-market.csv
+media_쿠빵_cpa | 쿠빵 매체 CPA(원) | SUM(광고비용)/SUM(전환수) by 매체 | 5031.9 | /app/data/yummy-food-market.csv
+media_컬삼_roas | 컬삼 매체 ROAS | SUM(매출액)/SUM(광고비용) by 매체 | 3.51 | /app/data/yummy-food-market.csv
+media_컬삼_ctr | 컬삼 매체 CTR(%) | SUM(클릭수)/SUM(노출수)*100 by 매체 | 1.8 | /app/data/yummy-food-market.csv
+media_컬삼_cvr | 컬삼 매체 전환율(%) | SUM(전환수)/SUM(클릭수)*100 by 매체 | 5.35 | /app/data/yummy-food-market.csv
+media_컬삼_cost_share | 컬삼 매체 광고비 점유율(%) | SUM(광고비용 by 매체)/SUM(전체 광고비용)*100 | 12.96 | /app/data/yummy-food-market.csv
+media_컬삼_rev_share | 컬삼 매체 매출 점유율(%) | SUM(매출액 by 매체)/SUM(전체 매출액)*100 | 13.4 | /app/data/yummy-food-market.csv
+media_컬삼_cpa | 컬삼 매체 CPA(원) | SUM(광고비용)/SUM(전환수) by 매체 | 5825.8 | /app/data/yummy-food-market.csv
+media_아마존_roas | 아마존 매체 ROAS | SUM(매출액)/SUM(광고비용) by 매체 | 3.17 | /app/data/yummy-food-market.csv
+media_아마존_ctr | 아마존 매체 CTR(%) | SUM(클릭수)/SUM(노출수)*100 by 매체 | 1.2 | /app/data/yummy-food-market.csv
+media_아마존_cvr | 아마존 매체 전환율(%) | SUM(전환수)/SUM(클릭수)*100 by 매체 | 6.39 | /app/data/yummy-food-market.csv
+media_아마존_cost_share | 아마존 매체 광고비 점유율(%) | SUM(광고비용 by 매체)/SUM(전체 광고비용)*100 | 17.63 | /app/data/yummy-food-market.csv
+media_아마존_rev_share | 아마존 매체 매출 점유율(%) | SUM(매출액 by 매체)/SUM(전체 매출액)*100 | 16.48 | /app/data/yummy-food-market.csv
+media_아마존_cpa | 아마존 매체 CPA(원) | SUM(광고비용)/SUM(전환수) by 매체 | 5436.9 | /app/data/yummy-food-market.csv
+media_네이바_roas | 네이바 매체 ROAS | SUM(매출액)/SUM(광고비용) by 매체 | 2.35 | /app/data/yummy-food-market.csv
+media_네이바_ctr | 네이바 매체 CTR(%) | SUM(클릭수)/SUM(노출수)*100 by 매체 | 3.21 | /app/data/yummy-food-market.csv
+media_네이바_cvr | 네이바 매체 전환율(%) | SUM(전환수)/SUM(클릭수)*100 by 매체 | 2.13 | /app/data/yummy-food-market.csv
+media_네이바_cost_share | 네이바 매체 광고비 점유율(%) | SUM(광고비용 by 매체)/SUM(전체 광고비용)*100 | 27.79 | /app/data/yummy-food-market.csv
+media_네이바_rev_share | 네이바 매체 매출 점유율(%) | SUM(매출액 by 매체)/SUM(전체 매출액)*100 | 19.27 | /app/data/yummy-food-market.csv
+media_네이바_cpa | 네이바 매체 CPA(원) | SUM(광고비용)/SUM(전환수) by 매체 | 8871.0 | /app/data/yummy-food-market.csv
+cat_신선식품_roas | 신선식품 카테고리 ROAS | SUM(매출액)/SUM(광고비용) by 카테고리 | 3.49 | /app/data/yummy-food-market.csv
+cat_신선식품_ctr | 신선식품 카테고리 CTR(%) | SUM(클릭수)/SUM(노출수)*100 by 카테고리 | 1.8 | /app/data/yummy-food-market.csv
+cat_신선식품_cvr | 신선식품 카테고리 전환율(%) | SUM(전환수)/SUM(클릭수)*100 by 카테고리 | 4.8 | /app/data/yummy-food-market.csv
+cat_신선식품_cost_share | 신선식품 카테고리 광고비 점유율(%) | SUM(광고비용 by 카테고리)/SUM(전체 광고비용)*100 | 38.28 | /app/data/yummy-food-market.csv
+cat_건강식품_roas | 건강식품 카테고리 ROAS | SUM(매출액)/SUM(광고비용) by 카테고리 | 3.35 | /app/data/yummy-food-market.csv
+cat_건강식품_ctr | 건강식품 카테고리 CTR(%) | SUM(클릭수)/SUM(노출수)*100 by 카테고리 | 1.89 | /app/data/yummy-food-market.csv
+cat_건강식품_cvr | 건강식품 카테고리 전환율(%) | SUM(전환수)/SUM(클릭수)*100 by 카테고리 | 4.37 | /app/data/yummy-food-market.csv
+cat_건강식품_cost_share | 건강식품 카테고리 광고비 점유율(%) | SUM(광고비용 by 카테고리)/SUM(전체 광고비용)*100 | 25.87 | /app/data/yummy-food-market.csv
+cat_간편식_roas | 간편식 카테고리 ROAS | SUM(매출액)/SUM(광고비용) by 카테고리 | 3.31 | /app/data/yummy-food-market.csv
+cat_간편식_ctr | 간편식 카테고리 CTR(%) | SUM(클릭수)/SUM(노출수)*100 by 카테고리 | 1.76 | /app/data/yummy-food-market.csv
+cat_간편식_cvr | 간편식 카테고리 전환율(%) | SUM(전환수)/SUM(클릭수)*100 by 카테고리 | 4.68 | /app/data/yummy-food-market.csv
+cat_간편식_cost_share | 간편식 카테고리 광고비 점유율(%) | SUM(광고비용 by 카테고리)/SUM(전체 광고비용)*100 | 35.84 | /app/data/yummy-food-market.csv
+prod_프리미엄과일_roas | 프리미엄과일 상품 ROAS | SUM(매출액)/SUM(광고비용) by 상품명 | 3.85 | /app/data/yummy-food-market.csv
+prod_프리미엄과일_ctr | 프리미엄과일 상품 CTR(%) | SUM(클릭수)/SUM(노출수)*100 by 상품명 | 1.88 | /app/data/yummy-food-market.csv
+prod_프리미엄과일_cvr | 프리미엄과일 상품 전환율(%) | SUM(전환수)/SUM(클릭수)*100 by 상품명 | 4.62 | /app/data/yummy-food-market.csv
+prod_프리미엄과일_cost | 프리미엄과일 상품 총 광고비용 | SUM(광고비용) by 상품명 | 65025000 | /app/data/yummy-food-market.csv
+prod_오메가3_roas | 오메가3 상품 ROAS | SUM(매출액)/SUM(광고비용) by 상품명 | 3.53 | /app/data/yummy-food-market.csv
+prod_오메가3_ctr | 오메가3 상품 CTR(%) | SUM(클릭수)/SUM(노출수)*100 by 상품명 | 1.9 | /app/data/yummy-food-market.csv
+prod_오메가3_cvr | 오메가3 상품 전환율(%) | SUM(전환수)/SUM(클릭수)*100 by 상품명 | 4.39 | /app/data/yummy-food-market.csv
+prod_오메가3_cost | 오메가3 상품 총 광고비용 | SUM(광고비용) by 상품명 | 50211000 | /app/data/yummy-food-market.csv
+prod_즉석밥세트_roas | 즉석밥세트 상품 ROAS | SUM(매출액)/SUM(광고비용) by 상품명 | 3.45 | /app/data/yummy-food-market.csv
+prod_즉석밥세트_ctr | 즉석밥세트 상품 CTR(%) | SUM(클릭수)/SUM(노출수)*100 by 상품명 | 1.75 | /app/data/yummy-food-market.csv
+prod_즉석밥세트_cvr | 즉석밥세트 상품 전환율(%) | SUM(전환수)/SUM(클릭수)*100 by 상품명 | 4.67 | /app/data/yummy-food-market.csv
+prod_즉석밥세트_cost | 즉석밥세트 상품 총 광고비용 | SUM(광고비용) by 상품명 | 69531000 | /app/data/yummy-food-market.csv
+prod_샐러드키트_roas | 샐러드키트 상품 ROAS | SUM(매출액)/SUM(광고비용) by 상품명 | 3.21 | /app/data/yummy-food-market.csv
+prod_샐러드키트_ctr | 샐러드키트 상품 CTR(%) | SUM(클릭수)/SUM(노출수)*100 by 상품명 | 1.78 | /app/data/yummy-food-market.csv
+prod_샐러드키트_cvr | 샐러드키트 상품 전환율(%) | SUM(전환수)/SUM(클릭수)*100 by 상품명 | 4.85 | /app/data/yummy-food-market.csv
+prod_샐러드키트_cost | 샐러드키트 상품 총 광고비용 | SUM(광고비용) by 상품명 | 83630000 | /app/data/yummy-food-market.csv
+prod_프로틴바_roas | 프로틴바 상품 ROAS | SUM(매출액)/SUM(광고비용) by 상품명 | 3.18 | /app/data/yummy-food-market.csv
+prod_프로틴바_cvr | 프로틴바 상품 전환율(%) | SUM(전환수)/SUM(클릭수)*100 by 상품명 | 4.36 | /app/data/yummy-food-market.csv
+prod_프로틴바_cost | 프로틴바 상품 총 광고비용 | SUM(광고비용) by 상품명 | 50251000 | /app/data/yummy-food-market.csv
+prod_냉동만두_roas | 냉동만두 상품 ROAS | SUM(매출액)/SUM(광고비용) by 상품명 | 3.17 | /app/data/yummy-food-market.csv
+prod_냉동만두_ctr | 냉동만두 상품 CTR(%) | SUM(클릭수)/SUM(노출수)*100 by 상품명 | 1.77 | /app/data/yummy-food-market.csv
+prod_냉동만두_cvr | 냉동만두 상품 전환율(%) | SUM(전환수)/SUM(클릭수)*100 by 상품명 | 4.69 | /app/data/yummy-food-market.csv
+prod_냉동만두_cost | 냉동만두 상품 총 광고비용 | SUM(광고비용) by 상품명 | 69648000 | /app/data/yummy-food-market.csv
+cross_네이바_간편식_roas | 네이바x간편식 교차 ROAS | SUM(매출액)/SUM(광고비용) by 매체,카테고리 | 2.49 | /app/data/yummy-food-market.csv
+cross_네이바_건강식품_roas | 네이바x건강식품 교차 ROAS | SUM(매출액)/SUM(광고비용) by 매체,카테고리 | 2.2 | /app/data/yummy-food-market.csv
+cross_네이바_신선식품_roas | 네이바x신선식품 교차 ROAS | SUM(매출액)/SUM(광고비용) by 매체,카테고리 | 2.36 | /app/data/yummy-food-market.csv
+cross_아마존_간편식_roas | 아마존x간편식 교차 ROAS | SUM(매출액)/SUM(광고비용) by 매체,카테고리 | 2.75 | /app/data/yummy-food-market.csv
+cross_아마존_건강식품_roas | 아마존x건강식품 교차 ROAS | SUM(매출액)/SUM(광고비용) by 매체,카테고리 | 8.41 | /app/data/yummy-food-market.csv
+cross_아마존_신선식품_roas | 아마존x신선식품 교차 ROAS | SUM(매출액)/SUM(광고비용) by 매체,카테고리 | 3.12 | /app/data/yummy-food-market.csv
+cross_컬삼_간편식_roas | 컬삼x간편식 교차 ROAS | SUM(매출액)/SUM(광고비용) by 매체,카테고리 | 2.89 | /app/data/yummy-food-market.csv
+cross_컬삼_건강식품_roas | 컬삼x건강식품 교차 ROAS | SUM(매출액)/SUM(광고비용) by 매체,카테고리 | 2.61 | /app/data/yummy-food-market.csv
+cross_컬삼_신선식품_roas | 컬삼x신선식품 교차 ROAS | SUM(매출액)/SUM(광고비용) by 매체,카테고리 | 3.81 | /app/data/yummy-food-market.csv
+cross_쿠빵_간편식_roas | 쿠빵x간편식 교차 ROAS | SUM(매출액)/SUM(광고비용) by 매체,카테고리 | 4.35 | /app/data/yummy-food-market.csv
+cross_쿠빵_건강식품_roas | 쿠빵x건강식품 교차 ROAS | SUM(매출액)/SUM(광고비용) by 매체,카테고리 | 3.88 | /app/data/yummy-food-market.csv
+cross_쿠빵_신선식품_roas | 쿠빵x신선식품 교차 ROAS | SUM(매출액)/SUM(광고비용) by 매체,카테고리 | 4.19 | /app/data/yummy-food-market.csv
+below_avg_media_cost | 전체 평균 ROAS 미달 매체(네이바,컬삼,아마존)의 광고비 합계 | SUM(광고비용) WHERE 매체별ROAS < 전체ROAS(3.39) | 176375000 | ./artifacts/media_agg.csv
+below_avg_media_cost_share | 전체 평균 ROAS 미달 매체 광고비 비중(%) | SUM(광고비용 WHERE ROAS<3.39)/SUM(전체광고비용)*100 | 45.42 | ./artifacts/media_agg.csv
+naver_rev_gap | 네이바 매체가 전체 평균 ROAS(3.39) 수준이었을 경우의 매출 증분 추정치 | (네이바 광고비 x 전체평균ROAS) - 네이바 실제매출 | 112203650.0 | ./artifacts/media_agg.csv
+corr_ctr_cvr | CTR과 전환율 간 피어슨 상관계수 | CORR(CTR, 전환율) | -0.898 | /app/data/yummy-food-market.csv
+corr_cost_roas | 광고비용과 ROAS 간 피어슨 상관계수 | CORR(광고비용, ROAS) | -0.376 | /app/data/yummy-food-market.csv
+corr_ctr_roas | CTR과 ROAS 간 피어슨 상관계수 | CORR(CTR, ROAS) | -0.485 | /app/data/yummy-food-market.csv
+corr_cvr_roas | 전환율과 ROAS 간 피어슨 상관계수 | CORR(전환율, ROAS) | 0.549 | /app/data/yummy-food-market.csv
+naver_ctr_vs_cvr_gap | 네이바 CTR과 전환율 격차(클릭은 높으나 전환이 낮은 패턴) | 네이바 CTR(%) - 네이바 전환율(%) | 1.08 | /app/data/yummy-food-market.csv
+daily_roas_max | 일별 ROAS 최고치 (2025-09-06) | MAX(일별 SUM(매출액)/SUM(광고비용)) | 4.51 | /app/data/yummy-food-market.csv
+daily_roas_min | 일별 ROAS 최저치 (2025-09-26) | MIN(일별 SUM(매출액)/SUM(광고비용)) | 2.91 | /app/data/yummy-food-market.csv
+weekend_roas | 주말(토,일) 통합 ROAS | SUM(주말 매출액)/SUM(주말 광고비용) | 4.0 | /app/data/yummy-food-market.csv
+weekday_roas | 평일 통합 ROAS | SUM(평일 매출액)/SUM(평일 광고비용) | 3.17 | /app/data/yummy-food-market.csv
+strategy1_naver_cut_amount | 전략1: 네이바 예산 30% 축소 금액 | 네이바 총광고비 x 0.30 | 32377500.0 | ./artifacts/media_agg.csv
+strategy1_net_rev_gain | 전략1: 네이바→쿠빵 예산 재배분 시 순매출 증분 추정 | (축소금액 x 쿠빵ROAS) - (축소금액 x 네이바ROAS) | 57955725.0 | ./artifacts/media_agg.csv
+strategy2_amazon_health_roas | 아마존x건강식품 조합의 ROAS | SUM(매출액)/SUM(광고비용) WHERE 매체=아마존, 카테고리=건강식품 | 8.41 | ./artifacts/cross_media_category.csv
+strategy2_increase_amount | 전략2: 아마존x건강식품 예산 50% 증액 금액 | 아마존x건강식품 광고비 x 0.5 | 1797000.0 | ./artifacts/cross_media_category.csv
+strategy2_conservative_roas | 전략2: 보수적 한계ROAS(원래ROAS의 70% 적용) | 아마존x건강식품ROAS x 0.7 | 5.89 | ./artifacts/cross_media_category.csv
+strategy2_expected_rev | 전략2: 예산 증액 시 기대 증분매출(보수적 시나리오) | 증액금액 x 보수적한계ROAS | 10584330.0 | ./artifacts/cross_media_category.csv
+strategy3_naver_cvr | 네이바 현재 전환율(%) | SUM(전환수)/SUM(클릭수)*100 WHERE 매체=네이바 | 2.13 | /app/data/yummy-food-market.csv
+strategy3_target_cvr | 전략3: 네이바 목표 전환율(쿠빵과 격차 20% 보수적 개선 가정) | 네이바전환율 + (쿠빵전환율-네이바전환율)*0.2 | 3.06 | /app/data/yummy-food-market.csv
+strategy3_naver_aov | 네이바 전환당 평균 매출(AOV) | SUM(매출액)/SUM(전환수) WHERE 매체=네이바 | 20850.0 | /app/data/yummy-food-market.csv
+strategy3_additional_rev | 전략3: 네이바 전환율 개선 시 기대 증분매출(보수적 시나리오) | 추가전환수 x 네이바AOV | 110671800.0 | /app/data/yummy-food-market.csv
+strategy3_additional_conv | 전략3: 전환율 개선 시 추가 전환수 | 네이바클릭수 x (목표전환율-현재전환율)/100 | 5308.0 | /app/data/yummy-food-market.csv
+strategy3_rev_increase_pct | 전략3: 네이바 매출 대비 증분매출 비율(%) | 증분매출/네이바현재매출*100 | 43.6 | /app/data/yummy-food-market.csv
