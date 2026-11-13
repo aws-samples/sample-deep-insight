@@ -1,5 +1,6 @@
 ---
 USER_REQUEST: {USER_REQUEST}
+OUTPUT_LANGUAGE: {OUTPUT_LANGUAGE}
 FULL_PLAN: {FULL_PLAN}
 ---
 
@@ -26,10 +27,11 @@ Check document structure after each major addition.
 After EACH `write_and_execute_tool` call returns successfully, BEFORE calling
 the next tool, emit EXACTLY one short sentence on its own line in this format:
 
-  📝 Step <N>: <섹션 제목> 완료
+  📝 Step <N>: <section title> complete
 
-Use the section title from the report (Korean if the report is Korean,
-English otherwise). One line only, no elaboration. This becomes the user's
+Write this line in OUTPUT_LANGUAGE (Korean: "📝 Step <N>:
+<섹션 제목> 완료"; English: as shown above), with the section title from the
+report. One line only, no elaboration. This becomes the user's
 real-time progress indicator — only `agent_text_stream` events reach the
 client (tool stdout does not), so without this line the user sees a 30–90s
 blank gap per step. Skip on the very first utility-file creation step
@@ -203,7 +205,7 @@ mode — Auditor is the source of truth.
 - Read analysis results from ./artifacts/all_results.txt
 - Build DOCX report incrementally (step-by-step)
 - Generate two versions: with citations and without citations
-- Use same language as USER_REQUEST
+- Write the report in OUTPUT_LANGUAGE: title, headings, body, figure captions ("Figure N:" / "그림 N:"), and table headers (reporter_final.py sets the references heading from OUTPUT_LANGUAGE). This holds even when all_results.txt or the citation descriptions are in another language: translate what you take from them. The reference list prints each citation's `description` as is, so if citations.json's descriptions are not in OUTPUT_LANGUAGE, rewrite only those `description` fields into OUTPUT_LANGUAGE before running reporter_final.py (ids, values, formulas and status unchanged). The Korean strings in this prompt's examples are examples only, not the output language
 
 **Incremental Workflow:**
 1. Create utility file (reporter_report_utils.py) with all helper functions
@@ -621,6 +623,7 @@ from reporter_report_utils import *
 from docx import Document
 
 doc = load_or_create_docx()
+REFS_HEADING = '데이터 출처 및 계산 근거' if '{OUTPUT_LANGUAGE}' == 'Korean' else 'References'
 
 # 🚨 PRE-STRIP — remove ALL [N] (body + table cells) so the resolver is the SOLE
 # marker source: every marker is then value-matched, making Type B/C impossible
@@ -726,7 +729,7 @@ if _order and os.path.exists('./artifacts/citations.json'):
                 for _p in _cell.paragraphs:
                     _present_scan(_p)
     _by_id = {{_c['citation_id']: _c for _c in _cdata.get('citations', [])}}
-    add_heading(doc, '데이터 출처 및 계산 근거', level=2)
+    add_heading(doc, REFS_HEADING, level=2)
     for _i in sorted(int(_x) for _x in _present):
         _c = _by_id.get('[' + str(_i) + ']')
         if _c:
@@ -751,7 +754,7 @@ for _tbl in doc2.tables:
 # Remove references section
 _paras = doc2.paragraphs
 _ref_i = next((i for i in range(len(_paras) - 1, -1, -1)
-               if '데이터 출처 및 계산 근거' in _paras[i].text), None)
+               if _paras[i].text.strip() == REFS_HEADING), None)
 if _ref_i is not None:  # references appended last; earlier match = TOC/section-list entry
     for para in _paras[_ref_i:]:
         para._element.getparent().remove(para._element)
