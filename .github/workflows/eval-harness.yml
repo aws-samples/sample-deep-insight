@@ -2,104 +2,36 @@ name: Eval harness
 
 on:
   workflow_dispatch:
-    inputs:
-      candidate_s3_uri:
-        description: Existing candidate run/session prefix (s3://bucket/prefix/)
-        required: true
-        type: string
-      baseline_s3_uri:
-        description: Existing baseline for the same scenario (s3://bucket/prefix/)
-        required: true
-        type: string
-      facts_s3_uri:
-        description: Verified Factcheck answer key (s3://bucket/key.json)
-        required: true
-        type: string
-      scenario:
-        description: Scenario name from eval-harness/config/scenarios.yaml
-        required: true
-        default: jungle_market_simple
-        type: string
-      results_s3_uri:
-        description: Private output prefix (or repository variable EVAL_RESULTS_S3_URI)
-        required: false
-        type: string
-      model_id:
-        description: Bedrock evaluator inference profile
-        required: true
-        default: global.anthropic.claude-sonnet-5
-        type: string
+  pull_request:
+    paths:
+      - .github/workflows/eval-harness.yml
+      - eval-harness/graders/**
+      - eval-harness/pairwise.py
 
 permissions:
   contents: read
 
-env:
-  AWS_REGION: ${{ vars.EVAL_AWS_REGION || 'us-west-2' }}
-  PYTHONUNBUFFERED: '1'
-
 jobs:
-  prepare:
-    name: Snapshot existing results
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    environment: eval-harness
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with:
-          persist-credentials: false
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
-        with:
-          python-version: '3.12'
-          cache: pip
-          cache-dependency-path: eval-harness/requirements-ci.txt
-      - run: python -m pip install -r eval-harness/requirements-ci.txt
-      - uses: aws-actions/configure-aws-credentials@4a1596c86fd706dc0521e32f0121ad1a6d1adb74 # v6
-        with:
-          role-to-assume: ${{ vars.EVAL_AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-          role-session-name: eval-prepare-${{ github.run_id }}
-      - name: Snapshot inputs in private S3
-        env:
-          CANDIDATE_URI: ${{ inputs.candidate_s3_uri }}
-          BASELINE_URI: ${{ inputs.baseline_s3_uri }}
-          FACTS_URI: ${{ inputs.facts_s3_uri }}
-          RESULTS_URI: ${{ inputs.results_s3_uri || vars.EVAL_RESULTS_S3_URI }}
-          SCENARIO: ${{ inputs.scenario }}
-          EXECUTION_ID: ${{ github.run_id }}-${{ github.run_attempt }}
-        run: |
-          python eval-harness/ci.py prepare \
-            --candidate-s3-uri "$CANDIDATE_URI" \
-            --baseline-s3-uri "$BASELINE_URI" \
-            --facts-s3-uri "$FACTS_URI" \
-            --results-s3-uri "$RESULTS_URI" \
-            --scenario "$SCENARIO" \
-            --execution-id "$EXECUTION_ID" \
-            --manifest-out input-manifest.json
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: eval-input-manifest
-          path: input-manifest.json
-          overwrite: true
-          if-no-files-found: error
-          retention-days: 7
-
   evaluate:
-    name: Evaluate (${{ matrix.evaluator }})
-    needs: prepare
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    environment: eval-harness
-    permissions:
-      contents: read
-      id-token: write
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       max-parallel: 4
       matrix:
-        evaluator: [rules, factcheck, judge, pairwise]
+        include:
+          - name: Rules
+            script: graders/rules.py
+          - name: Factcheck
+            script: graders/factcheck.py
+          - name: LLM Judge
+            script: graders/judge.py
+          - name: Pairwise
+            script: pairwise.py
+    defaults:
+      run:
+        working-directory: eval-harness
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -107,79 +39,7 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.12'
-          cache: pip
-          cache-dependency-path: eval-harness/requirements-ci.txt
-      - run: python -m pip install -r eval-harness/requirements-ci.txt
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
-        with:
-          name: eval-input-manifest
-          path: manifest
-      - uses: aws-actions/configure-aws-credentials@4a1596c86fd706dc0521e32f0121ad1a6d1adb74 # v6
-        with:
-          role-to-assume: ${{ vars.EVAL_AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-          role-session-name: eval-${{ matrix.evaluator }}-${{ github.run_id }}
-      - name: Run evaluator
+      - name: Run ${{ matrix.script }}
         env:
-          EVALUATOR: ${{ matrix.evaluator }}
-          MODEL_ID: ${{ inputs.model_id }}
-        run: |
-          python eval-harness/ci.py evaluate \
-            --kind "$EVALUATOR" \
-            --manifest manifest/input-manifest.json \
-            --work-dir .eval-inputs \
-            --model-id "$MODEL_ID" \
-            --out private-results/result.json \
-            --summary-out public-results/summary.json
-      - name: Publish scores even when evaluation fails
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: eval-summary-${{ matrix.evaluator }}
-          path: public-results/summary.json
-          overwrite: true
-          if-no-files-found: error
-          retention-days: 7
-
-  summary:
-    name: Evaluation summary
-    needs: [prepare, evaluate]
-    if: always()
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with:
-          persist-credentials: false
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
-        with:
-          python-version: '3.12'
-      - run: python -m pip install -r eval-harness/requirements-ci.txt
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
-        continue-on-error: true # Missing/download-failed results must still get a failing summary.
-        with:
-          pattern: eval-summary-*
-          path: evaluator-results
-      - name: Aggregate all four results
-        run: |
-          python eval-harness/ci.py summarize \
-            --results-dir evaluator-results \
-            --out evaluation-summary.json \
-            --markdown evaluation-summary.md
-      - name: Write job summary
-        if: always()
-        run: |
-          if [ -f evaluation-summary.md ]; then
-            cat evaluation-summary.md >> "$GITHUB_STEP_SUMMARY"
-          fi
-      - name: Upload combined scores
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: evaluation-summary
-          overwrite: true
-          path: |
-            evaluation-summary.json
-            evaluation-summary.md
-          if-no-files-found: error
-          retention-days: 7
+          SCRIPT_PATH: ${{ matrix.script }}
+        run: python "$SCRIPT_PATH"

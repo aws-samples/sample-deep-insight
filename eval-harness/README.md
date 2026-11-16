@@ -10,10 +10,9 @@ better":
 2. **What got better or worse, and by how much?** → before/after table
 
 This version grades with rules only: no model calls, so grading is free.
-The optional [GitHub Actions workflow](CI.md) evaluates existing results with
-four parallel jobs: rule graders, answer-key Factcheck, LLM Judge, and Pairwise.
-It does not generate new reports or invoke an analysis runtime. `grade.py`
-remains rule-only; the three reader-based evaluators use Bedrock.
+The [Eval harness GitHub Actions workflow](CI.md) currently checks execution
+of four parallel Python entry points (Rules, Factcheck, LLM Judge, Pairwise).
+Each prints Hello World; evaluation logic will be added in later steps.
 
 ## What it is
 
