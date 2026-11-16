@@ -10,7 +10,8 @@ Deep Insight의 자동 채점표입니다. 코드, 프롬프트, 모델을 바�
 
 이 버전은 규칙으로만 채점합니다. 모델 호출이 없으므로 채점 비용도 없습니다.
 [Eval harness GitHub Actions](CI.md)는 규칙 검사·Factcheck·LLM Judge·Pairwise의
-네 Python 파일을 병렬로 실행합니다. 현재는 각 파일이 Hello World를 출력하는
+네 병렬 작업에서 평가용 AgentCore Runtime을 호출하고, Runtime 내부에서
+각 Python 파일을 실행합니다. 현재는 각 파일이 Hello World를 출력하는
 실행 연결 확인 단계이며, 실제 평가 로직은 이후에 추가합니다.
 
 ## 구성
