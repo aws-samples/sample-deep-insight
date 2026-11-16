@@ -9,8 +9,18 @@ Deep Insight의 자동 채점표입니다. 코드, 프롬프트, 모델을 바�
 2. **무엇이 얼마나 좋아지거나 나빠졌는가?** → 변경 전후 비교표
 
 이 버전은 규칙으로만 채점합니다. 모델 호출이 없으므로 채점 비용도 없습니다.
-읽는 주체가 필요한 검사(정답 키 fact check, LLM judge, pairwise judge)는 이어지는
-PR에서 추가합니다.
+별도의 [GitHub Actions 워크플로](CI.md)는 **기존 분석 결과**에 대해 규칙 검사,
+정답 키 기반 Factcheck, LLM Judge, Pairwise를 네 작업으로 병렬 실행합니다.
+분석이나 Runtime 호출은 새로 하지 않습니다. 기존 `grade.py`는 계속 규칙으로만
+채점하고, 새로 추가된 세 평가기는 Bedrock 모델을 사용합니다.
+
+Actions 실행 전에는 평가할 결과와 기준 결과의 S3 경로, 검증된 정답 JSON이
+필요합니다. `config/facts.example.json`은 형식 예시이며 실제 정답으로 사용할 수
+없습니다. GitHub의 `eval-harness` 환경에 OIDC 역할(`EVAL_AWS_ROLE_ARN`)과
+결과 저장 경로(`EVAL_RESULTS_S3_URI`)를 설정한 뒤 **Actions → Eval harness →
+Run workflow**에서 입력합니다. 하나가 실패해도 나머지는 끝까지 실행되며,
+최종 요약에는 누락·오류도 실패로 표시합니다. 원본 보고서와 상세 평가 근거는
+S3에 저장하고 GitHub에는 점수 요약만 올립니다.
 
 ## 구성
 

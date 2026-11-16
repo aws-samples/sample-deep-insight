@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "minimum_score": 3.5,
+  "minimum_dimension_score": 2,
+  "dimensions": [
+    {"id": "grounding", "weight": 3, "description": "Claims are supported by calculations/citations; periods, filters, denominators, units, caveats and uncertainty are explicit. Assess visible support, not source-data correctness you cannot independently verify."},
+    {"id": "relevance", "weight": 2, "description": "Answers the original request and requested scope, without replacing it with unrelated analyses."},
+    {"id": "reasoning", "weight": 2, "description": "Distinguishes observations from hypotheses and causal claims; explains how evidence supports conclusions."},
+    {"id": "actionability", "weight": 1, "description": "When recommendations are requested, actions and priorities follow from evidence; otherwise, the requested analytical deliverable is directly usable."},
+    {"id": "clarity", "weight": 1, "description": "A reader can understand the main findings, calculations and limitations without misleading wording or unnecessary detail. Images are not inspected by this text-only judge."}
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "example": true,
+  "scenario": "jungle_market_simple",
+  "description": "SCHEMA EXAMPLE ONLY. Replace every placeholder with an independently verified answer before running. This is not benchmark ground truth.",
+  "facts": [
+    {"id": "total_revenue", "statement": "Total revenue in USD over the complete dataset after removing exact duplicate rows", "expected": "REPLACE_WITH_VERIFIED_NUMBER", "absolute_tolerance": 0.01, "relative_tolerance": 0, "required": true}
+  ]
+}
