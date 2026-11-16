@@ -2,7 +2,7 @@
 
 
 def main():
-    print("Hello World - Pairwise (pairwise.py)")
+    print("Hello World - Pairwise (graders/pairwise.py)")
 
 
 if __name__ == "__main__":

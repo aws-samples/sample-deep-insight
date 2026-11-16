@@ -6,7 +6,6 @@ on:
     paths:
       - .github/workflows/eval-harness.yml
       - eval-harness/graders/**
-      - eval-harness/pairwise.py
       - eval-harness/invoke_runtime.py
       - eval-harness/runtime.py
       - eval-harness/Dockerfile

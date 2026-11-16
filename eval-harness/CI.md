@@ -7,7 +7,7 @@ The four Actions jobs invoke the existing **evaluation** AgentCore Runtime indep
 | Rules | rules | graders/rules.py |
 | Factcheck | factcheck | graders/factcheck.py |
 | LLM Judge | judge | graders/judge.py |
-| Pairwise | pairwise | pairwise.py |
+| Pairwise | pairwise | graders/pairwise.py |
 
 All four scripts currently print Hello World. They do not analyze CSVs, evaluate reports, call models, or compare baselines yet. The matrix has no job dependencies, allows four concurrent jobs, and disables fail-fast. Actual scheduling depends on GitHub runner availability.
 

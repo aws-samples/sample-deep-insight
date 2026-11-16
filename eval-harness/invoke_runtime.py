@@ -11,7 +11,7 @@ SCRIPTS = {
     "rules": "graders/rules.py",
     "factcheck": "graders/factcheck.py",
     "judge": "graders/judge.py",
-    "pairwise": "pairwise.py",
+    "pairwise": "graders/pairwise.py",
 }
 ROOT = Path(__file__).resolve().parent
 

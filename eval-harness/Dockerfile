@@ -8,6 +8,6 @@ COPY --chown=1000:1000 runtime.py /app/eval-harness/runtime.py
 COPY --chown=1000:1000 graders/rules.py /app/eval-harness/graders/rules.py
 COPY --chown=1000:1000 graders/factcheck.py /app/eval-harness/graders/factcheck.py
 COPY --chown=1000:1000 graders/judge.py /app/eval-harness/graders/judge.py
-COPY --chown=1000:1000 pairwise.py /app/eval-harness/pairwise.py
+COPY --chown=1000:1000 graders/pairwise.py /app/eval-harness/graders/pairwise.py
 
 CMD ["opentelemetry-instrument", "python", "/app/eval-harness/runtime.py"]
