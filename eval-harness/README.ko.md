@@ -9,11 +9,12 @@ Deep Insight의 자동 채점표입니다. 코드, 프롬프트, 모델을 바�
 2. **무엇이 얼마나 좋아지거나 나빠졌는가?** → 변경 전후 비교표
 
 이 버전은 규칙으로만 채점합니다. 모델 호출이 없으므로 채점 비용도 없습니다.
-[Eval harness GitHub Actions](CI.md)는 규칙 검사·Factcheck·LLM Judge·Pairwise의
-단일 작업에서 평가용 AgentCore Runtime을 한 번 호출하고, Runtime 내부에서
-규칙 검사 → Factcheck → LLM Judge → Pairwise 순서로 각 Python 파일을
-순차 실행합니다. 현재는 각 파일이 Hello World를 출력하는
-실행 연결 확인 단계이며, 실제 평가 로직은 이후에 추가합니다.
+[Eval harness GitHub Actions](CI.md)는 브랜치 push 시 GitHub runner에서
+규칙 검사 → Factcheck → LLM Judge → Pairwise를 별도 step으로 순차 실행합니다.
+현재는 각 파일이 Hello World를 출력하는 진입점 확인 단계입니다.
+Runtime 연결은 보류했습니다. 최종 구조에서는 평가용 Runtime의 분석을 호출하고,
+성공적으로 완료된 뒤 산출물을 내려받아 이 네 단계를 실행합니다.
+현재 워크플로는 AWS를 호출하지 않으며, 실제 평가 로직은 이후에 추가합니다.
 
 ## 구성
 

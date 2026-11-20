@@ -1,36 +1,96 @@
-# Eval harness: GitHub Actions → AgentCore Runtime
+# Eval harness: sequential evaluators in GitHub Actions
 
-One Actions job invokes the existing **evaluation** AgentCore Runtime once. Within that invocation, the Runtime awaits each evaluator before starting the next: Rules → Factcheck → LLM Judge → Pairwise. The evaluator files execute inside that Runtime container; the GitHub runner only installs the invocation client and calls the Runtime API.
+## Intended flow
 
-| Execution order | Evaluator in Runtime payload `evaluators` | File inside the runtime, relative to `/app/eval-harness/` |
-|---|---|---|
-| 1. Rules | rules | graders/rules.py |
-| 2. Factcheck | factcheck | graders/factcheck.py |
-| 3. LLM Judge | judge | graders/judge.py |
-| 4. Pairwise | pairwise | graders/pairwise.py |
-
-All four scripts currently print Hello World. They do not analyze CSVs, evaluate reports, call models, or compare baselines yet. There is no job matrix or concurrent evaluator execution. A script's nonzero exit or 30-second timeout is recorded and the remaining evaluators still run; any unsuccessful result fails the Actions job.
-
-## Runtime code
-
-- `runtime.py`: AgentCore entry point. Accepts `evaluators: ["rules", "factcheck", "judge", "pairwise"]` and a request ID, then runs all four fixed paths sequentially with Python and a 30-second timeout per script. Returns one `evaluation_complete` response containing the ordered `results`, each with stdout, stderr, exit code, shared request/session IDs, timestamps, script SHA-256 and deployed code revision. Payloads without `evaluators` retain the existing analysis entry point.
-- `Dockerfile`: layers the wrapper and four scripts over the existing managed-agentcore image. Deploy this image to the evaluation Runtime only, using `eval_runtime.py set-image <image-uri@sha256:digest>`.
-- `invoke_runtime.py`: calls the Runtime once with retries disabled and checks the shared request/session IDs, all four evaluator results in order, paths, file hashes, successful exits and Hello World outputs. A stale deployed script, missing or reordered result, or failed execution fails the Actions job. The combined response is stored as `results/evaluators.json` in the single `eval-runtime-results` Actions artifact.
-
-Changing the runtime wrapper or an evaluator requires rebuilding and redeploying the evaluation Runtime before checking that change in Actions. In particular, the deployed image must support the `evaluators` batch payload. This workflow invokes the deployed image; it does not deploy images itself. The users' Runtime stays on its own image.
-
-## Authentication and execution
-
-The GitHub environment `eval-harness` supplies `EVAL_RUNTIME_ARN` and `EVAL_AWS_ROLE_ARN`. Region is `us-west-2`. AWS credentials are obtained through GitHub OIDC; no long-lived AWS keys are stored in GitHub. The caller role can invoke only the evaluation Runtime and its DEFAULT endpoint.
-
-The environment requires approval by `glossyyoon` before AWS access. Deployment branch rules currently permit `codex/eval-harness-parallel-20261116`, PR #160's merge ref, and `main`. Fork pull requests are skipped. Review code before approving a run because the approved runner receives the role's temporary credentials.
-
-Changes to this workflow or its runtime/evaluator paths trigger a pull-request run. After merging into the default branch, **Actions → Eval harness → Run workflow** also starts the single job. Approve the `eval-harness` environment when prompted, then inspect the combined Runtime result and downloadable artifact.
-
-For a local call with AWS credentials and a deployed image:
-
-```bash
-python invoke_runtime.py --runtime-arn <eval-runtime-arn> --out results/evaluators.json
+```text
+Code pushed to a branch
+  → GitHub Actions starts
+  → Invoke the evaluation AgentCore Runtime once
+  → Wait for successful analysis completion
+  → Download that run's reports, citations, execution logs and usage
+  → Rules → Factcheck → LLM Judge → Pairwise (on the GitHub runner)
+  → Upload evaluation results
 ```
 
-Direct file commands such as `python graders/rules.py` still work locally, but do not verify the Actions-to-Runtime connection. Replace each file's `main()` body when its evaluator implementation is ready.
+This is supported by GitHub Actions: steps in one job execute in order, and
+subsequent steps normally run only after earlier steps succeed. If Runtime
+execution is moved to a separate job later, the evaluation job can use `needs`
+to wait for it and download the artifacts it uploaded.
+
+A Runtime callback that starts a new workflow is unnecessary for this design.
+The original Actions job can keep the Runtime invocation stream open until
+completion, then continue with its next step. For a long asynchronous run,
+that step can instead poll a durable status record until it reaches success or
+failure; accepting a request is not a completion signal.
+
+## Implemented now
+
+Runtime integration is **deferred**. The current workflow is an evaluator
+entry-point smoke check, not a Runtime-to-Actions integration test.
+
+- `push` to any branch starts the workflow; tags do not. Manual
+  `workflow_dispatch` is also available. There is no additional `pull_request`
+  trigger, avoiding duplicate runs for a branch with an open PR.
+- One Ubuntu job checks out the pushed commit and sets up Python 3.12.
+- Four ordinary steps run the checked-out scripts on the GitHub runner:
+
+| Order | Actions step | Command | Log |
+|---|---|---|---|
+| 1 | Rules | `python graders/rules.py` | `results/rules.log` |
+| 2 | Factcheck | `python graders/factcheck.py` | `results/factcheck.log` |
+| 3 | LLM Judge | `python graders/judge.py` | `results/judge.log` |
+| 4 | Pairwise | `python graders/pairwise.py` | `results/pairwise.log` |
+
+All four scripts currently print Hello World. They do not read analysis
+artifacts, evaluate reports, call models or compare baselines yet. No matrix,
+background process, AWS login or Runtime invocation is used. Python's standard
+library is sufficient for these entry points, so no dependency install is
+needed yet.
+
+Each evaluator has a one-minute step timeout. The explicit Bash shell enables
+`pipefail`, so a failed Python command is not hidden by `tee`. A failed or timed
+out evaluator stops the remaining evaluator steps; logs from the steps that
+ran are uploaded with `if: always()` as the `eval-evaluator-logs` artifact.
+These are script logs, not grading scores. Revisit timeouts and dependencies
+when implementing the real evaluators.
+
+## Deferred Runtime connection
+
+Insert the following work before the Rules step, at the comment in
+`.github/workflows/eval-harness.yml`:
+
+1. Obtain AWS credentials through OIDC and the protected `eval-harness`
+   environment, then invoke the **analysis** entry point on the evaluation
+   Runtime once. Do not invoke the old batch evaluator dispatcher, which would
+   run the same evaluators again inside the container.
+2. Wait for an explicit successful terminal event (`workflow_complete` in the
+   current analysis stream) and validate the run/session ID. Stop on a failed,
+   incomplete or timed out run; HTTP 200 alone is insufficient.
+3. Fetch only that session's artifacts and write a manifest containing the
+   run/session ID, S3 location, deployed Runtime version/image and code revision.
+   All four evaluators must consume that same run's files.
+4. Pass the local artifact directory or manifest to each evaluator, implement
+   their grading logic, and retain the manifest and scores as Actions artifacts.
+
+`run_eval.py` already contains analysis invocation, automatic plan-review
+feedback, completion-event handling and S3 download logic. It also calls
+`grade.py` automatically; separate generation/download from grading before
+using it as the upstream stage here. The existing invocation-only OIDC role
+will also need appropriately scoped permissions for any chosen S3 feedback,
+upload and download operations. Those changes are deferred with the connection.
+
+A code push updates the scripts checked out by Actions. It does **not** rebuild
+or redeploy an AgentCore Runtime image. If analysis code changes are to be
+measured, deploy the matching evaluation image before invoking it and record
+its revision separately from the Actions checkout revision.
+
+The old `runtime.py`, `Dockerfile` and `invoke_runtime.py` remain available for
+the previously deployed Runtime-side Hello World dispatcher. The new Actions
+workflow does not call them. Their earlier AWS execution results do not verify
+the newly proposed Runtime → Actions handoff. No Runtime redeploy, AWS invocation
+or end-to-end handoff validation is part of this change.
+
+## References
+
+- [GitHub Actions workflow syntax: steps and job dependencies](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)
+- [Events that trigger workflows: push](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#push)

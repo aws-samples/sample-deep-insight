@@ -10,11 +10,13 @@ better":
 2. **What got better or worse, and by how much?** → before/after table
 
 This version grades with rules only: no model calls, so grading is free.
-The [Eval harness GitHub Actions workflow](CI.md) currently checks execution
-of four Python entry points inside the evaluation AgentCore Runtime. One
-Actions job invokes the Runtime once, which runs Rules, Factcheck, LLM Judge,
-and Pairwise sequentially in that order.
-Each prints Hello World; evaluation logic will be added in later steps.
+The [Eval harness GitHub Actions workflow](CI.md) runs on branch pushes and
+executes Rules → Factcheck → LLM Judge → Pairwise as four sequential steps on
+the GitHub runner. Each currently prints Hello World; evaluation logic will
+be added in later steps. Runtime integration is deferred: the intended flow
+will invoke the analysis Runtime, wait for successful completion, and download
+its artifacts before starting these steps. The current workflow checks only
+the evaluator entry points and does not call AWS.
 
 ## What it is
 
