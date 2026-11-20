@@ -1,4 +1,4 @@
-"""Invoke one evaluator inside AgentCore; do not execute its script locally."""
+"""Invoke AgentCore once to run all four evaluators sequentially."""
 import argparse
 import hashlib
 import json
@@ -16,12 +16,12 @@ SCRIPTS = {
 ROOT = Path(__file__).resolve().parent
 
 
-def invoke_evaluator(client, runtime_arn, evaluator):
+def invoke_evaluators(client, runtime_arn):
     request_id = str(uuid.uuid4())
     session_id = str(uuid.uuid4())
     response = client.invoke_agent_runtime(
         agentRuntimeArn=runtime_arn, qualifier="DEFAULT", runtimeSessionId=session_id,
-        payload=json.dumps({"evaluator": evaluator, "request_id": request_id}),
+        payload=json.dumps({"evaluators": list(SCRIPTS), "request_id": request_id}),
     )
     if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
         raise RuntimeError("AgentCore did not return HTTP 200")
@@ -38,7 +38,7 @@ def invoke_evaluator(client, runtime_arn, evaluator):
                     elif event.get("type") == "error":
                         raise RuntimeError("Runtime reported an error")
             if len(results) != 1:
-                raise RuntimeError("Expected exactly one evaluator result")
+                raise RuntimeError("Expected exactly one evaluation batch result")
             result = results[0]
         elif "application/json" in content_type:
             result = json.loads(body.read())
@@ -46,23 +46,33 @@ def invoke_evaluator(client, runtime_arn, evaluator):
             raise RuntimeError("Unexpected AgentCore response content type")
     finally:
         body.close()
-    expected_hash = hashlib.sha256((ROOT / SCRIPTS[evaluator]).read_bytes()).hexdigest()
-    if (result.get("execution_environment") != "agentcore-runtime"
-            or result.get("evaluator") != evaluator
+    if (result.get("type") != "evaluation_complete"
+            or result.get("execution_environment") != "agentcore-runtime"
             or result.get("request_id") != request_id
-            or result.get("script") != SCRIPTS[evaluator]
-            or result.get("script_sha256") != expected_hash):
-        raise RuntimeError("Runtime result does not match the requested evaluator and checked-out script")
-    if result.get("returncode") != 0:
-        raise RuntimeError("Evaluator script failed inside the runtime")
-    if "Hello World" not in result.get("stdout", ""):
-        raise RuntimeError("Runtime evaluator did not print Hello World")
+            or result.get("runtime_session_id") != session_id):
+        raise RuntimeError("Runtime result does not match the requested evaluation batch")
+    evaluations = result.get("results")
+    if not isinstance(evaluations, list) or len(evaluations) != len(SCRIPTS):
+        raise RuntimeError("Expected all four evaluator results in order")
+    for evaluation, (name, script) in zip(evaluations, SCRIPTS.items()):
+        expected_hash = hashlib.sha256((ROOT / script).read_bytes()).hexdigest()
+        if (not isinstance(evaluation, dict)
+                or evaluation.get("execution_environment") != "agentcore-runtime"
+                or evaluation.get("evaluator") != name
+                or evaluation.get("request_id") != request_id
+                or evaluation.get("runtime_session_id") != session_id
+                or evaluation.get("script") != script
+                or evaluation.get("script_sha256") != expected_hash):
+            raise RuntimeError(f"Runtime result does not match evaluator {name} and checked-out script")
+        if evaluation.get("returncode") != 0:
+            raise RuntimeError(f"Evaluator {name} failed inside the runtime")
+        if "Hello World" not in evaluation.get("stdout", ""):
+            raise RuntimeError(f"Runtime evaluator {name} did not print Hello World")
     return result
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--evaluator", choices=SCRIPTS, required=True)
     parser.add_argument("--runtime-arn", default=os.environ.get("EVAL_RUNTIME_ARN"))
     parser.add_argument("--region", default=os.environ.get("AWS_REGION", "us-west-2"))
     parser.add_argument("--out")
@@ -74,7 +84,7 @@ def main():
     client = boto3.client("bedrock-agentcore", region_name=args.region,
                           config=Config(connect_timeout=30, read_timeout=300,
                                         retries={"total_max_attempts": 1}))
-    result = invoke_evaluator(client, args.runtime_arn, args.evaluator)
+    result = invoke_evaluators(client, args.runtime_arn)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     if args.out:
         path = Path(args.out)

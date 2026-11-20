@@ -11,8 +11,9 @@ better":
 
 This version grades with rules only: no model calls, so grading is free.
 The [Eval harness GitHub Actions workflow](CI.md) currently checks execution
-of four Python entry points inside the evaluation AgentCore Runtime, invoked
-by parallel Actions jobs (Rules, Factcheck, LLM Judge, Pairwise).
+of four Python entry points inside the evaluation AgentCore Runtime. One
+Actions job invokes the Runtime once, which runs Rules, Factcheck, LLM Judge,
+and Pairwise sequentially in that order.
 Each prints Hello World; evaluation logic will be added in later steps.
 
 ## What it is

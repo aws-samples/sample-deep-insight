@@ -16,7 +16,7 @@ permissions:
 jobs:
   evaluate:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    name: ${{ matrix.name }}
+    name: Sequential evaluators
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: eval-harness
@@ -26,19 +26,6 @@ jobs:
     env:
       AWS_REGION: us-west-2
       EVAL_RUNTIME_ARN: ${{ vars.EVAL_RUNTIME_ARN }}
-    strategy:
-      fail-fast: false
-      max-parallel: 4
-      matrix:
-        include:
-          - name: Rules
-            evaluator: rules
-          - name: Factcheck
-            evaluator: factcheck
-          - name: LLM Judge
-            evaluator: judge
-          - name: Pairwise
-            evaluator: pairwise
     defaults:
       run:
         working-directory: eval-harness
@@ -55,14 +42,12 @@ jobs:
         with:
           role-to-assume: ${{ vars.EVAL_AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
-          role-session-name: eval-${{ matrix.evaluator }}-${{ github.run_id }}
-      - name: Invoke evaluator inside AgentCore Runtime
-        env:
-          EVALUATOR: ${{ matrix.evaluator }}
-        run: python invoke_runtime.py --evaluator "$EVALUATOR" --out "results/$EVALUATOR.json"
+          role-session-name: eval-${{ github.run_id }}
+      - name: Invoke Runtime once to run all evaluators sequentially
+        run: python invoke_runtime.py --out results/evaluators.json
       - name: Upload runtime execution result
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: eval-runtime-${{ matrix.evaluator }}
-          path: eval-harness/results/${{ matrix.evaluator }}.json
+          name: eval-runtime-results
+          path: eval-harness/results/evaluators.json
           if-no-files-found: error

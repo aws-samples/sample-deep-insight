@@ -1,4 +1,4 @@
-"""AgentCore entry point for the four evaluator scripts."""
+"""Run the four evaluator scripts sequentially in one AgentCore invocation."""
 import asyncio
 import hashlib
 import os
@@ -28,12 +28,14 @@ async def execute_evaluator(payload, context=None):
         sys.executable, str(script), cwd=str(ROOT),
         stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
     )
+    timed_out = False
     try:
         stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=30)
     except asyncio.TimeoutError:
+        timed_out = True
         process.kill()
-        await process.communicate()
-        raise TimeoutError("Evaluator exceeded 30 seconds")
+        stdout, stderr = await process.communicate()
+        stderr += b"\nEvaluator exceeded 30 seconds"
     return {
         "type": "evaluation_complete",
         "execution_environment": "agentcore-runtime",
@@ -45,15 +47,32 @@ async def execute_evaluator(payload, context=None):
         "code_revision": os.environ.get("EVAL_CODE_REVISION", "unknown"),
         "started_at": started,
         "completed_at": datetime.now(timezone.utc).isoformat(),
-        "returncode": process.returncode,
+        "returncode": 124 if timed_out else process.returncode,
         "stdout": stdout.decode("utf-8"),
         "stderr": stderr.decode("utf-8"),
     }
 
 
+async def execute_evaluators(payload, context=None):
+    if payload.get("evaluators") != list(SCRIPTS):
+        raise ValueError("Expected all four evaluators in order: rules, factcheck, judge, pairwise")
+    results = []
+    for name in SCRIPTS:
+        results.append(await execute_evaluator(
+            {"evaluator": name, "request_id": payload.get("request_id")}, context,
+        ))
+    return {
+        "type": "evaluation_complete",
+        "execution_environment": "agentcore-runtime",
+        "request_id": payload["request_id"],
+        "runtime_session_id": getattr(context, "session_id", None),
+        "results": results,
+    }
+
+
 async def invoke(payload, context):
-    if "evaluator" in payload:
-        yield await execute_evaluator(payload, context)
+    if "evaluators" in payload:
+        yield await execute_evaluators(payload, context)
         return
     # Keep existing analysis invocations working on the evaluation runtime.
     sys.path.insert(0, str(ROOT.parent))
