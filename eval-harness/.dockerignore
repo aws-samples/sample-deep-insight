@@ -1,0 +1,8 @@
+*
+!runtime.py
+!graders/
+graders/*
+!graders/rules.py
+!graders/factcheck.py
+!graders/judge.py
+!graders/pairwise.py

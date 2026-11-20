@@ -10,8 +10,13 @@ better":
 2. **What got better or worse, and by how much?** → before/after table
 
 This version grades with rules only: no model calls, so grading is free.
-Checks that need a reader (an answer-key fact check, an LLM judge, a
-pairwise judge) come in follow-up PRs.
+The [Eval harness GitHub Actions workflow](CI.md) runs on branch pushes and
+executes Rules → Factcheck → LLM Judge → Pairwise as four sequential steps on
+the GitHub runner. Each currently prints Hello World; evaluation logic will
+be added in later steps. Runtime integration is deferred: the intended flow
+will invoke the analysis Runtime, wait for successful completion, and download
+its artifacts before starting these steps. The current workflow checks only
+the evaluator entry points and does not call AWS.
 
 ## What it is
 

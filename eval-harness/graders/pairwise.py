@@ -1,0 +1,9 @@
+"""Pairwise evaluation entry point; evaluation logic will be added later."""
+
+
+def main():
+    print("Hello World - Pairwise (graders/pairwise.py)")
+
+
+if __name__ == "__main__":
+    main()
