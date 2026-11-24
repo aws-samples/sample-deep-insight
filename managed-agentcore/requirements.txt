@@ -40,7 +40,7 @@ python-docx==1.2.0
 weasyprint==70.0
 reportlab==4.4.4
 markdown==3.10
-fpdf2==2.8.5
+fpdf2==2.8.8
 
 # Other utilities
 python-dotenv==1.2.2
