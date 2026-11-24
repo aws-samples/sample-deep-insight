@@ -59,7 +59,7 @@ requests==2.34.2
 tornado==6.5.9
 orjson==3.11.9
 protobuf==5.29.6
-mistune==3.3.3
+mistune==3.3.4
 pygments==2.20.0
 python-multipart==0.0.32
 langchain-core==1.6.9
