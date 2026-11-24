@@ -10,7 +10,7 @@ requires-python = ">=3.12"
 dependencies = [
     "ipykernel==7.1.0",
     "boto3==1.43.28",
-    "strands-agents==1.19.0",
+    "strands-agents==1.48.0",
     "strands-agents-tools==0.2.21",
     "mcp==1.28.1",
     "requests-toolbelt==1.0.0",
